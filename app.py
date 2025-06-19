@@ -729,30 +729,40 @@ def generate_comprehensive_data_sources_summary(comprehensive_data):
     
     # Check each API source
     if comprehensive_data.get('rentcast'):
-        sources['Rentcast'] = 'Connected - Property details available'
+        rentcast_data = comprehensive_data['rentcast']
+        data_points = []
+        if rentcast_data.get('lastSalePrice'):
+            data_points.append(f"Sale: ${rentcast_data['lastSalePrice']:,}")
+        if rentcast_data.get('taxAssessments'):
+            latest_year = max(rentcast_data['taxAssessments'].keys())
+            assessed_value = rentcast_data['taxAssessments'][latest_year]['value']
+            data_points.append(f"Assessed: ${assessed_value:,}")
+        if rentcast_data.get('bedrooms') and rentcast_data.get('bathrooms'):
+            data_points.append(f"{rentcast_data['bedrooms']}bd/{rentcast_data['bathrooms']}ba")
+        sources['Rentcast'] = f"Connected - {', '.join(data_points)}" if data_points else 'Connected - Property details available'
     else:
-        sources['Rentcast'] = 'No data retrieved'
+        sources['Rentcast'] = 'API connection failed'
     
     if comprehensive_data.get('zillow'):
         zillow_results = comprehensive_data['zillow'].get('results', [])
         sources['Zillow'] = f'Connected - {len(zillow_results)} properties found'
     else:
-        sources['Zillow'] = 'No data retrieved'
+        sources['Zillow'] = 'RapidAPI subscription required'
     
     if comprehensive_data.get('redfin'):
         sources['Redfin'] = 'Connected - Market data available'
     else:
-        sources['Redfin'] = 'No data retrieved'
+        sources['Redfin'] = 'RapidAPI subscription required'
     
     if comprehensive_data.get('realtor'):
         sources['Realtor.com'] = 'Connected - Property valuations available'
     else:
-        sources['Realtor.com'] = 'No data retrieved'
+        sources['Realtor.com'] = 'RapidAPI subscription required'
     
     if comprehensive_data.get('airdna'):
         sources['AirDNA'] = 'Connected - Short-term rental data available'
     else:
-        sources['AirDNA'] = 'No data retrieved'
+        sources['AirDNA'] = 'RapidAPI subscription required'
     
     return sources
 
