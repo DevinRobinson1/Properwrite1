@@ -19,6 +19,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize tooltips
     initializeTooltips();
+    
+    // Google Places disabled - manual address entry enabled
 });
 
 // Form validation setup
