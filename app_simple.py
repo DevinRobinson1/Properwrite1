@@ -36,7 +36,7 @@ def generate_presentation():
         address = data.get('address', '').strip()
         city = data.get('city', '').strip()
         state = data.get('state', '').strip()
-        zip_code = data.get('zip', '').strip()
+        zip_code = data.get('zip_code', '').strip() or data.get('zip', '').strip()
         
         # Validate required fields
         if not all([address, city, state, zip_code]):
