@@ -274,7 +274,7 @@ def generate_presentation():
             'offer_comparison': offer_comparison
         }
         
-        return render_template('presentation_simple.html',
+        return render_template('presentation_clean.html',
                              address=address,
                              city=city,
                              state=state,
@@ -284,8 +284,8 @@ def generate_presentation():
                              sqft=sqft,
                              buy_price=buy_price,
                              arv=estimated_value,
-                             estimated_repairs=30000,
-                             rent_estimate=financials.get('monthly_rent', 1800),
+                             repairs=30000,
+                             rent=financials.get('monthly_rent', 1800),
                              property_title=property_title,
                              property_summary=property_summary,
                              property_data=property_data,
@@ -484,7 +484,7 @@ def share_link(data):
         # Decode the shared data
         decoded_data = json.loads(base64.b64decode(data.encode()).decode())
         
-        return render_template('presentation_simple.html', **decoded_data)
+        return render_template('presentation_clean.html', **decoded_data)
         
     except Exception as e:
         return f"<h1>Invalid Share Link</h1><p>Unable to load shared presentation.</p>", 400
