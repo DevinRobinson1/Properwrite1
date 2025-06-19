@@ -125,8 +125,8 @@ def search_comparable_properties(city, state, beds, baths, sqft):
     
     comparable_properties = []
     
-    for street in street_patterns[:10]:  # Limit to 10 searches to avoid rate limits
-        for house_num in range(100, 2000, 200):  # Try different house numbers
+    for street in street_patterns[:5]:  # Limit to 5 streets to avoid timeout
+        for house_num in range(100, 1200, 300):  # Try fewer house numbers
             try:
                 address = f"{house_num} {street}, {city}, {state}"
                 
@@ -155,7 +155,7 @@ def search_comparable_properties(city, state, beds, baths, sqft):
                                     comparable_properties.append(prop)
                                     logging.debug(f"Found comparable: {prop.get('formattedAddress')} - ${prop.get('lastSalePrice'):,}")
                                     
-                                    if len(comparable_properties) >= 8:  # Stop when we have enough comps
+                                    if len(comparable_properties) >= 5:  # Stop when we have enough comps
                                         return comparable_properties
                 
             except Exception as e:
