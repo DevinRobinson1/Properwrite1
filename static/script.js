@@ -286,12 +286,24 @@ function showNotification(message, type = 'info') {
             notification.className += ' bg-blue-100 border border-blue-400 text-blue-700';
     }
     
-    notification.innerHTML = `
-        <div class="flex items-center">
-            <span class="flex-1">${message}</span>
-            <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-lg font-bold">&times;</button>
-        </div>
-    `;
+    // Create elements safely without innerHTML to prevent XSS
+    const container = document.createElement('div');
+    container.className = 'flex items-center';
+    
+    const messageSpan = document.createElement('span');
+    messageSpan.className = 'flex-1';
+    messageSpan.textContent = message; // Safe text content assignment
+    
+    const closeButton = document.createElement('button');
+    closeButton.className = 'ml-2 text-lg font-bold';
+    closeButton.textContent = '×';
+    closeButton.onclick = function() { 
+        this.parentElement.parentElement.remove(); 
+    };
+    
+    container.appendChild(messageSpan);
+    container.appendChild(closeButton);
+    notification.appendChild(container);
     
     document.body.appendChild(notification);
     
