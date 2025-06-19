@@ -29,102 +29,419 @@
     </div>
 
     <div class="container mx-auto px-4 py-8 max-w-6xl">
-        <!-- Property Title -->
-        <div class="bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg p-8 mb-8 shadow-lg">
-            <h1 class="text-4xl font-bold mb-4">{{ property_title }}</h1>
-            <div class="flex flex-wrap items-center text-lg space-x-6">
-                <span><i class="fas fa-map-marker-alt mr-2"></i>{{ address }}, {{ city }}, {{ state }} {{ zip }}</span>
-                <span><i class="fas fa-bed mr-2"></i>{{ beds }} Bed</span>
-                <span><i class="fas fa-bath mr-2"></i>{{ baths }} Bath</span>
-                <span><i class="fas fa-ruler-combined mr-2"></i>{{ "{:,}".format(sqft) }} sqft</span>
+        <!-- Fixed Property Information Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6 border-l-4 border-blue-500">
+            <h1 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-home text-blue-600 mr-2"></i>Property Information
+            </h1>
+            
+            <!-- Address -->
+            <div class="mb-4">
+                <div class="flex flex-wrap items-center text-lg text-gray-700">
+                    <i class="fas fa-map-marker-alt text-red-500 mr-2"></i>
+                    <span class="font-medium">{{ address }}, {{ city }}, {{ state }} {{ zip }}</span>
+                </div>
+            </div>
+
+            <!-- Editable Property Details Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
+                <div class="space-y-1">
+                    <label class="block text-sm font-medium text-gray-600">Bedrooms</label>
+                    <input type="number" id="beds" value="{{ beds }}" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                           onchange="recalculateOffers()">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-sm font-medium text-gray-600">Bathrooms</label>
+                    <input type="number" step="0.5" id="baths" value="{{ baths }}" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                           onchange="recalculateOffers()">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-sm font-medium text-gray-600">Square Feet</label>
+                    <input type="number" id="sqft" value="{{ sqft }}" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                           onchange="recalculateOffers()">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-sm font-medium text-gray-600">ARV</label>
+                    <input type="number" id="arv" value="{{ financials.arv }}" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                           onchange="recalculateOffers()">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-sm font-medium text-gray-600">Estimated Repairs</label>
+                    <input type="number" id="repairs" value="{{ financials.estimated_repairs }}" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" 
+                           onchange="recalculateOffers()">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-sm font-medium text-gray-600">Rent Estimate</label>
+                    <input type="number" id="rent" value="{{ financials.monthly_rent }}" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500" 
+                           onchange="recalculateOffers()">
+                </div>
+            </div>
+
+            <!-- Key Metrics Display -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600" id="display-arv">${{ "{:,}".format(financials.arv) }}</div>
+                    <div class="text-sm text-gray-600">After Repair Value</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-yellow-600" id="display-repairs">${{ "{:,}".format(financials.estimated_repairs) }}</div>
+                    <div class="text-sm text-gray-600">Repair Costs</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-purple-600" id="display-rent">${{ "{:,}".format(financials.monthly_rent) }}</div>
+                    <div class="text-sm text-gray-600">Monthly Rent</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-blue-600" id="display-cap-rate">{{ "%.1f"|format(financials.cap_rate * 100) }}%</div>
+                    <div class="text-sm text-gray-600">Cap Rate</div>
+                </div>
             </div>
         </div>
 
-        <!-- Investment Summary -->
-        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">
-                <i class="fas fa-star text-yellow-500 mr-2"></i>Investment Summary
-            </h2>
-            <p class="text-lg text-gray-700 leading-relaxed">{{ property_summary }}</p>
+        <!-- Tab Navigation -->
+        <div class="bg-white rounded-lg shadow-lg mb-6">
+            <div class="border-b border-gray-200">
+                <nav class="flex space-x-8 px-6" role="tablist">
+                    <button class="py-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium tab-button active" 
+                            onclick="showTab('wholesale')" id="wholesale-tab">
+                        <i class="fas fa-money-bill-wave mr-2"></i>Wholesale Offer
+                    </button>
+                    <button class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium tab-button" 
+                            onclick="showTab('installment')" id="installment-tab">
+                        <i class="fas fa-calendar-alt mr-2"></i>Installment / Novation
+                    </button>
+                    <button class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium tab-button" 
+                            onclick="showTab('subject-to')" id="subject-to-tab">
+                        <i class="fas fa-handshake mr-2"></i>Subject-To
+                    </button>
+                    <button class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium tab-button" 
+                            onclick="showTab('seller-finance')" id="seller-finance-tab">
+                        <i class="fas fa-university mr-2"></i>Seller Finance
+                    </button>
+                </nav>
+            </div>
         </div>
 
-        <!-- Key Highlights -->
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">
-                <i class="fas fa-fire text-red-500 mr-2"></i>Key Highlights
-            </h3>
-            <ul class="space-y-3 text-lg">
-                <li class="flex items-center">
-                    <span class="text-2xl mr-3">🛏</span>
-                    <strong>{{ beds }} Bed / {{ baths }} Bath / {{ "{:,}".format(sqft) }} sqft</strong>
-                </li>
-                {% if financials.buy_price %}
-                <li class="flex items-center">
-                    <span class="text-2xl mr-3">💵</span>
-                    <span>Purchase Price: <strong>${{ "{:,}".format(financials.buy_price|int) }}</strong></span>
-                </li>
-                {% endif %}
-                {% if financials.arv %}
-                <li class="flex items-center">
-                    <span class="text-2xl mr-3">🏠</span>
-                    <span>Estimated Value: <strong>${{ "{:,}".format(financials.arv|int) }}</strong></span>
-                </li>
-                {% endif %}
-                {% if financials.monthly_rent %}
-                <li class="flex items-center">
-                    <span class="text-2xl mr-3">💰</span>
-                    <span>Monthly Rent: <strong>${{ "{:,}".format(financials.monthly_rent|int) }}</strong></span>
-                </li>
-                {% endif %}
-            </ul>
-        </div>
+        <!-- Tab Content Sections -->
+        
+        <!-- Wholesale Offer Tab -->
+        <div id="wholesale-content" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <div class="border-l-4 border-green-500 pl-4 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-money-bill-wave text-green-600 mr-2"></i>Wholesale Offer Strategy
+                    </h2>
+                    <p class="text-gray-600">Cash acquisition with quick closing for maximum seller speed</p>
+                </div>
 
-        <!-- Financial Overview -->
-        {% if financials %}
-        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                <i class="fas fa-calculator text-green-500 mr-2"></i>Financial Overview
-            </h2>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {% if financials.buy_price %}
-                <div class="text-center bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <div class="text-sm text-blue-600 font-medium">Purchase Price</div>
-                    <span class="font-bold text-lg">${{ "{:,}".format(financials.buy_price|int) }}</span>
+                <!-- Input Assumptions Section -->
+                <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-300 pb-2">
+                        <i class="fas fa-cogs text-blue-600 mr-2"></i>Input Assumptions
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Wholesale %</label>
+                            <select id="wholesale-percentage" class="w-full px-3 py-2 border border-gray-300 rounded-md" onchange="updateWholesalePercentage()">
+                                <option value="0.70" selected>70% ARV</option>
+                                <option value="0.65">65% ARV</option>
+                                <option value="0.75">75% ARV</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Min Profit</label>
+                            <input type="number" value="15000" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                        </div>
+                    </div>
                 </div>
-                {% endif %}
-                {% if financials.arv %}
-                <div class="text-center bg-green-50 p-4 rounded-lg border border-green-200">
-                    <div class="text-sm text-green-600 font-medium">Estimated Value</div>
-                    <span class="font-bold text-xl text-green-600">${{ "{:,}".format(financials.arv|int) }}</span>
+
+                <!-- Output Offers Section -->
+                <div class="bg-blue-50 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-blue-300 pb-2">
+                        <i class="fas fa-calculator text-green-600 mr-2"></i>Ackerman Method Offers
+                    </h3>
+                    {% if wholesale %}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {% for offer in wholesale.ackerman_offers %}
+                        <div class="bg-white rounded-lg p-4 border border-blue-200">
+                            <div class="text-center">
+                                <div class="text-sm text-gray-600 font-medium">Offer {{ offer.offer_number }}</div>
+                                <div class="text-2xl font-bold text-green-600">${{ "{:,}".format(offer.amount|int) }}</div>
+                                <div class="text-sm text-blue-600">{{ offer.percentage|round(1) }}% of MAO</div>
+                                <div class="text-xs text-gray-500 mt-2">{{ offer.strategy_note }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
-                {% if financials.monthly_rent %}
-                <div class="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                    <div class="text-sm text-yellow-600 font-medium">Monthly Rent</div>
-                    <span class="font-bold text-lg text-yellow-600">${{ "{:,}".format(financials.monthly_rent|int) }}</span>
-                </div>
-                {% endif %}
-                {% if financials.cap_rate %}
-                <div class="text-center bg-purple-50 p-4 rounded-lg border border-purple-200">
-                    <div class="text-sm text-purple-600 font-medium">Cap Rate</div>
-                    <span class="font-bold text-lg text-purple-600">{{ "%.1f"|format(financials.cap_rate) }}%</span>
-                </div>
-                {% endif %}
-                {% if financials.cash_flow %}
-                <div class="text-center bg-indigo-50 p-4 rounded-lg border border-indigo-200">
-                    <div class="text-sm text-indigo-600 font-medium">Monthly Cash Flow</div>
-                    <span class="font-bold text-lg text-indigo-600">${{ "{:,}".format(financials.cash_flow|int) }}</span>
-                </div>
-                {% endif %}
-                {% if financials.roi %}
-                <div class="text-center bg-pink-50 p-4 rounded-lg border border-pink-200">
-                    <div class="text-sm text-pink-600 font-medium">ROI</div>
-                    <span class="font-bold text-lg text-pink-600">{{ "%.1f"|format(financials.roi) }}%</span>
+
+                <!-- Key Metrics Section -->
+                {% if wholesale %}
+                <div class="bg-green-50 rounded-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-green-300 pb-2">
+                        <i class="fas fa-chart-line text-green-600 mr-2"></i>Key Metrics
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center bg-white rounded-lg p-3 border">
+                            <div class="text-sm text-gray-600">MAO</div>
+                            <div class="text-xl font-bold text-green-600">${{ "{:,}".format(wholesale.mao|int) }}</div>
+                        </div>
+                        <div class="text-center bg-white rounded-lg p-3 border">
+                            <div class="text-sm text-gray-600">Net Profit</div>
+                            <div class="text-xl font-bold text-blue-600">${{ "{:,}".format(wholesale.net_profit|int) }}</div>
+                        </div>
+                        <div class="text-center bg-white rounded-lg p-3 border">
+                            <div class="text-sm text-gray-600">Profit Margin</div>
+                            <div class="text-xl font-bold text-purple-600">{{ wholesale.profit_margin|round(1) }}%</div>
+                        </div>
+                        <div class="text-center bg-white rounded-lg p-3 border">
+                            <div class="text-sm text-gray-600">% of ARV</div>
+                            <div class="text-xl font-bold text-orange-600">{{ wholesale.percentage_of_arv|round(1) }}%</div>
+                        </div>
+                    </div>
                 </div>
                 {% endif %}
             </div>
         </div>
-        {% endif %}
+
+        <!-- Installment/Novation Tab -->
+        <div id="installment-content" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <div class="border-l-4 border-blue-500 pl-4 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-calendar-alt text-blue-600 mr-2"></i>Installment/Novation Strategy
+                    </h2>
+                    <p class="text-gray-600">Price + Convenience = Higher seller acceptance with installment payments</p>
+                </div>
+
+                {% if installment %}
+                <!-- Input Assumptions Section -->
+                <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-300 pb-2">
+                        <i class="fas fa-cogs text-blue-600 mr-2"></i>Advanced Fee Structure
+                    </h3>
+                    <button onclick="toggleAdvancedFees()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 mb-4">
+                        Toggle Advanced Fees
+                    </button>
+                    <div id="advanced-fees" class="hidden">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div><label class="block text-sm text-gray-600">Title Insurance</label><input type="number" value="1200" class="w-full px-3 py-2 border rounded-md"></div>
+                            <div><label class="block text-sm text-gray-600">Attorney Fees</label><input type="number" value="800" class="w-full px-3 py-2 border rounded-md"></div>
+                            <div><label class="block text-sm text-gray-600">Recording Fees</label><input type="number" value="150" class="w-full px-3 py-2 border rounded-md"></div>
+                            <div><label class="block text-sm text-gray-600">Inspection</label><input type="number" value="500" class="w-full px-3 py-2 border rounded-md"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Installment Offers Section -->
+                <div class="bg-purple-50 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-purple-300 pb-2">
+                        <i class="fas fa-handshake text-purple-600 mr-2"></i>Installment Offers
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white rounded-lg p-4 border border-purple-200">
+                            <div class="text-center">
+                                <div class="text-sm text-gray-600 font-medium">Conservative Offer</div>
+                                <div class="text-2xl font-bold text-purple-600">${{ "{:,}".format(installment.ackerman_offers.offer_1|int) }}</div>
+                                <div class="text-sm text-blue-600">Opening Position</div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 border border-purple-200">
+                            <div class="text-center">
+                                <div class="text-sm text-gray-600 font-medium">Balanced Offer</div>
+                                <div class="text-2xl font-bold text-purple-600">${{ "{:,}".format(installment.ackerman_offers.offer_2|int) }}</div>
+                                <div class="text-sm text-blue-600">Negotiation Range</div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 border border-purple-200">
+                            <div class="text-center">
+                                <div class="text-sm text-gray-600 font-medium">Maximum Offer</div>
+                                <div class="text-2xl font-bold text-purple-600">${{ "{:,}".format(installment.ackerman_offers.offer_3|int) }}</div>
+                                <div class="text-sm text-blue-600">Final Position</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Metrics -->
+                <div class="bg-blue-50 rounded-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-blue-300 pb-2">
+                        <i class="fas fa-chart-bar text-blue-600 mr-2"></i>Financial Analysis
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center bg-white rounded-lg p-3 border">
+                            <div class="text-sm text-gray-600">Installment MAO</div>
+                            <div class="text-xl font-bold text-purple-600">${{ "{:,}".format(installment.installment_mao|int) }}</div>
+                        </div>
+                        <div class="text-center bg-white rounded-lg p-3 border">
+                            <div class="text-sm text-gray-600">Net Profit</div>
+                            <div class="text-xl font-bold text-green-600">${{ "{:,}".format(installment.net_profit|int) }}</div>
+                        </div>
+                        <div class="text-center bg-white rounded-lg p-3 border">
+                            <div class="text-sm text-gray-600">Profit Margin</div>
+                            <div class="text-xl font-bold text-blue-600">{{ installment.profit_margin|round(1) }}%</div>
+                        </div>
+                        <div class="text-center bg-white rounded-lg p-3 border">
+                            <div class="text-sm text-gray-600">% of ARV</div>
+                            <div class="text-xl font-bold text-orange-600">{{ installment.mao_as_percent_of_arv|round(1) }}%</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Subject-To Tab -->
+        <div id="subject-to-content" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <div class="border-l-4 border-red-500 pl-4 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-handshake text-red-600 mr-2"></i>Subject-To Strategy
+                    </h2>
+                    <p class="text-gray-600">Creative financing with immediate equity acquisition and flexible exit strategies</p>
+                </div>
+
+                {% if subject_to %}
+                <!-- Entry Structure -->
+                <div class="bg-red-50 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-red-300 pb-2">
+                        <i class="fas fa-door-open text-red-600 mr-2"></i>Entry Structure
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center bg-white rounded-lg p-4 border">
+                            <div class="text-sm text-gray-600">Cash to Seller</div>
+                            <div class="text-xl font-bold text-red-600">${{ "{:,}".format(subject_to.cash_to_seller|int) }}</div>
+                        </div>
+                        <div class="text-center bg-white rounded-lg p-4 border">
+                            <div class="text-sm text-gray-600">Monthly P&I</div>
+                            <div class="text-xl font-bold text-blue-600">${{ "{:,}".format(subject_to.monthly_pi|int) }}</div>
+                        </div>
+                        <div class="text-center bg-white rounded-lg p-4 border">
+                            <div class="text-sm text-gray-600">Acquisition Costs</div>
+                            <div class="text-xl font-bold text-yellow-600">${{ "{:,}".format(subject_to.total_acquisition_costs|int) }}</div>
+                        </div>
+                        <div class="text-center bg-white rounded-lg p-4 border">
+                            <div class="text-sm text-gray-600">Immediate Equity</div>
+                            <div class="text-xl font-bold text-green-600">${{ "{:,}".format(subject_to.immediate_equity|int) }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exit Strategies -->
+                <div class="bg-green-50 rounded-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-green-300 pb-2">
+                        <i class="fas fa-chart-line text-green-600 mr-2"></i>Exit Strategy Analysis
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white rounded-lg p-4 border">
+                            <h4 class="font-bold text-gray-800 mb-2">5-Year Payoff</h4>
+                            <div class="text-2xl font-bold text-green-600">${{ "{:,}".format(subject_to.exit_strategies.five_year_payoff.total_profit|int) }}</div>
+                            <div class="text-sm text-gray-600">Total Return</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 border">
+                            <h4 class="font-bold text-gray-800 mb-2">Lease Option</h4>
+                            <div class="text-2xl font-bold text-purple-600">${{ "{:,}".format(subject_to.exit_strategies.lease_option.total_profit|int) }}</div>
+                            <div class="text-sm text-gray-600">Total Profit</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Seller Finance Tab -->
+        <div id="seller-finance-content" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <div class="border-l-4 border-yellow-500 pl-4 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-university text-yellow-600 mr-2"></i>Seller Finance Strategy
+                    </h2>
+                    <p class="text-gray-600">Owner financing with structured payment terms and cash flow analysis</p>
+                </div>
+
+                {% if seller_finance %}
+                <!-- Loan Structure -->
+                <div class="bg-yellow-50 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-yellow-300 pb-2">
+                        <i class="fas fa-file-contract text-yellow-600 mr-2"></i>Loan Structure
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div class="text-center bg-white rounded-lg p-4 border">
+                            <div class="text-sm text-gray-600">Purchase Price</div>
+                            <div class="text-xl font-bold text-yellow-600">${{ "{:,}".format(seller_finance.purchase_price|int) }}</div>
+                        </div>
+                        <div class="text-center bg-white rounded-lg p-4 border">
+                            <div class="text-sm text-gray-600">Down Payment</div>
+                            <div class="text-xl font-bold text-blue-600">${{ "{:,}".format(seller_finance.down_payment|int) }}</div>
+                        </div>
+                        <div class="text-center bg-white rounded-lg p-4 border">
+                            <div class="text-sm text-gray-600">Loan Amount</div>
+                            <div class="text-xl font-bold text-green-600">${{ "{:,}".format(seller_finance.loan_amount|int) }}</div>
+                        </div>
+                        <div class="text-center bg-white rounded-lg p-4 border">
+                            <div class="text-sm text-gray-600">Interest Rate</div>
+                            <div class="text-xl font-bold text-purple-600">{{ seller_finance.interest_rate }}%</div>
+                        </div>
+                        <div class="text-center bg-white rounded-lg p-4 border">
+                            <div class="text-sm text-gray-600">Monthly Payment</div>
+                            <div class="text-xl font-bold text-red-600">${{ "{:,}".format(seller_finance.monthly_payment|int) }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cash Flow Analysis -->
+                <div class="bg-green-50 rounded-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-green-300 pb-2">
+                        <i class="fas fa-money-check-alt text-green-600 mr-2"></i>Cash Flow Analysis
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg p-4 border">
+                            <h4 class="font-bold text-gray-800 mb-3">Monthly Cash Flow</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Rental Income</span>
+                                    <span class="font-bold text-green-600">${{ "{:,}".format(seller_finance.monthly_rent|int) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Loan Payment</span>
+                                    <span class="font-bold text-red-600">-${{ "{:,}".format(seller_finance.monthly_payment|int) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Operating Expenses</span>
+                                    <span class="font-bold text-red-600">-${{ "{:,}".format(seller_finance.monthly_operating_expenses|int) }}</span>
+                                </div>
+                                <hr class="border-gray-300">
+                                <div class="flex justify-between font-bold">
+                                    <span>Net Cash Flow</span>
+                                    <span class="text-lg {{ 'text-green-600' if seller_finance.monthly_cash_flow > 0 else 'text-red-600' }}">${{ "{:,}".format(seller_finance.monthly_cash_flow|int) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 border">
+                            <h4 class="font-bold text-gray-800 mb-3">Key Metrics</h4>
+                            <div class="space-y-3">
+                                <div class="text-center">
+                                    <div class="text-sm text-gray-600">Annual Cash Flow</div>
+                                    <div class="text-2xl font-bold text-green-600">${{ "{:,}".format((seller_finance.monthly_cash_flow * 12)|int) }}</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-sm text-gray-600">Cash-on-Cash ROI</div>
+                                    <div class="text-2xl font-bold text-blue-600">{{ seller_finance.cash_on_cash_return|round(1) }}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
 
         <!-- Property Details -->
         {% if property_data %}
