@@ -1,7 +1,7 @@
 import os
 import logging
-from flask import Flask, render_template, request, session
-from flask import jsonify
+from flask import Flask, render_template, request, session, jsonify
+from offer_calculator import generate_offer_comparison, get_strategy_recommendation
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -89,6 +89,18 @@ def generate_presentation():
         property_title = f"🏠 {beds}BR/{baths}BA Property in {city}"
         property_summary = f"Property analysis for {address} in {city}, {state}. {beds} bedrooms, {baths} bathrooms, {sqft:,} square feet."
         
+        # Generate offer strategies using ARV
+        offer_analysis = generate_offer_comparison(
+            arv=estimated_value,
+            repair_cost=20000,  # Default repair estimate
+            existing_loan=0,    # Can be updated if provided
+            monthly_payment=0,  # Can be updated if provided
+            asking_price=int(buy_price) if buy_price > 0 else 0
+        )
+        
+        # Get strategy recommendations
+        recommendations = get_strategy_recommendation(offer_analysis['offers'])
+        
         # Store in session
         session['property_data'] = {
             'address': address,
@@ -104,7 +116,9 @@ def generate_presentation():
             'financials': financials,
             'comparables': comparables,
             'market_data': market_data,
-            'data_sources': data_sources
+            'data_sources': data_sources,
+            'offer_analysis': offer_analysis,
+            'recommendations': recommendations
         }
         
         return render_template('presentation_simple.html',
@@ -121,11 +135,43 @@ def generate_presentation():
                              financials=financials,
                              comparables=comparables,
                              market_data=market_data,
-                             data_sources=data_sources)
+                             data_sources=data_sources,
+                             offer_analysis=offer_analysis,
+                             recommendations=recommendations)
         
     except Exception as e:
         logging.error(f"Error: {e}")
         return f"<h1>Processing Error</h1><p>Unable to process request: {str(e)}</p>", 500
+
+@app.route('/api/calculate-offers', methods=['POST'])
+def calculate_offers():
+    """API endpoint for calculating offer strategies"""
+    try:
+        data = request.json
+        arv = data.get('arv', 0)
+        repair_cost = data.get('repair_cost', 20000)
+        existing_loan = data.get('existing_loan', 0)
+        monthly_payment = data.get('monthly_payment', 0)
+        
+        offer_analysis = generate_offer_comparison(
+            arv=arv,
+            repair_cost=repair_cost,
+            existing_loan=existing_loan,
+            monthly_payment=monthly_payment
+        )
+        
+        recommendations = get_strategy_recommendation(offer_analysis['offers'])
+        
+        return jsonify({
+            'success': True,
+            'offers': offer_analysis['offers'],
+            'recommendations': recommendations,
+            'summary': offer_analysis['summary']
+        })
+        
+    except Exception as e:
+        logging.error(f"Offer calculation error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/share/<data>')
 def share_link(data):
