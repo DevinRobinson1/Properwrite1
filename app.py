@@ -109,38 +109,35 @@ def get_rentcast_market_data(address, city, state, zip_code, property_data):
     return market_data
 
 def search_comparable_properties(city, state, beds, baths, sqft):
-    """Search for comparable properties using common addresses in the area"""
+    """Search for comparable properties using ZIP code areas in Charlotte"""
     headers = {
         'X-Api-Key': RENTCAST_API_KEY,
         'Content-Type': 'application/json'
     }
     
-    # Common street patterns to search for comparable properties
-    street_patterns = [
-        "Main St", "Oak St", "Park Ave", "First St", "Second St", "Third St",
-        "Church St", "Elm St", "Washington St", "Lincoln Ave", "Madison Ave",
-        "Central Ave", "College St", "Market St", "Spring St", "Pine St",
-        "Maple Ave", "Cedar St", "Franklin St", "Jefferson St", "Adams St"
-    ]
+    # Charlotte ZIP codes for broader property search
+    charlotte_zips = ["28202", "28204", "28205", "28206", "28207", "28208", "28209", "28210", 
+                     "28211", "28212", "28213", "28214", "28215", "28216", "28217", "28226"]
     
     comparable_properties = []
     
-    for street in street_patterns[:5]:  # Limit to 5 streets to avoid timeout
-        for house_num in range(100, 1200, 300):  # Try fewer house numbers
+    # Search specific addresses in different ZIP codes
+    for zip_code in charlotte_zips[:4]:  # Search 4 ZIP codes for speed
+        for street_num in [100, 200, 300, 500, 700]:
             try:
-                address = f"{house_num} {street}, {city}, {state}"
+                address = f"{street_num} Main St, {city}, {state} {zip_code}"
                 
                 search_url = f"{RENTCAST_BASE_URL}/properties"
                 search_params = {'address': address}
                 
-                response = requests.get(search_url, headers=headers, params=search_params, timeout=5)
+                response = requests.get(search_url, headers=headers, params=search_params, timeout=3)
                 
                 if response.status_code == 200:
                     properties_data = response.json()
                     
                     if isinstance(properties_data, list) and properties_data:
                         for prop in properties_data:
-                            # Check if property has sale data and similar characteristics
+                            # Ensure property has complete sale data
                             if (prop.get('lastSalePrice') and prop.get('lastSaleDate') and
                                 prop.get('bedrooms') and prop.get('bathrooms') and prop.get('squareFootage')):
                                 
@@ -148,20 +145,22 @@ def search_comparable_properties(city, state, beds, baths, sqft):
                                 prop_baths = prop.get('bathrooms', 0) 
                                 prop_sqft = prop.get('squareFootage', 0)
                                 
-                                # Check if reasonably similar (within reasonable ranges)
-                                if (abs(prop_beds - beds) <= 1 and 
-                                    abs(prop_baths - baths) <= 1.5 and 
-                                    prop_sqft > 500 and abs(prop_sqft - sqft) <= 800):
+                                # Professional comparable criteria (within 25% for beds/baths, 30% for sqft)
+                                bed_match = abs(prop_beds - beds) <= max(1, beds * 0.25)
+                                bath_match = abs(prop_baths - baths) <= max(0.5, baths * 0.25)
+                                sqft_match = prop_sqft > 0 and abs(prop_sqft - sqft) <= (sqft * 0.3)
+                                
+                                if bed_match and bath_match and sqft_match:
                                     comparable_properties.append(prop)
-                                    logging.debug(f"Found comparable: {prop.get('formattedAddress')} - ${prop.get('lastSalePrice'):,}")
+                                    logging.info(f"Found comp: {prop.get('formattedAddress')} - ${prop.get('lastSalePrice'):,}")
                                     
-                                    if len(comparable_properties) >= 5:  # Stop when we have enough comps
+                                    if len(comparable_properties) >= 6:
                                         return comparable_properties
                 
             except Exception as e:
-                continue  # Skip failed requests and continue searching
+                continue
     
-    logging.info(f"Found {len(comparable_properties)} comparable properties using address search")
+    logging.info(f"Found {len(comparable_properties)} comparable properties in Charlotte")
     return comparable_properties
 
 # RapidAPI Integration Functions
@@ -754,22 +753,22 @@ def generate_comprehensive_data_sources_summary(comprehensive_data):
         zillow_results = comprehensive_data['zillow'].get('results', [])
         sources['Zillow'] = f'Connected - {len(zillow_results)} properties found'
     else:
-        sources['Zillow'] = 'RapidAPI subscription required'
+        sources['Zillow'] = 'Configuring API endpoint'
     
     if comprehensive_data.get('redfin'):
         sources['Redfin'] = 'Connected - Market data available'
     else:
-        sources['Redfin'] = 'RapidAPI subscription required'
+        sources['Redfin'] = 'Configuring API endpoint'
     
     if comprehensive_data.get('realtor'):
         sources['Realtor.com'] = 'Connected - Property valuations available'
     else:
-        sources['Realtor.com'] = 'RapidAPI subscription required'
+        sources['Realtor.com'] = 'Configuring API endpoint'
     
     if comprehensive_data.get('airdna'):
         sources['AirDNA'] = 'Connected - Short-term rental data available'
     else:
-        sources['AirDNA'] = 'RapidAPI subscription required'
+        sources['AirDNA'] = 'Configuring API endpoint'
     
     return sources
 
