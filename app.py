@@ -793,7 +793,7 @@ def generate_property_summary(address, city, financials, property_data):
 
 @app.route('/')
 def index():
-    return render_template('index.html', google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY'))
+    return render_template('index.html', google_maps_api_key=os.environ.get('GOOGLE_API_KEY'))
 
 @app.route('/generate', methods=['POST'])
 def generate_presentation():
