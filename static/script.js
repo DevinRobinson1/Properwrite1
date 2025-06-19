@@ -373,15 +373,57 @@ function formatCurrency(input) {
     }
 }
 
-// Add currency formatting to buy_price input
+// Enhanced address autocomplete functionality
 document.addEventListener('DOMContentLoaded', function() {
-    const buyPriceInput = document.getElementById('buy_price');
-    if (buyPriceInput) {
-        buyPriceInput.addEventListener('blur', function() {
-            formatCurrency(this);
-        });
-    }
+    setupAddressAutocomplete();
 });
+
+function setupAddressAutocomplete() {
+    const addressInput = document.getElementById('address');
+    const cityInput = document.getElementById('city');
+    const stateInput = document.getElementById('state');
+    const zipInput = document.getElementById('zip');
+    
+    if (!addressInput) return;
+    
+    // Enable browser's built-in address autocomplete
+    addressInput.setAttribute('autocomplete', 'street-address');
+    
+    // Auto-populate other fields when address is filled
+    addressInput.addEventListener('input', function(e) {
+        const value = e.target.value;
+        
+        // If user pastes a full address, try to parse it
+        if (value.includes(',')) {
+            const parts = value.split(',').map(part => part.trim());
+            if (parts.length >= 3) {
+                // Try to extract city, state, zip from pasted address
+                const lastPart = parts[parts.length - 1];
+                const secondLastPart = parts[parts.length - 2];
+                
+                // Check if last part looks like "STATE ZIP"
+                const stateZipMatch = lastPart.match(/^([A-Z]{2})\s+(\d{5}(-\d{4})?)$/);
+                if (stateZipMatch) {
+                    if (cityInput && !cityInput.value) cityInput.value = secondLastPart;
+                    if (stateInput && !stateInput.value) stateInput.value = stateZipMatch[1];
+                    if (zipInput && !zipInput.value) zipInput.value = stateZipMatch[2];
+                }
+            }
+        }
+    });
+    
+    // Format address input for consistency
+    addressInput.addEventListener('blur', function(e) {
+        const value = e.target.value.trim();
+        if (value) {
+            // Basic address formatting
+            const formatted = value.replace(/\b\w+/g, function(word) {
+                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            });
+            e.target.value = formatted;
+        }
+    });
+}
 
 // Handle modal clicks outside content
 document.addEventListener('click', function(event) {
