@@ -260,7 +260,7 @@
                         </div>
 
                         <!-- Profit Analysis -->
-                        <div class="bg-green-50 p-6 rounded-lg">
+                        <div class="bg-green-50 p-6 rounded-lg mb-6">
                             <h4 class="text-lg font-semibold text-green-800 mb-4">Profit Analysis</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
@@ -272,6 +272,54 @@
                                     <div class="text-sm text-green-700 mb-2">Assignment Profit</div>
                                     <div class="text-xl font-bold text-green-800">$<span id="assignment-profit">15,000</span></div>
                                     <div class="text-xs text-gray-600">Quick cash exit</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wholesale Strategy Details -->
+                        <div class="bg-white border border-gray-200 p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Strategy Analysis</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h5 class="font-semibold text-gray-700 mb-3">Key Metrics</h5>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between">
+                                            <span>Timeline:</span>
+                                            <span class="font-medium">30-60 days</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Cash Required:</span>
+                                            <span class="font-medium">$<span id="wholesale-cash-required">5,000</span></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Risk Level:</span>
+                                            <span class="font-medium text-green-600">Low</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Exit Strategy:</span>
+                                            <span class="font-medium">Assignment</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h5 class="font-semibold text-gray-700 mb-3">Pros & Cons</h5>
+                                    <div class="text-sm">
+                                        <div class="mb-2">
+                                            <span class="text-green-600 font-medium">Pros:</span>
+                                            <ul class="list-disc list-inside text-gray-600 mt-1">
+                                                <li>Quick cash turnaround</li>
+                                                <li>Low capital requirements</li>
+                                                <li>No renovation needed</li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <span class="text-red-600 font-medium">Cons:</span>
+                                            <ul class="list-disc list-inside text-gray-600 mt-1">
+                                                <li>Lower profit margins</li>
+                                                <li>Market dependent</li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -363,7 +411,7 @@
                         </div>
 
                         <!-- Profit Projections -->
-                        <div class="bg-indigo-50 p-6 rounded-lg">
+                        <div class="bg-indigo-50 p-6 rounded-lg mb-6">
                             <h4 class="text-lg font-semibold text-indigo-800 mb-4">Profit Projections</h4>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div class="bg-white p-4 rounded-lg">
@@ -377,6 +425,83 @@
                                 <div class="bg-white p-4 rounded-lg">
                                     <div class="text-sm text-indigo-600 font-medium">Net Profit</div>
                                     <div class="text-2xl font-bold text-green-600">$<span id="installment-profit">25,100</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Installment Strategy Details -->
+                        <div class="bg-white border border-gray-200 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Timeline & Execution</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h5 class="font-semibold text-gray-700 mb-3">Execution Timeline</h5>
+                                    <div class="space-y-3">
+                                        <div class="flex items-center">
+                                            <div class="w-4 h-4 bg-blue-500 rounded-full mr-3"></div>
+                                            <div class="text-sm">
+                                                <div class="font-medium">Month 1-2: Contract & Marketing</div>
+                                                <div class="text-gray-600">Execute contract, begin marketing</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-4 h-4 bg-blue-500 rounded-full mr-3"></div>
+                                            <div class="text-sm">
+                                                <div class="font-medium">Month 3-8: Buyer Search</div>
+                                                <div class="text-gray-600">Find qualified end buyer</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-4 h-4 bg-green-500 rounded-full mr-3"></div>
+                                            <div class="text-sm">
+                                                <div class="font-medium">Month 9-12: Closing</div>
+                                                <div class="text-gray-600">Complete sale, collect profit</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h5 class="font-semibold text-gray-700 mb-3">Key Advantages</h5>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Higher profit than wholesale</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Seller gets convenience + higher price</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Control over sale process</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Longer timeline than wholesale</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Market risk during holding period</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Risk Analysis -->
+                        <div class="bg-orange-50 p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-orange-800 mb-4">Risk Assessment</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-orange-600 mb-1">Medium</div>
+                                    <div class="text-sm text-orange-700">Overall Risk</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-green-600 mb-1">6-12mo</div>
+                                    <div class="text-sm text-gray-700">Typical Timeline</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-blue-600 mb-1">$<span id="installment-cash-needed">15,000</span></div>
+                                    <div class="text-sm text-gray-700">Cash Required</div>
                                 </div>
                             </div>
                         </div>
@@ -470,7 +595,7 @@
                         </div>
 
                         <!-- 5-Year Exit Logic -->
-                        <div class="bg-purple-50 p-6 rounded-lg">
+                        <div class="bg-purple-50 p-6 rounded-lg mb-6">
                             <h4 class="text-lg font-semibold text-purple-800 mb-4">5-Year Exit Strategies</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="bg-white p-4 rounded-lg border border-purple-200">
@@ -488,6 +613,78 @@
                                         <div>Cash Out: $<span id="refi-cashout">25,000</span></div>
                                         <div>Improved Cash Flow: +$<span id="refi-cashflow">150</span>/mo</div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Legal & Risk Considerations -->
+                        <div class="bg-yellow-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-yellow-800 mb-4">Legal & Risk Considerations</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h5 class="font-semibold text-yellow-700 mb-3">Legal Structure</h5>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Land trust or LLC ownership</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Insurance assignment required</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Power of attorney for loan servicing</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-red-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Check state regulations</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h5 class="font-semibold text-yellow-700 mb-3">Risk Mitigation</h5>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Automatic payment setup</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Comprehensive insurance coverage</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Emergency reserve fund</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Due-on-sale clause risk</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Performance Metrics -->
+                        <div class="bg-white border border-gray-200 p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Performance Analysis</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-green-600 mb-1"><span id="sub2-roi">18.5</span>%</div>
+                                    <div class="text-sm text-gray-700">Annual ROI</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-blue-600 mb-1"><span id="sub2-cap-rate">8.2</span>%</div>
+                                    <div class="text-sm text-gray-700">Cap Rate</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-purple-600 mb-1">High</div>
+                                    <div class="text-sm text-gray-700">Risk Level</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-indigo-600 mb-1">5-10yr</div>
+                                    <div class="text-sm text-gray-700">Hold Period</div>
                                 </div>
                             </div>
                         </div>
@@ -547,7 +744,7 @@
                         </div>
 
                         <!-- Cash Flow Analysis -->
-                        <div class="bg-green-50 p-6 rounded-lg">
+                        <div class="bg-green-50 p-6 rounded-lg mb-6">
                             <h4 class="text-lg font-semibold text-green-800 mb-4">Cash Flow Analysis</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="space-y-3">
@@ -574,6 +771,135 @@
                                         <div class="text-3xl font-bold text-green-600">+$<span id="sf-cashflow">199</span></div>
                                         <div class="text-sm text-gray-600 mt-1">Per month</div>
                                         <div class="text-xs text-green-600 mt-2">14% Cash-on-Cash Return</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Amortization & Balloon Options -->
+                        <div class="bg-blue-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-blue-800 mb-4">Financing Structure Options</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h5 class="font-semibold text-blue-700 mb-3">Amortization Options</h5>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between items-center p-2 bg-white rounded">
+                                            <span>30-Year Amortization:</span>
+                                            <span class="font-medium">$<span id="sf-30yr-payment">876</span>/mo</span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-2 bg-white rounded">
+                                            <span>25-Year Amortization:</span>
+                                            <span class="font-medium">$<span id="sf-25yr-payment">950</span>/mo</span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-2 bg-white rounded">
+                                            <span>20-Year Amortization:</span>
+                                            <span class="font-medium">$<span id="sf-20yr-payment">1,050</span>/mo</span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-2 bg-white rounded">
+                                            <span>Interest Only:</span>
+                                            <span class="font-medium">$<span id="sf-io-payment">715</span>/mo</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h5 class="font-semibold text-blue-700 mb-3">Balloon Term Options</h5>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between items-center p-2 bg-white rounded">
+                                            <span>5-Year Balloon:</span>
+                                            <span class="font-medium">$<span id="sf-5yr-balloon">125,500</span></span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-2 bg-white rounded">
+                                            <span>7-Year Balloon:</span>
+                                            <span class="font-medium">$<span id="sf-7yr-balloon">120,200</span></span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-2 bg-white rounded">
+                                            <span>10-Year Balloon:</span>
+                                            <span class="font-medium">$<span id="sf-10yr-balloon">110,800</span></span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-2 bg-white rounded">
+                                            <span>No Balloon:</span>
+                                            <span class="font-medium">Full Amortization</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Long-Term Projections -->
+                        <div class="bg-indigo-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-indigo-800 mb-4">10-Year Financial Projections</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div class="bg-white p-4 rounded-lg text-center">
+                                    <div class="text-sm text-indigo-600 mb-1">Year 5 Equity</div>
+                                    <div class="text-xl font-bold">$<span id="sf-5yr-equity">25,400</span></div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg text-center">
+                                    <div class="text-sm text-indigo-600 mb-1">Year 10 Equity</div>
+                                    <div class="text-xl font-bold">$<span id="sf-10yr-equity">58,200</span></div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg text-center">
+                                    <div class="text-sm text-indigo-600 mb-1">Total Cash Flow (10yr)</div>
+                                    <div class="text-xl font-bold text-green-600">$<span id="sf-10yr-cashflow">23,880</span></div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg text-center">
+                                    <div class="text-sm text-indigo-600 mb-1">Appreciation (3%)</div>
+                                    <div class="text-xl font-bold text-blue-600">$<span id="sf-appreciation">43,500</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Strategy Advantages -->
+                        <div class="bg-white border border-gray-200 p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Seller Finance Advantages</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h5 class="font-semibold text-gray-700 mb-3">For Investor</h5>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Low down payment requirement</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
+                                            <span>No bank qualification needed</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Flexible terms negotiation</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Faster closing process</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Positive cash flow from day one</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h5 class="font-semibold text-gray-700 mb-3">For Seller</h5>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Higher sale price achieved</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Monthly income stream</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Tax advantages on installment sale</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Security of real estate backing</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Risk of buyer default</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
