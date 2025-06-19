@@ -13,11 +13,11 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-change-in-production")
 
 # API Configuration
-RENTCAST_API_KEY = "c9c57c66b54140ff9b9db53efab53566"
+RENTCAST_API_KEY = os.environ.get("RENTCAST_API_KEY")
 RENTCAST_BASE_URL = "https://api.rentcast.io/v1"
 
 # RapidAPI Configuration
-RAPIDAPI_KEY = "be3e296439msh2693e44b9d2433fp17bebbjsn9aa77716b131"
+RAPIDAPI_KEY = os.environ.get("RAPIDAPI_KEY")
 RAPIDAPI_HEADERS = {
     'x-rapidapi-key': RAPIDAPI_KEY,
     'Content-Type': 'application/json'
