@@ -3,6 +3,7 @@ import logging
 from flask import Flask, render_template, request, session, jsonify
 from offer_calculator import generate_offer_comparison, get_strategy_recommendation
 from wholesale_calculator import calculate_wholesale_offers, calculate_ackerman_sequence, validate_wholesale_deal
+from installment_calculator import calculate_installment_offers, validate_installment_deal, get_seller_psychology_framework
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -117,6 +118,22 @@ def generate_presentation():
         # Validate wholesale deal
         wholesale_validations = validate_wholesale_deal(wholesale_analysis)
         
+        # Generate installment offer analysis
+        installment_analysis = calculate_installment_offers(
+            arv=estimated_value,
+            estimated_repairs=30000,
+            discount_to_sell_fast=10000,
+            closing_costs=18400,
+            min_acceptable_profit=15000,
+            wholesale_mao=wholesale_analysis['wholesale_mao']
+        )
+        
+        # Validate installment deal
+        installment_validations = validate_installment_deal(installment_analysis)
+        
+        # Get seller psychology framework for tooltips
+        seller_psychology = get_seller_psychology_framework()
+        
         # Store in session
         session['property_data'] = {
             'address': address,
@@ -137,7 +154,10 @@ def generate_presentation():
             'recommendations': recommendations,
             'wholesale_analysis': wholesale_analysis,
             'ackerman_offers': ackerman_offers,
-            'wholesale_validations': wholesale_validations
+            'wholesale_validations': wholesale_validations,
+            'installment_analysis': installment_analysis,
+            'installment_validations': installment_validations,
+            'seller_psychology': seller_psychology
         }
         
         return render_template('presentation_simple.html',
@@ -159,7 +179,10 @@ def generate_presentation():
                              recommendations=recommendations,
                              wholesale_analysis=wholesale_analysis,
                              ackerman_offers=ackerman_offers,
-                             wholesale_validations=wholesale_validations)
+                             wholesale_validations=wholesale_validations,
+                             installment_analysis=installment_analysis,
+                             installment_validations=installment_validations,
+                             seller_psychology=seller_psychology)
         
     except Exception as e:
         logging.error(f"Error: {e}")
@@ -201,6 +224,52 @@ def calculate_wholesale():
         
     except Exception as e:
         logging.error(f"Wholesale calculation error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/calculate-installment', methods=['POST'])
+def calculate_installment():
+    """API endpoint for installment offer calculations"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+            
+        arv = data.get('arv', 0)
+        estimated_repairs = data.get('estimated_repairs', 30000)
+        negative_adj = data.get('negative_adjustments', 0)
+        positive_adj = data.get('positive_adjustments', 0)
+        discount_fast = data.get('discount_to_sell_fast', 10000)
+        buyer_bonus = data.get('buyer_over_ask_bonus', 0)
+        closing_costs = data.get('closing_costs', 18400)
+        min_profit = data.get('min_acceptable_profit', 15000)
+        seller_bonus = data.get('split_with_seller_bonus', 0)
+        wholesale_mao = data.get('wholesale_mao', 0)
+        
+        installment_analysis = calculate_installment_offers(
+            arv=arv,
+            estimated_repairs=estimated_repairs,
+            negative_adjustments=negative_adj,
+            positive_adjustments=positive_adj,
+            discount_to_sell_fast=discount_fast,
+            buyer_over_ask_bonus=buyer_bonus,
+            closing_costs=closing_costs,
+            min_acceptable_profit=min_profit,
+            split_with_seller_bonus=seller_bonus,
+            wholesale_mao=wholesale_mao
+        )
+        
+        validations = validate_installment_deal(installment_analysis)
+        psychology = get_seller_psychology_framework()
+        
+        return jsonify({
+            'success': True,
+            'installment_analysis': installment_analysis,
+            'validations': validations,
+            'seller_psychology': psychology
+        })
+        
+    except Exception as e:
+        logging.error(f"Installment calculation error: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/calculate-offers', methods=['POST'])

@@ -342,6 +342,311 @@
         </div>
         {% endif %}
 
+        <!-- Installment Offer Calculator -->
+        {% if installment_analysis %}
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8 no-print">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-handshake text-indigo-500 mr-2"></i>Installment Offer Calculator
+                <span class="text-sm font-normal text-gray-500 ml-2">(Price + Convenience Strategy)</span>
+            </h2>
+
+            <!-- Seller Psychology Framework Toggle -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-gray-800">
+                        <i class="fas fa-brain text-indigo-500 mr-2"></i>Seller Psychology Framework
+                    </h3>
+                    <button onclick="toggleSellerFramework()" class="text-sm text-indigo-600 hover:text-indigo-800 transition-colors">
+                        <i class="fas fa-info-circle mr-1"></i>Show Details
+                    </button>
+                </div>
+                <div class="text-center">
+                    <div class="inline-block bg-white rounded-lg p-4 shadow-sm border">
+                        <div class="text-lg font-bold text-gray-800 mb-2">Sellers Choose Any 2 of 3:</div>
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div class="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                                <div class="text-2xl mb-1">⚡</div>
+                                <div class="font-semibold text-yellow-800">Speed</div>
+                            </div>
+                            <div class="p-3 bg-green-50 rounded-lg border border-green-200">
+                                <div class="text-2xl mb-1">🎯</div>
+                                <div class="font-semibold text-green-800">Convenience</div>
+                            </div>
+                            <div class="p-3 bg-purple-50 rounded-lg border border-purple-200">
+                                <div class="text-2xl mb-1">💰</div>
+                                <div class="font-semibold text-purple-800">Price</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-sm text-gray-600">
+                            <strong>Installment Strategy:</strong> Price + Convenience = Higher seller value with easy process
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Detailed Framework (Hidden by Default) -->
+                <div id="seller-framework-details" class="hidden mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="font-semibold text-red-600 mb-2">Speed + Convenience</div>
+                        <div class="text-gray-700">→ Wholesale Offer</div>
+                        <div class="text-xs text-gray-500 mt-1">Quick cash, lower price</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="font-semibold text-blue-600 mb-2">Speed + Price</div>
+                        <div class="text-gray-700">→ Subject-To/Seller Finance</div>
+                        <div class="text-xs text-gray-500 mt-1">Fast closing, higher price</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border border-indigo-300">
+                        <div class="font-semibold text-indigo-600 mb-2">Price + Convenience</div>
+                        <div class="text-gray-700">→ Installment/Novation</div>
+                        <div class="text-xs text-gray-500 mt-1">Maximum value, easy process</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Installment Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Installment MAO -->
+                <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200 rounded-lg p-6">
+                    <div class="flex items-center mb-3">
+                        <span class="text-3xl mr-3">🎯</span>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Installment MAO</h4>
+                            <p class="text-sm text-gray-600">Maximum Offer</p>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-indigo-600 mb-2">
+                        ${{ "{:,}".format(installment_analysis.installment_mao|int) }}
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        {{ "%.1f"|format(installment_analysis.mao_as_percent_of_arv) }}% of ARV
+                    </div>
+                </div>
+
+                <!-- Final Sales Price -->
+                <div class="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-6">
+                    <div class="flex items-center mb-3">
+                        <span class="text-3xl mr-3">💵</span>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Target Sale Price</h4>
+                            <p class="text-sm text-gray-600">To End Buyer</p>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-green-600 mb-2">
+                        ${{ "{:,}".format(installment_analysis.final_sales_price|int) }}
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        After buyer bonus
+                    </div>
+                </div>
+
+                <!-- Net Profit -->
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-6">
+                    <div class="flex items-center mb-3">
+                        <span class="text-3xl mr-3">📈</span>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Net Profit</h4>
+                            <p class="text-sm text-gray-600">After Closing</p>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-purple-600 mb-2">
+                        ${{ "{:,}".format(installment_analysis.net_profit|int) }}
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        {{ "%.1f"|format(installment_analysis.profit_margin) }}% margin
+                    </div>
+                </div>
+
+                <!-- Wholesale Gap -->
+                <div class="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-6">
+                    <div class="flex items-center mb-3">
+                        <span class="text-3xl mr-3">🔥</span>
+                        <div>
+                            <h4 class="font-bold text-gray-800">vs Wholesale</h4>
+                            <p class="text-sm text-gray-600">Premium</p>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-orange-600 mb-2">
+                        +${{ "{:,}".format(installment_analysis.installment_vs_wholesale_gap|int) }}
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        Higher than cash offer
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ackerman Method Offers for Installment -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">
+                    <i class="fas fa-stairs text-indigo-500 mr-2"></i>Ackerman Method Installment Offers
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold text-gray-800">1st Offer</span>
+                            <span class="text-sm bg-red-100 text-red-800 px-2 py-1 rounded">65%</span>
+                        </div>
+                        <div class="text-xl font-bold text-gray-800 mb-2">
+                            ${{ "{:,}".format(installment_analysis.ackerman_offers.offer_1|int) }}
+                        </div>
+                        <div class="text-xs text-gray-600">
+                            Opening anchor - establishes negotiation floor
+                        </div>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold text-gray-800">2nd Offer</span>
+                            <span class="text-sm bg-yellow-100 text-yellow-800 px-2 py-1 rounded">85%</span>
+                        </div>
+                        <div class="text-xl font-bold text-gray-800 mb-2">
+                            ${{ "{:,}".format(installment_analysis.ackerman_offers.offer_2|int) }}
+                        </div>
+                        <div class="text-xs text-gray-600">
+                            Middle position - shows flexibility and movement
+                        </div>
+                    </div>
+                    
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold text-gray-800">3rd Offer</span>
+                            <span class="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">95%</span>
+                        </div>
+                        <div class="text-xl font-bold text-gray-800 mb-2">
+                            ${{ "{:,}".format(installment_analysis.ackerman_offers.offer_3|int) }}
+                        </div>
+                        <div class="text-xs text-gray-600">
+                            Final offer - maximum price for installment deal
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deal Structure Breakdown -->
+            <div class="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h4 class="font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-calculator text-blue-500 mr-2"></i>Calculation Breakdown
+                    </h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">ARV (After Repair Value):</span>
+                            <span class="font-semibold">${{ "{:,}".format(installment_analysis.arv|int) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Est. Repairs:</span>
+                            <span class="font-semibold text-red-600">-${{ "{:,}".format(installment_analysis.estimated_repairs|int) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Discount to Sell Fast:</span>
+                            <span class="font-semibold text-red-600">-${{ "{:,}".format(installment_analysis.discount_to_sell_fast|int) }}</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">List Price:</span>
+                            <span class="font-semibold">${{ "{:,}".format(installment_analysis.list_price|int) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Buyer Over-Ask Bonus:</span>
+                            <span class="font-semibold text-green-600">+${{ "{:,}".format(installment_analysis.buyer_over_ask_bonus|int) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Final Sales Price:</span>
+                            <span class="font-bold text-blue-600">${{ "{:,}".format(installment_analysis.final_sales_price|int) }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h4 class="font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-chart-line text-green-500 mr-2"></i>Profit Analysis
+                    </h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Gross After Closing:</span>
+                            <span class="font-semibold">${{ "{:,}".format(installment_analysis.gross_after_closing|int) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Closing Costs:</span>
+                            <span class="font-semibold text-red-600">-${{ "{:,}".format(installment_analysis.closing_costs|int) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Min Acceptable Profit:</span>
+                            <span class="font-semibold">${{ "{:,}".format(installment_analysis.min_acceptable_profit|int) }}</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Installment MAO:</span>
+                            <span class="font-bold text-indigo-600">${{ "{:,}".format(installment_analysis.installment_mao|int) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Net Profit:</span>
+                            <span class="font-bold {{ 'text-green-600' if installment_analysis.net_profit >= installment_analysis.min_acceptable_profit else 'text-red-600' }}">${{ "{:,}".format(installment_analysis.net_profit|int) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Profit Margin:</span>
+                            <span class="font-bold text-purple-600">{{ "%.1f"|format(installment_analysis.profit_margin) }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Validations and Warnings -->
+            {% if installment_validations %}
+            <div class="mb-6">
+                <h4 class="font-semibold text-gray-800 mb-3">
+                    <i class="fas fa-clipboard-check text-orange-500 mr-2"></i>Deal Validation
+                </h4>
+                {% for validation in installment_validations %}
+                <div class="flex items-center p-3 rounded-lg mb-2 {{ 'bg-red-50 border border-red-200' if validation.type == 'error' else 'bg-yellow-50 border border-yellow-200' }}">
+                    <i class="fas {{ 'fa-exclamation-triangle text-red-500' if validation.type == 'error' else 'fa-info-circle text-yellow-500' }} mr-3"></i>
+                    <span class="text-sm {{ 'text-red-700' if validation.type == 'error' else 'text-yellow-700' }}">
+                        {{ validation.message }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Update Installment Calculator -->
+            <div class="p-6 bg-gray-50 rounded-lg">
+                <h4 class="font-semibold text-gray-800 mb-4">Update Installment Calculations</h4>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">ARV</label>
+                        <input type="number" id="installment-arv" value="{{ installment_analysis.arv|int }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Repairs</label>
+                        <input type="number" id="installment-repairs" value="{{ installment_analysis.estimated_repairs|int }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Discount Fast</label>
+                        <input type="number" id="installment-discount" value="{{ installment_analysis.discount_to_sell_fast|int }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Closing Costs</label>
+                        <input type="number" id="installment-closing" value="{{ installment_analysis.closing_costs|int }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Min Profit</label>
+                        <input type="number" id="installment-profit" value="{{ installment_analysis.min_acceptable_profit|int }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="updateInstallmentCalculations()" 
+                                class="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors text-sm">
+                            Recalculate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Offer Strategy Calculator -->
         {% if offer_analysis %}
         <div class="bg-white rounded-lg shadow-lg p-8 mb-8 no-print">
