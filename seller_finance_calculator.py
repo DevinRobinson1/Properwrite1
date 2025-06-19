@@ -117,6 +117,7 @@ def calculate_seller_finance_offer(arv, seller_finance_purchase_price, down_paym
         # Input values
         'arv': arv,
         'seller_finance_purchase_price': seller_finance_purchase_price,
+        'purchase_price': seller_finance_purchase_price,  # Template expects this field
         'down_payment': down_payment,
         'interest_rate': interest_rate,
         'amortization_term_months': amortization_term_months,

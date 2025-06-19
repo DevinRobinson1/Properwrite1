@@ -285,7 +285,7 @@ def generate_presentation():
                              buy_price=buy_price,
                              arv=estimated_value,
                              estimated_repairs=30000,
-                             rent_estimate=financials.get('estimated_monthly_rent', 1800),
+                             rent_estimate=financials.get('monthly_rent', 1800),
                              property_title=property_title,
                              property_summary=property_summary,
                              property_data=property_data,

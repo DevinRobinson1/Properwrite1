@@ -124,6 +124,9 @@ def calculate_subject_to_offer(arv, principal_balance, purchase_price, cash_to_s
         'roi_lease_option': roi_lease_option,
         'roi_hold': roi_hold,
         
+        # Immediate equity position
+        'immediate_equity': arv - principal_balance,
+        
         # Strategy comparison
         'preferred_strategy': 'lease_option' if total_profit_lease_option > total_profit_hold else 'long_term_hold',
         'strategy_advantage': abs(total_profit_lease_option - total_profit_hold)
