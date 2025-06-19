@@ -906,84 +906,7 @@
         </div>
         {% endif %}
 
-        <!-- Subject-To Creative Offer Calculator -->
-        {% if subject_to_analysis %}
-        <div class="bg-white rounded-lg shadow-lg p-8 mb-8 no-print">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                <i class="fas fa-exchange-alt text-blue-500 mr-2"></i>Subject-To Creative Offer Strategy
-                <span class="text-sm font-normal text-gray-500 ml-2">(Take Over Existing Financing)</span>
-            </h2>
 
-            <!-- Deal Summary Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <!-- Purchase Price -->
-                <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6">
-                    <div class="flex items-center mb-3">
-                        <span class="text-3xl mr-3">🏠</span>
-                        <div>
-                            <h4 class="font-bold text-gray-800">Purchase Price</h4>
-                            <p class="text-sm text-gray-600">Existing Loan Balance</p>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-blue-600 mb-2">
-                        ${{ "{:,}".format(subject_to_analysis.purchase_price|int) }}
-                    </div>
-                    <div class="text-sm text-gray-600">
-                        LTV: {{ "%.1f"|format((subject_to_analysis.principal_balance / subject_to_analysis.arv) * 100) }}%
-                    </div>
-                </div>
-
-                <!-- Cash to Seller -->
-                <div class="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-6">
-                    <div class="flex items-center mb-3">
-                        <span class="text-3xl mr-3">💵</span>
-                        <div>
-                            <h4 class="font-bold text-gray-800">Cash to Seller</h4>
-                            <p class="text-sm text-gray-600">Upfront Payment</p>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-green-600 mb-2">
-                        ${{ "{:,}".format(subject_to_analysis.cash_to_seller|int) }}
-                    </div>
-                    <div class="text-sm text-gray-600">
-                        Plus entry fees
-                    </div>
-                </div>
-
-                <!-- Monthly PITI -->
-                <div class="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-6">
-                    <div class="flex items-center mb-3">
-                        <span class="text-3xl mr-3">🏦</span>
-                        <div>
-                            <h4 class="font-bold text-gray-800">Monthly PITI</h4>
-                            <p class="text-sm text-gray-600">Loan Payment</p>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-purple-600 mb-2">
-                        ${{ "{:,}".format(subject_to_analysis.monthly_piti|int) }}
-                    </div>
-                    <div class="text-sm text-gray-600">
-                        {{ "%.1f"|format(subject_to_analysis.annual_interest_rate) }}% interest
-                    </div>
-                </div>
-
-                <!-- Total Investment -->
-                <div class="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-6">
-                    <div class="flex items-center mb-3">
-                        <span class="text-3xl mr-3">💰</span>
-                        <div>
-                            <h4 class="font-bold text-gray-800">Total Investment</h4>
-                            <p class="text-sm text-gray-600">Cash + Entry Fees</p>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-orange-600 mb-2">
-                        ${{ "{:,}".format(subject_to_analysis.total_investment|int) }}
-                    </div>
-                    <div class="text-sm text-gray-600">
-                        Out-of-pocket costs
-                    </div>
-                </div>
-            </div>
 
             <!-- Strategy Comparison Tabs -->
             <div class="mb-8">
@@ -1797,7 +1720,7 @@
                                     ${{ "{:,}".format(subject_to_analysis.cash_to_seller|int) }}
                                 </div>
                                 <div class="space-y-2 text-sm text-gray-600">
-                                    <div>Monthly Payment: <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.total_monthly_payment|int) }}</span></div>
+                                    <div>Monthly Payment: <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.monthly_piti|int) }}</span></div>
                                     <div>Equity Position: <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.immediate_equity|int) }}</span></div>
                                     <div>Exit Strategy: <span class="font-semibold">{{ subject_to_analysis.exit_strategies[0].strategy if subject_to_analysis.exit_strategies else 'Rental/Refinance' }}</span></div>
                                 </div>
