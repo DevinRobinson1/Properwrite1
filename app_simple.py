@@ -147,7 +147,10 @@ def generate_presentation():
 def calculate_offers():
     """API endpoint for calculating offer strategies"""
     try:
-        data = request.json
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+            
         arv = data.get('arv', 0)
         repair_cost = data.get('repair_cost', 20000)
         existing_loan = data.get('existing_loan', 0)
