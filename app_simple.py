@@ -206,7 +206,7 @@ def generate_presentation():
                 'net_profit': installment_analysis['net_profit'],
                 'hold_time': '3-6 months',
                 'exit_strategy': 'MLS Novation',
-                'roi': installment_analysis['profit_margin'],
+                'roi': installment_analysis.get('profit_margin', installment_analysis.get('mao_as_percent_of_arv', 0)),
                 'timeline_months': 6
             },
             'subject_to': {
