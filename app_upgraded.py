@@ -177,7 +177,7 @@ def calculate_strategies():
     try:
         data = request.get_json()
         
-        # Extract property inputs
+        # Extract property inputs with proper type conversion
         arv = float(data.get('arv', 200000))
         repairs = float(data.get('repairs', 30000))
         bedrooms = int(data.get('bedrooms', 3))
@@ -197,7 +197,11 @@ def calculate_strategies():
             arv=arv,
             repairs=repairs,
             wholesale_arv_percent=0.70,
-            min_acceptable_profit=int(15000)
+            min_acceptable_profit=int(15000),
+            bedrooms=int(bedrooms),
+            bathrooms=int(bathrooms),
+            square_feet=int(square_feet),
+            rent=int(monthly_rent)
         )
         
         # Calculate installment strategy  
@@ -206,7 +210,11 @@ def calculate_strategies():
             estimated_repairs=repairs,
             discount_to_sell_fast=int(10000),
             buyer_over_ask_bonus=int(5000),
-            min_acceptable_profit=int(25000)
+            min_acceptable_profit=int(25000),
+            bedrooms=int(bedrooms),
+            bathrooms=int(bathrooms),
+            square_feet=int(square_feet),
+            rent=int(monthly_rent)
         )
         
         # Calculate subject-to strategy
@@ -218,7 +226,10 @@ def calculate_strategies():
             cash_to_seller=4000,
             monthly_pi=int(estimated_loan_balance * 0.006),  # Estimate monthly payment
             rent_income=int(monthly_rent),
-            rehab=int(repairs)
+            rehab=int(repairs),
+            bedrooms=int(bedrooms),
+            bathrooms=int(bathrooms),
+            square_feet=int(square_feet)
         )
         
         # Calculate seller finance strategy
@@ -228,7 +239,10 @@ def calculate_strategies():
             down_payment=15000,
             interest_rate=6.5,
             monthly_rent=int(monthly_rent),
-            rehab_budget=int(repairs)
+            rehab_budget=int(repairs),
+            bedrooms=int(bedrooms),
+            bathrooms=int(bathrooms),
+            square_feet=int(square_feet)
         )
         
         # Compile comprehensive results
