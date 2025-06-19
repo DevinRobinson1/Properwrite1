@@ -443,13 +443,13 @@
             </div>
         </div>
 
-        <!-- Property Details -->
+        <!-- Shared Property Details (Outside Tabs) -->
         {% if property_data %}
-        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">
                 <i class="fas fa-home text-blue-500 mr-2"></i>Property Details
             </h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="text-center">
                     <div class="text-gray-600 text-sm font-medium">Property Type</div>
                     <div class="font-bold text-lg">{{ property_data.propertyType or "Single Family" }}</div>
@@ -472,10 +472,10 @@
         </div>
         {% endif %}
 
-        <!-- Data Sources -->
+        <!-- Shared Data Sources (Outside Tabs) -->
         {% if data_sources %}
-        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">
                 <i class="fas fa-database text-purple-500 mr-2"></i>Data Sources
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -489,236 +489,22 @@
         </div>
         {% endif %}
 
-        <!-- Wholesale/Cash Offer Calculator -->
-        {% if wholesale_analysis %}
-        <div class="bg-white rounded-lg shadow-lg p-8 mb-8 no-print">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                <i class="fas fa-money-bill-wave text-green-500 mr-2"></i>Wholesale/Cash Offer Calculator
-                <span class="text-sm font-normal text-gray-500 ml-2">(Ackerman Method)</span>
-            </h2>
-            
-            <!-- Toggle for Ackerman Method -->
-            <div class="mb-6 flex items-center">
-                <label class="flex items-center cursor-pointer">
-                    <input type="checkbox" id="ackerman-toggle" checked class="sr-only">
-                    <div class="relative">
-                        <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
-                        <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
-                    </div>
-                    <div class="ml-3 text-gray-700 font-medium">
-                        Use Ackerman Method (Descending Offers)
-                    </div>
-                </label>
-            </div>
-
-            <!-- Wholesale Summary Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
-                <!-- Cash MAO -->
-                <div class="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-6">
-                    <div class="flex items-center mb-3">
-                        <span class="text-3xl mr-3">💰</span>
-                        <div>
-                            <h4 class="font-bold text-gray-800">Cash MAO</h4>
-                            <p class="text-sm text-gray-600">Max Allowable Offer</p>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-green-600 mb-2">
-                        ${{ "{:,}".format(wholesale_analysis.wholesale_mao|int) }}
-                    </div>
-                    <div class="text-sm text-gray-600">
-                        {{ "%.1f"|format(wholesale_analysis.mao_as_percent_of_arv) }}% of ARV
-                    </div>
-                </div>
-
-                <!-- Assignment Price -->
-                <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6">
-                    <div class="flex items-center mb-3">
-                        <span class="text-3xl mr-3">🎯</span>
-                        <div>
-                            <h4 class="font-bold text-gray-800">Assignment Price</h4>
-                            <p class="text-sm text-gray-600">To Investor</p>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-blue-600 mb-2">
-                        ${{ "{:,}".format(wholesale_analysis.assignment_price|int) }}
-                    </div>
-                    <div class="text-sm text-gray-600">
-                        ${{ "{:,}".format(wholesale_analysis.assignment_profit|int) }} profit
-                    </div>
-                </div>
-
-                <!-- Retail Gap -->
-                <div class="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-6">
-                    <div class="flex items-center mb-3">
-                        <span class="text-3xl mr-3">📈</span>
-                        <div>
-                            <h4 class="font-bold text-gray-800">Retail Gap</h4>
-                            <p class="text-sm text-gray-600">Gross Profit</p>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-purple-600 mb-2">
-                        ${{ "{:,}".format(wholesale_analysis.retail_gap_gross_profit|int) }}
-                    </div>
-                    <div class="text-sm text-gray-600">
-                        After repairs
-                    </div>
-                </div>
-
-                <!-- All-In Amount -->
-                <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-lg p-6">
-                    <div class="flex items-center mb-3">
-                        <span class="text-3xl mr-3">🧾</span>
-                        <div>
-                            <h4 class="font-bold text-gray-800">All-In Amount</h4>
-                            <p class="text-sm text-gray-600">{{ wholesale_analysis.wholesale_arv_percent|int }}% of ARV</p>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-yellow-600 mb-2">
-                        ${{ "{:,}".format(wholesale_analysis.all_in_amount|int) }}
-                    </div>
-                    <div class="text-sm text-gray-600">
-                        Wholesale ceiling
-                    </div>
-                </div>
-            </div>
-
-            <!-- Ackerman Method Offers -->
-            {% if ackerman_offers %}
-            <div class="mb-8">
-                <h3 class="text-lg font-semibold text-gray-700 mb-4">
-                    <i class="fas fa-brain text-blue-500 mr-2"></i>Ackerman Method Offers
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {% for offer in ackerman_offers %}
-                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold text-gray-800">{{ offer.offer_number }}{{ 'st' if offer.offer_number == 1 else 'nd' if offer.offer_number == 2 else 'rd' }} Offer</span>
-                            <span class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">{{ offer.percentage|int }}%</span>
-                        </div>
-                        <div class="text-xl font-bold text-gray-800 mb-2">
-                            ${{ "{:,}".format(offer.amount|int) }}
-                        </div>
-                        <div class="text-xs text-gray-600">
-                            {{ offer.strategy_note }}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Validations and Warnings -->
-            {% if wholesale_validations %}
-            <div class="mb-6">
-                {% for validation in wholesale_validations %}
-                <div class="flex items-center p-3 rounded-lg mb-2 {{ 'bg-red-50 border border-red-200' if validation.type == 'error' else 'bg-yellow-50 border border-yellow-200' }}">
-                    <i class="fas {{ 'fa-exclamation-triangle text-red-500' if validation.type == 'error' else 'fa-info-circle text-yellow-500' }} mr-3"></i>
-                    <span class="text-sm {{ 'text-red-700' if validation.type == 'error' else 'text-yellow-700' }}">
-                        {{ validation.message }}
-                    </span>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            <!-- Update Wholesale Calculator -->
-            <div class="p-6 bg-gray-50 rounded-lg">
-                <h4 class="font-semibold text-gray-800 mb-4">Update Wholesale Calculations</h4>
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">ARV</label>
-                        <input type="number" id="wholesale-arv" value="{{ wholesale_analysis.arv|int }}" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Repairs</label>
-                        <input type="number" id="wholesale-repairs" value="{{ wholesale_analysis.repairs|int }}" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Wholesale %</label>
-                        <input type="range" id="wholesale-percent" min="60" max="80" value="{{ wholesale_analysis.wholesale_arv_percent|int }}" 
-                               class="w-full" oninput="updateWholesalePercentage(this.value)">
-                        <div class="text-xs text-gray-600 text-center mt-1">
-                            <span id="wholesale-percent-display">{{ wholesale_analysis.wholesale_arv_percent|int }}%</span>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Min Profit</label>
-                        <input type="number" id="wholesale-min-profit" value="{{ wholesale_analysis.min_acceptable_profit|int }}" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div class="flex items-end">
-                        <button onclick="updateWholesaleCalculations()" 
-                                class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                            Recalculate
-                        </button>
-                    </div>
-                </div>
+        <!-- Compare Offers Dashboard Toggle -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6 no-print">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-balance-scale text-purple-600 mr-2"></i>Compare All Strategies
+                </h2>
+                <button onclick="toggleCompareView()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                    <span id="compare-toggle-text">Show Comparison</span>
+                </button>
             </div>
         </div>
-        {% endif %}
 
-        <!-- Installment Offer Calculator -->
-        {% if installment_analysis %}
-        <div class="bg-white rounded-lg shadow-lg p-8 mb-8 no-print">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                <i class="fas fa-handshake text-indigo-500 mr-2"></i>Installment Offer Calculator
-                <span class="text-sm font-normal text-gray-500 ml-2">(Price + Convenience Strategy)</span>
-            </h2>
 
-            <!-- Seller Psychology Framework Toggle -->
-            <div class="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-lg font-semibold text-gray-800">
-                        <i class="fas fa-brain text-indigo-500 mr-2"></i>Seller Psychology Framework
-                    </h3>
-                    <button onclick="toggleSellerFramework()" class="text-sm text-indigo-600 hover:text-indigo-800 transition-colors">
-                        <i class="fas fa-info-circle mr-1"></i>Show Details
-                    </button>
-                </div>
-                <div class="text-center">
-                    <div class="inline-block bg-white rounded-lg p-4 shadow-sm border">
-                        <div class="text-lg font-bold text-gray-800 mb-2">Sellers Choose Any 2 of 3:</div>
-                        <div class="grid grid-cols-3 gap-4 text-center">
-                            <div class="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                                <div class="text-2xl mb-1">⚡</div>
-                                <div class="font-semibold text-yellow-800">Speed</div>
-                            </div>
-                            <div class="p-3 bg-green-50 rounded-lg border border-green-200">
-                                <div class="text-2xl mb-1">🎯</div>
-                                <div class="font-semibold text-green-800">Convenience</div>
-                            </div>
-                            <div class="p-3 bg-purple-50 rounded-lg border border-purple-200">
-                                <div class="text-2xl mb-1">💰</div>
-                                <div class="font-semibold text-purple-800">Price</div>
-                            </div>
-                        </div>
-                        <div class="mt-4 text-sm text-gray-600">
-                            <strong>Installment Strategy:</strong> Price + Convenience = Higher seller value with easy process
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Detailed Framework (Hidden by Default) -->
-                <div id="seller-framework-details" class="hidden mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div class="bg-white p-3 rounded-lg border">
-                        <div class="font-semibold text-red-600 mb-2">Speed + Convenience</div>
-                        <div class="text-gray-700">→ Wholesale Offer</div>
-                        <div class="text-xs text-gray-500 mt-1">Quick cash, lower price</div>
-                    </div>
-                    <div class="bg-white p-3 rounded-lg border">
-                        <div class="font-semibold text-blue-600 mb-2">Speed + Price</div>
-                        <div class="text-gray-700">→ Subject-To/Seller Finance</div>
-                        <div class="text-xs text-gray-500 mt-1">Fast closing, higher price</div>
-                    </div>
-                    <div class="bg-white p-3 rounded-lg border border-indigo-300">
-                        <div class="font-semibold text-indigo-600 mb-2">Price + Convenience</div>
-                        <div class="text-gray-700">→ Installment/Novation</div>
-                        <div class="text-xs text-gray-500 mt-1">Maximum value, easy process</div>
-                    </div>
-                </div>
-            </div>
+
+
+
 
             <!-- Installment Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
