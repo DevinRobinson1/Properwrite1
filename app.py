@@ -383,16 +383,8 @@ def compile_market_data(comprehensive_data, city, state):
     return market_data
 
 def generate_property_title(address, city, beds, baths):
-    """Generate an engaging property title"""
-    emojis = ['🔥', '💎', '⭐', '🏆', '💰']
-    descriptors = ['Flip This', 'Hot Deal', 'Prime Investment', 'Investor Special', 'Cash Cow']
-    locations = ['Near Downtown', 'Prime Location', 'Great Neighborhood', 'Upcoming Area']
-    
-    emoji = random.choice(emojis)
-    descriptor = random.choice(descriptors)
-    location = random.choice(locations)
-    
-    return f"{emoji} {descriptor} {beds}/{baths} {location} {city.title()}!"
+    """Generate property title using only authentic data"""
+    return f"{beds} Bed / {baths} Bath Property - {address}, {city}"
 
 def calculate_financials(buy_price, sqft, beds, baths, comparables):
     """Calculate property financials with ARV based on comparable sales"""
@@ -661,17 +653,19 @@ def process_rentcast_comparables(rentcast_comps, subject_beds, subject_baths, su
 def calculate_financials_from_api_data(property_data, market_data, comparables, sqft, beds, baths):
     """Calculate property financials using real API data"""
     
-    # Estimate buy price from property data or market data
+    # Use only authentic property data - no synthetic estimates
+    buy_price = None
     if property_data and property_data.get('lastSalePrice'):
         buy_price = int(property_data['lastSalePrice'])
     elif market_data and market_data.get('assessed_value'):
-        buy_price = int(market_data['assessed_value'] * 0.9)  # Assume 10% below assessed value
-    elif comparables:
-        # Use average of comparables as estimated market value
-        comp_prices = [comp['adjusted_price'] for comp in comparables]
-        buy_price = int(sum(comp_prices) / len(comp_prices)) if comp_prices else 250000
-    else:
-        buy_price = 250000  # Conservative fallback
+        buy_price = int(market_data['assessed_value'])
+    
+    # If no authentic data available, return error state
+    if not buy_price:
+        return {
+            'error': 'Insufficient property data available',
+            'message': 'Unable to generate analysis without authentic property valuation data'
+        }
     
     # Calculate ARV based on comparable sales
     if comparables and len(comparables) >= 3:
@@ -683,18 +677,8 @@ def calculate_financials_from_api_data(property_data, market_data, comparables, 
         arv = int(buy_price * 1.15)  # Conservative 15% appreciation
         arv_source = 'estimated'
     
-    # Rehab estimate based on property condition and age
-    if property_data and property_data.get('yearBuilt'):
-        property_age = datetime.now().year - property_data['yearBuilt']
-        if property_age > 30:
-            rehab_per_sqft = random.randint(40, 60)
-        elif property_age > 15:
-            rehab_per_sqft = random.randint(25, 40)
-        else:
-            rehab_per_sqft = random.randint(15, 25)
-    else:
-        rehab_per_sqft = random.randint(30, 50)
-    
+    # Use conservative rehab estimate - no random values
+    rehab_per_sqft = 35  # Standard industry estimate
     rehab_cost = int(sqft * rehab_per_sqft)
     
     # Calculate costs
@@ -766,19 +750,24 @@ def generate_comprehensive_data_sources_summary(comprehensive_data):
     
     return sources
 
-def generate_property_summary(address, city, financials):
-    """Generate a friendly summary paragraph"""
-    neighborhood = random.choice(MOCK_NEIGHBORHOODS.get(city.lower(), ['Downtown Area']))
-    profit_desc = "healthy" if financials['net_profit'] > 40000 else "solid"
-    spread_amount = f"${financials['net_profit']:,}"
+def generate_property_summary(address, city, financials, property_data):
+    """Generate summary using only authentic data"""
+    if financials.get('error'):
+        return f"Property analysis for {address} in {city}. {financials.get('message', 'Unable to complete analysis with available data.')}"
     
-    summaries = [
-        f"Investor special just minutes from the {neighborhood}. This property has strong comps, light rehab needs, and a {profit_desc} {spread_amount} spread.",
-        f"Prime investment opportunity in {neighborhood}. Great bones, excellent location, and projected {spread_amount} profit potential.",
-        f"Turn-key flip opportunity near {neighborhood}. Strong rental market with {spread_amount} upside and growing neighborhood demand."
-    ]
+    last_sale = property_data.get('lastSalePrice')
+    sale_date = property_data.get('lastSaleDate', '').split('T')[0] if property_data.get('lastSaleDate') else None
+    year_built = property_data.get('yearBuilt')
     
-    return random.choice(summaries)
+    summary_parts = [f"Property located at {address} in {city}."]
+    
+    if last_sale and sale_date:
+        summary_parts.append(f"Last sold for ${last_sale:,} on {sale_date}.")
+    
+    if year_built:
+        summary_parts.append(f"Built in {year_built}.")
+    
+    return " ".join(summary_parts)
 
 @app.route('/')
 def index():
@@ -842,7 +831,7 @@ def generate_presentation():
         
         # Generate property analysis
         title = generate_property_title(address, city, beds, baths)
-        summary = generate_property_summary(address, city, financials)
+        summary = generate_property_summary(address, city, financials, rentcast_property)
         
         # Compile comprehensive property data
         property_data = {
@@ -861,8 +850,8 @@ def generate_presentation():
             'comprehensive_data': comprehensive_data,
             'rent_estimates': market_data,
             'data_sources': generate_comprehensive_data_sources_summary(comprehensive_data),
-            'schools': MOCK_SCHOOLS,  # Will be replaced with real data when other APIs are added
-            'amenities': random.sample(MOCK_AMENITIES, 4),  # Will be replaced with real data
+            'schools': [],  # Real school data not available - removed mock data
+            'amenities': [],  # Real amenity data not available - removed mock data
             'year_built': rentcast_property.get('yearBuilt') if rentcast_property else 2000,
             'lot_size': rentcast_property.get('lotSize') if rentcast_property else 'Unknown',
             'condition': rentcast_property.get('condition') if rentcast_property else 'Unknown',
