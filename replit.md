@@ -109,6 +109,7 @@ This is a Flask-based web application that generates professional property prese
 - June 19, 2025. Fixed XSS vulnerability in notification system and identified RapidAPI subscription requirements for additional data sources
 - June 19, 2025. Implemented data integrity policy - removed all synthetic/mock data generation, application now displays only authentic property data from Rentcast API
 - June 19, 2025. Added comprehensive Offer Strategy Calculator module with MAO cash offers, seller financing, novation, and subject-to acquisition strategies with real-time recalculation capabilities
+- June 19, 2025. Implemented tabbed interface for offer strategy calculator with four distinct calculator types: Wholesale (MAO with Ackerman Method), Installment (Novation with seller psychology), Subject-To (creative financing with exit strategies), and Seller Finance (owner financing terms)
 
 ## User Preferences
 
