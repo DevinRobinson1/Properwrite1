@@ -621,6 +621,11 @@
                     populatePropertyData(data);
                     await calculateStrategies();
                     
+                    // Initialize tab calculations and comparison
+                    setTimeout(() => {
+                        updateAllTabCalculations();
+                    }, 200);
+                    
                     // Show results
                     document.getElementById('loading-state').classList.add('hidden');
                     document.getElementById('analysis-results').classList.remove('hidden');
@@ -696,6 +701,11 @@
                 populateSubjectToResults(results.subject_to);
                 populateSellerFinanceResults(results.seller_finance);
                 populateComparisonResults(results);
+                
+                // Initialize all tab calculations
+                setTimeout(() => {
+                    updateAllTabCalculations();
+                }, 100);
                 
             } catch (error) {
                 console.error('Error calculating strategies:', error);
@@ -778,26 +788,89 @@
         function populateComparisonResults(results) {
             const container = document.getElementById('comparison-results');
             container.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-gradient-to-br from-green-400 to-green-600 text-white p-6 rounded-lg">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-gradient-to-br from-green-400 to-green-600 text-white p-6 rounded-lg card-hover transition-all duration-300">
                         <h4 class="font-bold text-lg mb-2">Wholesale</h4>
                         <p class="text-2xl font-bold mb-1">$${results.wholesale.wholesale_mao.toLocaleString()}</p>
                         <p class="text-sm opacity-90">${results.wholesale.strategy_type}</p>
+                        <div class="mt-3 text-sm">
+                            <div>Assignment: $${results.wholesale.assignment_profit.toLocaleString()}</div>
+                            <div>All-In: $${results.wholesale.all_in_amount.toLocaleString()}</div>
+                        </div>
                     </div>
-                    <div class="bg-gradient-to-br from-blue-400 to-blue-600 text-white p-6 rounded-lg">
+                    <div class="bg-gradient-to-br from-blue-400 to-blue-600 text-white p-6 rounded-lg card-hover transition-all duration-300">
                         <h4 class="font-bold text-lg mb-2">Installment</h4>
                         <p class="text-2xl font-bold mb-1">$${results.installment.installment_mao.toLocaleString()}</p>
                         <p class="text-sm opacity-90">${results.installment.strategy_type}</p>
+                        <div class="mt-3 text-sm">
+                            <div>Net Profit: $${results.installment.net_profit.toLocaleString()}</div>
+                            <div>Sale Price: $${results.installment.final_sales_price.toLocaleString()}</div>
+                        </div>
                     </div>
-                    <div class="bg-gradient-to-br from-purple-400 to-purple-600 text-white p-6 rounded-lg">
+                    <div class="bg-gradient-to-br from-purple-400 to-purple-600 text-white p-6 rounded-lg card-hover transition-all duration-300">
                         <h4 class="font-bold text-lg mb-2">Subject-To</h4>
                         <p class="text-2xl font-bold mb-1">$${results.subject_to.equity_position.toLocaleString()}</p>
                         <p class="text-sm opacity-90">${results.subject_to.strategy_type}</p>
+                        <div class="mt-3 text-sm">
+                            <div>Monthly CF: $${results.subject_to.monthly_cash_flow.toLocaleString()}</div>
+                            <div>Payment: $${results.subject_to.monthly_payment.toLocaleString()}</div>
+                        </div>
                     </div>
-                    <div class="bg-gradient-to-br from-indigo-400 to-indigo-600 text-white p-6 rounded-lg">
+                    <div class="bg-gradient-to-br from-indigo-400 to-indigo-600 text-white p-6 rounded-lg card-hover transition-all duration-300">
                         <h4 class="font-bold text-lg mb-2">Seller Finance</h4>
                         <p class="text-2xl font-bold mb-1">$${results.seller_finance.purchase_price.toLocaleString()}</p>
                         <p class="text-sm opacity-90">${results.seller_finance.strategy_type}</p>
+                        <div class="mt-3 text-sm">
+                            <div>Down: $${results.seller_finance.down_payment.toLocaleString()}</div>
+                            <div>Monthly CF: $${results.seller_finance.monthly_cash_flow.toLocaleString()}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg border border-gray-200">
+                    <h4 class="text-xl font-bold text-gray-800 mb-4">Strategy Comparison Analysis</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="text-left p-3 font-semibold">Strategy</th>
+                                    <th class="text-right p-3 font-semibold">Initial Investment</th>
+                                    <th class="text-right p-3 font-semibold">Monthly Cash Flow</th>
+                                    <th class="text-right p-3 font-semibold">Total Profit Potential</th>
+                                    <th class="text-center p-3 font-semibold">Timeline</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b">
+                                    <td class="p-3 font-medium text-green-700">Wholesale</td>
+                                    <td class="p-3 text-right">$${results.wholesale.all_in_amount.toLocaleString()}</td>
+                                    <td class="p-3 text-right">$0</td>
+                                    <td class="p-3 text-right font-bold text-green-600">$${results.wholesale.assignment_profit.toLocaleString()}</td>
+                                    <td class="p-3 text-center">30-60 days</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="p-3 font-medium text-blue-700">Installment</td>
+                                    <td class="p-3 text-right">$${results.installment.installment_mao.toLocaleString()}</td>
+                                    <td class="p-3 text-right">$0</td>
+                                    <td class="p-3 text-right font-bold text-blue-600">$${results.installment.net_profit.toLocaleString()}</td>
+                                    <td class="p-3 text-center">6-12 months</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="p-3 font-medium text-purple-700">Subject-To</td>
+                                    <td class="p-3 text-right">$${results.subject_to.total_cash_needed.toLocaleString()}</td>
+                                    <td class="p-3 text-right font-bold text-green-600">+$${results.subject_to.monthly_cash_flow.toLocaleString()}</td>
+                                    <td class="p-3 text-right">$${results.subject_to.equity_position.toLocaleString()}+</td>
+                                    <td class="p-3 text-center">Long-term hold</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-medium text-indigo-700">Seller Finance</td>
+                                    <td class="p-3 text-right">$${results.seller_finance.down_payment.toLocaleString()}</td>
+                                    <td class="p-3 text-right font-bold text-green-600">+$${results.seller_finance.monthly_cash_flow.toLocaleString()}</td>
+                                    <td class="p-3 text-right">Appreciation + CF</td>
+                                    <td class="p-3 text-center">Long-term hold</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             `;
@@ -944,6 +1017,60 @@
             recalculateInstallment();
             recalculateSubjectTo();
             recalculateSellerFinance();
+            updateComparisonFromTabs();
+        }
+
+        function updateComparisonFromTabs() {
+            // Get current values from tabs and update comparison
+            const arv = parseFloat(document.getElementById('arv').value);
+            const repairs = parseFloat(document.getElementById('repairs').value);
+            const rent = parseFloat(document.getElementById('rent').value);
+            
+            // Calculate simplified results for comparison
+            const wholesaleMao = parseFloat(document.getElementById('wholesale-mao-result').textContent.replace(/,/g, ''));
+            const assignmentProfit = parseFloat(document.getElementById('assignment-profit').textContent.replace(/,/g, ''));
+            
+            const installmentPurchase = parseFloat(document.getElementById('installment-purchase').textContent.replace(/,/g, ''));
+            const installmentSales = parseFloat(document.getElementById('installment-sales').textContent.replace(/,/g, ''));
+            const installmentProfit = parseFloat(document.getElementById('installment-profit').textContent.replace(/,/g, ''));
+            
+            const sub2Equity = parseFloat(document.getElementById('sub2-equity').textContent.replace(/,/g, ''));
+            const sub2CashFlow = parseFloat(document.getElementById('sub2-cashflow').textContent.replace(/,/g, ''));
+            const sub2Payment = parseFloat(document.getElementById('sub2-pi').textContent.replace(/,/g, ''));
+            
+            const sfPurchase = parseFloat(document.getElementById('sf-purchase-price').value);
+            const sfDown = parseFloat(document.getElementById('sf-down-payment').value);
+            const sfCashFlow = parseFloat(document.getElementById('sf-cashflow').textContent.replace(/,/g, ''));
+            
+            const comparisonResults = {
+                wholesale: {
+                    wholesale_mao: wholesaleMao,
+                    assignment_profit: assignmentProfit,
+                    all_in_amount: wholesaleMao + repairs,
+                    strategy_type: 'Cash Acquisition'
+                },
+                installment: {
+                    installment_mao: installmentPurchase,
+                    net_profit: installmentProfit,
+                    final_sales_price: installmentSales,
+                    strategy_type: 'Payment Plan'
+                },
+                subject_to: {
+                    equity_position: sub2Equity,
+                    monthly_cash_flow: sub2CashFlow,
+                    monthly_payment: sub2Payment,
+                    total_cash_needed: 6500,
+                    strategy_type: 'Creative Financing'
+                },
+                seller_finance: {
+                    purchase_price: sfPurchase,
+                    down_payment: sfDown,
+                    monthly_cash_flow: sfCashFlow,
+                    strategy_type: 'Owner Financing'
+                }
+            };
+            
+            populateComparisonResults(comparisonResults);
         }
     </script>
 </body>
