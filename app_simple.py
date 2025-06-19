@@ -2,6 +2,7 @@ import os
 import logging
 from flask import Flask, render_template, request, session, jsonify
 from offer_calculator import generate_offer_comparison, get_strategy_recommendation
+from wholesale_calculator import calculate_wholesale_offers, calculate_ackerman_sequence, validate_wholesale_deal
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -102,6 +103,20 @@ def generate_presentation():
         # Get strategy recommendations
         recommendations = get_strategy_recommendation(offer_analysis['offers'])
         
+        # Generate wholesale/cash offer analysis with Ackerman Method
+        wholesale_analysis = calculate_wholesale_offers(
+            arv=estimated_value,
+            repairs=30000,
+            wholesale_arv_percent=0.70,
+            min_acceptable_profit=15000
+        )
+        
+        # Generate Ackerman sequence
+        ackerman_offers = calculate_ackerman_sequence(wholesale_analysis['wholesale_mao'])
+        
+        # Validate wholesale deal
+        wholesale_validations = validate_wholesale_deal(wholesale_analysis)
+        
         # Store in session
         session['property_data'] = {
             'address': address,
@@ -119,7 +134,10 @@ def generate_presentation():
             'market_data': market_data,
             'data_sources': data_sources,
             'offer_analysis': offer_analysis,
-            'recommendations': recommendations
+            'recommendations': recommendations,
+            'wholesale_analysis': wholesale_analysis,
+            'ackerman_offers': ackerman_offers,
+            'wholesale_validations': wholesale_validations
         }
         
         return render_template('presentation_simple.html',
@@ -138,11 +156,52 @@ def generate_presentation():
                              market_data=market_data,
                              data_sources=data_sources,
                              offer_analysis=offer_analysis,
-                             recommendations=recommendations)
+                             recommendations=recommendations,
+                             wholesale_analysis=wholesale_analysis,
+                             ackerman_offers=ackerman_offers,
+                             wholesale_validations=wholesale_validations)
         
     except Exception as e:
         logging.error(f"Error: {e}")
         return f"<h1>Processing Error</h1><p>Unable to process request: {str(e)}</p>", 500
+
+@app.route('/api/calculate-wholesale', methods=['POST'])
+def calculate_wholesale():
+    """API endpoint for wholesale/cash offer calculations with Ackerman Method"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+            
+        arv = data.get('arv', 0)
+        repairs = data.get('repairs', 30000)
+        wholesale_percent = data.get('wholesale_percent', 70) / 100
+        min_profit = data.get('min_profit', 15000)
+        negative_adj = data.get('negative_adjustments', 0)
+        positive_adj = data.get('positive_adjustments', 0)
+        
+        wholesale_analysis = calculate_wholesale_offers(
+            arv=arv,
+            repairs=repairs,
+            wholesale_arv_percent=wholesale_percent,
+            negative_adjustments=negative_adj,
+            positive_adjustments=positive_adj,
+            min_acceptable_profit=min_profit
+        )
+        
+        ackerman_offers = calculate_ackerman_sequence(wholesale_analysis['wholesale_mao'])
+        validations = validate_wholesale_deal(wholesale_analysis)
+        
+        return jsonify({
+            'success': True,
+            'wholesale_analysis': wholesale_analysis,
+            'ackerman_offers': ackerman_offers,
+            'validations': validations
+        })
+        
+    except Exception as e:
+        logging.error(f"Wholesale calculation error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/calculate-offers', methods=['POST'])
 def calculate_offers():
