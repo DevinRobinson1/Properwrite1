@@ -607,6 +607,265 @@
             </div>
             {% endif %}
 
+            <!-- Dynamic Fee Section -->
+            <div class="mb-8 p-6 bg-orange-50 border border-orange-200 rounded-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">
+                        <i class="fas fa-receipt text-orange-500 mr-2"></i>Installment Closing Costs & Out-of-Pocket Concessions
+                    </h3>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="toggleAdvancedFees()" class="text-sm text-orange-600 hover:text-orange-800 transition-colors">
+                            <i class="fas fa-cog mr-1"></i>Advanced Settings
+                        </button>
+                        <button onclick="resetToDefaults()" class="text-sm text-gray-600 hover:text-gray-800 transition-colors">
+                            <i class="fas fa-undo mr-1"></i>Reset Defaults
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-white rounded-lg p-4 border border-orange-300">
+                        <div class="text-sm text-gray-600 mb-1">Total Closing Costs</div>
+                        <div class="text-2xl font-bold text-orange-600" id="total-closing-display">
+                            ${{ "{:,}".format(installment_analysis.detailed_closing_costs|int) }}
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border border-orange-300">
+                        <div class="text-sm text-gray-600 mb-1">Out-of-Pocket Costs</div>
+                        <div class="text-2xl font-bold text-orange-600" id="total-oop-display">
+                            ${{ "{:,}".format(installment_analysis.detailed_oop_costs|int) }}
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border border-orange-300">
+                        <div class="text-sm text-gray-600 mb-1">Total Combined</div>
+                        <div class="text-2xl font-bold text-orange-600" id="total-combined-display">
+                            ${{ "{:,}".format(installment_analysis.closing_costs|int) }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Editable Fee Fields -->
+                <div id="fee-details" class="space-y-6">
+                    <!-- Closing Costs Section -->
+                    <div class="bg-white rounded-lg p-6 border border-gray-200">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-home text-blue-500 mr-2"></i>Closing Costs (Percentage & Flat Fees)
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Flat Fee Listing -->
+                            <div class="fee-field">
+                                <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+                                    Flat Fee Listing Service
+                                    <i class="fas fa-info-circle text-gray-400 ml-1 cursor-pointer" 
+                                       title="{{ fee_tooltips.flat_fee_listing_service }}"></i>
+                                </label>
+                                <input type="number" id="flat_fee_listing_service" 
+                                       value="{{ default_fees.flat_fee_listing_service }}"
+                                       class="w-full px-3 py-2 border-2 border-orange-300 rounded-md text-sm bg-orange-50 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                                       onchange="updateFeeCalculations()">
+                            </div>
+
+                            <!-- Listing Agent Commission -->
+                            <div class="fee-field">
+                                <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+                                    Listing Agent Commission (%)
+                                    <i class="fas fa-info-circle text-gray-400 ml-1 cursor-pointer" 
+                                       title="{{ fee_tooltips.listing_agent_commission_pct }}"></i>
+                                </label>
+                                <input type="number" step="0.1" id="listing_agent_commission_pct" 
+                                       value="{{ default_fees.listing_agent_commission_pct }}"
+                                       class="w-full px-3 py-2 border-2 border-orange-300 rounded-md text-sm bg-orange-50 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                                       onchange="updateFeeCalculations()">
+                            </div>
+
+                            <!-- Buyer Agent Commission -->
+                            <div class="fee-field">
+                                <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+                                    Buyer Agent Commission (%)
+                                    <i class="fas fa-info-circle text-gray-400 ml-1 cursor-pointer" 
+                                       title="{{ fee_tooltips.buyer_agent_commission_pct }}"></i>
+                                </label>
+                                <input type="number" step="0.1" id="buyer_agent_commission_pct" 
+                                       value="{{ default_fees.buyer_agent_commission_pct }}"
+                                       class="w-full px-3 py-2 border-2 border-orange-300 rounded-md text-sm bg-orange-50 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                                       onchange="updateFeeCalculations()">
+                            </div>
+
+                            <!-- Title & Escrow Fees -->
+                            <div class="fee-field">
+                                <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+                                    Title & Escrow Fees (%)
+                                    <i class="fas fa-info-circle text-gray-400 ml-1 cursor-pointer" 
+                                       title="{{ fee_tooltips.title_escrow_fees_pct }}"></i>
+                                </label>
+                                <input type="number" step="0.1" id="title_escrow_fees_pct" 
+                                       value="{{ default_fees.title_escrow_fees_pct }}"
+                                       class="w-full px-3 py-2 border-2 border-orange-300 rounded-md text-sm bg-orange-50 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                                       onchange="updateFeeCalculations()">
+                            </div>
+
+                            <!-- Loan Concessions -->
+                            <div class="fee-field">
+                                <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+                                    Loan Concessions to Buyer
+                                    <i class="fas fa-info-circle text-gray-400 ml-1 cursor-pointer" 
+                                       title="{{ fee_tooltips.loan_concessions }}"></i>
+                                </label>
+                                <input type="number" id="loan_concessions" 
+                                       value="{{ default_fees.loan_concessions }}"
+                                       class="w-full px-3 py-2 border-2 border-orange-300 rounded-md text-sm bg-orange-50 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                                       onchange="updateFeeCalculations()">
+                            </div>
+
+                            <!-- Home Warranty -->
+                            <div class="fee-field">
+                                <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+                                    Home Warranty
+                                    <i class="fas fa-info-circle text-gray-400 ml-1 cursor-pointer" 
+                                       title="{{ fee_tooltips.home_warranty }}"></i>
+                                </label>
+                                <input type="number" id="home_warranty" 
+                                       value="{{ default_fees.home_warranty }}"
+                                       class="w-full px-3 py-2 border-2 border-orange-300 rounded-md text-sm bg-orange-50 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                                       onchange="updateFeeCalculations()">
+                            </div>
+                        </div>
+
+                        <!-- Advanced Closing Costs (Hidden by Default) -->
+                        <div id="advanced-closing-fees" class="hidden mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+                            <div class="fee-field">
+                                <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+                                    HOA Resale Certificate
+                                    <i class="fas fa-info-circle text-gray-400 ml-1 cursor-pointer" 
+                                       title="{{ fee_tooltips.hoa_resale_certificate }}"></i>
+                                </label>
+                                <input type="number" id="hoa_resale_certificate" 
+                                       value="{{ default_fees.hoa_resale_certificate }}"
+                                       class="w-full px-3 py-2 border-2 border-orange-300 rounded-md text-sm bg-orange-50 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                                       onchange="updateFeeCalculations()">
+                            </div>
+                            <div class="fee-field">
+                                <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+                                    HOA Transfer Fee
+                                    <i class="fas fa-info-circle text-gray-400 ml-1 cursor-pointer" 
+                                       title="{{ fee_tooltips.hoa_transfer_fee }}"></i>
+                                </label>
+                                <input type="number" id="hoa_transfer_fee" 
+                                       value="{{ default_fees.hoa_transfer_fee }}"
+                                       class="w-full px-3 py-2 border-2 border-orange-300 rounded-md text-sm bg-orange-50 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                                       onchange="updateFeeCalculations()">
+                            </div>
+                            <div class="fee-field">
+                                <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+                                    Survey Fee
+                                    <i class="fas fa-info-circle text-gray-400 ml-1 cursor-pointer" 
+                                       title="{{ fee_tooltips.survey_fee }}"></i>
+                                </label>
+                                <input type="number" id="survey_fee" 
+                                       value="{{ default_fees.survey_fee }}"
+                                       class="w-full px-3 py-2 border-2 border-orange-300 rounded-md text-sm bg-orange-50 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                                       onchange="updateFeeCalculations()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Out-of-Pocket Costs Section -->
+                    <div class="bg-white rounded-lg p-6 border border-gray-200">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-wallet text-purple-500 mr-2"></i>Out-of-Pocket Costs
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Professional Staging -->
+                            <div class="fee-field">
+                                <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+                                    Professional Staging
+                                    <i class="fas fa-info-circle text-gray-400 ml-1 cursor-pointer" 
+                                       title="{{ fee_tooltips.professional_staging }}"></i>
+                                </label>
+                                <input type="number" id="professional_staging" 
+                                       value="{{ default_fees.professional_staging }}"
+                                       class="w-full px-3 py-2 border-2 border-orange-300 rounded-md text-sm bg-orange-50 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                                       onchange="updateFeeCalculations()">
+                            </div>
+
+                            <!-- Make-Ready Cleaning -->
+                            <div class="fee-field">
+                                <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+                                    Make-Ready Cleaning
+                                    <i class="fas fa-info-circle text-gray-400 ml-1 cursor-pointer" 
+                                       title="{{ fee_tooltips.make_ready_cleaning }}"></i>
+                                </label>
+                                <input type="number" id="make_ready_cleaning" 
+                                       value="{{ default_fees.make_ready_cleaning }}"
+                                       class="w-full px-3 py-2 border-2 border-orange-300 rounded-md text-sm bg-orange-50 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                                       onchange="updateFeeCalculations()">
+                            </div>
+
+                            <!-- Photography -->
+                            <div class="fee-field">
+                                <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+                                    Photography
+                                    <i class="fas fa-info-circle text-gray-400 ml-1 cursor-pointer" 
+                                       title="{{ fee_tooltips.photography }}"></i>
+                                </label>
+                                <input type="number" id="photography" 
+                                       value="{{ default_fees.photography }}"
+                                       class="w-full px-3 py-2 border-2 border-orange-300 rounded-md text-sm bg-orange-50 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                                       onchange="updateFeeCalculations()">
+                            </div>
+
+                            <!-- Matterport -->
+                            <div class="fee-field">
+                                <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+                                    Matterport 3D Tour
+                                    <i class="fas fa-info-circle text-gray-400 ml-1 cursor-pointer" 
+                                       title="{{ fee_tooltips.matterport }}"></i>
+                                </label>
+                                <input type="number" id="matterport" 
+                                       value="{{ default_fees.matterport }}"
+                                       class="w-full px-3 py-2 border-2 border-orange-300 rounded-md text-sm bg-orange-50 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                                       onchange="updateFeeCalculations()">
+                            </div>
+
+                            <!-- Inspection Fee -->
+                            <div class="fee-field">
+                                <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+                                    Inspection Fee
+                                    <i class="fas fa-info-circle text-gray-400 ml-1 cursor-pointer" 
+                                       title="{{ fee_tooltips.inspection_fee }}"></i>
+                                </label>
+                                <input type="number" id="inspection_fee" 
+                                       value="{{ default_fees.inspection_fee }}"
+                                       class="w-full px-3 py-2 border-2 border-orange-300 rounded-md text-sm bg-orange-50 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                                       onchange="updateFeeCalculations()">
+                            </div>
+
+                            <!-- Max Repairs Pre-Close -->
+                            <div class="fee-field">
+                                <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+                                    Max Repairs Prior to Closing
+                                    <i class="fas fa-info-circle text-gray-400 ml-1 cursor-pointer" 
+                                       title="{{ fee_tooltips.max_repairs_pre_close }}"></i>
+                                </label>
+                                <input type="number" id="max_repairs_pre_close" 
+                                       value="{{ default_fees.max_repairs_pre_close }}"
+                                       class="w-full px-3 py-2 border-2 border-orange-300 rounded-md text-sm bg-orange-50 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                                       onchange="updateFeeCalculations()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recalculate Button -->
+                    <div class="text-center">
+                        <button onclick="recalculateNovationMAO()" 
+                                class="bg-orange-600 text-white px-8 py-3 rounded-lg hover:bg-orange-700 transition-colors font-semibold text-lg">
+                            <i class="fas fa-calculator mr-2"></i>Recalculate Novation MAO
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Update Installment Calculator -->
             <div class="p-6 bg-gray-50 rounded-lg">
                 <h4 class="font-semibold text-gray-800 mb-4">Update Installment Calculations</h4>
@@ -629,7 +888,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Closing Costs</label>
                         <input type="number" id="installment-closing" value="{{ installment_analysis.closing_costs|int }}" 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" readonly>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Min Profit</label>

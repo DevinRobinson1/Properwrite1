@@ -3,7 +3,14 @@ import logging
 from flask import Flask, render_template, request, session, jsonify
 from offer_calculator import generate_offer_comparison, get_strategy_recommendation
 from wholesale_calculator import calculate_wholesale_offers, calculate_ackerman_sequence, validate_wholesale_deal
-from installment_calculator import calculate_installment_offers, validate_installment_deal, get_seller_psychology_framework
+from installment_calculator import (
+    calculate_installment_offers, validate_installment_deal, get_seller_psychology_framework,
+    get_default_installment_fees, validate_installment_fees, get_fee_tooltips
+)
+from subject_to_calculator import (
+    calculate_subject_to_offer, validate_subject_to_deal, get_subject_to_strategies,
+    calculate_refinance_scenario
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -134,6 +141,26 @@ def generate_presentation():
         # Get seller psychology framework for tooltips
         seller_psychology = get_seller_psychology_framework()
         
+        # Get default fee structure and tooltips
+        default_fees = get_default_installment_fees()
+        fee_tooltips = get_fee_tooltips()
+        
+        # Generate Subject-To offer analysis
+        subject_to_analysis = calculate_subject_to_offer(
+            arv=estimated_value,
+            principal_balance=estimated_value * 0.85,  # Assume 85% LTV existing loan
+            purchase_price=estimated_value * 0.85,
+            rent_income=estimated_value * 0.007,  # 0.7% rent ratio
+            lease_option_income=estimated_value * 0.0075,  # Slightly higher for lease option
+            lease_option_sale_price=estimated_value * 1.1  # 10% premium for lease option
+        )
+        
+        # Validate Subject-To deal
+        subject_to_validations = validate_subject_to_deal(subject_to_analysis)
+        
+        # Get Subject-To strategies
+        subject_to_strategies = get_subject_to_strategies()
+        
         # Store in session
         session['property_data'] = {
             'address': address,
@@ -157,7 +184,9 @@ def generate_presentation():
             'wholesale_validations': wholesale_validations,
             'installment_analysis': installment_analysis,
             'installment_validations': installment_validations,
-            'seller_psychology': seller_psychology
+            'seller_psychology': seller_psychology,
+            'default_fees': default_fees,
+            'fee_tooltips': fee_tooltips
         }
         
         return render_template('presentation_simple.html',
@@ -182,7 +211,9 @@ def generate_presentation():
                              wholesale_validations=wholesale_validations,
                              installment_analysis=installment_analysis,
                              installment_validations=installment_validations,
-                             seller_psychology=seller_psychology)
+                             seller_psychology=seller_psychology,
+                             default_fees=default_fees,
+                             fee_tooltips=fee_tooltips)
         
     except Exception as e:
         logging.error(f"Error: {e}")

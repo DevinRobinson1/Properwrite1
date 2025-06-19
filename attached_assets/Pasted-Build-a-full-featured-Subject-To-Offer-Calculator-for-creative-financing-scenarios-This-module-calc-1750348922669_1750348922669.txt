@@ -1,0 +1,118 @@
+Build a full-featured Subject-To Offer Calculator for creative financing scenarios. This module calculates monthly payment structure, entry fees, 5-year payoff outcomes, lease option exit profits, and equity structure.
+
+📥 REQUIRED INPUTS:
+Subject Property Terms:
+ARV: $270,000
+
+PrincipalBalance: $260,000
+
+PurchasePrice: $260,000
+
+CashToSeller: $4,000
+
+AnnualInterestRate: 7.2%
+
+LoanTermMonths: 360
+
+AnnualInsurance: $1,200
+
+AnnualTaxes: $750
+
+MonthlyPI: $1,800
+
+MonthlyEscrow: $300
+
+MonthlyPITI: $2,200
+
+Entry Fees:
+AcquisitionCosts: $2,000
+
+ClosingCosts: $2,500
+
+Rehab: $0
+
+WholesaleFee: $20,000
+
+EntryFeesTotal: $28,500 (calculated from above)
+
+Seller Equity Terms (if applicable):
+EquityAmountFinanced: e.g., $30,000
+
+EquityInterestRate: 0.0% (Interest-Only or Principal Only)
+
+EquityPayment: $250
+
+EquityTermMonths: 72
+
+🧠 CORE CALCULATIONS:
+Monthly Cash Flow
+
+js
+Copy
+Edit
+CashFlow = RentIncome - MonthlyPITI - MonthlyEquityPayment - HOA - CapitalCost;
+Loan Balance Reduction Over 5 Years
+
+js
+Copy
+Edit
+YearlyPaydown = AverageMonthlyPrincipalReduction * 12;
+Lease Option Exit Strategy
+
+js
+Copy
+Edit
+LeaseOptionSalePrice = $299,000;
+LeaseOptionFeeUpfront = $10,000;
+ProfitAfterSale = LeaseOptionPrice - PurchasePrice - EntryFees + Appreciation - EquityPaid;
+Total 5-Year Cash Flow + Profit
+
+js
+Copy
+Edit
+TotalCashFlow = CashFlow * 60;
+TotalProfit = ProfitAfterSale + TotalCashFlow;
+📊 UI OUTPUT SECTION:
+Use styled cards or tables to present:
+
+🔹 Deal Summary
+Purchase Price: $260,000
+
+Cash to Seller: $4,000
+
+Entry Fees: $28,500
+
+PITI: $2,200
+
+Rent Income: $1,900 (or Lease Option: $2,000)
+
+Cash Flow: - $640/month
+
+🔻 5-Year Performance:
+Loan Balance After 5 Years: $112,000
+
+Cash Flow Over 5 Years: -$38,400
+
+Lease Option Exit Price: $299,000
+
+Total Profit (Principal Only): $369,100
+
+Lump Sum After Exit: $397,500
+
+🧰 ADDITIONAL LOGIC & FEATURES:
+Allow users to choose “Interest-Only” vs. “Principal-Only” seller equity terms
+
+Editable interest rate, term, PITI override
+
+Autofill taxes/insurance into escrow if checkbox enabled
+
+Toggle to model a 6–12 month refinance strategy
+
+Option to run Lease Option vs. Long-Term Hold comparison
+
+✅ INTEGRATION:
+Add this module inside the Offer Strategy Panel below Novation and Wholesale
+
+Recalculate all values based on inputs from the underwriting engine (ARV, Rent, Rehab, etc.)
+
+Label this section clearly as “Subject-To Creative Offer Strategy”
