@@ -109,58 +109,54 @@ def get_rentcast_market_data(address, city, state, zip_code, property_data):
     return market_data
 
 def search_comparable_properties(city, state, beds, baths, sqft):
-    """Search for comparable properties using ZIP code areas in Charlotte"""
+    """Search for comparable properties with optimized performance"""
     headers = {
         'X-Api-Key': RENTCAST_API_KEY,
         'Content-Type': 'application/json'
     }
     
-    # Charlotte ZIP codes for broader property search
-    charlotte_zips = ["28202", "28204", "28205", "28206", "28207", "28208", "28209", "28210", 
-                     "28211", "28212", "28213", "28214", "28215", "28216", "28217", "28226"]
-    
     comparable_properties = []
     
-    # Search specific addresses in different ZIP codes
-    for zip_code in charlotte_zips[:4]:  # Search 4 ZIP codes for speed
-        for street_num in [100, 200, 300, 500, 700]:
-            try:
-                address = f"{street_num} Main St, {city}, {state} {zip_code}"
-                
-                search_url = f"{RENTCAST_BASE_URL}/properties"
-                search_params = {'address': address}
-                
-                response = requests.get(search_url, headers=headers, params=search_params, timeout=3)
-                
-                if response.status_code == 200:
-                    properties_data = response.json()
-                    
-                    if isinstance(properties_data, list) and properties_data:
-                        for prop in properties_data:
-                            # Ensure property has complete sale data
-                            if (prop.get('lastSalePrice') and prop.get('lastSaleDate') and
-                                prop.get('bedrooms') and prop.get('bathrooms') and prop.get('squareFootage')):
-                                
-                                prop_beds = prop.get('bedrooms', 0)
-                                prop_baths = prop.get('bathrooms', 0) 
-                                prop_sqft = prop.get('squareFootage', 0)
-                                
-                                # Professional comparable criteria (within 25% for beds/baths, 30% for sqft)
-                                bed_match = abs(prop_beds - beds) <= max(1, beds * 0.25)
-                                bath_match = abs(prop_baths - baths) <= max(0.5, baths * 0.25)
-                                sqft_match = prop_sqft > 0 and abs(prop_sqft - sqft) <= (sqft * 0.3)
-                                
-                                if bed_match and bath_match and sqft_match:
-                                    comparable_properties.append(prop)
-                                    logging.info(f"Found comp: {prop.get('formattedAddress')} - ${prop.get('lastSalePrice'):,}")
-                                    
-                                    if len(comparable_properties) >= 6:
-                                        return comparable_properties
-                
-            except Exception as e:
-                continue
+    # Quick search using just a few strategic addresses
+    test_addresses = [
+        f"100 Main St, {city}, {state} 28202",
+        f"200 Park Ave, {city}, {state} 28204", 
+        f"300 First St, {city}, {state} 28205"
+    ]
     
-    logging.info(f"Found {len(comparable_properties)} comparable properties in Charlotte")
+    for address in test_addresses:
+        try:
+            search_url = f"{RENTCAST_BASE_URL}/properties"
+            search_params = {'address': address}
+            
+            response = requests.get(search_url, headers=headers, params=search_params, timeout=2)
+            
+            if response.status_code == 200:
+                properties_data = response.json()
+                
+                if isinstance(properties_data, list) and properties_data:
+                    for prop in properties_data:
+                        if (prop.get('lastSalePrice') and prop.get('lastSaleDate') and
+                            prop.get('bedrooms') and prop.get('bathrooms') and prop.get('squareFootage')):
+                            
+                            prop_beds = prop.get('bedrooms', 0)
+                            prop_baths = prop.get('bathrooms', 0) 
+                            prop_sqft = prop.get('squareFootage', 0)
+                            
+                            # Reasonable comparable criteria
+                            if (abs(prop_beds - beds) <= 1 and 
+                                abs(prop_baths - baths) <= 1 and 
+                                prop_sqft > 0 and abs(prop_sqft - sqft) <= (sqft * 0.4)):
+                                
+                                comparable_properties.append(prop)
+                                if len(comparable_properties) >= 3:
+                                    return comparable_properties
+            
+        except Exception as e:
+            logging.debug(f"Search failed for {address}: {e}")
+            continue
+    
+    logging.info(f"Found {len(comparable_properties)} comparable properties")
     return comparable_properties
 
 # RapidAPI Integration Functions
@@ -836,14 +832,16 @@ def generate_presentation():
         # Get market data and rent estimates from all sources
         market_data = compile_market_data(comprehensive_data, city, state)
         
-        # Search for comparable properties
-        comparable_properties = search_comparable_properties(city, state, beds, baths, sqft)
-        
-        # Process comparable sales with strict underwriting rules
-        if comparable_properties:
-            comparables = process_rentcast_comparables(comparable_properties, beds, baths, sqft)
-        else:
-            logging.warning("No comparable sales data available from Rentcast API")
+        # Search for comparable properties with timeout protection
+        try:
+            comparable_properties = search_comparable_properties(city, state, beds, baths, sqft)
+            if comparable_properties:
+                comparables = process_rentcast_comparables(comparable_properties, beds, baths, sqft)
+            else:
+                logging.warning("No comparable sales data available from Rentcast API")
+                comparables = []
+        except Exception as e:
+            logging.warning(f"Comparable search failed: {e}")
             comparables = []
         
         # Calculate financials based on real data
