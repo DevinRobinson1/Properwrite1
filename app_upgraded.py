@@ -6,7 +6,7 @@ import os
 import logging
 from flask import Flask, render_template, request, jsonify, session
 from property_data_service import property_service
-from external_property_service import external_property_service
+from enhanced_property_service import enhanced_property_service
 from wholesale_calculator import calculate_wholesale_offers
 from installment_calculator import calculate_installment_offers
 from subject_to_calculator import calculate_subject_to_offer
@@ -59,7 +59,7 @@ def analyze_property():
         
         # Get comprehensive property data from external sources first
         try:
-            external_data = external_property_service.get_comprehensive_property_data(address, city, state, zip_code)
+            external_data = enhanced_property_service.get_comprehensive_property_data(address, city, state, zip_code)
             
             if external_data and external_data.get('data_sources'):
                 # Use external data as primary source
@@ -74,9 +74,12 @@ def analyze_property():
                     'zillow_estimate': external_data.get('zillow_estimate'),
                     'redfin_estimate': external_data.get('redfin_estimate'),
                     'realtor_estimate': external_data.get('realtor_estimate'),
-                    'rent_estimate': external_data.get('rent_estimate'),
+                    'rent_estimate': external_data.get('rent_estimate') or property_data.get('rent_estimate'),
                     'data_sources': external_data.get('data_sources', []),
-                    'data_errors': external_data.get('errors', [])
+                    'data_errors': external_data.get('data_errors', []),
+                    'last_updated': external_data.get('last_updated'),
+                    'average_estimate': external_data.get('average_estimate'),
+                    'estimate_range': external_data.get('estimate_range')
                 })
                 logging.info(f"Retrieved data from {len(external_data.get('data_sources', []))} external sources")
             else:

@@ -63,27 +63,60 @@ class ExternalPropertyService:
     
     def _get_zillow_data(self, address: str) -> Dict:
         """
-        Get property data from Zillow using web scraping and API endpoints
+        Get property data from Zillow using web scraping
         """
         try:
-            # Try Zillow search first
-            search_url = "https://www.zillow.com/webservice/PropertySuggestionService.htm"
-            params = {
-                'userQuery': address,
-                'maxResults': 5
-            }
+            # Search for property on Zillow
+            search_url = "https://www.zillow.com/homes/{}_rb/".format(quote(address))
             
-            response = self.session.get(search_url, params=params, timeout=10)
+            response = self.session.get(search_url, timeout=15)
             
             if response.status_code == 200:
-                # Parse Zillow response
-                data = self._parse_zillow_response(response.text, address)
-                if data:
-                    return data
-                    
-            # Fallback: Try direct page scraping
-            fallback_data = self._scrape_zillow_page(address)
-            return fallback_data if fallback_data else {}
+                soup = BeautifulSoup(response.content, 'html.parser')
+                
+                # Extract property data from the page
+                property_data = {}
+                
+                # Look for Zestimate in text content
+                zestimate_elements = soup.find_all(text=re.compile(r'\$[\d,]+'))
+                if zestimate_elements:
+                    for element in zestimate_elements:
+                        element_str = str(element)
+                        price_match = re.search(r'\$([0-9,]+)', element_str)
+                        if price_match:
+                            price_str = price_match.group(1).replace(',', '')
+                            if len(price_str) >= 5:  # Reasonable property price
+                                property_data['estimate'] = int(price_str)
+                                break
+                
+                # Look for property details in text
+                beds_element = soup.find(text=re.compile(r'\d+ bed'))
+                if beds_element:
+                    beds_match = re.search(r'(\d+) bed', str(beds_element))
+                    if beds_match:
+                        property_data['bedrooms'] = int(beds_match.group(1))
+                
+                baths_element = soup.find(text=re.compile(r'\d+\.?\d* bath'))
+                if baths_element:
+                    baths_match = re.search(r'(\d+\.?\d*) bath', str(baths_element))
+                    if baths_match:
+                        property_data['bathrooms'] = float(baths_match.group(1))
+                
+                sqft_element = soup.find(text=re.compile(r'[\d,]+ sqft'))
+                if sqft_element:
+                    sqft_match = re.search(r'([\d,]+) sqft', str(sqft_element))
+                    if sqft_match:
+                        property_data['square_feet'] = int(sqft_match.group(1).replace(',', ''))
+                
+                # Look for property image
+                img_elements = soup.find_all('img', {'alt': re.compile(r'property|home|house', re.I)})
+                if img_elements and hasattr(img_elements[0], 'get'):
+                    property_data['image_url'] = img_elements[0].get('src')
+                
+                logging.info(f"Zillow data extracted: {property_data}")
+                return property_data
+            
+            return {}
             
         except Exception as e:
             logging.error(f"Error fetching Zillow data: {e}")
@@ -91,29 +124,114 @@ class ExternalPropertyService:
     
     def _get_redfin_data(self, address: str) -> Dict:
         """
-        Get property data from Redfin API
+        Get property data from Redfin using their search API
         """
         try:
-            # Redfin search API
+            # Try Redfin's search endpoint
             search_url = "https://www.redfin.com/stingray/api/gis"
             params = {
                 'al': 1,
+                'market': 'charlotte',  # Default market
                 'query': address,
                 'v': 8
             }
             
-            response = self.session.get(search_url, params=params, timeout=10)
+            # Add Redfin-specific headers
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Referer': 'https://www.redfin.com/',
+                'Accept': 'application/json'
+            }
+            
+            response = self.session.get(search_url, params=params, headers=headers, timeout=10)
             
             if response.status_code == 200:
-                data = response.json()
-                parsed_data = self._parse_redfin_data(data)
-                return parsed_data if parsed_data else {}
+                try:
+                    data = response.json()
+                    if data.get('payload') and data['payload'].get('homes'):
+                        home_data = data['payload']['homes'][0]
+                        
+                        property_data = {}
+                        
+                        # Extract basic details
+                        if 'beds' in home_data:
+                            property_data['bedrooms'] = home_data['beds']
+                        if 'baths' in home_data:
+                            property_data['bathrooms'] = home_data['baths']
+                        if 'sqFt' in home_data and home_data['sqFt']:
+                            property_data['square_feet'] = home_data['sqFt'].get('value')
+                        if 'yearBuilt' in home_data and home_data['yearBuilt']:
+                            property_data['year_built'] = home_data['yearBuilt'].get('value')
+                        if 'lotSize' in home_data and home_data['lotSize']:
+                            property_data['lot_size_sqft'] = home_data['lotSize'].get('value')
+                        
+                        # Extract price estimate
+                        if 'price' in home_data and home_data['price']:
+                            property_data['estimate'] = home_data['price'].get('value')
+                        
+                        logging.info(f"Redfin data extracted: {property_data}")
+                        return property_data
+                        
+                except json.JSONDecodeError:
+                    logging.error("Failed to parse Redfin JSON response")
             
-            return {}
+            # Fallback: Try scraping Redfin search page
+            return self._scrape_redfin_page(address)
                 
         except Exception as e:
             logging.error(f"Error fetching Redfin data: {e}")
             return {'error': str(e)}
+    
+    def _scrape_redfin_page(self, address: str) -> Dict:
+        """Scrape Redfin search page as fallback"""
+        try:
+            search_url = f"https://www.redfin.com/city/30327/NC/Charlotte/filter/include=sold-1yr"
+            
+            # Add search query
+            params = {'q': address}
+            
+            response = self.session.get(search_url, params=params, timeout=15)
+            
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.content, 'html.parser')
+                
+                property_data = {}
+                
+                # Look for price in search results
+                price_elements = soup.find_all('span', class_=re.compile(r'price|amount', re.I))
+                for element in price_elements:
+                    price_text = element.get_text()
+                    price_match = re.search(r'\$([0-9,]+)', price_text)
+                    if price_match:
+                        price_str = price_match.group(1).replace(',', '')
+                        if len(price_str) >= 5:  # Reasonable property price
+                            property_data['estimate'] = int(price_str)
+                            break
+                
+                # Look for property specs
+                spec_elements = soup.find_all('div', class_=re.compile(r'stats|details|spec', re.I))
+                for element in spec_elements:
+                    text = element.get_text()
+                    
+                    beds_match = re.search(r'(\d+)\s*bed', text, re.I)
+                    if beds_match:
+                        property_data['bedrooms'] = int(beds_match.group(1))
+                    
+                    baths_match = re.search(r'(\d+\.?\d*)\s*bath', text, re.I)
+                    if baths_match:
+                        property_data['bathrooms'] = float(baths_match.group(1))
+                    
+                    sqft_match = re.search(r'([\d,]+)\s*sq\.?\s*ft', text, re.I)
+                    if sqft_match:
+                        property_data['square_feet'] = int(sqft_match.group(1).replace(',', ''))
+                
+                logging.info(f"Redfin scrape data: {property_data}")
+                return property_data
+                
+        except Exception as e:
+            logging.error(f"Error scraping Redfin page: {e}")
+            
+        return {}
     
     def _get_realtor_data(self, address: str) -> Dict:
         """

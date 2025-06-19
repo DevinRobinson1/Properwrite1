@@ -129,31 +129,128 @@
                     </div>
                 </div>
 
+                <!-- Multi-Platform Property Estimates -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Property Valuations</h3>
+                        <div class="flex items-center space-x-2 text-xs text-gray-500">
+                            <div class="w-2 h-2 bg-green-400 rounded-full" id="data-status-indicator"></div>
+                            <span id="data-status-text">Pulling data...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Platform Estimate Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <!-- Zillow Estimate Card -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 transition-all duration-300 hover:shadow-md">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background-color: #0074e4;">
+                                    Z
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-gray-800">Zillow</div>
+                                    <div class="text-xs text-gray-500">Zestimate</div>
+                                </div>
+                            </div>
+                            <div class="zillow-estimate-content">
+                                <div id="zillow-loading" class="text-sm text-gray-400">Loading...</div>
+                                <div id="zillow-estimate" class="hidden">
+                                    <input type="number" id="zillow-value" class="w-full text-2xl font-bold border-none bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 rounded p-1" style="color: #0074e4;" placeholder="$0">
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        <span id="zillow-updated">Updated: --</span>
+                                    </div>
+                                </div>
+                                <div id="zillow-error" class="hidden text-sm text-red-500">Estimate not found</div>
+                            </div>
+                        </div>
+
+                        <!-- Redfin Estimate Card -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 transition-all duration-300 hover:shadow-md">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background-color: #A02040;">
+                                    R
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-gray-800">Redfin</div>
+                                    <div class="text-xs text-gray-500">Estimate</div>
+                                </div>
+                            </div>
+                            <div class="redfin-estimate-content">
+                                <div id="redfin-loading" class="text-sm text-gray-400">Loading...</div>
+                                <div id="redfin-estimate" class="hidden">
+                                    <input type="number" id="redfin-value" class="w-full text-2xl font-bold border-none bg-transparent focus:outline-none focus:ring-2 focus:ring-red-500 rounded p-1" style="color: #A02040;" placeholder="$0">
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        <span id="redfin-updated">Updated: --</span>
+                                    </div>
+                                </div>
+                                <div id="redfin-error" class="hidden text-sm text-red-500">Estimate not found</div>
+                            </div>
+                        </div>
+
+                        <!-- Realtor.com Estimate Card -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 transition-all duration-300 hover:shadow-md">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background-color: #E4002B;">
+                                    R
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-gray-800">Realtor.com</div>
+                                    <div class="text-xs text-gray-500">Estimate</div>
+                                </div>
+                            </div>
+                            <div class="realtor-estimate-content">
+                                <div id="realtor-loading" class="text-sm text-gray-400">Loading...</div>
+                                <div id="realtor-estimate" class="hidden">
+                                    <input type="number" id="realtor-value" class="w-full text-2xl font-bold border-none bg-transparent focus:outline-none focus:ring-2 focus:ring-red-500 rounded p-1" style="color: #E4002B;" placeholder="$0">
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        <span id="realtor-updated">Updated: --</span>
+                                    </div>
+                                </div>
+                                <div id="realtor-error" class="hidden text-sm text-red-500">Estimate not found</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Average Estimate Display -->
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-medium text-gray-700">Estimated Market Value</div>
+                                <div class="text-xs text-gray-500">Average of available estimates</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl font-bold text-blue-600" id="average-estimate">$--</div>
+                                <div class="text-xs text-gray-500" id="estimate-count">-- sources</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Editable Property Details -->
                 <div class="grid grid-cols-2 md:grid-cols-6 gap-6 p-6 bg-gray-50 rounded-lg">
                     <div class="text-center">
                         <label class="block text-sm font-medium text-gray-600 mb-2">Bedrooms</label>
-                        <input type="number" id="bedrooms" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="3">
+                        <input type="number" id="bedrooms" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="3" onchange="updateAllTabCalculations()">
                     </div>
                     <div class="text-center">
                         <label class="block text-sm font-medium text-gray-600 mb-2">Bathrooms</label>
-                        <input type="number" step="0.5" id="bathrooms" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="2">
+                        <input type="number" step="0.5" id="bathrooms" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="2" onchange="updateAllTabCalculations()">
                     </div>
                     <div class="text-center">
                         <label class="block text-sm font-medium text-gray-600 mb-2">Square Feet</label>
-                        <input type="number" id="square_feet" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="1200">
+                        <input type="number" id="square_feet" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="1200" onchange="updateAllTabCalculations()">
                     </div>
                     <div class="text-center">
                         <label class="block text-sm font-medium text-gray-600 mb-2">ARV ($)</label>
-                        <input type="number" id="arv" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="200000">
+                        <input type="number" id="arv" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="200000" onchange="updateAllTabCalculations()">
                     </div>
                     <div class="text-center">
                         <label class="block text-sm font-medium text-gray-600 mb-2">Repairs ($)</label>
-                        <input type="number" id="repairs" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="30000">
+                        <input type="number" id="repairs" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="30000" onchange="updateAllTabCalculations()">
                     </div>
                     <div class="text-center">
                         <label class="block text-sm font-medium text-gray-600 mb-2">Monthly Rent ($)</label>
-                        <input type="number" id="rent" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="2000">
+                        <input type="number" id="rent" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="2000" onchange="updateAllTabCalculations()">
                     </div>
                 </div>
             </div>
