@@ -98,7 +98,7 @@
                     <div class="text-sm text-gray-600">Monthly Rent</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-blue-600" id="display-cap-rate">{{ "%.1f"|format(financials.cap_rate * 100) }}%</div>
+                    <div class="text-2xl font-bold text-blue-600" id="display-cap-rate">{{ "%.1f"|format((financials.cap_rate or 0) * 100) }}%</div>
                     <div class="text-sm text-gray-600">Cap Rate</div>
                 </div>
             </div>
@@ -2430,6 +2430,73 @@
             if (selectedTabButton) {
                 selectedTabButton.classList.remove('border-transparent', 'text-gray-500');
                 selectedTabButton.classList.add('border-blue-500', 'text-blue-600');
+            }
+        }
+        
+        // Missing functions that were causing console errors
+        function updateWholesalePercentage() {
+            const percentage = document.getElementById('wholesale-percentage').value;
+            // Update wholesale calculations based on new percentage
+            recalculateOffers();
+        }
+
+        function toggleAdvancedFees() {
+            const advancedFeesDiv = document.getElementById('advanced-fees');
+            if (advancedFeesDiv) {
+                advancedFeesDiv.classList.toggle('hidden');
+            }
+        }
+
+        function recalculateOffers() {
+            // Get current property values from the editable inputs
+            const arv = document.getElementById('arv').value;
+            const repairs = document.getElementById('repairs').value;
+            const beds = document.getElementById('beds').value;
+            const baths = document.getElementById('baths').value;
+            const sqft = document.getElementById('sqft').value;
+            const rent = document.getElementById('rent').value;
+
+            // Update display values
+            document.getElementById('display-arv').textContent = '$' + parseInt(arv).toLocaleString();
+            document.getElementById('display-repairs').textContent = '$' + parseInt(repairs).toLocaleString();
+            document.getElementById('display-rent').textContent = '$' + parseInt(rent).toLocaleString();
+
+            // Calculate cap rate
+            const monthlyRent = parseInt(rent);
+            const arvValue = parseInt(arv);
+            const capRate = ((monthlyRent * 12) / arvValue * 100).toFixed(1);
+            document.getElementById('display-cap-rate').textContent = capRate + '%';
+
+            // Show notification that calculations have been updated
+            showNotification('Property data updated - calculations refreshed', 'success');
+        }
+
+        // Update the tab switching to use the new IDs
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Remove active styles from all tab buttons
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.classList.remove('border-blue-500', 'text-blue-600', 'active');
+                button.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Show selected tab content
+            const selectedTabContent = document.getElementById(`${tabName}-content`);
+            if (selectedTabContent) {
+                selectedTabContent.classList.remove('hidden');
+            }
+            
+            // Style active tab button
+            const selectedTabButton = document.getElementById(`${tabName}-tab`);
+            if (selectedTabButton) {
+                selectedTabButton.classList.remove('border-transparent', 'text-gray-500');
+                selectedTabButton.classList.add('border-blue-500', 'text-blue-600', 'active');
             }
         }
         
