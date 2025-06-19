@@ -908,95 +908,7 @@
 
 
 
-            <!-- Strategy Comparison Tabs -->
-            <div class="mb-8">
-                <div class="border-b border-gray-200">
-                    <nav class="-mb-px flex space-x-8">
-                        <button onclick="showStrategy('lease-option')" 
-                                class="strategy-tab active-tab border-b-2 border-blue-500 py-2 px-1 text-sm font-medium text-blue-600">
-                            Lease Option Exit
-                        </button>
-                        <button onclick="showStrategy('long-term')" 
-                                class="strategy-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                            Long-Term Hold
-                        </button>
-                        <button onclick="showStrategy('refinance')" 
-                                class="strategy-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                            6-12 Month Refinance
-                        </button>
-                    </nav>
-                </div>
 
-                <!-- Lease Option Strategy -->
-                <div id="lease-option-strategy" class="strategy-content mt-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
-                            <h4 class="text-lg font-semibold text-gray-800 mb-4">
-                                <i class="fas fa-key text-blue-500 mr-2"></i>Lease Option Performance
-                            </h4>
-                            <div class="space-y-3">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Monthly Rent Income:</span>
-                                    <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.lease_option_income|int) }}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Monthly Cash Flow:</span>
-                                    <span class="font-semibold {{ 'text-green-600' if subject_to_analysis.cash_flow_lease_option >= 0 else 'text-red-600' }}">
-                                        ${{ "{:,}".format(subject_to_analysis.cash_flow_lease_option|int) }}
-                                    </span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Option Fee Upfront:</span>
-                                    <span class="font-semibold text-green-600">${{ "{:,}".format(subject_to_analysis.lease_option_fee_upfront|int) }}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Exit Sale Price:</span>
-                                    <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.lease_option_sale_price|int) }}</span>
-                                </div>
-                                <hr class="my-3">
-                                <div class="flex justify-between text-lg">
-                                    <span class="font-semibold">Total 5-Year Profit:</span>
-                                    <span class="font-bold text-blue-600">${{ "{:,}".format(subject_to_analysis.total_profit_lease_option|int) }}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">ROI:</span>
-                                    <span class="font-semibold text-blue-600">{{ "%.1f"|format(subject_to_analysis.roi_lease_option) }}%</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                            <h4 class="text-lg font-semibold text-gray-800 mb-4">
-                                <i class="fas fa-chart-line text-green-500 mr-2"></i>5-Year Breakdown
-                            </h4>
-                            <div class="space-y-3">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Total Cash Flow (60 months):</span>
-                                    <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.total_cash_flow_lease_option|int) }}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Principal Paydown:</span>
-                                    <span class="font-semibold text-green-600">${{ "{:,}".format(subject_to_analysis.principal_paydown_5_years|int) }}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Loan Balance After 5 Years:</span>
-                                    <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.balance_after_5_years|int) }}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Exit Profit:</span>
-                                    <span class="font-semibold text-blue-600">${{ "{:,}".format(subject_to_analysis.lease_option_profit|int) }}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Option Fee Income:</span>
-                                    <span class="font-semibold text-green-600">${{ "{:,}".format(subject_to_analysis.lease_option_fee_upfront|int) }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Long-Term Hold Strategy -->
-                <div id="long-term-strategy" class="strategy-content mt-6 hidden">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="bg-green-50 rounded-lg p-6 border border-green-200">
                             <h4 class="text-lg font-semibold text-gray-800 mb-4">
@@ -1005,30 +917,23 @@
                             <div class="space-y-3">
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Monthly Rent Income:</span>
-                                    <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.rent_income|int) }}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Monthly Cash Flow:</span>
-                                    <span class="font-semibold {{ 'text-green-600' if subject_to_analysis.cash_flow_rental >= 0 else 'text-red-600' }}">
-                                        ${{ "{:,}".format(subject_to_analysis.cash_flow_rental|int) }}
                                     </span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Projected Appreciation:</span>
-                                    <span class="font-semibold text-green-600">${{ "{:,}".format(subject_to_analysis.appreciation_5_years|int) }}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Hold Exit Value:</span>
-                                    <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.hold_exit_value|int) }}</span>
                                 </div>
                                 <hr class="my-3">
                                 <div class="flex justify-between text-lg">
                                     <span class="font-semibold">Total 5-Year Profit:</span>
-                                    <span class="font-bold text-green-600">${{ "{:,}".format(subject_to_analysis.total_profit_hold|int) }}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">ROI:</span>
-                                    <span class="font-semibold text-green-600">{{ "%.1f"|format(subject_to_analysis.roi_hold) }}%</span>
                                 </div>
                             </div>
                         </div>
@@ -1103,24 +1008,19 @@
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Acquisition Costs:</span>
-                            <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.acquisition_costs|int) }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Closing Costs:</span>
-                            <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.closing_costs|int) }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Rehab:</span>
-                            <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.rehab|int) }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Wholesale Fee:</span>
-                            <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.wholesale_fee|int) }}</span>
                         </div>
                         <hr class="my-2">
                         <div class="flex justify-between text-lg">
                             <span class="font-semibold">Total Entry Fees:</span>
-                            <span class="font-bold text-blue-600">${{ "{:,}".format(subject_to_analysis.entry_fees_total|int) }}</span>
                         </div>
                     </div>
                 </div>
@@ -1132,28 +1032,22 @@
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Principal Balance:</span>
-                            <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.principal_balance|int) }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Interest Rate:</span>
-                            <span class="font-semibold">{{ "%.1f"|format(subject_to_analysis.annual_interest_rate) }}%</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Loan Term:</span>
-                            <span class="font-semibold">{{ subject_to_analysis.loan_term_months }} months</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Monthly P&I:</span>
-                            <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.monthly_pi|int) }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Monthly Escrow:</span>
-                            <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.monthly_escrow|int) }}</span>
                         </div>
                         <hr class="my-2">
                         <div class="flex justify-between text-lg">
                             <span class="font-semibold">Monthly PITI:</span>
-                            <span class="font-bold text-green-600">${{ "{:,}".format(subject_to_analysis.monthly_piti|int) }}</span>
                         </div>
                     </div>
                 </div>
@@ -1182,27 +1076,22 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">ARV</label>
-                        <input type="number" id="subject-to-arv" value="{{ subject_to_analysis.arv|int }}" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Principal Balance</label>
-                        <input type="number" id="subject-to-balance" value="{{ subject_to_analysis.principal_balance|int }}" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Interest Rate (%)</label>
-                        <input type="number" step="0.1" id="subject-to-rate" value="{{ subject_to_analysis.annual_interest_rate }}" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Rent Income</label>
-                        <input type="number" id="subject-to-rent" value="{{ subject_to_analysis.rent_income|int }}" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cash to Seller</label>
-                        <input type="number" id="subject-to-cash" value="{{ subject_to_analysis.cash_to_seller|int }}" 
                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
                     </div>
                     <div class="flex items-end">
@@ -1717,12 +1606,8 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <div class="text-3xl font-bold text-yellow-600 mb-2">
-                                    ${{ "{:,}".format(subject_to_analysis.cash_to_seller|int) }}
                                 </div>
                                 <div class="space-y-2 text-sm text-gray-600">
-                                    <div>Monthly Payment: <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.monthly_piti|int) }}</span></div>
-                                    <div>Equity Position: <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.immediate_equity|int) }}</span></div>
-                                    <div>Exit Strategy: <span class="font-semibold">{{ subject_to_analysis.exit_strategies[0].strategy if subject_to_analysis.exit_strategies else 'Rental/Refinance' }}</span></div>
                                 </div>
                             </div>
                             <div class="bg-white p-4 rounded border">
@@ -1730,19 +1615,15 @@
                                 <div class="space-y-1 text-xs text-gray-600">
                                     <div class="flex justify-between">
                                         <span>Cash to Seller:</span>
-                                        <span>${{ "{:,}".format(subject_to_analysis.cash_to_seller|int) }}</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span>Existing Loan:</span>
-                                        <span>${{ "{:,}".format(subject_to_analysis.principal_balance|int) }}</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span>Total Investment:</span>
-                                        <span>${{ "{:,}".format(subject_to_analysis.total_investment|int) }}</span>
                                     </div>
                                     <div class="flex justify-between border-t pt-1 font-semibold">
                                         <span>Immediate Equity:</span>
-                                        <span>${{ "{:,}".format(subject_to_analysis.immediate_equity|int) }}</span>
                                     </div>
                                 </div>
                             </div>
