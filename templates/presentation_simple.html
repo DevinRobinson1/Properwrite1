@@ -1625,149 +1625,259 @@
 
         <!-- Offer Strategy Calculator -->
         {% if offer_analysis %}
-        <div class="bg-white rounded-lg shadow-lg p-8 mb-8 no-print">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                <i class="fas fa-calculator text-blue-500 mr-2"></i>Offer Strategy Calculator
-                <span class="text-sm font-normal text-gray-500 ml-2">(Internal Team Use Only)</span>
-            </h2>
-            
-            <!-- Strategy Recommendations -->
-            {% if recommendations %}
-            <div class="mb-6">
-                <h3 class="text-lg font-semibold text-gray-700 mb-3">Recommended Strategies</h3>
-                <div class="flex flex-wrap gap-3">
-                    {% for rec in recommendations %}
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
-                        <span class="text-2xl mr-2">{{ rec.icon }}</span>
-                        <span class="font-semibold text-blue-800">{{ rec.strategy }}</span>
-                        <span class="text-sm text-blue-600 ml-2">{{ rec.status }}</span>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Offer Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white rounded-lg shadow-lg mb-8 no-print">
+            <!-- Sticky Property Header -->
+            <div class="sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-calculator text-blue-500 mr-2"></i>Offer Strategy Calculator
+                    <span class="text-sm font-normal text-gray-500 ml-2">(Internal Team Use Only)</span>
+                </h2>
                 
-                <!-- Cash Offer -->
-                {% if offer_analysis.offers.cash %}
-                {% set cash = offer_analysis.offers.cash %}
-                <div class="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-6">
-                    <div class="flex items-center mb-4">
-                        <span class="text-3xl mr-3">💰</span>
+                <!-- Property Key Details -->
+                <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 text-sm">
                         <div>
-                            <h4 class="font-bold text-gray-800">Cash Offer</h4>
-                            <p class="text-sm text-gray-600">MAO Formula</p>
+                            <span class="text-gray-600">Address:</span>
+                            <div class="font-semibold">{{ address }}, {{ city }} {{ state }} {{ zip }}</div>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">ARV:</span>
+                            <div class="font-semibold text-green-600">${{ "{:,}".format(arv|int) }}</div>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Beds/Baths:</span>
+                            <div class="font-semibold">{{ beds }} Bed / {{ baths }} Bath</div>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">SqFt:</span>
+                            <div class="font-semibold">{{ "{:,}".format(sqft) }}</div>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Repairs:</span>
+                            <div class="font-semibold text-red-600">${{ "{:,}".format(estimated_repairs|int) }}</div>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Rent Estimate:</span>
+                            <div class="font-semibold text-blue-600">${{ "{:,}".format(rent_estimate|int) }}</div>
                         </div>
                     </div>
-                    <div class="text-2xl font-bold text-green-600 mb-2">
-                        ${{ "{:,}".format(cash.offer_amount|int) }}
-                    </div>
-                    <div class="text-sm text-gray-600 space-y-1">
-                        <div>Expected Profit: ${{ "{:,}".format(cash.expected_profit|int) }}</div>
-                        <div>Cash Strategy: {{ cash.strategy }}</div>
-                    </div>
-                    <button onclick="toggleBreakdown('cash')" class="mt-3 text-blue-600 text-sm hover:underline">
-                        View Breakdown
-                    </button>
-                    <div id="cash-breakdown" class="hidden mt-3 text-xs text-gray-600 bg-white p-3 rounded border">
-                        <div>ARV: ${{ "{:,}".format(cash.arv|int) }}</div>
-                        <div>Repair Cost: ${{ "{:,}".format(cash.repair_cost|int) }}</div>
-                        <div>Closing Costs: ${{ "{:,}".format(cash.closing_costs|int) }}</div>
-                        <div>Strategy: {{ cash.strategy }}</div>
-                    </div>
                 </div>
-                {% endif %}
-
-                <!-- Seller Finance -->
-                {% if offer_analysis.offers.seller_finance %}
-                {% set sf = offer_analysis.offers.seller_finance %}
-                <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6">
-                    <div class="flex items-center mb-4">
-                        <span class="text-3xl mr-3">💸</span>
-                        <div>
-                            <h4 class="font-bold text-gray-800">Seller Finance</h4>
-                            <p class="text-sm text-gray-600">Owner Financing</p>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-blue-600 mb-2">
-                        ${{ "{:,}".format(sf.offer_amount|int) }}
-                    </div>
-                    <div class="text-sm text-gray-600 space-y-1">
-                        <div>Down: ${{ "{:,}".format(sf.down_payment|int) }}</div>
-                        <div>Payment: ${{ "{:,}".format(sf.monthly_payment|int) }}/mo</div>
-                        <div>Term: {{ sf.term_years|int }} years @ {{ "%.1f"|format(sf.interest_rate) }}%</div>
-                    </div>
-                    <button onclick="toggleBreakdown('sf')" class="mt-3 text-blue-600 text-sm hover:underline">
-                        View Breakdown
-                    </button>
-                    <div id="sf-breakdown" class="hidden mt-3 text-xs text-gray-600 bg-white p-3 rounded border">
-                        <div>Monthly Cash Flow: ${{ "{:,}".format(sf.monthly_cash_flow|int) }}</div>
-                        <div>Total Interest: ${{ "{:,}".format(sf.total_interest|int) }}</div>
-                        <div>Total Payments: ${{ "{:,}".format(sf.total_payments|int) }}</div>
-                    </div>
+                
+                <!-- Tab Navigation -->
+                <div class="border-b border-gray-200">
+                    <nav class="flex space-x-8" aria-label="Tabs">
+                        <button onclick="showTab('wholesale')" id="tab-wholesale" class="tab-button border-b-2 border-blue-500 text-blue-600 py-2 px-1 font-medium text-sm">
+                            Wholesale Offer
+                        </button>
+                        <button onclick="showTab('installment')" id="tab-installment" class="tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 py-2 px-1 font-medium text-sm">
+                            Installment Offer
+                        </button>
+                        <button onclick="showTab('subject-to')" id="tab-subject-to" class="tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 py-2 px-1 font-medium text-sm">
+                            Subject-To Offer
+                        </button>
+                        <button onclick="showTab('seller-finance')" id="tab-seller-finance" class="tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 py-2 px-1 font-medium text-sm">
+                            Seller Finance Offer
+                        </button>
+                    </nav>
                 </div>
-                {% endif %}
-
-                <!-- Novation -->
-                {% if offer_analysis.offers.novation %}
-                {% set nov = offer_analysis.offers.novation %}
-                <div class="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-6">
-                    <div class="flex items-center mb-4">
-                        <span class="text-3xl mr-3">🧾</span>
-                        <div>
-                            <h4 class="font-bold text-gray-800">Novation</h4>
-                            <p class="text-sm text-gray-600">Loan Takeover</p>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-purple-600 mb-2">
-                        ${{ "{:,}".format(nov.offer_amount|int) }}
-                    </div>
-                    <div class="text-sm text-gray-600 space-y-1">
-                        <div>Existing Loan: ${{ "{:,}".format(nov.existing_loan|int) }}</div>
-                        <div>Equity: ${{ "{:,}".format(nov.equity_position|int) }}</div>
-                    </div>
-                    <button onclick="toggleBreakdown('nov')" class="mt-3 text-blue-600 text-sm hover:underline">
-                        View Breakdown
-                    </button>
-                    <div id="nov-breakdown" class="hidden mt-3 text-xs text-gray-600 bg-white p-3 rounded border">
-                        <div>{{ nov.takeover_terms }}</div>
-                        <div>Strategy: {{ nov.strategy }}</div>
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Subject-To -->
-                {% if offer_analysis.offers.subject_to %}
-                {% set sub2 = offer_analysis.offers.subject_to %}
-                <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-lg p-6">
-                    <div class="flex items-center mb-4">
-                        <span class="text-3xl mr-3">🏦</span>
-                        <div>
-                            <h4 class="font-bold text-gray-800">Subject-To</h4>
-                            <p class="text-sm text-gray-600">Mortgage Takeover</p>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-yellow-600 mb-2">
-                        ${{ "{:,}".format(sub2.cash_required|int) }}
-                    </div>
-                    <div class="text-sm text-gray-600 space-y-1">
-                        <div>Loan: ${{ "{:,}".format(sub2.existing_loan|int) }}</div>
-                        <div>Cash Flow: ${{ "{:,}".format(sub2.monthly_cash_flow|int) }}/mo</div>
-                        <div>ROI: {{ "%.1f"|format(sub2.cash_on_cash_return) }}%</div>
-                    </div>
-                    <button onclick="toggleBreakdown('sub2')" class="mt-3 text-blue-600 text-sm hover:underline">
-                        View Breakdown
-                    </button>
-                    <div id="sub2-breakdown" class="hidden mt-3 text-xs text-gray-600 bg-white p-3 rounded border">
-                        <div>{{ sub2.takeover_terms }}</div>
-                        <div>Monthly Payment: ${{ "{:,}".format(sub2.monthly_payment|int) }}</div>
-                        <div>Rent Estimate: ${{ "{:,}".format(sub2.monthly_rent_estimate|int) }}</div>
-                    </div>
-                </div>
-                {% endif %}
             </div>
+            
+            <!-- Tab Content Container -->
+            <div class="p-6">
+                <!-- Wholesale Tab Content -->
+                <div id="tab-content-wholesale" class="tab-content">
+                    {% if offer_analysis.offers.cash %}
+                    {% set cash = offer_analysis.offers.cash %}
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-6 mb-6">
+                        <div class="flex items-center mb-4">
+                            <span class="text-3xl mr-3">💰</span>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Wholesale/Cash Offer</h3>
+                                <p class="text-sm text-gray-600">Maximum Allowable Offer (MAO) Formula</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <div class="text-3xl font-bold text-green-600 mb-2">
+                                    ${{ "{:,}".format(cash.offer_amount|int) }}
+                                </div>
+                                <div class="space-y-2 text-sm text-gray-600">
+                                    <div>Expected Profit: <span class="font-semibold">${{ "{:,}".format(cash.expected_profit|int) }}</span></div>
+                                    <div>Strategy: <span class="font-semibold">{{ cash.strategy }}</span></div>
+                                </div>
+                            </div>
+                            <div class="bg-white p-4 rounded border">
+                                <h4 class="font-semibold text-gray-700 mb-2">Breakdown</h4>
+                                <div class="space-y-1 text-xs text-gray-600">
+                                    <div class="flex justify-between">
+                                        <span>ARV:</span>
+                                        <span>${{ "{:,}".format(cash.arv|int) }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Repair Cost:</span>
+                                        <span>-${{ "{:,}".format(cash.repair_cost|int) }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Closing Costs:</span>
+                                        <span>-${{ "{:,}".format(cash.closing_costs|int) }}</span>
+                                    </div>
+                                    <div class="flex justify-between border-t pt-1 font-semibold">
+                                        <span>Max Offer:</span>
+                                        <span>${{ "{:,}".format(cash.offer_amount|int) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Installment Tab Content -->
+                <div id="tab-content-installment" class="tab-content hidden">
+                    {% if installment_analysis %}
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-6 mb-6">
+                        <div class="flex items-center mb-4">
+                            <span class="text-3xl mr-3">🏠</span>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Installment/Novation Offer</h3>
+                                <p class="text-sm text-gray-600">Seller Psychology: Price + Convenience</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <div class="text-3xl font-bold text-purple-600 mb-2">
+                                    ${{ "{:,}".format(installment_analysis.list_price|int) }}
+                                </div>
+                                <div class="space-y-2 text-sm text-gray-600">
+                                    <div>Net Profit: <span class="font-semibold">${{ "{:,}".format(installment_analysis.net_profit|int) }}</span></div>
+                                    <div>Strategy: <span class="font-semibold">MLS Novation</span></div>
+                                    <div>Timeline: <span class="font-semibold">3-6 months</span></div>
+                                </div>
+                            </div>
+                            <div class="bg-white p-4 rounded border">
+                                <h4 class="font-semibold text-gray-700 mb-2">Deal Structure</h4>
+                                <div class="space-y-1 text-xs text-gray-600">
+                                    <div class="flex justify-between">
+                                        <span>List Price:</span>
+                                        <span>${{ "{:,}".format(installment_analysis.list_price|int) }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Closing Costs:</span>
+                                        <span>-${{ "{:,}".format(installment_analysis.closing_costs|int) }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Out of Pocket:</span>
+                                        <span>-${{ "{:,}".format(installment_analysis.out_of_pocket_costs|int) }}</span>
+                                    </div>
+                                    <div class="flex justify-between border-t pt-1 font-semibold">
+                                        <span>Net Profit:</span>
+                                        <span>${{ "{:,}".format(installment_analysis.net_profit|int) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Subject-To Tab Content -->
+                <div id="tab-content-subject-to" class="tab-content hidden">
+                    {% if subject_to_analysis %}
+                    <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-lg p-6 mb-6">
+                        <div class="flex items-center mb-4">
+                            <span class="text-3xl mr-3">🔑</span>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Subject-To Creative Financing</h3>
+                                <p class="text-sm text-gray-600">Take Over Existing Mortgage</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <div class="text-3xl font-bold text-yellow-600 mb-2">
+                                    ${{ "{:,}".format(subject_to_analysis.cash_to_seller|int) }}
+                                </div>
+                                <div class="space-y-2 text-sm text-gray-600">
+                                    <div>Monthly Payment: <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.total_monthly_payment|int) }}</span></div>
+                                    <div>Equity Position: <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.immediate_equity|int) }}</span></div>
+                                    <div>Exit Strategy: <span class="font-semibold">{{ subject_to_analysis.exit_strategies[0].strategy if subject_to_analysis.exit_strategies else 'Rental/Refinance' }}</span></div>
+                                </div>
+                            </div>
+                            <div class="bg-white p-4 rounded border">
+                                <h4 class="font-semibold text-gray-700 mb-2">Deal Structure</h4>
+                                <div class="space-y-1 text-xs text-gray-600">
+                                    <div class="flex justify-between">
+                                        <span>Cash to Seller:</span>
+                                        <span>${{ "{:,}".format(subject_to_analysis.cash_to_seller|int) }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Existing Loan:</span>
+                                        <span>${{ "{:,}".format(subject_to_analysis.principal_balance|int) }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Total Investment:</span>
+                                        <span>${{ "{:,}".format(subject_to_analysis.total_investment|int) }}</span>
+                                    </div>
+                                    <div class="flex justify-between border-t pt-1 font-semibold">
+                                        <span>Immediate Equity:</span>
+                                        <span>${{ "{:,}".format(subject_to_analysis.immediate_equity|int) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Seller Finance Tab Content -->
+                <div id="tab-content-seller-finance" class="tab-content hidden">
+                    {% if seller_finance_analysis %}
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6 mb-6">
+                        <div class="flex items-center mb-4">
+                            <span class="text-3xl mr-3">💸</span>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Seller Finance Offer</h3>
+                                <p class="text-sm text-gray-600">Owner Financing Terms</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <div class="text-3xl font-bold text-blue-600 mb-2">
+                                    ${{ "{:,}".format(seller_finance_analysis.purchase_price|int) }}
+                                </div>
+                                <div class="space-y-2 text-sm text-gray-600">
+                                    <div>Down Payment: <span class="font-semibold">${{ "{:,}".format(seller_finance_analysis.down_payment|int) }}</span></div>
+                                    <div>Monthly Payment: <span class="font-semibold">${{ "{:,}".format(seller_finance_analysis.monthly_payment|int) }}</span></div>
+                                    <div>Term: <span class="font-semibold">{{ seller_finance_analysis.amortization_term_years|int }} years @ {{ "%.1f"|format(seller_finance_analysis.interest_rate) }}%</span></div>
+                                </div>
+                            </div>
+                            <div class="bg-white p-4 rounded border">
+                                <h4 class="font-semibold text-gray-700 mb-2">Cash Flow Analysis</h4>
+                                <div class="space-y-1 text-xs text-gray-600">
+                                    <div class="flex justify-between">
+                                        <span>Monthly Rent:</span>
+                                        <span>${{ "{:,}".format(seller_finance_analysis.monthly_rent|int) }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Loan Payment:</span>
+                                        <span>-${{ "{:,}".format(seller_finance_analysis.monthly_payment|int) }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Operating Costs:</span>
+                                        <span>-${{ "{:,}".format((seller_finance_analysis.monthly_taxes + seller_finance_analysis.monthly_insurance + seller_finance_analysis.monthly_maintenance)|int) }}</span>
+                                    </div>
+                                    <div class="flex justify-between border-t pt-1 font-semibold">
+                                        <span>Net Cash Flow:</span>
+                                        <span>${{ "{:,}".format(seller_finance_analysis.monthly_cash_flow|int) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
 
             <!-- Update Calculator -->
             <div class="mt-8 p-6 bg-gray-50 rounded-lg">
@@ -1955,6 +2065,40 @@
                 notification.remove();
             }, 3000);
         }
+
+        // Tab functionality
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Remove active styles from all tab buttons
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.classList.remove('border-blue-500', 'text-blue-600');
+                button.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Show selected tab content
+            const selectedTabContent = document.getElementById(`tab-content-${tabName}`);
+            if (selectedTabContent) {
+                selectedTabContent.classList.remove('hidden');
+            }
+            
+            // Style active tab button
+            const selectedTabButton = document.getElementById(`tab-${tabName}`);
+            if (selectedTabButton) {
+                selectedTabButton.classList.remove('border-transparent', 'text-gray-500');
+                selectedTabButton.classList.add('border-blue-500', 'text-blue-600');
+            }
+        }
+        
+        // Initialize with wholesale tab active
+        document.addEventListener('DOMContentLoaded', function() {
+            showTab('wholesale');
+        });
     </script>
 </body>
 </html>
