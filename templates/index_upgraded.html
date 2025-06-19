@@ -3,795 +3,467 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real Estate Investment Analyzer</title>
+    <title>Real Estate Investment Analyzer - Smart Data Pulling</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .loading-spinner { animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .tab-transition { transition: all 0.3s ease; }
-        .card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .tab-button.active {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            transform: translateY(-1px);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     
     <!-- Header -->
-    <div class="gradient-bg text-white py-8">
-        <div class="max-w-7xl mx-auto px-6">
-            <h1 class="text-4xl font-bold mb-2">Real Estate Investment Analyzer</h1>
-            <p class="text-blue-100">Smart property analysis with multi-strategy offer calculations</p>
+    <div class="gradient-bg text-white py-8 mb-8">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl font-bold text-center mb-2">
+                <i class="fas fa-chart-line mr-3"></i>Real Estate Investment Analyzer
+            </h1>
+            <p class="text-xl text-center opacity-90">Smart Property Analysis with External Data Integration</p>
         </div>
     </div>
 
-    <!-- Main Container -->
-    <div class="max-w-7xl mx-auto px-6 py-8">
+    <div class="container mx-auto px-4 max-w-7xl">
         
-        <!-- Address Input Section -->
-        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+        <!-- Property Input Section -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8 card-hover transition-all duration-300">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                <i class="fas fa-map-marker-alt text-blue-600 mr-3"></i>Property Address
+                <i class="fas fa-search text-blue-600 mr-2"></i>Property Analysis
             </h2>
             
             <form id="property-form" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Street Address</label>
-                        <input type="text" id="address" name="address" required
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Street Address *</label>
+                        <input type="text" id="address" required
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="123 Main Street">
+                               placeholder="123 Main St">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
-                        <input type="text" id="city" name="city" required
+                        <label class="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                        <input type="text" id="city" required
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                placeholder="Charlotte">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">State</label>
-                        <select id="state" name="state" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Select State</option>
-                            <option value="NC">North Carolina</option>
-                            <option value="SC">South Carolina</option>
-                            <option value="GA">Georgia</option>
-                            <option value="TN">Tennessee</option>
-                            <option value="FL">Florida</option>
-                            <option value="VA">Virginia</option>
-                        </select>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">State *</label>
+                        <input type="text" id="state" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="NC">
                     </div>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">ZIP Code</label>
-                        <input type="text" id="zip" name="zip" required
+                        <label class="block text-sm font-medium text-gray-700 mb-2">ZIP Code *</label>
+                        <input type="text" id="zip" required
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                placeholder="28202">
                     </div>
-                    <div class="flex items-end">
-                        <button type="submit" 
-                                class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                            <i class="fas fa-search mr-2"></i>Analyze Property
-                        </button>
-                    </div>
-                </div>
-            </form>
-            
-            <!-- Loading State -->
-            <div id="loading-state" class="hidden mt-6 text-center">
-                <div class="inline-flex items-center">
-                    <i class="fas fa-spinner loading-spinner text-blue-600 mr-3"></i>
-                    <span class="text-gray-600">Pulling property data from Zillow, Redfin, and Realtor.com...</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Property Information Section (Hidden initially) -->
-        <div id="property-info-section" class="hidden bg-white rounded-xl shadow-lg p-8 mb-8">
-            
-            <!-- Property Header with Image -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-                <div class="lg:col-span-2">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-2" id="property-title">Property Overview</h2>
-                    <p class="text-xl text-gray-600 mb-6" id="property-address"></p>
-                    
-                    <!-- Data Sources -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Data Sources</h3>
-                        <div id="data-sources" class="flex flex-wrap gap-2">
-                            <!-- Data source badges will be populated here -->
-                        </div>
-                    </div>
                 </div>
                 
-                <!-- Property Image -->
-                <div class="lg:col-span-1">
-                    <div class="bg-gray-200 rounded-lg h-64 flex items-center justify-center" id="property-image-container">
-                        <i class="fas fa-home text-gray-400 text-6xl"></i>
-                        <span class="ml-4 text-gray-500">Property Image</span>
-                    </div>
+                <div class="flex justify-center">
+                    <button type="submit" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-semibold">
+                        <i class="fas fa-rocket mr-2"></i>Analyze Property
+                    </button>
                 </div>
-            </div>
-
-            <!-- Editable Property Details -->
-            <div class="grid grid-cols-2 md:grid-cols-6 gap-6 p-6 bg-gray-50 rounded-lg">
-                <div class="text-center">
-                    <label class="block text-sm font-medium text-gray-600 mb-2">Bedrooms</label>
-                    <input type="number" id="bedrooms" value="3" min="1" max="10"
-                           class="w-full text-center text-xl font-bold border-2 border-gray-300 rounded-lg py-2"
-                           onchange="updateCalculations()">
-                </div>
-                <div class="text-center">
-                    <label class="block text-sm font-medium text-gray-600 mb-2">Bathrooms</label>
-                    <input type="number" id="bathrooms" value="2" min="1" max="10" step="0.5"
-                           class="w-full text-center text-xl font-bold border-2 border-gray-300 rounded-lg py-2"
-                           onchange="updateCalculations()">
-                </div>
-                <div class="text-center">
-                    <label class="block text-sm font-medium text-gray-600 mb-2">Square Feet</label>
-                    <input type="number" id="square-feet" value="1200" min="500" max="10000"
-                           class="w-full text-center text-xl font-bold border-2 border-gray-300 rounded-lg py-2"
-                           onchange="updateCalculations()">
-                </div>
-                <div class="text-center">
-                    <label class="block text-sm font-medium text-gray-600 mb-2">ARV</label>
-                    <input type="number" id="arv" value="200000" min="50000" max="2000000"
-                           class="w-full text-center text-xl font-bold border-2 border-green-300 rounded-lg py-2"
-                           onchange="updateCalculations()">
-                </div>
-                <div class="text-center">
-                    <label class="block text-sm font-medium text-gray-600 mb-2">Repairs</label>
-                    <input type="number" id="repairs" value="30000" min="0" max="200000"
-                           class="w-full text-center text-xl font-bold border-2 border-red-300 rounded-lg py-2"
-                           onchange="updateCalculations()">
-                </div>
-                <div class="text-center">
-                    <label class="block text-sm font-medium text-gray-600 mb-2">Monthly Rent</label>
-                    <input type="number" id="rent" value="2000" min="500" max="10000"
-                           class="w-full text-center text-xl font-bold border-2 border-blue-300 rounded-lg py-2"
-                           onchange="updateCalculations()">
-                </div>
-            </div>
+            </form>
         </div>
 
-        <!-- Strategy Tabs Section (Hidden initially) -->
-        <div id="strategy-tabs-section" class="hidden">
+        <!-- Loading State -->
+        <div id="loading-state" class="hidden bg-white rounded-xl shadow-lg p-8 mb-8 text-center">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-gray-600">Pulling property data from external sources...</p>
+        </div>
+
+        <!-- Property Analysis Results -->
+        <div id="analysis-results" class="hidden">
             
-            <!-- Tab Navigation -->
-            <div class="bg-white rounded-t-xl shadow-lg">
-                <div class="border-b border-gray-200">
-                    <nav class="flex space-x-0" role="tablist">
-                        <button onclick="showTab('wholesale')" 
-                                class="tab-button tab-transition flex-1 py-4 px-6 text-center font-medium border-b-3 border-transparent hover:text-blue-600 hover:border-blue-300"
-                                id="wholesale-tab">
-                            <i class="fas fa-money-bill-wave text-green-600 mr-2"></i>
-                            <span>Wholesale</span>
-                        </button>
-                        <button onclick="showTab('installment')" 
-                                class="tab-button tab-transition flex-1 py-4 px-6 text-center font-medium border-b-3 border-transparent hover:text-blue-600 hover:border-blue-300"
-                                id="installment-tab">
-                            <i class="fas fa-handshake text-indigo-600 mr-2"></i>
-                            <span>Installment</span>
-                        </button>
-                        <button onclick="showTab('subject-to')" 
-                                class="tab-button tab-transition flex-1 py-4 px-6 text-center font-medium border-b-3 border-transparent hover:text-blue-600 hover:border-blue-300"
-                                id="subject-to-tab">
-                            <i class="fas fa-key text-orange-600 mr-2"></i>
-                            <span>Subject-To</span>
-                        </button>
-                        <button onclick="showTab('seller-finance')" 
-                                class="tab-button tab-transition flex-1 py-4 px-6 text-center font-medium border-b-3 border-transparent hover:text-blue-600 hover:border-blue-300"
-                                id="seller-finance-tab">
-                            <i class="fas fa-file-contract text-blue-600 mr-2"></i>
-                            <span>Seller Finance</span>
-                        </button>
-                        <button onclick="showTab('compare')" 
-                                class="tab-button tab-transition flex-1 py-4 px-6 text-center font-medium border-b-3 border-transparent hover:text-blue-600 hover:border-blue-300 bg-purple-50"
-                                id="compare-tab">
-                            <i class="fas fa-balance-scale text-purple-600 mr-2"></i>
-                            <span>Compare All</span>
-                        </button>
-                    </nav>
+            <!-- Property Overview -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                    <div class="lg:col-span-2">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2" id="property-title">Property Overview</h2>
+                        <p class="text-xl text-gray-600 mb-6" id="property-address"></p>
+                        
+                        <!-- Data Sources -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">Data Sources</h3>
+                            <div id="data-sources" class="flex flex-wrap gap-2">
+                                <!-- Data source badges will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Property Image -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-gray-200 rounded-lg h-64 flex items-center justify-center" id="property-image-container">
+                            <i class="fas fa-home text-gray-400 text-6xl"></i>
+                            <span class="ml-4 text-gray-500">Property Image</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Editable Property Details -->
+                <div class="grid grid-cols-2 md:grid-cols-6 gap-6 p-6 bg-gray-50 rounded-lg">
+                    <div class="text-center">
+                        <label class="block text-sm font-medium text-gray-600 mb-2">Bedrooms</label>
+                        <input type="number" id="bedrooms" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="3">
+                    </div>
+                    <div class="text-center">
+                        <label class="block text-sm font-medium text-gray-600 mb-2">Bathrooms</label>
+                        <input type="number" step="0.5" id="bathrooms" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="2">
+                    </div>
+                    <div class="text-center">
+                        <label class="block text-sm font-medium text-gray-600 mb-2">Square Feet</label>
+                        <input type="number" id="square_feet" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="1200">
+                    </div>
+                    <div class="text-center">
+                        <label class="block text-sm font-medium text-gray-600 mb-2">ARV ($)</label>
+                        <input type="number" id="arv" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="200000">
+                    </div>
+                    <div class="text-center">
+                        <label class="block text-sm font-medium text-gray-600 mb-2">Repairs ($)</label>
+                        <input type="number" id="repairs" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="30000">
+                    </div>
+                    <div class="text-center">
+                        <label class="block text-sm font-medium text-gray-600 mb-2">Monthly Rent ($)</label>
+                        <input type="number" id="rent" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="2000">
+                    </div>
                 </div>
             </div>
 
-            <!-- Tab Content Areas -->
-            <div class="bg-white rounded-b-xl shadow-lg min-h-96">
-
-                <!-- Wholesale Tab -->
-                <div id="wholesale-content" class="tab-content p-8">
-                    <div class="border-l-4 border-green-500 pl-6 mb-8">
-                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Wholesale Offer Strategy</h2>
-                        <p class="text-gray-600 text-lg">Cash acquisition with quick closing - Speed + Convenience</p>
-                    </div>
-
-                    <!-- Strategy Results Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div class="card-hover bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-6">
-                            <div class="flex items-center mb-4">
-                                <div class="p-3 bg-green-200 rounded-full mr-4">
-                                    <i class="fas fa-dollar-sign text-green-700 text-xl"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-gray-800">Maximum Offer</h3>
-                                    <p class="text-sm text-gray-600">70% ARV Rule</p>
-                                </div>
-                            </div>
-                            <div class="text-3xl font-bold text-green-700 mb-2" id="wholesale-mao">$119,000</div>
-                            <div class="text-sm text-gray-600">59.5% of ARV</div>
-                        </div>
-
-                        <div class="card-hover bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-6">
-                            <div class="flex items-center mb-4">
-                                <div class="p-3 bg-blue-200 rounded-full mr-4">
-                                    <i class="fas fa-chart-line text-blue-700 text-xl"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-gray-800">Assignment Fee</h3>
-                                    <p class="text-sm text-gray-600">Investor Profit</p>
-                                </div>
-                            </div>
-                            <div class="text-3xl font-bold text-blue-700 mb-2" id="wholesale-profit">$21,000</div>
-                            <div class="text-sm text-gray-600">15% margin</div>
-                        </div>
-
-                        <div class="card-hover bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-6">
-                            <div class="flex items-center mb-4">
-                                <div class="p-3 bg-purple-200 rounded-full mr-4">
-                                    <i class="fas fa-clock text-purple-700 text-xl"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-gray-800">Timeline</h3>
-                                    <p class="text-sm text-gray-600">To Closing</p>
-                                </div>
-                            </div>
-                            <div class="text-3xl font-bold text-purple-700 mb-2">14 Days</div>
-                            <div class="text-sm text-gray-600">Fast cash close</div>
-                        </div>
-                    </div>
-
-                    <!-- Ackerman Method -->
-                    <div class="bg-gray-50 rounded-xl p-6 mb-8">
-                        <h3 class="text-xl font-bold text-gray-800 mb-4">
-                            <i class="fas fa-brain text-blue-600 mr-2"></i>Ackerman Method Offers
-                        </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="ackerman-offers">
-                            <!-- Ackerman offers will be populated here -->
-                        </div>
-                    </div>
-
-                    <!-- Input Controls -->
-                    <div class="bg-blue-50 rounded-xl p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4">Strategy Controls</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Wholesale Percentage</label>
-                                <select id="wholesale-percentage" class="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                                        onchange="updateCalculations()">
-                                    <option value="0.65">65% ARV</option>
-                                    <option value="0.70" selected>70% ARV</option>
-                                    <option value="0.75">75% ARV</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Profit</label>
-                                <input type="number" id="min-profit" value="15000" min="5000" max="100000"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                                       onchange="updateCalculations()">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Assignment Fee</label>
-                                <input type="number" id="assignment-fee" value="21000" min="5000" max="100000"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                                       onchange="updateCalculations()">
-                            </div>
-                        </div>
-                    </div>
+            <!-- Strategy Tabs -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                
+                <!-- Tab Navigation -->
+                <div class="flex flex-wrap bg-gray-100 border-b">
+                    <button class="tab-button px-6 py-4 font-semibold transition-all duration-300 active" onclick="showTab('wholesale')">
+                        <i class="fas fa-dollar-sign mr-2"></i>Wholesale
+                    </button>
+                    <button class="tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showTab('installment')">
+                        <i class="fas fa-calendar-alt mr-2"></i>Installment
+                    </button>
+                    <button class="tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showTab('subject-to')">
+                        <i class="fas fa-handshake mr-2"></i>Subject-To
+                    </button>
+                    <button class="tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showTab('seller-finance')">
+                        <i class="fas fa-university mr-2"></i>Seller Finance
+                    </button>
+                    <button class="tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showTab('compare')">
+                        <i class="fas fa-chart-bar mr-2"></i>Compare All
+                    </button>
                 </div>
 
-                <!-- Installment Tab -->
-                <div id="installment-content" class="tab-content hidden p-8">
-                    <div class="border-l-4 border-indigo-500 pl-6 mb-8">
-                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Installment Offer Strategy</h2>
-                        <p class="text-gray-600 text-lg">Payment plan acquisition - Price + Convenience</p>
-                    </div>
-
-                    <!-- Seller Psychology Framework -->
-                    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl p-6 mb-8">
-                        <h3 class="text-xl font-bold text-gray-800 mb-4">
-                            <i class="fas fa-brain text-indigo-600 mr-2"></i>Seller Psychology Framework
-                        </h3>
-                        <div class="grid grid-cols-3 gap-4 text-center">
-                            <div class="p-4 bg-yellow-100 rounded-lg border border-yellow-200">
-                                <div class="text-3xl mb-2">⚡</div>
-                                <div class="font-bold text-yellow-800">Speed</div>
-                                <div class="text-sm text-gray-600 mt-1">Quick closing</div>
-                            </div>
-                            <div class="p-4 bg-green-100 rounded-lg border border-green-200">
-                                <div class="text-3xl mb-2">🎯</div>
-                                <div class="font-bold text-green-800">Convenience</div>
-                                <div class="text-sm text-gray-600 mt-1">Easy process</div>
-                            </div>
-                            <div class="p-4 bg-purple-100 rounded-lg border border-purple-200">
-                                <div class="text-3xl mb-2">💰</div>
-                                <div class="font-bold text-purple-800">Price</div>
-                                <div class="text-sm text-gray-600 mt-1">Maximum value</div>
-                            </div>
-                        </div>
-                        <div class="mt-6 text-center">
-                            <div class="inline-block bg-white rounded-lg p-4 border border-indigo-300">
-                                <strong class="text-indigo-600">Installment Strategy:</strong> Price + Convenience = Higher seller value
-                            </div>
+                <!-- Tab Content -->
+                <div class="p-8">
+                    
+                    <!-- Wholesale Tab -->
+                    <div id="wholesale-tab" class="tab-content active">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Wholesale Strategy (Cash Offer)</h3>
+                        <div id="wholesale-results" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- Results will be populated here -->
                         </div>
                     </div>
 
-                    <!-- Strategy Results -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                        <div class="card-hover bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200 rounded-xl p-6">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-indigo-700 mb-2" id="installment-mao">$175,000</div>
-                                <div class="text-sm text-gray-600">Maximum Offer</div>
-                            </div>
+                    <!-- Installment Tab -->
+                    <div id="installment-tab" class="tab-content">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Installment/Novation Strategy</h3>
+                        <div id="installment-results" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- Results will be populated here -->
                         </div>
-                        <div class="card-hover bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-6">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-green-700 mb-2" id="installment-profit">$45,000</div>
-                                <div class="text-sm text-gray-600">Net Profit</div>
-                            </div>
-                        </div>
-                        <div class="card-hover bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-6">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-blue-700 mb-2" id="installment-timeline">60 Days</div>
-                                <div class="text-sm text-gray-600">To Complete</div>
-                            </div>
-                        </div>
-                        <div class="card-hover bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-6">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-orange-700 mb-2" id="installment-premium">+$56,000</div>
-                                <div class="text-sm text-gray-600">vs Wholesale</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Subject-To Tab -->
-                <div id="subject-to-content" class="tab-content hidden p-8">
-                    <div class="border-l-4 border-orange-500 pl-6 mb-8">
-                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Subject-To Offer Strategy</h2>
-                        <p class="text-gray-600 text-lg">Creative financing - Take over existing mortgage</p>
                     </div>
 
-                    <!-- Strategy Results -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div class="card-hover bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-6">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-orange-700 mb-2" id="subject-to-equity">$85,000</div>
-                                <div class="text-sm text-gray-600">Instant Equity</div>
-                            </div>
+                    <!-- Subject-To Tab -->
+                    <div id="subject-to-tab" class="tab-content">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Subject-To Strategy</h3>
+                        <div id="subject-to-results" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- Results will be populated here -->
                         </div>
-                        <div class="card-hover bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-xl p-6">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-red-700 mb-2" id="subject-to-payment">$1,650</div>
-                                <div class="text-sm text-gray-600">Monthly Payment</div>
-                            </div>
-                        </div>
-                        <div class="card-hover bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-6">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-green-700 mb-2" id="subject-to-cashflow">$350</div>
-                                <div class="text-sm text-gray-600">Monthly Cash Flow</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Seller Finance Tab -->
-                <div id="seller-finance-content" class="tab-content hidden p-8">
-                    <div class="border-l-4 border-blue-500 pl-6 mb-8">
-                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Seller Finance Offer Strategy</h2>
-                        <p class="text-gray-600 text-lg">Owner financing - Full ARV with seller carrying note</p>
                     </div>
 
-                    <!-- Strategy Results -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                        <div class="card-hover bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-6">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-blue-700 mb-2" id="seller-finance-price">$190,000</div>
-                                <div class="text-sm text-gray-600">Purchase Price</div>
-                            </div>
+                    <!-- Seller Finance Tab -->
+                    <div id="seller-finance-tab" class="tab-content">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Seller Finance Strategy</h3>
+                        <div id="seller-finance-results" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- Results will be populated here -->
                         </div>
-                        <div class="card-hover bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-6">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-green-700 mb-2" id="seller-finance-down">$15,000</div>
-                                <div class="text-sm text-gray-600">Down Payment</div>
-                            </div>
-                        </div>
-                        <div class="card-hover bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-6">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-purple-700 mb-2" id="seller-finance-rate">6.5%</div>
-                                <div class="text-sm text-gray-600">Interest Rate</div>
-                            </div>
-                        </div>
-                        <div class="card-hover bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-6">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-orange-700 mb-2" id="seller-finance-payment">$1,175</div>
-                                <div class="text-sm text-gray-600">Monthly Payment</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Compare Tab -->
-                <div id="compare-content" class="tab-content hidden p-8">
-                    <div class="border-l-4 border-purple-500 pl-6 mb-8">
-                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Strategy Comparison</h2>
-                        <p class="text-gray-600 text-lg">Side-by-side analysis of all offer strategies</p>
                     </div>
 
-                    <!-- Comparison Table -->
-                    <div class="overflow-x-auto">
-                        <table class="w-full bg-white rounded-lg shadow">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-4 text-left text-sm font-medium text-gray-900">Strategy</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium text-gray-900">Purchase Price</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium text-gray-900">Entry Cash</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium text-gray-900">Monthly Payment</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium text-gray-900">Cash Flow</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium text-gray-900">Net Profit</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium text-gray-900">Timeline</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                <tr class="hover:bg-green-50">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-money-bill-wave text-green-600 mr-3"></i>
-                                            <strong>Wholesale</strong>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-center font-bold text-green-700" id="compare-wholesale-price">$119,000</td>
-                                    <td class="px-6 py-4 text-center" id="compare-wholesale-cash">$119,000</td>
-                                    <td class="px-6 py-4 text-center">$0</td>
-                                    <td class="px-6 py-4 text-center">$0</td>
-                                    <td class="px-6 py-4 text-center font-bold text-green-700" id="compare-wholesale-profit">$21,000</td>
-                                    <td class="px-6 py-4 text-center">14 days</td>
-                                </tr>
-                                <tr class="hover:bg-indigo-50">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-handshake text-indigo-600 mr-3"></i>
-                                            <strong>Installment</strong>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-center font-bold text-indigo-700" id="compare-installment-price">$175,000</td>
-                                    <td class="px-6 py-4 text-center" id="compare-installment-cash">$25,000</td>
-                                    <td class="px-6 py-4 text-center">$2,500</td>
-                                    <td class="px-6 py-4 text-center">-$500</td>
-                                    <td class="px-6 py-4 text-center font-bold text-indigo-700" id="compare-installment-profit">$45,000</td>
-                                    <td class="px-6 py-4 text-center">60 days</td>
-                                </tr>
-                                <tr class="hover:bg-orange-50">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-key text-orange-600 mr-3"></i>
-                                            <strong>Subject-To</strong>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-center font-bold text-orange-700" id="compare-subto-price">$4,000</td>
-                                    <td class="px-6 py-4 text-center" id="compare-subto-cash">$8,000</td>
-                                    <td class="px-6 py-4 text-center">$1,650</td>
-                                    <td class="px-6 py-4 text-center font-bold text-green-600">$350</td>
-                                    <td class="px-6 py-4 text-center font-bold text-orange-700" id="compare-subto-profit">$85,000</td>
-                                    <td class="px-6 py-4 text-center">30 days</td>
-                                </tr>
-                                <tr class="hover:bg-blue-50">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-file-contract text-blue-600 mr-3"></i>
-                                            <strong>Seller Finance</strong>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-center font-bold text-blue-700" id="compare-seller-price">$190,000</td>
-                                    <td class="px-6 py-4 text-center" id="compare-seller-cash">$45,000</td>
-                                    <td class="px-6 py-4 text-center">$1,175</td>
-                                    <td class="px-6 py-4 text-center font-bold text-green-600">$825</td>
-                                    <td class="px-6 py-4 text-center font-bold text-blue-700" id="compare-seller-profit">$35,000</td>
-                                    <td class="px-6 py-4 text-center">45 days</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <!-- Compare All Tab -->
+                    <div id="compare-tab" class="tab-content">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Strategy Comparison Dashboard</h3>
+                        <div id="comparison-results" class="space-y-6">
+                            <!-- Comparison results will be populated here -->
+                        </div>
                     </div>
 
-                    <!-- Strategy Recommendations -->
-                    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-green-50 rounded-xl p-6 border border-green-200">
-                            <h3 class="text-lg font-bold text-green-800 mb-3">
-                                <i class="fas fa-thumbs-up mr-2"></i>Recommended Strategy
-                            </h3>
-                            <div class="text-green-700">
-                                <strong>Subject-To Offer</strong> provides the highest equity position with positive cash flow.
-                                Best for long-term wealth building.
-                            </div>
-                        </div>
-                        <div class="bg-blue-50 rounded-xl p-6 border border-blue-200">
-                            <h3 class="text-lg font-bold text-blue-800 mb-3">
-                                <i class="fas fa-lightbulb mr-2"></i>Quick Cash Option
-                            </h3>
-                            <div class="text-blue-700">
-                                <strong>Wholesale Offer</strong> provides fastest liquidity with $21,000 profit in 14 days.
-                                Best for immediate cash needs.
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Global variables
-        let currentPropertyData = {};
-        let calculationResults = {};
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
-        });
-
-        function setupEventListeners() {
-            document.getElementById('property-form').addEventListener('submit', analyzeProperty);
-        }
-
-        async function analyzeProperty(event) {
-            event.preventDefault();
+        // Form submission and property analysis
+        document.getElementById('property-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            const formData = {
-                address: document.getElementById('address').value,
-                city: document.getElementById('city').value,
-                state: document.getElementById('state').value,
-                zip: document.getElementById('zip').value
-            };
-
-            showLoading();
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            const state = document.getElementById('state').value;
+            const zip = document.getElementById('zip').value;
+            
+            // Show loading state
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('analysis-results').classList.add('hidden');
             
             try {
+                // Analyze property with external data
                 const response = await fetch('/api/analyze-property', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address, city, state, zip })
                 });
-
+                
                 const data = await response.json();
                 
                 if (data.success) {
-                    currentPropertyData = data;
-                    displayPropertyData(data);
-                    await calculateAllStrategies();
-                    showPropertySections();
+                    populatePropertyData(data);
+                    await calculateStrategies();
+                    
+                    // Show results
+                    document.getElementById('loading-state').classList.add('hidden');
+                    document.getElementById('analysis-results').classList.remove('hidden');
                 } else {
-                    showError(data.error || 'Failed to analyze property');
+                    throw new Error(data.error || 'Failed to analyze property');
                 }
+                
             } catch (error) {
                 console.error('Error:', error);
-                showError('Failed to analyze property');
-            } finally {
-                hideLoading();
+                alert('Error analyzing property: ' + error.message);
+                document.getElementById('loading-state').classList.add('hidden');
             }
-        }
+        });
 
-        function displayPropertyData(data) {
-            // Update property header
-            document.getElementById('property-title').textContent = 
-                `${data.bedrooms || 3} bed, ${data.bathrooms || 2} bath ${data.property_type || 'Single Family'}`;
-            document.getElementById('property-address').textContent = data.full_address;
-
-            // Update data sources
-            const sourcesContainer = document.getElementById('data-sources');
-            sourcesContainer.innerHTML = '';
+        function populatePropertyData(data) {
+            // Update property overview
+            document.getElementById('property-title').textContent = `${data.address}, ${data.city}`;
+            document.getElementById('property-address').textContent = `${data.city}, ${data.state} ${data.zip}`;
             
-            Object.entries(data.data_sources || {}).forEach(([source, status]) => {
-                const badge = document.createElement('span');
-                badge.className = `inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                    status === 'Success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`;
-                badge.innerHTML = `<i class="fas fa-${status === 'Success' ? 'check' : 'times'} mr-1"></i>${source}`;
-                sourcesContainer.appendChild(badge);
-            });
-
-            // Update property image
+            // Populate editable fields
+            if (data.bedrooms) document.getElementById('bedrooms').value = data.bedrooms;
+            if (data.bathrooms) document.getElementById('bathrooms').value = data.bathrooms;
+            if (data.square_feet) document.getElementById('square_feet').value = data.square_feet;
+            if (data.estimated_value) document.getElementById('arv').value = data.estimated_value;
+            if (data.rent_estimate) document.getElementById('rent').value = data.rent_estimate;
+            
+            // Update data sources
+            const dataSourcesContainer = document.getElementById('data-sources');
+            dataSourcesContainer.innerHTML = '';
+            
+            if (data.data_sources && data.data_sources.length > 0) {
+                data.data_sources.forEach(source => {
+                    const badge = document.createElement('span');
+                    badge.className = 'px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full';
+                    badge.textContent = source;
+                    dataSourcesContainer.appendChild(badge);
+                });
+            }
+            
+            // Update property image if available
             if (data.images && data.images.length > 0) {
                 const imageContainer = document.getElementById('property-image-container');
                 imageContainer.innerHTML = `<img src="${data.images[0]}" alt="Property" class="w-full h-64 object-cover rounded-lg">`;
             }
-
-            // Update editable fields
-            if (data.bedrooms) document.getElementById('bedrooms').value = data.bedrooms;
-            if (data.bathrooms) document.getElementById('bathrooms').value = data.bathrooms;
-            if (data.square_feet) document.getElementById('square-feet').value = data.square_feet;
-            if (data.estimated_value) document.getElementById('arv').value = data.estimated_value;
-            if (data.rent_estimate) document.getElementById('rent').value = data.rent_estimate;
         }
 
-        async function calculateAllStrategies() {
-            const propertyInputs = {
+        async function calculateStrategies() {
+            const strategyData = {
+                arv: parseFloat(document.getElementById('arv').value),
+                repairs: parseFloat(document.getElementById('repairs').value),
                 bedrooms: parseInt(document.getElementById('bedrooms').value),
                 bathrooms: parseFloat(document.getElementById('bathrooms').value),
-                square_feet: parseInt(document.getElementById('square-feet').value),
-                arv: parseInt(document.getElementById('arv').value),
-                repairs: parseInt(document.getElementById('repairs').value),
-                rent: parseInt(document.getElementById('rent').value)
+                square_feet: parseInt(document.getElementById('square_feet').value),
+                rent: parseFloat(document.getElementById('rent').value)
             };
-
+            
             try {
                 const response = await fetch('/api/calculate-strategies', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(propertyInputs)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(strategyData)
                 });
-
-                const results = await response.json();
-                calculationResults = results;
-                updateAllDisplays(results);
-            } catch (error) {
-                console.error('Calculation error:', error);
-                showError('Failed to calculate strategies');
-            }
-        }
-
-        function updateAllDisplays(results) {
-            // Update wholesale displays
-            if (results.wholesale) {
-                document.getElementById('wholesale-mao').textContent = formatCurrency(results.wholesale.wholesale_mao);
-                document.getElementById('wholesale-profit').textContent = formatCurrency(results.wholesale.assignment_profit);
-                updateAckermanOffers(results.wholesale.ackerman_offers);
-            }
-
-            // Update installment displays
-            if (results.installment) {
-                document.getElementById('installment-mao').textContent = formatCurrency(results.installment.installment_mao);
-                document.getElementById('installment-profit').textContent = formatCurrency(results.installment.net_profit);
-                document.getElementById('installment-premium').textContent = 
-                    formatCurrency(results.installment.installment_vs_wholesale_gap, '+');
-            }
-
-            // Update subject-to displays
-            if (results.subject_to) {
-                document.getElementById('subject-to-equity').textContent = formatCurrency(results.subject_to.equity_position);
-                document.getElementById('subject-to-payment').textContent = formatCurrency(results.subject_to.monthly_payment);
-                document.getElementById('subject-to-cashflow').textContent = formatCurrency(results.subject_to.monthly_cash_flow, '+');
-            }
-
-            // Update seller finance displays
-            if (results.seller_finance) {
-                document.getElementById('seller-finance-price').textContent = formatCurrency(results.seller_finance.purchase_price);
-                document.getElementById('seller-finance-down').textContent = formatCurrency(results.seller_finance.down_payment);
-                document.getElementById('seller-finance-payment').textContent = formatCurrency(results.seller_finance.monthly_payment);
-            }
-
-            // Update comparison table
-            updateComparisonTable(results);
-        }
-
-        function updateAckermanOffers(offers) {
-            const container = document.getElementById('ackerman-offers');
-            container.innerHTML = '';
-
-            offers.forEach((offer, index) => {
-                const colors = ['red', 'yellow', 'green'];
-                const color = colors[index] || 'gray';
                 
-                const offerCard = document.createElement('div');
-                offerCard.className = `bg-${color}-50 border border-${color}-200 rounded-lg p-4 hover:shadow-md transition-shadow`;
-                offerCard.innerHTML = `
-                    <div class="text-center">
-                        <div class="text-sm font-medium text-gray-800 mb-2">${getOrdinal(offer.offer_number)} Offer</div>
-                        <div class="text-2xl font-bold text-${color}-700 mb-2">${formatCurrency(offer.amount)}</div>
-                        <div class="text-sm text-${color}-600">${offer.percentage}% of MAO</div>
-                        <div class="text-xs text-gray-600 mt-2">${offer.strategy_note}</div>
-                    </div>
-                `;
-                container.appendChild(offerCard);
-            });
-        }
-
-        function updateComparisonTable(results) {
-            // Update comparison table values
-            const elements = {
-                'compare-wholesale-price': results.wholesale?.wholesale_mao,
-                'compare-wholesale-cash': results.wholesale?.wholesale_mao,
-                'compare-wholesale-profit': results.wholesale?.assignment_profit,
-                'compare-installment-price': results.installment?.installment_mao,
-                'compare-installment-cash': 25000,
-                'compare-installment-profit': results.installment?.net_profit,
-                'compare-subto-price': 4000,
-                'compare-subto-cash': 8000,
-                'compare-subto-profit': results.subject_to?.equity_position,
-                'compare-seller-price': results.seller_finance?.purchase_price,
-                'compare-seller-cash': results.seller_finance?.down_payment + 30000,
-                'compare-seller-profit': 35000
-            };
-
-            Object.entries(elements).forEach(([id, value]) => {
-                const element = document.getElementById(id);
-                if (element && value !== undefined) {
-                    element.textContent = formatCurrency(value);
+                const results = await response.json();
+                
+                if (results.error) {
+                    throw new Error(results.error);
                 }
-            });
-        }
-
-        function showTab(tabName) {
-            // Remove active class from all tabs
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('border-blue-500', 'text-blue-600', 'bg-blue-50');
-                btn.classList.add('border-transparent', 'text-gray-500');
-            });
-
-            // Hide all tab content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.add('hidden');
-            });
-
-            // Show selected tab
-            document.getElementById(`${tabName}-content`).classList.remove('hidden');
-            
-            // Style active tab
-            const activeTab = document.getElementById(`${tabName}-tab`);
-            activeTab.classList.remove('border-transparent', 'text-gray-500');
-            activeTab.classList.add('border-blue-500', 'text-blue-600', 'bg-blue-50');
-        }
-
-        function showPropertySections() {
-            document.getElementById('property-info-section').classList.remove('hidden');
-            document.getElementById('strategy-tabs-section').classList.remove('hidden');
-            showTab('wholesale'); // Default to wholesale tab
-        }
-
-        function showLoading() {
-            document.getElementById('loading-state').classList.remove('hidden');
-        }
-
-        function hideLoading() {
-            document.getElementById('loading-state').classList.add('hidden');
-        }
-
-        function showError(message) {
-            const notification = document.createElement('div');
-            notification.className = 'fixed top-4 right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-            notification.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i>${message}`;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => notification.remove(), 5000);
-        }
-
-        function updateCalculations() {
-            if (Object.keys(currentPropertyData).length > 0) {
-                calculateAllStrategies();
+                
+                // Populate strategy results
+                populateWholesaleResults(results.wholesale);
+                populateInstallmentResults(results.installment);
+                populateSubjectToResults(results.subject_to);
+                populateSellerFinanceResults(results.seller_finance);
+                populateComparisonResults(results);
+                
+            } catch (error) {
+                console.error('Error calculating strategies:', error);
+                alert('Error calculating strategies: ' + error.message);
             }
         }
 
-        function formatCurrency(amount, prefix = '') {
-            if (amount === null || amount === undefined) return 'N/A';
-            const formatted = new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(Math.abs(amount));
-            
-            if (amount < 0) return '-' + formatted;
-            return prefix + formatted;
+        function populateWholesaleResults(data) {
+            const container = document.getElementById('wholesale-results');
+            container.innerHTML = `
+                <div class="bg-green-50 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg text-green-800 mb-2">Maximum Allowable Offer</h4>
+                    <p class="text-3xl font-bold text-green-600">$${data.wholesale_mao.toLocaleString()}</p>
+                </div>
+                <div class="bg-blue-50 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg text-blue-800 mb-2">Assignment Profit</h4>
+                    <p class="text-3xl font-bold text-blue-600">$${data.assignment_profit.toLocaleString()}</p>
+                </div>
+                <div class="bg-purple-50 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg text-purple-800 mb-2">All-In Amount</h4>
+                    <p class="text-3xl font-bold text-purple-600">$${data.all_in_amount.toLocaleString()}</p>
+                </div>
+            `;
         }
 
-        function getOrdinal(num) {
-            const ordinals = ['', '1st', '2nd', '3rd', '4th', '5th'];
-            return ordinals[num] || num + 'th';
+        function populateInstallmentResults(data) {
+            const container = document.getElementById('installment-results');
+            container.innerHTML = `
+                <div class="bg-indigo-50 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg text-indigo-800 mb-2">Installment MAO</h4>
+                    <p class="text-3xl font-bold text-indigo-600">$${data.installment_mao.toLocaleString()}</p>
+                </div>
+                <div class="bg-teal-50 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg text-teal-800 mb-2">Net Profit</h4>
+                    <p class="text-3xl font-bold text-teal-600">$${data.net_profit.toLocaleString()}</p>
+                </div>
+                <div class="bg-orange-50 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg text-orange-800 mb-2">Final Sales Price</h4>
+                    <p class="text-3xl font-bold text-orange-600">$${data.final_sales_price.toLocaleString()}</p>
+                </div>
+            `;
         }
+
+        function populateSubjectToResults(data) {
+            const container = document.getElementById('subject-to-results');
+            container.innerHTML = `
+                <div class="bg-red-50 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg text-red-800 mb-2">Equity Position</h4>
+                    <p class="text-3xl font-bold text-red-600">$${data.equity_position.toLocaleString()}</p>
+                </div>
+                <div class="bg-yellow-50 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg text-yellow-800 mb-2">Monthly Payment</h4>
+                    <p class="text-3xl font-bold text-yellow-600">$${data.monthly_payment.toLocaleString()}</p>
+                </div>
+                <div class="bg-pink-50 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg text-pink-800 mb-2">Monthly Cash Flow</h4>
+                    <p class="text-3xl font-bold text-pink-600">$${data.monthly_cash_flow.toLocaleString()}</p>
+                </div>
+            `;
+        }
+
+        function populateSellerFinanceResults(data) {
+            const container = document.getElementById('seller-finance-results');
+            container.innerHTML = `
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">Purchase Price</h4>
+                    <p class="text-3xl font-bold text-gray-600">$${data.purchase_price.toLocaleString()}</p>
+                </div>
+                <div class="bg-emerald-50 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg text-emerald-800 mb-2">Down Payment</h4>
+                    <p class="text-3xl font-bold text-emerald-600">$${data.down_payment.toLocaleString()}</p>
+                </div>
+                <div class="bg-cyan-50 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg text-cyan-800 mb-2">Monthly Cash Flow</h4>
+                    <p class="text-3xl font-bold text-cyan-600">$${data.monthly_cash_flow.toLocaleString()}</p>
+                </div>
+            `;
+        }
+
+        function populateComparisonResults(results) {
+            const container = document.getElementById('comparison-results');
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-gradient-to-br from-green-400 to-green-600 text-white p-6 rounded-lg">
+                        <h4 class="font-bold text-lg mb-2">Wholesale</h4>
+                        <p class="text-2xl font-bold mb-1">$${results.wholesale.wholesale_mao.toLocaleString()}</p>
+                        <p class="text-sm opacity-90">${results.wholesale.strategy_type}</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-400 to-blue-600 text-white p-6 rounded-lg">
+                        <h4 class="font-bold text-lg mb-2">Installment</h4>
+                        <p class="text-2xl font-bold mb-1">$${results.installment.installment_mao.toLocaleString()}</p>
+                        <p class="text-sm opacity-90">${results.installment.strategy_type}</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-400 to-purple-600 text-white p-6 rounded-lg">
+                        <h4 class="font-bold text-lg mb-2">Subject-To</h4>
+                        <p class="text-2xl font-bold mb-1">$${results.subject_to.equity_position.toLocaleString()}</p>
+                        <p class="text-sm opacity-90">${results.subject_to.strategy_type}</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-indigo-400 to-indigo-600 text-white p-6 rounded-lg">
+                        <h4 class="font-bold text-lg mb-2">Seller Finance</h4>
+                        <p class="text-2xl font-bold mb-1">$${results.seller_finance.purchase_price.toLocaleString()}</p>
+                        <p class="text-sm opacity-90">${results.seller_finance.strategy_type}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Tab functionality
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Real-time recalculation when property values change
+        document.querySelectorAll('#bedrooms, #bathrooms, #square_feet, #arv, #repairs, #rent').forEach(input => {
+            input.addEventListener('change', function() {
+                if (document.getElementById('analysis-results').classList.contains('hidden')) return;
+                calculateStrategies();
+            });
+        });
     </script>
 </body>
 </html>

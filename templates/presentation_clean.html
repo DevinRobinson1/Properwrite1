@@ -68,34 +68,7 @@
             </div>
         </div>
 
-        <!-- Shared Property Details (Outside Tabs) -->
-        {% if property_data %}
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">
-                <i class="fas fa-home text-blue-500 mr-2"></i>Property Details
-            </h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="text-center">
-                    <div class="text-gray-600 text-sm font-medium">Property Type</div>
-                    <div class="font-bold text-lg">{{ property_data.propertyType or "Single Family" }}</div>
-                </div>
-                {% if property_data.yearBuilt %}
-                <div class="text-center">
-                    <div class="text-gray-600 text-sm font-medium">Year Built</div>
-                    <div class="font-bold text-lg">{{ property_data.yearBuilt }}</div>
-                </div>
-                {% endif %}
-                <div class="text-center">
-                    <div class="text-gray-600 text-sm font-medium">Square Feet</div>
-                    <div class="font-bold text-lg">{{ "{:,}".format(sqft) }}</div>
-                </div>
-                <div class="text-center">
-                    <div class="text-gray-600 text-sm font-medium">Bedrooms/Baths</div>
-                    <div class="font-bold text-lg">{{ beds }}/{{ baths }}</div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
+
 
         <!-- Shared Data Sources (Outside Tabs) -->
         {% if data_sources %}
