@@ -1,0 +1,70 @@
+Create a Compare Offers dashboard that displays and contrasts the four major offer types for a subject property. This section helps acquisition or dispo team members see all strategies side-by-side in one clean, data-driven view.
+
+🎯 GOAL:
+Unify the output of the following calculators:
+
+✅ Wholesale (Cash Offer)
+
+✅ Installment / Novation Offer
+
+✅ Subject-To Offer
+
+✅ Seller Finance Offer
+
+📐 LAYOUT STRUCTURE:
+Use a four-column responsive grid with a row for each key metric.
+
+Metric	Wholesale	Installment	Subject-To	Seller Finance
+🏷 Offer Label	“Cash MAO”	“Installment MAO”	“Takeover + Equity”	“Owner Finance Terms”
+💵 Purchase Price	$95,000	$126,600	$260,000	$250,000
+💸 Entry Cash Required	$95,000	$126,600	$28,500	$15,000
+💲 Monthly Payment	N/A	N/A	$2,200 (PITI)	$1,735 (PITI)
+📈 Monthly Cash Flow	N/A	N/A	-$640	+$265
+🧮 Closing + OOP Costs	$0	$18,400	$28,500	$5,000
+🏠 Resale Price (if any)	$110,000	$160,000	$299,000 (LO)	$270,000 (Refi)
+📊 Net Profit (Est.)	$25,000	$34,000	$369,000	$34,000
+⏱ Hold Time	None	3–6 months	5 years	5 years
+📝 Exit Strategy	Assignment	MLS Novation	Lease Option	Refi/Lease Opt.
+
+🧰 FEATURES:
+💡 Add toggles to:
+
+Show/Hide Exit Assumptions
+
+Enable/Disable Ackerman Offers
+
+Expand into detail modal for each offer (e.g. amortization table, comp logic, etc.)
+
+📎 Pull from shared underwriting object:
+
+ARV, Repairs, Rent, SellerInput, etc.
+
+🎨 Style in Tailwind or Bootstrap (clean, color-coded, responsive)
+
+🛡 Lock values for read-only view for dispo team
+
+💾 Save calculated offers to CRM or export to PDF/email summary
+
+📊 Example UI Mock (simplified):
+plaintext
+Copy
+Edit
++-------------------+-------------+--------------+-------------+------------------+
+|                   | WHOLESALE   | INSTALLMENT  | SUBJECT-TO  | SELLER FINANCE   |
++-------------------+-------------+--------------+-------------+------------------+
+| Offer Price       | $95,000     | $126,600     | $260,000    | $250,000         |
+| Entry Cash        | $95,000     | $126,600     | $28,500     | $15,000          |
+| Monthly Payment   | —           | —            | $2,200      | $1,735           |
+| Cash Flow         | —           | —            | -$640       | +$265            |
+| Resale Price      | $110,000    | $160,000     | $299,000    | $270,000         |
+| Exit Type         | Assignment  | MLS Listing  | Lease Opt.  | Refi / Sale      |
++-------------------+-------------+--------------+-------------+------------------+
+✅ NEXT STEPS FOR REPLIT:
+Pull data from the underlying 4 calculators
+
+Auto-recalculate if underwriting values change (ARV, repairs, rent, etc.)
+
+Create a CompareOffersComponent (React or Vue) or basic HTML/JS layout
+
+Add export button for PDF generation or CRM logging
+

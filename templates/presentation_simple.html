@@ -906,6 +906,393 @@
         </div>
         {% endif %}
 
+        <!-- Subject-To Creative Offer Calculator -->
+        {% if subject_to_analysis %}
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8 no-print">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-exchange-alt text-blue-500 mr-2"></i>Subject-To Creative Offer Strategy
+                <span class="text-sm font-normal text-gray-500 ml-2">(Take Over Existing Financing)</span>
+            </h2>
+
+            <!-- Deal Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Purchase Price -->
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6">
+                    <div class="flex items-center mb-3">
+                        <span class="text-3xl mr-3">🏠</span>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Purchase Price</h4>
+                            <p class="text-sm text-gray-600">Existing Loan Balance</p>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-blue-600 mb-2">
+                        ${{ "{:,}".format(subject_to_analysis.purchase_price|int) }}
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        LTV: {{ "%.1f"|format((subject_to_analysis.principal_balance / subject_to_analysis.arv) * 100) }}%
+                    </div>
+                </div>
+
+                <!-- Cash to Seller -->
+                <div class="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-6">
+                    <div class="flex items-center mb-3">
+                        <span class="text-3xl mr-3">💵</span>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Cash to Seller</h4>
+                            <p class="text-sm text-gray-600">Upfront Payment</p>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-green-600 mb-2">
+                        ${{ "{:,}".format(subject_to_analysis.cash_to_seller|int) }}
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        Plus entry fees
+                    </div>
+                </div>
+
+                <!-- Monthly PITI -->
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-6">
+                    <div class="flex items-center mb-3">
+                        <span class="text-3xl mr-3">🏦</span>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Monthly PITI</h4>
+                            <p class="text-sm text-gray-600">Loan Payment</p>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-purple-600 mb-2">
+                        ${{ "{:,}".format(subject_to_analysis.monthly_piti|int) }}
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        {{ "%.1f"|format(subject_to_analysis.annual_interest_rate) }}% interest
+                    </div>
+                </div>
+
+                <!-- Total Investment -->
+                <div class="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-6">
+                    <div class="flex items-center mb-3">
+                        <span class="text-3xl mr-3">💰</span>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Total Investment</h4>
+                            <p class="text-sm text-gray-600">Cash + Entry Fees</p>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-orange-600 mb-2">
+                        ${{ "{:,}".format(subject_to_analysis.total_investment|int) }}
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        Out-of-pocket costs
+                    </div>
+                </div>
+            </div>
+
+            <!-- Strategy Comparison Tabs -->
+            <div class="mb-8">
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-8">
+                        <button onclick="showStrategy('lease-option')" 
+                                class="strategy-tab active-tab border-b-2 border-blue-500 py-2 px-1 text-sm font-medium text-blue-600">
+                            Lease Option Exit
+                        </button>
+                        <button onclick="showStrategy('long-term')" 
+                                class="strategy-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                            Long-Term Hold
+                        </button>
+                        <button onclick="showStrategy('refinance')" 
+                                class="strategy-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                            6-12 Month Refinance
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Lease Option Strategy -->
+                <div id="lease-option-strategy" class="strategy-content mt-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                                <i class="fas fa-key text-blue-500 mr-2"></i>Lease Option Performance
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Monthly Rent Income:</span>
+                                    <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.lease_option_income|int) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Monthly Cash Flow:</span>
+                                    <span class="font-semibold {{ 'text-green-600' if subject_to_analysis.cash_flow_lease_option >= 0 else 'text-red-600' }}">
+                                        ${{ "{:,}".format(subject_to_analysis.cash_flow_lease_option|int) }}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Option Fee Upfront:</span>
+                                    <span class="font-semibold text-green-600">${{ "{:,}".format(subject_to_analysis.lease_option_fee_upfront|int) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Exit Sale Price:</span>
+                                    <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.lease_option_sale_price|int) }}</span>
+                                </div>
+                                <hr class="my-3">
+                                <div class="flex justify-between text-lg">
+                                    <span class="font-semibold">Total 5-Year Profit:</span>
+                                    <span class="font-bold text-blue-600">${{ "{:,}".format(subject_to_analysis.total_profit_lease_option|int) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">ROI:</span>
+                                    <span class="font-semibold text-blue-600">{{ "%.1f"|format(subject_to_analysis.roi_lease_option) }}%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                                <i class="fas fa-chart-line text-green-500 mr-2"></i>5-Year Breakdown
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Total Cash Flow (60 months):</span>
+                                    <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.total_cash_flow_lease_option|int) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Principal Paydown:</span>
+                                    <span class="font-semibold text-green-600">${{ "{:,}".format(subject_to_analysis.principal_paydown_5_years|int) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Loan Balance After 5 Years:</span>
+                                    <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.balance_after_5_years|int) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Exit Profit:</span>
+                                    <span class="font-semibold text-blue-600">${{ "{:,}".format(subject_to_analysis.lease_option_profit|int) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Option Fee Income:</span>
+                                    <span class="font-semibold text-green-600">${{ "{:,}".format(subject_to_analysis.lease_option_fee_upfront|int) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Long-Term Hold Strategy -->
+                <div id="long-term-strategy" class="strategy-content mt-6 hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                                <i class="fas fa-home text-green-500 mr-2"></i>Long-Term Hold Performance
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Monthly Rent Income:</span>
+                                    <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.rent_income|int) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Monthly Cash Flow:</span>
+                                    <span class="font-semibold {{ 'text-green-600' if subject_to_analysis.cash_flow_rental >= 0 else 'text-red-600' }}">
+                                        ${{ "{:,}".format(subject_to_analysis.cash_flow_rental|int) }}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Projected Appreciation:</span>
+                                    <span class="font-semibold text-green-600">${{ "{:,}".format(subject_to_analysis.appreciation_5_years|int) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Hold Exit Value:</span>
+                                    <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.hold_exit_value|int) }}</span>
+                                </div>
+                                <hr class="my-3">
+                                <div class="flex justify-between text-lg">
+                                    <span class="font-semibold">Total 5-Year Profit:</span>
+                                    <span class="font-bold text-green-600">${{ "{:,}".format(subject_to_analysis.total_profit_hold|int) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">ROI:</span>
+                                    <span class="font-semibold text-green-600">{{ "%.1f"|format(subject_to_analysis.roi_hold) }}%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                                <i class="fas fa-calendar-alt text-purple-500 mr-2"></i>Hold Strategy Benefits
+                            </h4>
+                            <div class="space-y-3">
+                                {% for benefit in subject_to_strategies.long_term_hold.benefits %}
+                                <div class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                                    <span class="text-sm text-gray-700">{{ benefit }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <h5 class="font-semibold text-gray-700 mb-2">Considerations:</h5>
+                                {% for consideration in subject_to_strategies.long_term_hold.considerations %}
+                                <div class="flex items-start">
+                                    <i class="fas fa-exclamation-triangle text-yellow-500 mr-2 mt-1"></i>
+                                    <span class="text-sm text-gray-600">{{ consideration }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Refinance Strategy -->
+                <div id="refinance-strategy" class="strategy-content mt-6 hidden">
+                    <div class="bg-yellow-50 rounded-lg p-6 border border-yellow-200">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-sync-alt text-yellow-500 mr-2"></i>6-12 Month Refinance Strategy
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h5 class="font-semibold text-gray-700 mb-3">Benefits:</h5>
+                                {% for benefit in subject_to_strategies.refinance_exit.benefits %}
+                                <div class="flex items-start mb-2">
+                                    <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                                    <span class="text-sm text-gray-700">{{ benefit }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div>
+                                <h5 class="font-semibold text-gray-700 mb-3">Requirements:</h5>
+                                {% for consideration in subject_to_strategies.refinance_exit.considerations %}
+                                <div class="flex items-start mb-2">
+                                    <i class="fas fa-info-circle text-blue-500 mr-2 mt-1"></i>
+                                    <span class="text-sm text-gray-700">{{ consideration }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="mt-4 p-4 bg-white rounded border">
+                            <p class="text-sm text-gray-600">
+                                <strong>Timeline:</strong> {{ subject_to_strategies.refinance_exit.timeline }}<br>
+                                <strong>Strategy:</strong> {{ subject_to_strategies.refinance_exit.description }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Entry Fees Breakdown -->
+            <div class="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h4 class="font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-receipt text-blue-500 mr-2"></i>Entry Fees Breakdown
+                    </h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Acquisition Costs:</span>
+                            <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.acquisition_costs|int) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Closing Costs:</span>
+                            <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.closing_costs|int) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Rehab:</span>
+                            <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.rehab|int) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Wholesale Fee:</span>
+                            <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.wholesale_fee|int) }}</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="flex justify-between text-lg">
+                            <span class="font-semibold">Total Entry Fees:</span>
+                            <span class="font-bold text-blue-600">${{ "{:,}".format(subject_to_analysis.entry_fees_total|int) }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h4 class="font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-calculator text-green-500 mr-2"></i>Loan Terms
+                    </h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Principal Balance:</span>
+                            <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.principal_balance|int) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Interest Rate:</span>
+                            <span class="font-semibold">{{ "%.1f"|format(subject_to_analysis.annual_interest_rate) }}%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Loan Term:</span>
+                            <span class="font-semibold">{{ subject_to_analysis.loan_term_months }} months</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Monthly P&I:</span>
+                            <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.monthly_pi|int) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Monthly Escrow:</span>
+                            <span class="font-semibold">${{ "{:,}".format(subject_to_analysis.monthly_escrow|int) }}</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="flex justify-between text-lg">
+                            <span class="font-semibold">Monthly PITI:</span>
+                            <span class="font-bold text-green-600">${{ "{:,}".format(subject_to_analysis.monthly_piti|int) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Validations and Warnings -->
+            {% if subject_to_validations %}
+            <div class="mb-6">
+                <h4 class="font-semibold text-gray-800 mb-3">
+                    <i class="fas fa-shield-alt text-orange-500 mr-2"></i>Deal Analysis & Warnings
+                </h4>
+                {% for validation in subject_to_validations %}
+                <div class="flex items-center p-3 rounded-lg mb-2 {{ 'bg-red-50 border border-red-200' if validation.type == 'error' else 'bg-yellow-50 border border-yellow-200' if validation.type == 'warning' else 'bg-blue-50 border border-blue-200' }}">
+                    <i class="fas {{ 'fa-exclamation-triangle text-red-500' if validation.type == 'error' else 'fa-info-circle text-yellow-500' if validation.type == 'warning' else 'fa-check-circle text-blue-500' }} mr-3"></i>
+                    <span class="text-sm {{ 'text-red-700' if validation.type == 'error' else 'text-yellow-700' if validation.type == 'warning' else 'text-blue-700' }}">
+                        {{ validation.message }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Update Subject-To Calculator -->
+            <div class="p-6 bg-gray-50 rounded-lg">
+                <h4 class="font-semibold text-gray-800 mb-4">Update Subject-To Calculations</h4>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">ARV</label>
+                        <input type="number" id="subject-to-arv" value="{{ subject_to_analysis.arv|int }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Principal Balance</label>
+                        <input type="number" id="subject-to-balance" value="{{ subject_to_analysis.principal_balance|int }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Interest Rate (%)</label>
+                        <input type="number" step="0.1" id="subject-to-rate" value="{{ subject_to_analysis.annual_interest_rate }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Rent Income</label>
+                        <input type="number" id="subject-to-rent" value="{{ subject_to_analysis.rent_income|int }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cash to Seller</label>
+                        <input type="number" id="subject-to-cash" value="{{ subject_to_analysis.cash_to_seller|int }}" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="updateSubjectToCalculations()" 
+                                class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                            Recalculate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Offer Strategy Calculator -->
         {% if offer_analysis %}
         <div class="bg-white rounded-lg shadow-lg p-8 mb-8 no-print">

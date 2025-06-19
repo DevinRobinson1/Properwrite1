@@ -11,6 +11,10 @@ from subject_to_calculator import (
     calculate_subject_to_offer, validate_subject_to_deal, get_subject_to_strategies,
     calculate_refinance_scenario
 )
+from seller_finance_calculator import (
+    calculate_seller_finance_offer, validate_seller_finance_deal, 
+    generate_seller_finance_term_sheet, get_seller_finance_strategies
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -148,11 +152,11 @@ def generate_presentation():
         # Generate Subject-To offer analysis
         subject_to_analysis = calculate_subject_to_offer(
             arv=estimated_value,
-            principal_balance=estimated_value * 0.85,  # Assume 85% LTV existing loan
-            purchase_price=estimated_value * 0.85,
-            rent_income=estimated_value * 0.007,  # 0.7% rent ratio
-            lease_option_income=estimated_value * 0.0075,  # Slightly higher for lease option
-            lease_option_sale_price=estimated_value * 1.1  # 10% premium for lease option
+            principal_balance=int(estimated_value * 0.85),  # Assume 85% LTV existing loan
+            purchase_price=int(estimated_value * 0.85),
+            rent_income=int(estimated_value * 0.007),  # 0.7% rent ratio
+            lease_option_income=int(estimated_value * 0.0075),  # Slightly higher for lease option
+            lease_option_sale_price=int(estimated_value * 1.1)  # 10% premium for lease option
         )
         
         # Validate Subject-To deal
@@ -160,6 +164,80 @@ def generate_presentation():
         
         # Get Subject-To strategies
         subject_to_strategies = get_subject_to_strategies()
+        
+        # Generate Seller Finance offer analysis
+        seller_finance_analysis = calculate_seller_finance_offer(
+            arv=estimated_value,
+            seller_finance_purchase_price=int(estimated_value * 0.90),  # 90% of ARV
+            down_payment=int(estimated_value * 0.05),  # 5% down
+            monthly_rent=int(estimated_value * 0.007)  # 0.7% rent ratio
+        )
+        
+        # Validate Seller Finance deal
+        seller_finance_validations = validate_seller_finance_deal(seller_finance_analysis)
+        
+        # Get Seller Finance strategies
+        seller_finance_strategies = get_seller_finance_strategies()
+        
+        # Generate comprehensive offer comparison
+        offer_comparison = {
+            'wholesale': {
+                'label': 'Cash MAO',
+                'offer_price': wholesale_analysis['wholesale_mao'],
+                'entry_cash': wholesale_analysis['wholesale_mao'],
+                'monthly_payment': 0,
+                'monthly_cash_flow': 0,
+                'closing_costs': 0,
+                'resale_price': wholesale_analysis['assignment_price'],
+                'net_profit': wholesale_analysis['assignment_fee'],
+                'hold_time': 'None',
+                'exit_strategy': 'Assignment',
+                'roi': 0,
+                'timeline_months': 0
+            },
+            'installment': {
+                'label': 'Installment MAO',
+                'offer_price': installment_analysis['installment_mao'],
+                'entry_cash': installment_analysis['installment_mao'],
+                'monthly_payment': 0,
+                'monthly_cash_flow': 0,
+                'closing_costs': installment_analysis['closing_costs'],
+                'resale_price': installment_analysis['final_sales_price'],
+                'net_profit': installment_analysis['net_profit'],
+                'hold_time': '3-6 months',
+                'exit_strategy': 'MLS Novation',
+                'roi': installment_analysis['profit_margin'],
+                'timeline_months': 6
+            },
+            'subject_to': {
+                'label': 'Takeover + Equity',
+                'offer_price': subject_to_analysis['purchase_price'],
+                'entry_cash': subject_to_analysis['total_investment'],
+                'monthly_payment': subject_to_analysis['monthly_piti'],
+                'monthly_cash_flow': subject_to_analysis['cash_flow_lease_option'],
+                'closing_costs': subject_to_analysis['entry_fees_total'],
+                'resale_price': subject_to_analysis['lease_option_sale_price'],
+                'net_profit': subject_to_analysis['total_profit_lease_option'],
+                'hold_time': '5 years',
+                'exit_strategy': 'Lease Option',
+                'roi': subject_to_analysis['roi_lease_option'],
+                'timeline_months': 60
+            },
+            'seller_finance': {
+                'label': 'Owner Finance Terms',
+                'offer_price': seller_finance_analysis['seller_finance_purchase_price'],
+                'entry_cash': seller_finance_analysis['total_investment'],
+                'monthly_payment': seller_finance_analysis['monthly_total_outflow'],
+                'monthly_cash_flow': seller_finance_analysis['monthly_cash_flow'],
+                'closing_costs': seller_finance_analysis['closing_costs'],
+                'resale_price': seller_finance_analysis['projected_arv_at_balloon'] if seller_finance_analysis['has_balloon'] else seller_finance_analysis['arv'],
+                'net_profit': seller_finance_analysis['total_return'] if seller_finance_analysis['has_balloon'] else seller_finance_analysis['cash_flow_5_years'],
+                'hold_time': '5 years' if seller_finance_analysis['has_balloon'] else 'Long-term',
+                'exit_strategy': 'Refi/Sale',
+                'roi': seller_finance_analysis['cash_on_cash_return'],
+                'timeline_months': seller_finance_analysis['balloon_term_months'] if seller_finance_analysis['has_balloon'] else 60
+            }
+        }
         
         # Store in session
         session['property_data'] = {
@@ -186,7 +264,14 @@ def generate_presentation():
             'installment_validations': installment_validations,
             'seller_psychology': seller_psychology,
             'default_fees': default_fees,
-            'fee_tooltips': fee_tooltips
+            'fee_tooltips': fee_tooltips,
+            'subject_to_analysis': subject_to_analysis,
+            'subject_to_validations': subject_to_validations,
+            'subject_to_strategies': subject_to_strategies,
+            'seller_finance_analysis': seller_finance_analysis,
+            'seller_finance_validations': seller_finance_validations,
+            'seller_finance_strategies': seller_finance_strategies,
+            'offer_comparison': offer_comparison
         }
         
         return render_template('presentation_simple.html',
@@ -213,7 +298,10 @@ def generate_presentation():
                              installment_validations=installment_validations,
                              seller_psychology=seller_psychology,
                              default_fees=default_fees,
-                             fee_tooltips=fee_tooltips)
+                             fee_tooltips=fee_tooltips,
+                             subject_to_analysis=subject_to_analysis,
+                             subject_to_validations=subject_to_validations,
+                             subject_to_strategies=subject_to_strategies)
         
     except Exception as e:
         logging.error(f"Error: {e}")
@@ -301,6 +389,48 @@ def calculate_installment():
         
     except Exception as e:
         logging.error(f"Installment calculation error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/calculate-subject-to', methods=['POST'])
+def calculate_subject_to():
+    """API endpoint for Subject-To offer calculations"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+            
+        arv = data.get('arv', 270000)
+        principal_balance = data.get('principal_balance', 260000)
+        purchase_price = data.get('purchase_price', 260000)
+        cash_to_seller = data.get('cash_to_seller', 4000)
+        annual_interest_rate = data.get('annual_interest_rate', 7.2)
+        rent_income = data.get('rent_income', 1900)
+        lease_option_income = data.get('lease_option_income', 2000)
+        lease_option_sale_price = data.get('lease_option_sale_price', 299000)
+        
+        subject_to_analysis = calculate_subject_to_offer(
+            arv=arv,
+            principal_balance=principal_balance,
+            purchase_price=purchase_price,
+            cash_to_seller=cash_to_seller,
+            annual_interest_rate=annual_interest_rate,
+            rent_income=rent_income,
+            lease_option_income=lease_option_income,
+            lease_option_sale_price=lease_option_sale_price
+        )
+        
+        validations = validate_subject_to_deal(subject_to_analysis)
+        strategies = get_subject_to_strategies()
+        
+        return jsonify({
+            'success': True,
+            'subject_to_analysis': subject_to_analysis,
+            'validations': validations,
+            'strategies': strategies
+        })
+        
+    except Exception as e:
+        logging.error(f"Subject-To calculation error: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/calculate-offers', methods=['POST'])
