@@ -11,7 +11,7 @@ def calculate_seller_finance_offer(arv, seller_finance_purchase_price, down_paym
                                   balloon_term_months=0, monthly_taxes=150, monthly_insurance=100,
                                   monthly_hoa=0, monthly_rent=2000, annual_maintenance_reserve=1200,
                                   closing_costs=5000, rehab_budget=30000, capital_cost=10000,
-                                  is_interest_only=False, bedrooms=3, bathrooms=2, square_feet=1200):
+                                  is_interest_only=False, bedrooms=3, bathrooms=2.0, square_feet=1200):
     """
     Calculate comprehensive Seller Finance offer analysis with payment structures and exit strategies
     """
