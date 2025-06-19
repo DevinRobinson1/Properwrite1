@@ -301,7 +301,11 @@ def generate_presentation():
                              fee_tooltips=fee_tooltips,
                              subject_to_analysis=subject_to_analysis,
                              subject_to_validations=subject_to_validations,
-                             subject_to_strategies=subject_to_strategies)
+                             subject_to_strategies=subject_to_strategies,
+                             seller_finance_analysis=seller_finance_analysis,
+                             seller_finance_validations=seller_finance_validations,
+                             seller_finance_strategies=seller_finance_strategies,
+                             offer_comparison=offer_comparison)
         
     except Exception as e:
         logging.error(f"Error: {e}")
