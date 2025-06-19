@@ -121,6 +121,7 @@ def calculate_seller_finance_offer(arv, seller_finance_purchase_price, down_paym
         'down_payment': down_payment,
         'interest_rate': interest_rate,
         'amortization_term_months': amortization_term_months,
+        'amortization_term_years': amortization_term_months / 12,  # Template expects this field
         'balloon_term_months': balloon_term_months,
         'is_interest_only': is_interest_only,
         
@@ -137,6 +138,7 @@ def calculate_seller_finance_offer(arv, seller_finance_purchase_price, down_paym
         # Calculated values
         'loan_amount': loan_amount,
         'monthly_pi': monthly_pi,
+        'monthly_payment': monthly_pi,  # Template expects this field
         'monthly_maintenance': monthly_maintenance,
         'monthly_expenses': monthly_expenses,
         'monthly_total_outflow': monthly_total_outflow,
