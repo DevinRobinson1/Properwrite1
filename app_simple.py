@@ -112,7 +112,7 @@ def generate_presentation():
             'data_sources': data_sources
         }
         
-        return render_template('presentation.html',
+        return render_template('presentation_simple.html',
                              address=address,
                              city=city,
                              state=state,
@@ -142,7 +142,7 @@ def share_link(data):
         # Decode the shared data
         decoded_data = json.loads(base64.b64decode(data.encode()).decode())
         
-        return render_template('presentation.html', **decoded_data)
+        return render_template('presentation_simple.html', **decoded_data)
         
     except Exception as e:
         return f"<h1>Invalid Share Link</h1><p>Unable to load shared presentation.</p>", 400

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ property_title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .print-break { page-break-before: always; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header Actions -->
+    <div class="bg-white shadow-sm border-b no-print">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="/" class="text-blue-600 hover:text-blue-800 font-medium">
+                <i class="fas fa-arrow-left mr-2"></i>Generate Another
+            </a>
+            <div class="space-x-3">
+                <button onclick="window.print()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                    <i class="fas fa-download mr-2"></i>Print/PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Property Title -->
+        <div class="bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg p-8 mb-8 shadow-lg">
+            <h1 class="text-4xl font-bold mb-4">{{ property_title }}</h1>
+            <div class="flex flex-wrap items-center text-lg space-x-6">
+                <span><i class="fas fa-map-marker-alt mr-2"></i>{{ address }}, {{ city }}, {{ state }} {{ zip }}</span>
+                <span><i class="fas fa-bed mr-2"></i>{{ beds }} Bed</span>
+                <span><i class="fas fa-bath mr-2"></i>{{ baths }} Bath</span>
+                <span><i class="fas fa-ruler-combined mr-2"></i>{{ "{:,}".format(sqft) }} sqft</span>
+            </div>
+        </div>
+
+        <!-- Investment Summary -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-star text-yellow-500 mr-2"></i>Investment Summary
+            </h2>
+            <p class="text-lg text-gray-700 leading-relaxed">{{ property_summary }}</p>
+        </div>
+
+        <!-- Key Highlights -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-fire text-red-500 mr-2"></i>Key Highlights
+            </h3>
+            <ul class="space-y-3 text-lg">
+                <li class="flex items-center">
+                    <span class="text-2xl mr-3">🛏</span>
+                    <strong>{{ beds }} Bed / {{ baths }} Bath / {{ "{:,}".format(sqft) }} sqft</strong>
+                </li>
+                {% if financials.buy_price %}
+                <li class="flex items-center">
+                    <span class="text-2xl mr-3">💵</span>
+                    <span>Purchase Price: <strong>${{ "{:,}".format(financials.buy_price|int) }}</strong></span>
+                </li>
+                {% endif %}
+                {% if financials.arv %}
+                <li class="flex items-center">
+                    <span class="text-2xl mr-3">🏠</span>
+                    <span>Estimated Value: <strong>${{ "{:,}".format(financials.arv|int) }}</strong></span>
+                </li>
+                {% endif %}
+                {% if financials.monthly_rent %}
+                <li class="flex items-center">
+                    <span class="text-2xl mr-3">💰</span>
+                    <span>Monthly Rent: <strong>${{ "{:,}".format(financials.monthly_rent|int) }}</strong></span>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <!-- Financial Overview -->
+        {% if financials %}
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-calculator text-green-500 mr-2"></i>Financial Overview
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {% if financials.buy_price %}
+                <div class="text-center bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <div class="text-sm text-blue-600 font-medium">Purchase Price</div>
+                    <span class="font-bold text-lg">${{ "{:,}".format(financials.buy_price|int) }}</span>
+                </div>
+                {% endif %}
+                {% if financials.arv %}
+                <div class="text-center bg-green-50 p-4 rounded-lg border border-green-200">
+                    <div class="text-sm text-green-600 font-medium">Estimated Value</div>
+                    <span class="font-bold text-xl text-green-600">${{ "{:,}".format(financials.arv|int) }}</span>
+                </div>
+                {% endif %}
+                {% if financials.monthly_rent %}
+                <div class="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                    <div class="text-sm text-yellow-600 font-medium">Monthly Rent</div>
+                    <span class="font-bold text-lg text-yellow-600">${{ "{:,}".format(financials.monthly_rent|int) }}</span>
+                </div>
+                {% endif %}
+                {% if financials.cap_rate %}
+                <div class="text-center bg-purple-50 p-4 rounded-lg border border-purple-200">
+                    <div class="text-sm text-purple-600 font-medium">Cap Rate</div>
+                    <span class="font-bold text-lg text-purple-600">{{ "%.1f"|format(financials.cap_rate) }}%</span>
+                </div>
+                {% endif %}
+                {% if financials.cash_flow %}
+                <div class="text-center bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+                    <div class="text-sm text-indigo-600 font-medium">Monthly Cash Flow</div>
+                    <span class="font-bold text-lg text-indigo-600">${{ "{:,}".format(financials.cash_flow|int) }}</span>
+                </div>
+                {% endif %}
+                {% if financials.roi %}
+                <div class="text-center bg-pink-50 p-4 rounded-lg border border-pink-200">
+                    <div class="text-sm text-pink-600 font-medium">ROI</div>
+                    <span class="font-bold text-lg text-pink-600">{{ "%.1f"|format(financials.roi) }}%</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Property Details -->
+        {% if property_data %}
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-home text-blue-500 mr-2"></i>Property Details
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <div class="text-gray-600 text-sm font-medium">Property Type</div>
+                    <div class="font-bold text-lg">{{ property_data.propertyType or "Single Family" }}</div>
+                </div>
+                {% if property_data.yearBuilt %}
+                <div class="text-center">
+                    <div class="text-gray-600 text-sm font-medium">Year Built</div>
+                    <div class="font-bold text-lg">{{ property_data.yearBuilt }}</div>
+                </div>
+                {% endif %}
+                <div class="text-center">
+                    <div class="text-gray-600 text-sm font-medium">Square Feet</div>
+                    <div class="font-bold text-lg">{{ "{:,}".format(sqft) }}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-gray-600 text-sm font-medium">Bedrooms/Baths</div>
+                    <div class="font-bold text-lg">{{ beds }}/{{ baths }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Data Sources -->
+        {% if data_sources %}
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-database text-purple-500 mr-2"></i>Data Sources
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for source, status in data_sources.items() %}
+                <div class="bg-gray-50 rounded-lg p-4 border-l-4 border-blue-500">
+                    <div class="font-semibold text-gray-800">{{ source }}</div>
+                    <div class="text-sm text-gray-600">{{ status }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Market Data -->
+        {% if market_data %}
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-chart-area text-green-500 mr-2"></i>Market Analysis
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {% if market_data.rent_estimate %}
+                <div class="text-center bg-green-50 p-4 rounded-lg">
+                    <div class="text-green-600 text-sm font-medium">Rent Estimate</div>
+                    <div class="font-bold text-xl text-green-600">${{ "{:,}".format(market_data.rent_estimate|int) }}/mo</div>
+                </div>
+                {% endif %}
+                {% if market_data.property_value_estimate %}
+                <div class="text-center bg-blue-50 p-4 rounded-lg">
+                    <div class="text-blue-600 text-sm font-medium">Property Value</div>
+                    <div class="font-bold text-xl text-blue-600">${{ "{:,}".format(market_data.property_value_estimate|int) }}</div>
+                </div>
+                {% endif %}
+                {% if market_data.neighborhood %}
+                <div class="text-center bg-purple-50 p-4 rounded-lg">
+                    <div class="text-purple-600 text-sm font-medium">Market Area</div>
+                    <div class="font-bold text-lg text-purple-600">{{ market_data.neighborhood }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div class="text-center text-gray-500 text-sm mt-12 print-break">
+            <p>Generated by Real Estate Investment Analyzer</p>
+            <p>Analysis based on available property data and market conditions</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script_clean.js') }}"></script>
+</body>
+</html>
