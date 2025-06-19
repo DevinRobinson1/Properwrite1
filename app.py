@@ -852,10 +852,10 @@ def generate_presentation():
             'data_sources': generate_comprehensive_data_sources_summary(comprehensive_data),
             'schools': [],  # Real school data not available - removed mock data
             'amenities': [],  # Real amenity data not available - removed mock data
-            'year_built': rentcast_property.get('yearBuilt') if rentcast_property else 2000,
-            'lot_size': rentcast_property.get('lotSize') if rentcast_property else 'Unknown',
-            'condition': rentcast_property.get('condition') if rentcast_property else 'Unknown',
-            'property_type': rentcast_property.get('propertyType') if rentcast_property else 'Single Family Residential'
+            'year_built': rentcast_property.get('yearBuilt') if rentcast_property else None,
+            'lot_size': rentcast_property.get('lotSize') if rentcast_property else None,
+            'condition': rentcast_property.get('condition') if rentcast_property else None,
+            'property_type': rentcast_property.get('propertyType') if rentcast_property else None
         }
         
         return render_template('presentation.html', property=property_data)
