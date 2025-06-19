@@ -1,0 +1,104 @@
+## 🧠 Project Context:
+Fund Flow OS is now being used by active users, beta testers, and content creators. To ensure long-term scalability and a smooth user experience, we need a **comprehensive data sweep and clean**, targeting system integrity and operational optimization.
+
+⚠️ IMPORTANT: Do not change layout, design, button positions, labels, or core functionality in any way.
+
+---
+
+## 🎯 OBJECTIVE
+
+Perform an exhaustive, system-wide data review and clean-up that ensures:
+- ✅ Full data consistency across all modules
+- ✅ Maximum efficiency and response speed
+- ✅ All data relationships are connected and reflected properly
+- ✅ There are no orphaned, broken, or lagging records
+- ✅ All user-facing and backend logic functions reliably
+
+---
+
+## ✅ DATA CLEAN & INTEGRITY TASKS
+
+### 🔄 1. Entity Connection & Relationship Validation
+
+- Scrape and review core entity relationships:
+  - Contacts ↔ Pipeline ↔ Deals ↔ Loans ↔ Tags ↔ Notes ↔ Tenants
+
+- ✅ Ensure:
+  - Every pipeline card is tied to an existing contact
+  - Every deal/investment record is tied to an active tenant and investor
+  - Every loan is attached to a valid contact and properly displays in the Private Loans tab
+  - No contacts exist without a valid `tenantId`
+
+---
+
+### 🧹 2. Remove Orphaned or Unused Records
+
+- ✅ Identify and safely remove:
+  - Pipeline cards with no `contactId`
+  - Tags or lead sources with `0` references and not saved in tenant settings
+  - Stale entries in activity logs, old webhook tests, or abandoned drafts
+
+- ✅ Fix:
+  - Any records saved with incomplete fields (e.g. empty `createdAt`, broken references)
+  - Placeholder/demo contacts in non-demo accounts
+
+---
+
+### 📈 3. Optimize Internal Queries and Indexing
+
+- Review all data calls for:
+  - ✅ Redundant queries
+  - ✅ Unindexed filters causing delays
+  - ✅ Over-fetching or n+1 issues on contact/profile pages
+
+- Confirm proper use of:
+  - `createdAt`, `tenantId`, and indexing keys on all tables/collections
+
+---
+
+### 🔁 4. Sync and Audit All Stats
+
+- ✅ Make sure:
+  - Dashboard and pipeline numbers match actual records
+  - All stages show accurate totals based on real pipeline card content
+  - Loan balances and commitments are properly calculated
+  - No numbers are “stuck” from past sample/test states
+
+---
+
+### 🔐 5. Tenant Isolation Check
+
+- ✅ Confirm that each tenant’s:
+  - Contacts
+  - Loans
+  - CRM data
+  - Settings (tags, sources, automation)
+  - Admin activity logs
+  ...are fully isolated and not accessible by other tenants
+
+---
+
+### 📬 6. Activity & Messaging Clean
+
+- ✅ Remove:
+  - Duplicate entries in activity logs
+  - Unlinked notification records
+  - Any broken webhooks or failed send attempts that aren't cleared
+
+---
+
+## ⚠️ DO NOT
+
+- ❌ Do not delete or touch any active production data unless clearly orphaned or broken
+- ❌ Do not change any layout, button location, field names, tabs, or visual structure
+- ❌ Do not remove demo data from `sarah.chen@betauser.com`
+- ✅ Only perform a deep data sweep and clean under the hood
+
+---
+
+## ✅ FINAL OUTPUT
+
+- Platform runs faster, with fully connected data across all sections
+- No broken links, ghost records, or lagging reports
+- CRM and dashboard reflect true, connected, tenant-specific information
+- Nothing changes visually or structurally on the front end

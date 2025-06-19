@@ -3,7 +3,7 @@ Wholesale/Cash Offer Calculator with Ackerman Method
 Implements Chris Voss's Ackerman Method for descending offer strategy
 """
 
-def calculate_wholesale_offers(arv, repairs, wholesale_arv_percent=0.70, negative_adjustments=0, positive_adjustments=0, min_acceptable_profit=15000):
+def calculate_wholesale_offers(arv, repairs, wholesale_arv_percent=0.70, negative_adjustments=0, positive_adjustments=0, min_acceptable_profit=15000, bedrooms=3, bathrooms=2, square_feet=1200, rent=2000):
     """
     Calculate wholesale offers using Ackerman Method
     Based on strict investment logic for cash buyers

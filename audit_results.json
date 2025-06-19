@@ -1,0 +1,92 @@
+{
+  "orphaned_records": [
+    {
+      "type": "unused_app_file",
+      "file": "app.py",
+      "recommendation": "Archive or remove if no longer needed"
+    },
+    {
+      "type": "unused_app_file",
+      "file": "app_simple.py",
+      "recommendation": "Archive or remove if no longer needed"
+    },
+    {
+      "type": "unused_template",
+      "file": "index.html",
+      "recommendation": "Archive if no longer used"
+    },
+    {
+      "type": "unused_template",
+      "file": "presentation.html",
+      "recommendation": "Archive if no longer used"
+    },
+    {
+      "type": "unused_template",
+      "file": "presentation_simple.html",
+      "recommendation": "Archive if no longer used"
+    },
+    {
+      "type": "unused_template",
+      "file": "presentation_clean.html",
+      "recommendation": "Archive if no longer used"
+    }
+  ],
+  "broken_relationships": [
+    {
+      "module": "wholesale_calculator",
+      "issue": "Missing required parameters",
+      "missing_params": [
+        "bedrooms",
+        "bathrooms",
+        "square_feet",
+        "rent"
+      ]
+    },
+    {
+      "module": "installment_calculator",
+      "issue": "Missing required parameters",
+      "missing_params": [
+        "bedrooms",
+        "bathrooms",
+        "square_feet",
+        "rent"
+      ]
+    },
+    {
+      "module": "subject_to_calculator",
+      "issue": "Missing required parameters",
+      "missing_params": [
+        "repairs",
+        "bedrooms",
+        "bathrooms",
+        "square_feet"
+      ]
+    },
+    {
+      "module": "seller_finance_calculator",
+      "issue": "Missing required parameters",
+      "missing_params": [
+        "repairs",
+        "bedrooms",
+        "bathrooms",
+        "square_feet"
+      ]
+    }
+  ],
+  "data_inconsistencies": [],
+  "performance_issues": [],
+  "optimization_recommendations": [
+    {
+      "service": "enhanced_property_service",
+      "recommendation": "Implement caching for external API responses"
+    },
+    {
+      "component": "template_optimization",
+      "recommendation": "Move inline styles to external CSS for better performance"
+    },
+    {
+      "component": "css_optimization",
+      "recommendation": "Consider local Tailwind build for production"
+    }
+  ]
+}

@@ -7,7 +7,7 @@ Price + Convenience = Installment/Novation Offers
 def calculate_installment_offers(arv, estimated_repairs, negative_adjustments=0, positive_adjustments=0, 
                                 discount_to_sell_fast=10000, buyer_over_ask_bonus=0, closing_costs=18400, 
                                 min_acceptable_profit=15000, split_with_seller_bonus=0, wholesale_mao=0, 
-                                detailed_fees=None):
+                                detailed_fees=None, bedrooms=3, bathrooms=2, square_feet=1200, rent=2000):
     """
     Calculate installment offers using real-world underwriting logic
     Based on seller psychology: Price + Convenience framework
