@@ -21,7 +21,47 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeTooltips();
     
     // Google Places disabled - manual address entry enabled
+    
+    // Initialize tabs if present
+    initializeTabs();
 });
+
+// Tab functionality for offer strategy calculator
+function initializeTabs() {
+    // Show wholesale tab by default if tabs exist
+    const tabs = document.querySelectorAll('.tab-button');
+    if (tabs.length > 0) {
+        showTab('wholesale');
+    }
+}
+
+function showTab(tabName) {
+    // Hide all tab contents
+    const contents = document.querySelectorAll('.tab-content');
+    contents.forEach(content => {
+        content.classList.add('hidden');
+    });
+    
+    // Remove active class from all tab buttons
+    const buttons = document.querySelectorAll('.tab-button');
+    buttons.forEach(button => {
+        button.classList.remove('border-blue-500', 'text-blue-600');
+        button.classList.add('border-transparent', 'text-gray-500');
+    });
+    
+    // Show selected tab content
+    const selectedContent = document.getElementById(`tab-content-${tabName}`);
+    if (selectedContent) {
+        selectedContent.classList.remove('hidden');
+    }
+    
+    // Activate selected tab button
+    const selectedButton = document.getElementById(`tab-${tabName}`);
+    if (selectedButton) {
+        selectedButton.classList.remove('border-transparent', 'text-gray-500');
+        selectedButton.classList.add('border-blue-500', 'text-blue-600');
+    }
+}
 
 // Form validation setup
 function setupFormValidation() {
