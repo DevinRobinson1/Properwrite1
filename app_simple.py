@@ -9,9 +9,7 @@ logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-key-12345")
 
-# Environment variables for APIs
-RENTCAST_API_KEY = os.environ.get('RENTCAST_API_KEY')
-RAPIDAPI_KEY = os.environ.get('RAPIDAPI_KEY')
+# Simple property analyzer without external APIs
 
 @app.route('/')
 def index():
@@ -42,34 +40,31 @@ def generate_presentation():
         
         logging.info(f"Processing: {address}, {city}, {state} {zip_code}")
         
-        # Simple property data structure
+        # Property data structure with user inputs only
         property_data = {
             'formattedAddress': f"{address}, {city}, {state} {zip_code}",
             'bedrooms': beds,
             'bathrooms': baths,
             'squareFootage': sqft,
-            'propertyType': 'Single Family',
-            'yearBuilt': 2010,
-            'lastSalePrice': 0,
-            'lastSaleDate': None
+            'propertyType': 'Property Analysis'
         }
         
-        # Basic market data
+        # Market data based on property characteristics
         market_data = {
             'rent_estimate': sqft * 1.2,
             'property_value_estimate': sqft * 150,
             'neighborhood': f"{city}, {state}"
         }
         
-        # Simple financials
-        arv = sqft * 160  # Basic ARV calculation
+        # Financial calculations based on property specs
+        estimated_value = sqft * 150
         monthly_rent = sqft * 1.2
         
         financials = {
-            'arv': arv,
+            'arv': estimated_value,
             'monthly_rent': monthly_rent,
             'annual_rent': monthly_rent * 12,
-            'estimated_value': arv
+            'estimated_value': estimated_value
         }
         
         if buy_price > 0:
@@ -83,11 +78,11 @@ def generate_presentation():
         # Simple comparable data
         comparables = []
         
-        # Data sources status
+        # Analysis methods used
         data_sources = {
-            'Rentcast': 'API configured - fetching authentic property data',
-            'Google Maps': 'Connected - address validation active',
-            'Market Analysis': 'Processing property characteristics'
+            'Property Analysis': 'Based on user-provided specifications',
+            'Market Calculations': 'Using standard real estate formulas',
+            'Investment Metrics': 'Calculated from property characteristics'
         }
         
         # Generate presentation content
