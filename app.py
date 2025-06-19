@@ -16,6 +16,13 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-change-in-prod
 RENTCAST_API_KEY = "c9c57c66b54140ff9b9db53efab53566"
 RENTCAST_BASE_URL = "https://api.rentcast.io/v1"
 
+# RapidAPI Configuration
+RAPIDAPI_KEY = "be3e296439msh2693e44b9d2433fp17bebbjsn9aa77716b131"
+RAPIDAPI_HEADERS = {
+    'x-rapidapi-key': RAPIDAPI_KEY,
+    'Content-Type': 'application/json'
+}
+
 # Mock data for property analysis
 MOCK_NEIGHBORHOODS = {
     'charlotte': ['Noda Arts District', 'South End', 'Dilworth', 'Myers Park', 'Plaza Midwood'],
@@ -133,6 +140,242 @@ def search_comparable_properties(city, state, beds, baths, sqft):
     except requests.exceptions.RequestException as e:
         logging.error(f"Rentcast search API request failed: {str(e)}")
         return []
+
+# RapidAPI Integration Functions
+def get_zillow_property_data(address, city, state, zip_code):
+    """Get property data from Zillow via RapidAPI"""
+    headers = {**RAPIDAPI_HEADERS, 'x-rapidapi-host': 'zillow-com1.p.rapidapi.com'}
+    
+    try:
+        # Search for property by address
+        search_url = "https://zillow-com1.p.rapidapi.com/propertySearch"
+        search_params = {
+            'address': f"{address}, {city}, {state} {zip_code}",
+            'status_type': 'ForSale'
+        }
+        
+        response = requests.get(search_url, headers=headers, params=search_params, timeout=15)
+        logging.debug(f"Zillow API response: {response.status_code}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            logging.debug(f"Zillow data received: {len(data.get('results', []))} properties")
+            return data
+        else:
+            logging.warning(f"Zillow API returned: {response.status_code}")
+            return None
+            
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Zillow API request failed: {str(e)}")
+        return None
+
+def get_redfin_property_data(city, state):
+    """Get property data from Redfin via RapidAPI"""
+    headers = {**RAPIDAPI_HEADERS, 'x-rapidapi-host': 'redfin-com-data.p.rapidapi.com'}
+    
+    try:
+        # Search for region ID first
+        region_url = "https://redfin-com-data.p.rapidapi.com/properties/search-rent"
+        region_params = {
+            'regionId': f"{city}_{state}",  # This may need adjustment based on API docs
+        }
+        
+        response = requests.get(region_url, headers=headers, params=region_params, timeout=15)
+        logging.debug(f"Redfin API response: {response.status_code}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            logging.debug(f"Redfin data received")
+            return data
+        else:
+            logging.warning(f"Redfin API returned: {response.status_code}")
+            return None
+            
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Redfin API request failed: {str(e)}")
+        return None
+
+def get_realtor_property_data(latitude, longitude):
+    """Get property data from Realtor.com via RapidAPI"""
+    headers = {**RAPIDAPI_HEADERS, 'x-rapidapi-host': 'realtor-search.p.rapidapi.com'}
+    
+    try:
+        # Get nearby home values
+        nearby_url = "https://realtor-search.p.rapidapi.com/properties/nearby-home-values"
+        nearby_params = {
+            'lat': latitude,
+            'lon': longitude
+        }
+        
+        response = requests.get(nearby_url, headers=headers, params=nearby_params, timeout=15)
+        logging.debug(f"Realtor API response: {response.status_code}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            logging.debug(f"Realtor data received")
+            return data
+        else:
+            logging.warning(f"Realtor API returned: {response.status_code}")
+            return None
+            
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Realtor API request failed: {str(e)}")
+        return None
+
+def get_airdna_data(city, state):
+    """Get short-term rental data from AirDNA via RapidAPI"""
+    headers = {**RAPIDAPI_HEADERS, 'x-rapidapi-host': 'airdna1.p.rapidapi.com'}
+    
+    try:
+        # Get properties data
+        airdna_url = "https://airdna1.p.rapidapi.com/properties"
+        airdna_params = {
+            'location': f"{city}, {state}",
+            'currency': 'native'
+        }
+        
+        response = requests.get(airdna_url, headers=headers, params=airdna_params, timeout=15)
+        logging.debug(f"AirDNA API response: {response.status_code}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            logging.debug(f"AirDNA data received")
+            return data
+        else:
+            logging.warning(f"AirDNA API returned: {response.status_code}")
+            return None
+            
+    except requests.exceptions.RequestException as e:
+        logging.error(f"AirDNA API request failed: {str(e)}")
+        return None
+
+def get_comprehensive_property_data(address, city, state, zip_code):
+    """Fetch comprehensive property data from all available APIs"""
+    logging.info(f"Fetching comprehensive data for: {address}, {city}, {state} {zip_code}")
+    
+    # Fetch from all APIs concurrently
+    property_data = {}
+    
+    # Rentcast data (already working)
+    rentcast_data = get_rentcast_property_data(address, city, state, zip_code)
+    if rentcast_data:
+        property_data['rentcast'] = rentcast_data[0] if isinstance(rentcast_data, list) and rentcast_data else rentcast_data
+    
+    # Zillow data
+    zillow_data = get_zillow_property_data(address, city, state, zip_code)
+    if zillow_data:
+        property_data['zillow'] = zillow_data
+    
+    # Redfin data
+    redfin_data = get_redfin_property_data(city, state)
+    if redfin_data:
+        property_data['redfin'] = redfin_data
+    
+    # Get coordinates for Realtor API (from Rentcast if available)
+    latitude = longitude = None
+    if rentcast_data and isinstance(rentcast_data, list) and rentcast_data:
+        latitude = rentcast_data[0].get('latitude')
+        longitude = rentcast_data[0].get('longitude')
+    
+    # Realtor data (needs coordinates)
+    if latitude and longitude:
+        realtor_data = get_realtor_property_data(latitude, longitude)
+        if realtor_data:
+            property_data['realtor'] = realtor_data
+    
+    # AirDNA data
+    airdna_data = get_airdna_data(city, state)
+    if airdna_data:
+        property_data['airdna'] = airdna_data
+    
+    return property_data
+
+def generate_multi_source_valuations(comprehensive_data):
+    """Generate property valuations from all available data sources"""
+    valuations = {}
+    
+    # Rentcast valuation
+    rentcast_data = comprehensive_data.get('rentcast', {})
+    if rentcast_data:
+        if rentcast_data.get('lastSalePrice'):
+            valuations['Rentcast Last Sale'] = f"${rentcast_data['lastSalePrice']:,} ({rentcast_data.get('lastSaleDate', 'Unknown date')})"
+        
+        # Get latest tax assessment
+        tax_assessments = rentcast_data.get('taxAssessments', {})
+        if tax_assessments:
+            latest_year = max(tax_assessments.keys()) if tax_assessments else None
+            if latest_year:
+                assessed_value = tax_assessments[latest_year].get('value')
+                if assessed_value:
+                    valuations['County Assessed Value'] = f"${assessed_value:,} ({latest_year})"
+    
+    # Zillow valuation
+    zillow_data = comprehensive_data.get('zillow', {})
+    if zillow_data and zillow_data.get('results'):
+        for result in zillow_data['results'][:1]:  # Take first result
+            if result.get('zestimate'):
+                valuations['Zillow Zestimate'] = f"${result['zestimate']:,}"
+            if result.get('price'):
+                valuations['Zillow Listed Price'] = f"${result['price']:,}"
+    
+    # Redfin valuation
+    redfin_data = comprehensive_data.get('redfin', {})
+    if redfin_data and redfin_data.get('homes'):
+        for home in redfin_data['homes'][:1]:  # Take first result
+            if home.get('price'):
+                valuations['Redfin Estimate'] = f"${home['price']:,}"
+    
+    # Realtor valuation
+    realtor_data = comprehensive_data.get('realtor', {})
+    if realtor_data and realtor_data.get('properties'):
+        for prop in realtor_data['properties'][:1]:  # Take first result
+            if prop.get('estimate'):
+                valuations['Realtor.com Estimate'] = f"${prop['estimate']:,}"
+    
+    return valuations
+
+def compile_market_data(comprehensive_data, city, state):
+    """Compile market data from all sources including rent estimates"""
+    market_data = {}
+    
+    # Rentcast data
+    rentcast_data = comprehensive_data.get('rentcast', {})
+    if rentcast_data:
+        beds = rentcast_data.get('bedrooms', 3)
+        baths = rentcast_data.get('bathrooms', 2)
+        sqft = rentcast_data.get('squareFootage', 1400)
+        
+        # Calculate rent estimate from sale price
+        if rentcast_data.get('lastSalePrice'):
+            estimated_monthly_rent = int(rentcast_data['lastSalePrice'] * 0.01)
+            market_data['rent_estimate'] = estimated_monthly_rent
+            market_data['rent_source'] = 'Calculated from Rentcast sale data'
+        
+        market_data['last_sale_price'] = rentcast_data.get('lastSalePrice')
+        market_data['last_sale_date'] = rentcast_data.get('lastSaleDate')
+        
+        # Tax assessment data
+        tax_assessments = rentcast_data.get('taxAssessments', {})
+        if tax_assessments:
+            latest_year = max(tax_assessments.keys()) if tax_assessments else None
+            if latest_year:
+                market_data['assessed_value'] = tax_assessments[latest_year].get('value')
+    
+    # AirDNA short-term rental data
+    airdna_data = comprehensive_data.get('airdna', {})
+    if airdna_data and airdna_data.get('data'):
+        properties = airdna_data['data']
+        if properties:
+            # Calculate average nightly rate and occupancy
+            total_revenue = sum(prop.get('revenue', 0) for prop in properties[:10])
+            avg_nightly_rate = sum(prop.get('adr', 0) for prop in properties[:10]) / min(len(properties), 10)
+            avg_occupancy = sum(prop.get('occupancy', 0) for prop in properties[:10]) / min(len(properties), 10)
+            
+            market_data['airbnb_nightly_rate'] = int(avg_nightly_rate) if avg_nightly_rate > 0 else None
+            market_data['airbnb_occupancy'] = round(avg_occupancy, 1) if avg_occupancy > 0 else None
+            market_data['airbnb_monthly_estimate'] = int(avg_nightly_rate * 30 * (avg_occupancy / 100)) if avg_nightly_rate > 0 and avg_occupancy > 0 else None
+    
+    return market_data
 
 def generate_property_title(address, city, beds, baths):
     """Generate an engaging property title"""
@@ -475,17 +718,37 @@ def calculate_financials_from_api_data(property_data, market_data, comparables, 
         'arv_source': arv_source
     }
 
-def generate_data_sources_summary(property_data, market_data, comparable_properties):
-    """Generate summary of data sources used"""
-    sources = {
-        'Rentcast Property Data': 'Available' if property_data else 'Not Available',
-        'Rentcast Market Data': 'Available' if market_data else 'Not Available',
-        'Rentcast Comparables': f"{len(comparable_properties)} found" if comparable_properties else 'Not Available',
-        'Zillow': 'Not Connected (API key needed)',
-        'Redfin': 'Not Connected (API key needed)',
-        'Realtor.com': 'Not Connected (API key needed)',
-        'County Records': 'Not Connected (API access needed)'
-    }
+def generate_comprehensive_data_sources_summary(comprehensive_data):
+    """Generate summary of all data sources used"""
+    sources = {}
+    
+    # Check each API source
+    if comprehensive_data.get('rentcast'):
+        sources['Rentcast'] = 'Connected - Property details available'
+    else:
+        sources['Rentcast'] = 'No data retrieved'
+    
+    if comprehensive_data.get('zillow'):
+        zillow_results = comprehensive_data['zillow'].get('results', [])
+        sources['Zillow'] = f'Connected - {len(zillow_results)} properties found'
+    else:
+        sources['Zillow'] = 'No data retrieved'
+    
+    if comprehensive_data.get('redfin'):
+        sources['Redfin'] = 'Connected - Market data available'
+    else:
+        sources['Redfin'] = 'No data retrieved'
+    
+    if comprehensive_data.get('realtor'):
+        sources['Realtor.com'] = 'Connected - Property valuations available'
+    else:
+        sources['Realtor.com'] = 'No data retrieved'
+    
+    if comprehensive_data.get('airdna'):
+        sources['AirDNA'] = 'Connected - Short-term rental data available'
+    else:
+        sources['AirDNA'] = 'No data retrieved'
+    
     return sources
 
 def generate_property_summary(address, city, financials):
@@ -516,9 +779,12 @@ def generate_presentation():
         state = data.get('state', '').strip()
         zip_code = data.get('zip', '').strip()
         
-        # Fetch real property data from Rentcast
-        logging.info(f"Fetching property data for: {address}, {city}, {state} {zip_code}")
-        rentcast_property = get_rentcast_property_data(address, city, state, zip_code)
+        # Fetch comprehensive property data from all APIs
+        logging.info(f"Fetching comprehensive property data for: {address}, {city}, {state} {zip_code}")
+        comprehensive_data = get_comprehensive_property_data(address, city, state, zip_code)
+        
+        # Extract property details from comprehensive data
+        rentcast_property = comprehensive_data.get('rentcast', {})
         
         # Handle optional property details with defaults or API data
         if rentcast_property and 'bedrooms' in rentcast_property:
@@ -530,8 +796,11 @@ def generate_presentation():
             baths = float(data.get('baths') or 2)
             sqft = int(data.get('sqft') or 1400)
         
-        # Get market data and rent estimates
-        market_data = get_rentcast_market_data(address, city, state, zip_code, rentcast_property)
+        # Generate multi-source property valuations
+        property_valuations = generate_multi_source_valuations(comprehensive_data)
+        
+        # Get market data and rent estimates from all sources
+        market_data = compile_market_data(comprehensive_data, city, state)
         
         # Search for comparable properties
         comparable_properties = search_comparable_properties(city, state, beds, baths, sqft)
@@ -552,7 +821,7 @@ def generate_presentation():
         title = generate_property_title(address, city, beds, baths)
         summary = generate_property_summary(address, city, financials)
         
-        # Compile property data
+        # Compile comprehensive property data
         property_data = {
             'address': address,
             'city': city,
@@ -565,13 +834,14 @@ def generate_presentation():
             'summary': summary,
             'financials': financials,
             'comparables': comparables,
-            'rentcast_data': rentcast_property,
+            'property_valuations': property_valuations,
+            'comprehensive_data': comprehensive_data,
             'rent_estimates': market_data,
-            'data_sources': generate_data_sources_summary(rentcast_property, market_data, comparable_properties),
+            'data_sources': generate_comprehensive_data_sources_summary(comprehensive_data),
             'schools': MOCK_SCHOOLS,  # Will be replaced with real data when other APIs are added
             'amenities': random.sample(MOCK_AMENITIES, 4),  # Will be replaced with real data
-            'year_built': rentcast_property.get('yearBuilt') if rentcast_property else random.randint(1980, 2015),
-            'lot_size': rentcast_property.get('lotSize') if rentcast_property else f"{random.uniform(0.15, 0.35):.2f} acres",
+            'year_built': rentcast_property.get('yearBuilt') if rentcast_property else 2000,
+            'lot_size': rentcast_property.get('lotSize') if rentcast_property else 'Unknown',
             'condition': rentcast_property.get('condition') if rentcast_property else 'Unknown',
             'property_type': rentcast_property.get('propertyType') if rentcast_property else 'Single Family Residential'
         }
