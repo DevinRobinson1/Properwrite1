@@ -375,23 +375,23 @@
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                         <div class="text-center bg-white rounded-lg p-4 border">
                             <div class="text-sm text-gray-600">Purchase Price</div>
-                            <div class="text-xl font-bold text-yellow-600">${{ "{:,}".format(seller_finance.purchase_price|int) }}</div>
+                            <div class="text-xl font-bold text-yellow-600">${{ "{:,}".format((seller_finance.purchase_price or 0)|int) }}</div>
                         </div>
                         <div class="text-center bg-white rounded-lg p-4 border">
                             <div class="text-sm text-gray-600">Down Payment</div>
-                            <div class="text-xl font-bold text-blue-600">${{ "{:,}".format(seller_finance.down_payment|int) }}</div>
+                            <div class="text-xl font-bold text-blue-600">${{ "{:,}".format((seller_finance.down_payment or 0)|int) }}</div>
                         </div>
                         <div class="text-center bg-white rounded-lg p-4 border">
                             <div class="text-sm text-gray-600">Loan Amount</div>
-                            <div class="text-xl font-bold text-green-600">${{ "{:,}".format(seller_finance.loan_amount|int) }}</div>
+                            <div class="text-xl font-bold text-green-600">${{ "{:,}".format((seller_finance.loan_amount or 0)|int) }}</div>
                         </div>
                         <div class="text-center bg-white rounded-lg p-4 border">
                             <div class="text-sm text-gray-600">Interest Rate</div>
-                            <div class="text-xl font-bold text-purple-600">{{ seller_finance.interest_rate }}%</div>
+                            <div class="text-xl font-bold text-purple-600">{{ seller_finance.interest_rate or 0 }}%</div>
                         </div>
                         <div class="text-center bg-white rounded-lg p-4 border">
                             <div class="text-sm text-gray-600">Monthly Payment</div>
-                            <div class="text-xl font-bold text-red-600">${{ "{:,}".format(seller_finance.monthly_payment|int) }}</div>
+                            <div class="text-xl font-bold text-red-600">${{ "{:,}".format((seller_finance.monthly_payment or 0)|int) }}</div>
                         </div>
                     </div>
                 </div>
@@ -407,20 +407,20 @@
                             <div class="space-y-2">
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Rental Income</span>
-                                    <span class="font-bold text-green-600">${{ "{:,}".format(seller_finance.monthly_rent|int) }}</span>
+                                    <span class="font-bold text-green-600">${{ "{:,}".format((seller_finance.monthly_rent or 0)|int) }}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Loan Payment</span>
-                                    <span class="font-bold text-red-600">-${{ "{:,}".format(seller_finance.monthly_payment|int) }}</span>
+                                    <span class="font-bold text-red-600">-${{ "{:,}".format((seller_finance.monthly_payment or 0)|int) }}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Operating Expenses</span>
-                                    <span class="font-bold text-red-600">-${{ "{:,}".format(seller_finance.monthly_operating_expenses|int) }}</span>
+                                    <span class="font-bold text-red-600">-${{ "{:,}".format((seller_finance.monthly_operating_expenses or 0)|int) }}</span>
                                 </div>
                                 <hr class="border-gray-300">
                                 <div class="flex justify-between font-bold">
                                     <span>Net Cash Flow</span>
-                                    <span class="text-lg {{ 'text-green-600' if seller_finance.monthly_cash_flow > 0 else 'text-red-600' }}">${{ "{:,}".format(seller_finance.monthly_cash_flow|int) }}</span>
+                                    <span class="text-lg {{ 'text-green-600' if (seller_finance.monthly_cash_flow or 0) > 0 else 'text-red-600' }}">${{ "{:,}".format((seller_finance.monthly_cash_flow or 0)|int) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -429,11 +429,11 @@
                             <div class="space-y-3">
                                 <div class="text-center">
                                     <div class="text-sm text-gray-600">Annual Cash Flow</div>
-                                    <div class="text-2xl font-bold text-green-600">${{ "{:,}".format((seller_finance.monthly_cash_flow * 12)|int) }}</div>
+                                    <div class="text-2xl font-bold text-green-600">${{ "{:,}".format(((seller_finance.monthly_cash_flow or 0) * 12)|int) }}</div>
                                 </div>
                                 <div class="text-center">
                                     <div class="text-sm text-gray-600">Cash-on-Cash ROI</div>
-                                    <div class="text-2xl font-bold text-blue-600">{{ seller_finance.cash_on_cash_return|round(1) }}%</div>
+                                    <div class="text-2xl font-bold text-blue-600">{{ (seller_finance.cash_on_cash_return or 0)|round(1) }}%</div>
                                 </div>
                             </div>
                         </div>
