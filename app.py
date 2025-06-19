@@ -249,7 +249,7 @@ def get_airdna_data(city, state):
         logging.error(f"AirDNA API request failed: {str(e)}")
         return None
 
-def get_comprehensive_property_data(address, city, state, zip_code):
+def get_comprehensive_property_data(address, city, state, zip_code, latitude=None, longitude=None):
     """Fetch comprehensive property data from all available APIs"""
     logging.info(f"Fetching comprehensive data for: {address}, {city}, {state} {zip_code}")
     
@@ -271,17 +271,22 @@ def get_comprehensive_property_data(address, city, state, zip_code):
     if redfin_data:
         property_data['redfin'] = redfin_data
     
-    # Get coordinates for Realtor API (from Rentcast if available)
-    latitude = longitude = None
-    if rentcast_data and isinstance(rentcast_data, list) and rentcast_data:
-        latitude = rentcast_data[0].get('latitude')
-        longitude = rentcast_data[0].get('longitude')
+    # Use coordinates from Google Places or fallback to Rentcast
+    if not latitude or not longitude:
+        if rentcast_data and isinstance(rentcast_data, list) and rentcast_data:
+            latitude = rentcast_data[0].get('latitude')
+            longitude = rentcast_data[0].get('longitude')
     
     # Realtor data (needs coordinates)
     if latitude and longitude:
-        realtor_data = get_realtor_property_data(latitude, longitude)
-        if realtor_data:
-            property_data['realtor'] = realtor_data
+        try:
+            lat_float = float(latitude)
+            lng_float = float(longitude)
+            realtor_data = get_realtor_property_data(lat_float, lng_float)
+            if realtor_data:
+                property_data['realtor'] = realtor_data
+        except (ValueError, TypeError):
+            logging.warning(f"Invalid coordinates provided: {latitude}, {longitude}")
     
     # AirDNA data
     airdna_data = get_airdna_data(city, state)
@@ -767,21 +772,29 @@ def generate_property_summary(address, city, financials):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY'))
 
 @app.route('/generate', methods=['POST'])
 def generate_presentation():
     try:
-        # Get form data
+        # Get form data including coordinates from Google Places
         data = request.form
         address = data.get('address', '').strip()
         city = data.get('city', '').strip()
         state = data.get('state', '').strip()
         zip_code = data.get('zip', '').strip()
         
+        # Extract coordinates if available from Google Places
+        latitude = data.get('latitude', '').strip()
+        longitude = data.get('longitude', '').strip()
+        
+        logging.info(f"Processing property: {address}, {city}, {state} {zip_code}")
+        if latitude and longitude:
+            logging.info(f"Coordinates provided: {latitude}, {longitude}")
+        
         # Fetch comprehensive property data from all APIs
         logging.info(f"Fetching comprehensive property data for: {address}, {city}, {state} {zip_code}")
-        comprehensive_data = get_comprehensive_property_data(address, city, state, zip_code)
+        comprehensive_data = get_comprehensive_property_data(address, city, state, zip_code, latitude, longitude)
         
         # Extract property details from comprehensive data
         rentcast_property = comprehensive_data.get('rentcast', {})

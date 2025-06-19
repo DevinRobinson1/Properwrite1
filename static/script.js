@@ -373,55 +373,188 @@ function formatCurrency(input) {
     }
 }
 
-// Enhanced address autocomplete functionality
+// Google Places Autocomplete functionality
+let autocomplete;
+let selectedPlace = null;
+
+function initGooglePlaces() {
+    const addressInput = document.getElementById('property-address');
+    const cityInput = document.getElementById('city');
+    const stateInput = document.getElementById('state');
+    const zipInput = document.getElementById('zip');
+    const loadingSpinner = document.getElementById('address-loading');
+    
+    if (!addressInput || !window.google) return;
+    
+    // Initialize Google Places Autocomplete
+    autocomplete = new google.maps.places.Autocomplete(addressInput, {
+        types: ['address'],
+        componentRestrictions: { country: 'us' },
+        fields: ['address_components', 'formatted_address', 'geometry', 'name']
+    });
+    
+    // Show loading spinner when user starts typing
+    let typingTimer;
+    addressInput.addEventListener('input', function() {
+        clearTimeout(typingTimer);
+        if (this.value.length > 2) {
+            loadingSpinner.classList.remove('hidden');
+            
+            // Hide spinner after 3 seconds if no selection made
+            typingTimer = setTimeout(() => {
+                loadingSpinner.classList.add('hidden');
+            }, 3000);
+        } else {
+            loadingSpinner.classList.add('hidden');
+        }
+    });
+    
+    // Handle place selection
+    autocomplete.addListener('place_changed', function() {
+        loadingSpinner.classList.add('hidden');
+        const place = autocomplete.getPlace();
+        
+        if (!place.geometry) {
+            showNotification('Please select a valid address from the dropdown suggestions.', 'warning');
+            return;
+        }
+        
+        selectedPlace = place;
+        
+        // Extract address components
+        const components = place.address_components;
+        let streetNumber = '';
+        let route = '';
+        let city = '';
+        let state = '';
+        let postalCode = '';
+        
+        components.forEach(component => {
+            const types = component.types;
+            
+            if (types.includes('street_number')) {
+                streetNumber = component.long_name;
+            }
+            if (types.includes('route')) {
+                route = component.long_name;
+            }
+            if (types.includes('locality')) {
+                city = component.long_name;
+            }
+            if (types.includes('administrative_area_level_1')) {
+                state = component.short_name;
+            }
+            if (types.includes('postal_code')) {
+                postalCode = component.long_name;
+            }
+        });
+        
+        // Populate form fields
+        const fullAddress = `${streetNumber} ${route}`.trim();
+        addressInput.value = fullAddress;
+        
+        if (cityInput && city) cityInput.value = city;
+        if (stateInput && state) stateInput.value = state;
+        if (zipInput && postalCode) zipInput.value = postalCode;
+        
+        // Store coordinates for API calls
+        if (place.geometry && place.geometry.location) {
+            const lat = place.geometry.location.lat();
+            const lng = place.geometry.location.lng();
+            
+            addressInput.dataset.latitude = lat;
+            addressInput.dataset.longitude = lng;
+            
+            // Add hidden inputs to the form to pass coordinates
+            let latInput = document.getElementById('latitude-input');
+            let lngInput = document.getElementById('longitude-input');
+            
+            if (!latInput) {
+                latInput = document.createElement('input');
+                latInput.type = 'hidden';
+                latInput.id = 'latitude-input';
+                latInput.name = 'latitude';
+                addressInput.form.appendChild(latInput);
+            }
+            
+            if (!lngInput) {
+                lngInput = document.createElement('input');
+                lngInput.type = 'hidden';
+                lngInput.id = 'longitude-input';
+                lngInput.name = 'longitude';
+                addressInput.form.appendChild(lngInput);
+            }
+            
+            latInput.value = lat;
+            lngInput.value = lng;
+        }
+        
+        // Visual feedback
+        addressInput.classList.add('border-green-500', 'bg-green-50');
+        setTimeout(() => {
+            addressInput.classList.remove('border-green-500', 'bg-green-50');
+        }, 2000);
+        
+        showNotification('Address validated successfully!', 'success');
+    });
+    
+    // Handle manual typing without selection
+    addressInput.addEventListener('blur', function() {
+        loadingSpinner.classList.add('hidden');
+        
+        if (this.value && !selectedPlace) {
+            showNotification('Please select an address from the dropdown for best results.', 'info');
+        }
+    });
+}
+
+// Initialize Google Places when API loads
+function initializeGoogleMaps() {
+    if (window.google && window.google.maps) {
+        initGooglePlaces();
+    } else {
+        // Retry in case API is still loading
+        setTimeout(initializeGoogleMaps, 500);
+    }
+}
+
+// Enhanced address autocomplete functionality for fallback
 document.addEventListener('DOMContentLoaded', function() {
     setupAddressAutocomplete();
+    initializeGoogleMaps();
 });
 
 function setupAddressAutocomplete() {
-    const addressInput = document.getElementById('address');
+    const addressInput = document.getElementById('property-address');
     const cityInput = document.getElementById('city');
     const stateInput = document.getElementById('state');
     const zipInput = document.getElementById('zip');
     
     if (!addressInput) return;
     
-    // Enable browser's built-in address autocomplete
-    addressInput.setAttribute('autocomplete', 'street-address');
-    
-    // Auto-populate other fields when address is filled
-    addressInput.addEventListener('input', function(e) {
-        const value = e.target.value;
-        
-        // If user pastes a full address, try to parse it
-        if (value.includes(',')) {
-            const parts = value.split(',').map(part => part.trim());
-            if (parts.length >= 3) {
-                // Try to extract city, state, zip from pasted address
-                const lastPart = parts[parts.length - 1];
-                const secondLastPart = parts[parts.length - 2];
-                
-                // Check if last part looks like "STATE ZIP"
-                const stateZipMatch = lastPart.match(/^([A-Z]{2})\s+(\d{5}(-\d{4})?)$/);
-                if (stateZipMatch) {
-                    if (cityInput && !cityInput.value) cityInput.value = secondLastPart;
-                    if (stateInput && !stateInput.value) stateInput.value = stateZipMatch[1];
-                    if (zipInput && !zipInput.value) zipInput.value = stateZipMatch[2];
+    // Fallback: Auto-populate other fields when address is pasted
+    addressInput.addEventListener('paste', function(e) {
+        setTimeout(() => {
+            const value = e.target.value;
+            
+            // If user pastes a full address, try to parse it
+            if (value.includes(',')) {
+                const parts = value.split(',').map(part => part.trim());
+                if (parts.length >= 3) {
+                    // Try to extract city, state, zip from pasted address
+                    const lastPart = parts[parts.length - 1];
+                    const secondLastPart = parts[parts.length - 2];
+                    
+                    // Check if last part looks like "STATE ZIP"
+                    const stateZipMatch = lastPart.match(/^([A-Z]{2})\s+(\d{5}(-\d{4})?)$/);
+                    if (stateZipMatch) {
+                        if (cityInput && !cityInput.value) cityInput.value = secondLastPart;
+                        if (stateInput && !stateInput.value) stateInput.value = stateZipMatch[1];
+                        if (zipInput && !zipInput.value) zipInput.value = stateZipMatch[2];
+                    }
                 }
             }
-        }
-    });
-    
-    // Format address input for consistency
-    addressInput.addEventListener('blur', function(e) {
-        const value = e.target.value.trim();
-        if (value) {
-            // Basic address formatting
-            const formatted = value.replace(/\b\w+/g, function(word) {
-                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-            });
-            e.target.value = formatted;
-        }
+        }, 100);
     });
 }
 

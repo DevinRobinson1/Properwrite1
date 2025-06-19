@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&loading=async" async defer></script>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <div class="container mx-auto px-4 py-8 max-w-4xl">
@@ -38,10 +39,16 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
                             <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Street Address *</label>
-                            <input type="text" id="address" name="address" required
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   placeholder="123 Main Street"
-                                   autocomplete="street-address">
+                            <div class="relative">
+                                <input type="text" id="property-address" name="address" required
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                       placeholder="Start typing an address..."
+                                       autocomplete="off">
+                                <div id="address-loading" class="hidden absolute right-3 top-1/2 transform -translate-y-1/2">
+                                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">Google Places will suggest addresses as you type</div>
                         </div>
                         <div>
                             <label for="city" class="block text-sm font-medium text-gray-700 mb-2">City *</label>
