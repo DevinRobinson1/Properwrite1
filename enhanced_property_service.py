@@ -11,6 +11,7 @@ from urllib.parse import quote
 import time
 from datetime import datetime
 from address_validation_service import address_validator
+from property_cache_service import property_cache
 
 class EnhancedPropertyService:
     def __init__(self):
@@ -26,6 +27,12 @@ class EnhancedPropertyService:
         """
         Get comprehensive property data with address validation and precise matching
         """
+        # Check cache first
+        cached_data = property_cache.get_cached_property_data(address, city, state, zip_code)
+        if cached_data:
+            logging.info(f"Returning cached data for {address}")
+            return cached_data
+        
         # Step 1: Validate and normalize the address
         validated_address = address_validator.validate_and_normalize_address(address, city, state, zip_code)
         
@@ -77,6 +84,9 @@ class EnhancedPropertyService:
         
         # Add data quality assessment
         property_data['data_quality'] = self._assess_data_quality(property_data)
+        
+        # Cache the results for future use
+        property_cache.cache_property_data(address, city, state, zip_code, property_data)
         
         logging.info(f"Retrieved data from {len(property_data['data_sources'])} sources with confidence scores: {property_data['confidence_scores']}")
         return property_data

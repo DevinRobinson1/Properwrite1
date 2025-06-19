@@ -13,7 +13,7 @@ def calculate_subject_to_offer(arv, principal_balance, purchase_price, cash_to_s
                               equity_amount_financed=0, equity_interest_rate=0.0, equity_payment=0,
                               equity_term_months=72, rent_income=1900, lease_option_income=2000,
                               lease_option_sale_price=299000, lease_option_fee_upfront=10000,
-                              hoa_monthly=0, capital_cost_monthly=100):
+                              hoa_monthly=0, capital_cost_monthly=100, bedrooms=3, bathrooms=2, square_feet=1200):
     """
     Calculate comprehensive Subject-To offer analysis with creative financing options
     """
