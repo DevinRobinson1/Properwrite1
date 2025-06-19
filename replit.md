@@ -34,7 +34,13 @@ This is a Flask-based web application that generates professional property prese
 - Error handling and user feedback
 
 ### Property Analysis Engine
-- **Financial Calculator**: Generates investment metrics including buy price, rehab estimates, ARV (After Repair Value), and net profit projections
+- **Professional Underwriting System**: Implements strict real estate appraisal standards for comparable sales analysis
+- **Financial Calculator**: Generates investment metrics with ARV calculated from adjusted comparable sales data
+- **Comparable Sales Generator**: Follows professional underwriting rules including:
+  - Time-based filtering (90-365 days, prioritizing recent sales)
+  - Geographic boundaries (0.25-1 mile radius within same neighborhood)
+  - Property matching (type, style, square footage within reasonable ranges)
+  - Monetary adjustments for bedroom, bathroom, and size differences
 - **Title Generator**: Creates engaging property titles with emojis and descriptive language
 - **Mock Data Systems**: 
   - Neighborhood data for major cities (Charlotte, Raleigh, Atlanta, Nashville)
@@ -99,6 +105,7 @@ This is a Flask-based web application that generates professional property prese
 ## Changelog
 
 - June 19, 2025. Initial setup
+- June 19, 2025. Enhanced comparable sales analysis with professional underwriting rules including time-based filtering, geographic boundaries, property matching, and monetary adjustments
 
 ## User Preferences
 

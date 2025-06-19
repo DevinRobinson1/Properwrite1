@@ -214,31 +214,89 @@
         <!-- Comparable Sales -->
         <div class="bg-white rounded-lg shadow-lg p-8 mb-8 print-break">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                <i class="fas fa-balance-scale text-purple-500 mr-2"></i>Comparable Sales (Sold ≤ 6mo, ±500 sqft)
+                <i class="fas fa-balance-scale text-purple-500 mr-2"></i>Comparable Sales Analysis
             </h2>
+            
+            <!-- Underwriting Summary -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <h3 class="font-bold text-blue-800 mb-2">Underwriting Standards Applied:</h3>
+                <ul class="text-sm text-blue-700 space-y-1">
+                    <li>• Prioritized sales within 90-180 days</li>
+                    <li>• Limited search to ¼ to 1 mile radius within same neighborhood</li>
+                    <li>• Matched property type, style, and similar square footage</li>
+                    <li>• Applied monetary adjustments for bedroom, bathroom, and size differences</li>
+                </ul>
+            </div>
+
+            <!-- Comparables Table -->
             <div class="overflow-x-auto">
-                <table class="w-full table-auto">
+                <table class="w-full table-auto text-sm">
                     <thead>
                         <tr class="bg-gray-100">
-                            <th class="px-4 py-3 text-left font-bold text-gray-800">Address</th>
-                            <th class="px-4 py-3 text-left font-bold text-gray-800">Specs</th>
-                            <th class="px-4 py-3 text-left font-bold text-gray-800">Sold Date</th>
-                            <th class="px-4 py-3 text-left font-bold text-gray-800">Price</th>
-                            <th class="px-4 py-3 text-left font-bold text-gray-800">$/Sqft</th>
+                            <th class="px-3 py-3 text-left font-bold text-gray-800">Address</th>
+                            <th class="px-3 py-3 text-left font-bold text-gray-800">Specs</th>
+                            <th class="px-3 py-3 text-left font-bold text-gray-800">Distance</th>
+                            <th class="px-3 py-3 text-left font-bold text-gray-800">Days Ago</th>
+                            <th class="px-3 py-3 text-left font-bold text-gray-800">Raw Price</th>
+                            <th class="px-3 py-3 text-left font-bold text-gray-800">Adjustments</th>
+                            <th class="px-3 py-3 text-left font-bold text-gray-800">Adjusted Price</th>
+                            <th class="px-3 py-3 text-left font-bold text-gray-800">$/Sqft</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for comp in property.comparables %}
                         <tr class="border-b hover:bg-gray-50">
-                            <td class="px-4 py-3 font-medium">{{ comp.address }}</td>
-                            <td class="px-4 py-3">{{ comp.beds }}/{{ comp.baths }} {{ "{:,}".format(comp.sqft) }}sf</td>
-                            <td class="px-4 py-3">{{ comp.sold_date }}</td>
-                            <td class="px-4 py-3 font-bold text-green-600">${{ "{:,}".format(comp.price) }}</td>
-                            <td class="px-4 py-3">${{ comp.price_per_sqft }}</td>
+                            <td class="px-3 py-3 font-medium">{{ comp.address }}</td>
+                            <td class="px-3 py-3">{{ comp.beds }}/{{ comp.baths }}<br>{{ "{:,}".format(comp.sqft) }}sf</td>
+                            <td class="px-3 py-3 text-center">{{ comp.distance_miles }} mi</td>
+                            <td class="px-3 py-3 text-center">{{ comp.days_ago }}</td>
+                            <td class="px-3 py-3 font-medium">${{ "{:,}".format(comp.raw_price) }}</td>
+                            <td class="px-3 py-3 text-center">
+                                {% if comp.adjustments.total_adjustment != 0 %}
+                                    <span class="{% if comp.adjustments.total_adjustment > 0 %}text-green-600{% else %}text-red-600{% endif %} font-bold">
+                                        ${{{ "{:,}".format(comp.adjustments.total_adjustment) }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-500">None</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-3 py-3 font-bold text-blue-600">${{ "{:,}".format(comp.adjusted_price) }}</td>
+                            <td class="px-3 py-3">${{ comp.price_per_sqft }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Adjustment Details -->
+            {% if property.comparables %}
+            <div class="mt-6">
+                <h3 class="font-bold text-gray-800 mb-3">Adjustment Details:</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for comp in property.comparables %}
+                    {% if comp.adjustments.notes %}
+                    <div class="bg-gray-50 rounded p-3">
+                        <div class="font-medium text-gray-800 mb-2">{{ comp.address }}</div>
+                        {% for note in comp.adjustments.notes %}
+                        <div class="text-xs text-gray-600">• {{ note }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ARV Calculation -->
+            <div class="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
+                <h3 class="font-bold text-green-800 mb-2">ARV Calculation Method:</h3>
+                <p class="text-sm text-green-700">
+                    {% if property.financials.arv_source == 'comparable_sales' %}
+                        ARV calculated using average of {{ property.comparables|length }} adjusted comparable sales: ${{ "{:,}".format(property.financials.arv) }}
+                    {% else %}
+                        ARV estimated using market multiplier method due to insufficient comparable data: ${{ "{:,}".format(property.financials.arv) }}
+                    {% endif %}
+                </p>
             </div>
         </div>
 
