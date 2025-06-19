@@ -6,6 +6,7 @@ import os
 import logging
 from flask import Flask, render_template, request, jsonify, session
 from property_data_service import property_service
+from external_property_service import external_property_service
 from wholesale_calculator import calculate_wholesale_offers
 from installment_calculator import calculate_installment_offers
 from subject_to_calculator import calculate_subject_to_offer
@@ -56,16 +57,48 @@ def analyze_property():
             'images': []
         }
         
-        # Try to get external data but don't fail if unavailable
+        # Get comprehensive property data from external sources first
         try:
-            external_data = property_service.get_property_data(address, city, state, zip_code)
-            if external_data:
-                # Only update with non-None values
-                for key, value in external_data.items():
-                    if value is not None and value != '':
-                        property_data[key] = value
+            external_data = external_property_service.get_comprehensive_property_data(address, city, state, zip_code)
+            
+            if external_data and external_data.get('data_sources'):
+                # Use external data as primary source
+                property_data.update({
+                    'bedrooms': external_data.get('bedrooms') or property_data['bedrooms'],
+                    'bathrooms': external_data.get('bathrooms') or property_data['bathrooms'],
+                    'square_feet': external_data.get('square_feet') or property_data['square_feet'],
+                    'year_built': external_data.get('year_built') or property_data['year_built'],
+                    'lot_size_sqft': external_data.get('lot_size_sqft'),
+                    'property_type': external_data.get('property_type') or property_data['property_type'],
+                    'image_url': external_data.get('image_url'),
+                    'zillow_estimate': external_data.get('zillow_estimate'),
+                    'redfin_estimate': external_data.get('redfin_estimate'),
+                    'realtor_estimate': external_data.get('realtor_estimate'),
+                    'rent_estimate': external_data.get('rent_estimate'),
+                    'data_sources': external_data.get('data_sources', []),
+                    'data_errors': external_data.get('errors', [])
+                })
+                logging.info(f"Retrieved data from {len(external_data.get('data_sources', []))} external sources")
+            else:
+                # Fall back to location-based estimates only if external fails
+                fallback_data = property_service.get_property_data(address, city, state, zip_code)
+                if fallback_data:
+                    for key, value in fallback_data.items():
+                        if value is not None and value != '':
+                            property_data[key] = value
+                logging.warning("Using location-based estimates - external data sources unavailable")
+                
         except Exception as e:
-            logging.warning(f"External data unavailable: {e}")
+            logging.error(f"External data retrieval failed: {e}")
+            # Use location-based fallback
+            try:
+                fallback_data = property_service.get_property_data(address, city, state, zip_code)
+                if fallback_data:
+                    for key, value in fallback_data.items():
+                        if value is not None and value != '':
+                            property_data[key] = value
+            except Exception as fallback_error:
+                logging.error(f"Fallback data service also failed: {fallback_error}")
         
         # Generate estimates for missing values
         if not property_data.get('estimated_value'):
