@@ -86,15 +86,15 @@
             <!-- Key Metrics Display -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-green-600" id="display-arv">${{ "{:,}".format(financials.arv) }}</div>
+                    <div class="text-2xl font-bold text-green-600" id="display-arv">${{ "{:,}".format(financials.arv or 0) }}</div>
                     <div class="text-sm text-gray-600">After Repair Value</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-yellow-600" id="display-repairs">${{ "{:,}".format(financials.estimated_repairs) }}</div>
+                    <div class="text-2xl font-bold text-yellow-600" id="display-repairs">${{ "{:,}".format(financials.estimated_repairs or 0) }}</div>
                     <div class="text-sm text-gray-600">Repair Costs</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-purple-600" id="display-rent">${{ "{:,}".format(financials.monthly_rent) }}</div>
+                    <div class="text-2xl font-bold text-purple-600" id="display-rent">${{ "{:,}".format(financials.monthly_rent or 0) }}</div>
                     <div class="text-sm text-gray-600">Monthly Rent</div>
                 </div>
                 <div class="text-center">
@@ -172,7 +172,7 @@
                         <div class="bg-white rounded-lg p-4 border border-blue-200">
                             <div class="text-center">
                                 <div class="text-sm text-gray-600 font-medium">Offer {{ offer.offer_number }}</div>
-                                <div class="text-2xl font-bold text-green-600">${{ "{:,}".format(offer.amount|int) }}</div>
+                                <div class="text-2xl font-bold text-green-600">${{ "{:,}".format((offer.amount or 0)|int) }}</div>
                                 <div class="text-sm text-blue-600">{{ offer.percentage|round(1) }}% of MAO</div>
                                 <div class="text-xs text-gray-500 mt-2">{{ offer.strategy_note }}</div>
                             </div>
@@ -191,19 +191,19 @@
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div class="text-center bg-white rounded-lg p-3 border">
                             <div class="text-sm text-gray-600">MAO</div>
-                            <div class="text-xl font-bold text-green-600">${{ "{:,}".format(wholesale.mao|int) }}</div>
+                            <div class="text-xl font-bold text-green-600">${{ "{:,}".format((wholesale.mao or 0)|int) }}</div>
                         </div>
                         <div class="text-center bg-white rounded-lg p-3 border">
                             <div class="text-sm text-gray-600">Net Profit</div>
-                            <div class="text-xl font-bold text-blue-600">${{ "{:,}".format(wholesale.net_profit|int) }}</div>
+                            <div class="text-xl font-bold text-blue-600">${{ "{:,}".format((wholesale.net_profit or 0)|int) }}</div>
                         </div>
                         <div class="text-center bg-white rounded-lg p-3 border">
                             <div class="text-sm text-gray-600">Profit Margin</div>
-                            <div class="text-xl font-bold text-purple-600">{{ wholesale.profit_margin|round(1) }}%</div>
+                            <div class="text-xl font-bold text-purple-600">{{ (wholesale.profit_margin or 0)|round(1) }}%</div>
                         </div>
                         <div class="text-center bg-white rounded-lg p-3 border">
                             <div class="text-sm text-gray-600">% of ARV</div>
-                            <div class="text-xl font-bold text-orange-600">{{ wholesale.percentage_of_arv|round(1) }}%</div>
+                            <div class="text-xl font-bold text-orange-600">{{ (wholesale.percentage_of_arv or 0)|round(1) }}%</div>
                         </div>
                     </div>
                 </div>
@@ -249,21 +249,21 @@
                         <div class="bg-white rounded-lg p-4 border border-purple-200">
                             <div class="text-center">
                                 <div class="text-sm text-gray-600 font-medium">Conservative Offer</div>
-                                <div class="text-2xl font-bold text-purple-600">${{ "{:,}".format(installment.ackerman_offers.offer_1|int) }}</div>
+                                <div class="text-2xl font-bold text-purple-600">${{ "{:,}".format((installment.ackerman_offers.offer_1 or 0)|int) }}</div>
                                 <div class="text-sm text-blue-600">Opening Position</div>
                             </div>
                         </div>
                         <div class="bg-white rounded-lg p-4 border border-purple-200">
                             <div class="text-center">
                                 <div class="text-sm text-gray-600 font-medium">Balanced Offer</div>
-                                <div class="text-2xl font-bold text-purple-600">${{ "{:,}".format(installment.ackerman_offers.offer_2|int) }}</div>
+                                <div class="text-2xl font-bold text-purple-600">${{ "{:,}".format((installment.ackerman_offers.offer_2 or 0)|int) }}</div>
                                 <div class="text-sm text-blue-600">Negotiation Range</div>
                             </div>
                         </div>
                         <div class="bg-white rounded-lg p-4 border border-purple-200">
                             <div class="text-center">
                                 <div class="text-sm text-gray-600 font-medium">Maximum Offer</div>
-                                <div class="text-2xl font-bold text-purple-600">${{ "{:,}".format(installment.ackerman_offers.offer_3|int) }}</div>
+                                <div class="text-2xl font-bold text-purple-600">${{ "{:,}".format((installment.ackerman_offers.offer_3 or 0)|int) }}</div>
                                 <div class="text-sm text-blue-600">Final Position</div>
                             </div>
                         </div>
@@ -278,19 +278,19 @@
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div class="text-center bg-white rounded-lg p-3 border">
                             <div class="text-sm text-gray-600">Installment MAO</div>
-                            <div class="text-xl font-bold text-purple-600">${{ "{:,}".format(installment.installment_mao|int) }}</div>
+                            <div class="text-xl font-bold text-purple-600">${{ "{:,}".format((installment.installment_mao or 0)|int) }}</div>
                         </div>
                         <div class="text-center bg-white rounded-lg p-3 border">
                             <div class="text-sm text-gray-600">Net Profit</div>
-                            <div class="text-xl font-bold text-green-600">${{ "{:,}".format(installment.net_profit|int) }}</div>
+                            <div class="text-xl font-bold text-green-600">${{ "{:,}".format((installment.net_profit or 0)|int) }}</div>
                         </div>
                         <div class="text-center bg-white rounded-lg p-3 border">
                             <div class="text-sm text-gray-600">Profit Margin</div>
-                            <div class="text-xl font-bold text-blue-600">{{ installment.profit_margin|round(1) }}%</div>
+                            <div class="text-xl font-bold text-blue-600">{{ (installment.profit_margin or 0)|round(1) }}%</div>
                         </div>
                         <div class="text-center bg-white rounded-lg p-3 border">
                             <div class="text-sm text-gray-600">% of ARV</div>
-                            <div class="text-xl font-bold text-orange-600">{{ installment.mao_as_percent_of_arv|round(1) }}%</div>
+                            <div class="text-xl font-bold text-orange-600">{{ (installment.mao_as_percent_of_arv or 0)|round(1) }}%</div>
                         </div>
                     </div>
                 </div>
@@ -317,19 +317,19 @@
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div class="text-center bg-white rounded-lg p-4 border">
                             <div class="text-sm text-gray-600">Cash to Seller</div>
-                            <div class="text-xl font-bold text-red-600">${{ "{:,}".format(subject_to.cash_to_seller|int) }}</div>
+                            <div class="text-xl font-bold text-red-600">${{ "{:,}".format((subject_to.cash_to_seller or 0)|int) }}</div>
                         </div>
                         <div class="text-center bg-white rounded-lg p-4 border">
                             <div class="text-sm text-gray-600">Monthly P&I</div>
-                            <div class="text-xl font-bold text-blue-600">${{ "{:,}".format(subject_to.monthly_pi|int) }}</div>
+                            <div class="text-xl font-bold text-blue-600">${{ "{:,}".format((subject_to.monthly_pi or 0)|int) }}</div>
                         </div>
                         <div class="text-center bg-white rounded-lg p-4 border">
                             <div class="text-sm text-gray-600">Acquisition Costs</div>
-                            <div class="text-xl font-bold text-yellow-600">${{ "{:,}".format(subject_to.total_acquisition_costs|int) }}</div>
+                            <div class="text-xl font-bold text-yellow-600">${{ "{:,}".format((subject_to.total_acquisition_costs or 0)|int) }}</div>
                         </div>
                         <div class="text-center bg-white rounded-lg p-4 border">
                             <div class="text-sm text-gray-600">Immediate Equity</div>
-                            <div class="text-xl font-bold text-green-600">${{ "{:,}".format(subject_to.immediate_equity|int) }}</div>
+                            <div class="text-xl font-bold text-green-600">${{ "{:,}".format((subject_to.immediate_equity or 0)|int) }}</div>
                         </div>
                     </div>
                 </div>
@@ -342,12 +342,12 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-white rounded-lg p-4 border">
                             <h4 class="font-bold text-gray-800 mb-2">5-Year Payoff</h4>
-                            <div class="text-2xl font-bold text-green-600">${{ "{:,}".format(subject_to.exit_strategies.five_year_payoff.total_profit|int) }}</div>
+                            <div class="text-2xl font-bold text-green-600">${{ "{:,}".format((subject_to.exit_strategies.five_year_payoff.total_profit or 0)|int) }}</div>
                             <div class="text-sm text-gray-600">Total Return</div>
                         </div>
                         <div class="bg-white rounded-lg p-4 border">
                             <h4 class="font-bold text-gray-800 mb-2">Lease Option</h4>
-                            <div class="text-2xl font-bold text-purple-600">${{ "{:,}".format(subject_to.exit_strategies.lease_option.total_profit|int) }}</div>
+                            <div class="text-2xl font-bold text-purple-600">${{ "{:,}".format((subject_to.exit_strategies.lease_option.total_profit or 0)|int) }}</div>
                             <div class="text-sm text-gray-600">Total Profit</div>
                         </div>
                     </div>
