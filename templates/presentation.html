@@ -298,6 +298,23 @@
                     {% endif %}
                 </p>
             </div>
+
+            <!-- Data Sources Summary -->
+            {% if property.data_sources %}
+            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 class="font-bold text-blue-800 mb-3">Data Sources Used:</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {% for source, status in property.data_sources.items() %}
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="font-medium">{{ source }}:</span>
+                        <span class="{% if 'Available' in status or 'found' in status %}text-green-600{% else %}text-red-600{% endif %}">
+                            {{ status }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Contact Information -->
