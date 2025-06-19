@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ property.title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .print-break { page-break-before: always; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header Actions -->
+    <div class="bg-white shadow-sm border-b no-print">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="/" class="text-blue-600 hover:text-blue-800 font-medium">
+                <i class="fas fa-arrow-left mr-2"></i>Generate Another
+            </a>
+            <div class="space-x-3">
+                <button onclick="enableEditing()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-edit mr-2"></i>Edit Content
+                </button>
+                <button onclick="generateShareLink()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                    <i class="fas fa-share mr-2"></i>Share Link
+                </button>
+                <button onclick="window.print()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                    <i class="fas fa-download mr-2"></i>Print/PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Property Title -->
+        <div class="bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg p-8 mb-8 shadow-lg">
+            <h1 class="text-4xl font-bold mb-4 editable" data-field="title">{{ property.title }}</h1>
+            <div class="flex flex-wrap items-center text-lg space-x-6">
+                <span><i class="fas fa-map-marker-alt mr-2"></i>{{ property.address }}, {{ property.city }}, {{ property.state }} {{ property.zip }}</span>
+                <span><i class="fas fa-bed mr-2"></i>{{ property.beds }} Bed</span>
+                <span><i class="fas fa-bath mr-2"></i>{{ property.baths }} Bath</span>
+                <span><i class="fas fa-ruler-combined mr-2"></i>{{ "{:,}".format(property.sqft) }} sqft</span>
+            </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-star text-yellow-500 mr-2"></i>Investment Summary
+            </h2>
+            <p class="text-lg text-gray-700 leading-relaxed editable" data-field="summary">{{ property.summary }}</p>
+        </div>
+
+        <!-- Highlights Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Key Highlights -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-fire text-red-500 mr-2"></i>Key Highlights
+                </h3>
+                <ul class="space-y-3 text-lg">
+                    <li class="flex items-center">
+                        <span class="text-2xl mr-3">🛏</span>
+                        <strong>{{ property.beds }} Bed / {{ property.baths }} Bath / {{ "{:,}".format(property.sqft) }} sqft</strong>
+                    </li>
+                    <li class="flex items-center">
+                        <span class="text-2xl mr-3">💵</span>
+                        <span>Purchase Price: <strong>${{ "{:,}".format(property.financials.buy_price) }}</strong></span>
+                    </li>
+                    <li class="flex items-center">
+                        <span class="text-2xl mr-3">🛠</span>
+                        <span>Rehab Estimate: <strong>${{ "{:,}".format(property.financials.rehab_cost) }}</strong></span>
+                    </li>
+                    <li class="flex items-center">
+                        <span class="text-2xl mr-3">🏠</span>
+                        <span>ARV: <strong>${{ "{:,}".format(property.financials.arv) }}</strong></span>
+                    </li>
+                    <li class="flex items-center">
+                        <span class="text-2xl mr-3">📈</span>
+                        <span>Net Profit: <strong class="text-green-600">${{ "{:,}".format(property.financials.net_profit) }}+</strong></span>
+                    </li>
+                    <li class="flex items-center">
+                        <span class="text-2xl mr-3">🏙️</span>
+                        <span>Prime Location Investment</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Financial Overview -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-chart-line text-green-500 mr-2"></i>Financial Overview
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                        <span class="font-medium">Purchase Price:</span>
+                        <span class="font-bold text-lg">${{ "{:,}".format(property.financials.buy_price) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                        <span class="font-medium">Rehab Costs:</span>
+                        <span class="font-bold text-lg text-red-600">${{ "{:,}".format(property.financials.rehab_cost) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                        <span class="font-medium">Holding Costs:</span>
+                        <span class="font-bold text-lg text-red-600">${{ "{:,}".format(property.financials.holding_costs) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                        <span class="font-medium">Closing Costs:</span>
+                        <span class="font-bold text-lg text-red-600">${{ "{:,}".format(property.financials.closing_costs) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-green-100 rounded border-2 border-green-300">
+                        <span class="font-bold">ARV:</span>
+                        <span class="font-bold text-xl text-green-600">${{ "{:,}".format(property.financials.arv) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-blue-100 rounded border-2 border-blue-300">
+                        <span class="font-bold">Net Profit:</span>
+                        <span class="font-bold text-xl text-blue-600">${{ "{:,}".format(property.financials.net_profit) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-purple-100 rounded">
+                        <span class="font-medium">Profit Margin:</span>
+                        <span class="font-bold text-lg text-purple-600">{{ property.financials.profit_margin }}%</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-yellow-100 rounded">
+                        <span class="font-medium">Monthly Rent Est:</span>
+                        <span class="font-bold text-lg text-yellow-600">${{ "{:,}".format(property.financials.monthly_rent) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Property Specifications -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-info-circle text-blue-500 mr-2"></i>Property Specifications
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <i class="fas fa-calendar-alt text-2xl text-blue-600 mb-2"></i>
+                    <div class="font-bold text-lg">{{ property.year_built }}</div>
+                    <div class="text-sm text-gray-600">Year Built</div>
+                </div>
+                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <i class="fas fa-expand-arrows-alt text-2xl text-green-600 mb-2"></i>
+                    <div class="font-bold text-lg">{{ "{:,}".format(property.sqft) }}</div>
+                    <div class="text-sm text-gray-600">Square Feet</div>
+                </div>
+                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <i class="fas fa-tools text-2xl text-yellow-600 mb-2"></i>
+                    <div class="font-bold text-lg">{{ property.condition }}</div>
+                    <div class="text-sm text-gray-600">Condition</div>
+                </div>
+                <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <i class="fas fa-tree text-2xl text-green-600 mb-2"></i>
+                    <div class="font-bold text-lg">{{ property.lot_size }}</div>
+                    <div class="text-sm text-gray-600">Lot Size</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Location & Amenities -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Nearby Schools -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-graduation-cap text-blue-500 mr-2"></i>Nearby Schools
+                </h3>
+                <div class="space-y-3">
+                    {% for school in property.schools %}
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                        <div>
+                            <div class="font-medium">📚 {{ school.name }}</div>
+                            <div class="text-sm text-gray-600">{{ school.distance }}</div>
+                        </div>
+                        <div class="text-sm font-bold text-blue-600">{{ school.rating }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Nearby Amenities -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-map-marked-alt text-green-500 mr-2"></i>Nearby Amenities
+                </h3>
+                <div class="space-y-3">
+                    {% for amenity in property.amenities %}
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                        <div>
+                            {% if amenity.type == 'shopping' %}
+                                <div class="font-medium">🛍 {{ amenity.name }}</div>
+                            {% elif amenity.type == 'transport' %}
+                                <div class="font-medium">🚌 {{ amenity.name }}</div>
+                            {% elif amenity.type == 'entertainment' %}
+                                <div class="font-medium">🎭 {{ amenity.name }}</div>
+                            {% elif amenity.type == 'grocery' %}
+                                <div class="font-medium">🛒 {{ amenity.name }}</div>
+                            {% elif amenity.type == 'medical' %}
+                                <div class="font-medium">🏥 {{ amenity.name }}</div>
+                            {% else %}
+                                <div class="font-medium">📍 {{ amenity.name }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="text-sm text-gray-600">{{ amenity.distance }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparable Sales -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8 print-break">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-balance-scale text-purple-500 mr-2"></i>Comparable Sales (Sold ≤ 6mo, ±500 sqft)
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full table-auto">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="px-4 py-3 text-left font-bold text-gray-800">Address</th>
+                            <th class="px-4 py-3 text-left font-bold text-gray-800">Specs</th>
+                            <th class="px-4 py-3 text-left font-bold text-gray-800">Sold Date</th>
+                            <th class="px-4 py-3 text-left font-bold text-gray-800">Price</th>
+                            <th class="px-4 py-3 text-left font-bold text-gray-800">$/Sqft</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for comp in property.comparables %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="px-4 py-3 font-medium">{{ comp.address }}</td>
+                            <td class="px-4 py-3">{{ comp.beds }}/{{ comp.baths }} {{ "{:,}".format(comp.sqft) }}sf</td>
+                            <td class="px-4 py-3">{{ comp.sold_date }}</td>
+                            <td class="px-4 py-3 font-bold text-green-600">${{ "{:,}".format(comp.price) }}</td>
+                            <td class="px-4 py-3">${{ comp.price_per_sqft }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-lg p-8 text-center">
+            <h2 class="text-2xl font-bold mb-4">Ready to Invest?</h2>
+            <p class="text-lg mb-6">Contact us to discuss this investment opportunity and explore financing options.</p>
+            <div class="flex flex-wrap justify-center space-x-6">
+                <div class="flex items-center">
+                    <i class="fas fa-phone mr-2"></i>
+                    <span>(555) 123-4567</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-envelope mr-2"></i>
+                    <span>invest@realestate.com</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-globe mr-2"></i>
+                    <span>www.realestateinvestments.com</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Link Modal -->
+    <div id="shareModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 no-print">
+        <div class="flex items-center justify-center h-full">
+            <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+                <h3 class="text-xl font-bold mb-4">Share This Property Analysis</h3>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Share Link:</label>
+                    <div class="flex">
+                        <input type="text" id="shareUrl" readonly
+                               class="flex-1 px-3 py-2 border border-gray-300 rounded-l-lg bg-gray-50">
+                        <button onclick="copyShareLink()" 
+                                class="px-4 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button onclick="closeShareModal()" 
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

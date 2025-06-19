@@ -1,0 +1,109 @@
+The system must strictly follow these underwriting rules when determining whether a property is a valid comp:
+
+📅 TIME FRAME RULES
+Always prioritize sales within the last 90 days
+
+If fewer than 3 valid comps are found:
+
+Expand to 180 days
+
+Then increase in 30-day increments as needed
+
+NEVER go beyond 365 days
+
+📍 GEOGRAPHICAL BOUNDARY RULES
+Start with comps within a ¼ mile radius and same subdivision
+
+If <3 comps found, expand to:
+
+½ mile
+
+Then 1 mile max
+
+Do NOT cross major roads or leave the neighborhood/subdivision
+
+It is better to go further back in time than to go outside the subdivision
+
+🏠 PROPERTY TYPE & CHARACTERISTIC MATCHING
+Only select comps that:
+
+Match the same property type (e.g., Single-Family vs. Townhome vs. Mobile Home)
+
+Match the same style (e.g., Ranch vs. 2-Story)
+
+Match expected post-rehab condition
+
+Have similar quality, layout, and living space
+
+Have a lot size within ±2,500 sqft of the subject property
+
+🚫 AVOID UNIQUE AMENITIES UNLESS NECESSARY
+If the subject does not have an HOA, pool, hot tub, or waterfront feature:
+
+Do not include comps that do, unless you absolutely cannot find 3 valid comps otherwise
+
+If you must include one, clearly note it and apply proper adjustments or escalate to an expert
+
+🧮 APPRAISAL ADJUSTMENT GUIDELINES
+Apply monetary adjustments for comp differences:
+
+Bedroom: ±$10K to $25K
+
+Full Bathroom: ±$10K to $15K
+
+Half Bathroom: ±$5K to $10K
+
+Garage Spaces: ±$10K
+
+Carport Spaces: ±$5K
+
+Pool: ±$10K
+
+Lot Size: Compare only within ±2,500 sqft
+
+Basement / Guest House: Value at 50% of price per sqft of main home
+
+🚧 TRAFFIC OR COMMERCIAL ADJUSTMENTS (For Properties Under $500,000)
+Side of property adjacent to commercial/traffic:
+
+Subtract $10K–$15K OR 10%
+
+Behind the property:
+
+Subtract $10K–$15K OR 15%
+
+Front of the property:
+
+Subtract $20K–$25K OR 20%
+
+🧠 BEHAVIOR ENFORCEMENT RULES
+Ensure a minimum of 3 valid comps
+
+Use strict filtering logic before calculating ARV or net profit
+
+Always log why a comp was included or excluded
+
+If insufficient comps can be found, flag the file for manual review instead of forcing a poor match
+
+🧰 Final Output:
+The system should output:
+
+3–5 fully qualified comps that follow all rules
+
+A table showing:
+
+Raw sale price
+
+Distance
+
+Days since sold
+
+Adjustment values
+
+Final adjusted comp price
+
+A computed ARV estimate
+
+Notes explaining adjustments made
+
+This underwriting logic is not flexible — treat it as absolute business rules unless overridden by a human reviewer.
