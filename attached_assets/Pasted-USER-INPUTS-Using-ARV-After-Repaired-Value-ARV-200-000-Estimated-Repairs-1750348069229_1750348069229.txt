@@ -1,0 +1,58 @@
+USER INPUTS			
+(Using ARV)			
+			
+After Repaired Value ("ARV")		$200,000	
+			
+Estimated Repairs (click link below for an estimator tool)		$30,000	
+http://repairs.jvwithcashflowsociety.com/			
+			
+Amount To SUBTRACT For Negative Appraisal Factors		$0	
+(NOTE: This could be anything that would change the value of the property other than repairs; such as a weird feature of the house, or the property backs up to a commercial property, four lane road/highway, near railroad tracks / water tower / overhead high-voltage power lines, functional obsolescence, etc.)			
+			
+			
+			
+Amount To ADD For Positive Appraisal Factors			
+(NOTE: Such as this house has 4 bedrooms, but all the comps have 3)			
+			
+Do you want to take Appraisal Factors into account for your Wholesale offer?		No	
+			
+			
+"As-Is Value" (=ARV - Est. Repairs - Appraisal Factors)		$170,000	
+			
+Recommended Discount To Sell Fast On The M.L.S.		$10,000	
+(NOTE: We recommend listing it for 90% of the "As-Is Value," or $20,000, whichever is less.)			
+			
+			
+Discount To Sell Fast On The M.L.S.		$10,000	
+			
+Do you want to factor the Discount into the List Price?		Yes	
+			
+Price To List The Property On The M.L.S.		$160,000	
+			
+% of ARV that we can sell this as a Wholesale Deal		70.00%	 
+(NOTE: Depends on the market. Default = 65%; Max. % = 80%)			
+			
+Installment Closing Fees & Out Of Pocket Costs		$18,400	
+(NOTE: See "Closing Fees & Out Of Pocket Costs" tab for a detailed breakdown)			
+			
+			
+Suggested Minimum Profit (FOR REFERENCE ONLY)		$25,000	
+(NOTE: Suggested Minimum Profit on a Installment is the greater of $25,000 or 10% of the Sales Price To Another Investor on a Wholesale Offer [i.e. Assignment Price]. Always shoot for at least 1.5x of that amount to leave room for negotiations.)			
+			
+			
+			
+Minimum Acceptable Profit		$15,000	
+			
+			
+			
+			
+NOTE: Only use the fields below after getting offers from third-party buyers if you agreed to split profits with the seller. That way you can figure out which offers are the most profitable.			
+			
+			
+			
+Amount Over Asking Price Offered by End-Buyer on a Installment DEAL		$0	
+			
+			
+Amount To Split With Seller If Sold For More Than Asking Price (OPTIONAL)		$0	
+			
+			

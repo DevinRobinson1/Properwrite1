@@ -89,12 +89,13 @@ def generate_presentation():
         property_title = f"🏠 {beds}BR/{baths}BA Property in {city}"
         property_summary = f"Property analysis for {address} in {city}, {state}. {beds} bedrooms, {baths} bathrooms, {sqft:,} square feet."
         
-        # Generate offer strategies using ARV
+        # Generate offer strategies using ARV and enhanced calculations
         offer_analysis = generate_offer_comparison(
             arv=estimated_value,
-            repair_cost=20000,  # Default repair estimate
-            existing_loan=0,    # Can be updated if provided
-            monthly_payment=0,  # Can be updated if provided
+            repair_cost=30000,  # Using reference repair cost
+            existing_loan=120000,  # Sample existing loan for demo
+            monthly_payment=850,  # Sample monthly payment
+            interest_rate=0.045,  # Sample interest rate
             asking_price=int(buy_price) if buy_price > 0 else 0
         )
         
