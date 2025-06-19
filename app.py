@@ -109,37 +109,60 @@ def get_rentcast_market_data(address, city, state, zip_code, property_data):
     return market_data
 
 def search_comparable_properties(city, state, beds, baths, sqft):
-    """Search for comparable properties in the same area"""
+    """Search for comparable properties using common addresses in the area"""
     headers = {
         'X-Api-Key': RENTCAST_API_KEY,
         'Content-Type': 'application/json'
     }
     
-    try:
-        # Search for properties in the same city with similar characteristics
-        search_url = f"{RENTCAST_BASE_URL}/properties"
-        search_params = {
-            'city': city,
-            'state': state,
-            'bedrooms': beds,
-            'bathrooms': baths,
-            'limit': 20  # Get more properties to filter through
-        }
-        
-        search_response = requests.get(search_url, headers=headers, params=search_params, timeout=15)
-        logging.debug(f"Rentcast search API response: {search_response.status_code}")
-        
-        if search_response.status_code == 200:
-            properties_data = search_response.json()
-            logging.debug(f"Found {len(properties_data)} properties in search")
-            return properties_data
-        else:
-            logging.warning(f"Rentcast search API returned: {search_response.status_code}")
-            return []
-            
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Rentcast search API request failed: {str(e)}")
-        return []
+    # Common street patterns to search for comparable properties
+    street_patterns = [
+        "Main St", "Oak St", "Park Ave", "First St", "Second St", "Third St",
+        "Church St", "Elm St", "Washington St", "Lincoln Ave", "Madison Ave",
+        "Central Ave", "College St", "Market St", "Spring St", "Pine St",
+        "Maple Ave", "Cedar St", "Franklin St", "Jefferson St", "Adams St"
+    ]
+    
+    comparable_properties = []
+    
+    for street in street_patterns[:10]:  # Limit to 10 searches to avoid rate limits
+        for house_num in range(100, 2000, 200):  # Try different house numbers
+            try:
+                address = f"{house_num} {street}, {city}, {state}"
+                
+                search_url = f"{RENTCAST_BASE_URL}/properties"
+                search_params = {'address': address}
+                
+                response = requests.get(search_url, headers=headers, params=search_params, timeout=5)
+                
+                if response.status_code == 200:
+                    properties_data = response.json()
+                    
+                    if isinstance(properties_data, list) and properties_data:
+                        for prop in properties_data:
+                            # Check if property has sale data and similar characteristics
+                            if (prop.get('lastSalePrice') and prop.get('lastSaleDate') and
+                                prop.get('bedrooms') and prop.get('bathrooms') and prop.get('squareFootage')):
+                                
+                                prop_beds = prop.get('bedrooms', 0)
+                                prop_baths = prop.get('bathrooms', 0) 
+                                prop_sqft = prop.get('squareFootage', 0)
+                                
+                                # Check if reasonably similar (within reasonable ranges)
+                                if (abs(prop_beds - beds) <= 1 and 
+                                    abs(prop_baths - baths) <= 1.5 and 
+                                    prop_sqft > 500 and abs(prop_sqft - sqft) <= 800):
+                                    comparable_properties.append(prop)
+                                    logging.debug(f"Found comparable: {prop.get('formattedAddress')} - ${prop.get('lastSalePrice'):,}")
+                                    
+                                    if len(comparable_properties) >= 8:  # Stop when we have enough comps
+                                        return comparable_properties
+                
+            except Exception as e:
+                continue  # Skip failed requests and continue searching
+    
+    logging.info(f"Found {len(comparable_properties)} comparable properties using address search")
+    return comparable_properties
 
 # RapidAPI Integration Functions
 def get_zillow_property_data(address, city, state, zip_code):
