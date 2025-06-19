@@ -255,16 +255,13 @@ def generate_presentation():
         city = data.get('city', '').strip()
         state = data.get('state', '').strip()
         zip_code = data.get('zip', '').strip()
-        beds = int(data.get('beds', 3))
-        baths = int(data.get('baths', 2))
-        sqft = int(data.get('sqft', 1400))
-        buy_price = data.get('buy_price', '').strip()
+        # Handle optional property details with defaults
+        beds = int(data.get('beds') or 3)
+        baths = float(data.get('baths') or 2)
+        sqft = int(data.get('sqft') or 1400)
         
-        # Convert buy_price to int if provided
-        if buy_price:
-            buy_price = int(buy_price.replace(',', '').replace('$', ''))
-        else:
-            buy_price = None
+        # Remove buy_price handling since we removed that section
+        buy_price = None
             
         # Generate property analysis
         title = generate_property_title(address, city, beds, baths)

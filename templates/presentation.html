@@ -254,7 +254,7 @@
                             <td class="px-3 py-3 text-center">
                                 {% if comp.adjustments.total_adjustment != 0 %}
                                     <span class="{% if comp.adjustments.total_adjustment > 0 %}text-green-600{% else %}text-red-600{% endif %} font-bold">
-                                        ${{{ "{:,}".format(comp.adjustments.total_adjustment) }}
+                                        ${{ "{:,}".format(comp.adjustments.total_adjustment) }}
                                     </span>
                                 {% else %}
                                     <span class="text-gray-500">None</span>
