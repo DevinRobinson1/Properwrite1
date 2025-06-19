@@ -132,6 +132,39 @@ def analyze_property():
             'error': 'Failed to analyze property. Please check the address and try again.'
         }), 500
 
+def _assess_investment_potential(property_data: dict) -> str:
+    """Assess investment potential based on available data"""
+    sources = len(property_data.get('data_sources', []))
+    if sources >= 2:
+        return 'High - Multiple data sources'
+    elif sources == 1:
+        return 'Moderate - Single data source'
+    else:
+        return 'Limited - Estimated data only'
+
+def _assess_market_conditions(property_data: dict) -> str:
+    """Assess market conditions based on property estimates"""
+    estimates = [
+        property_data.get('zillow_estimate'),
+        property_data.get('redfin_estimate'),
+        property_data.get('realtor_estimate')
+    ]
+    valid_estimates = [e for e in estimates if e is not None]
+    
+    if len(valid_estimates) >= 2:
+        return 'Stable - Multiple valuations available'
+    else:
+        return 'Unknown - Limited valuation data'
+
+def _assess_risk_level(property_data: dict) -> str:
+    """Assess risk level based on data quality"""
+    if property_data.get('data_errors'):
+        return 'Medium - Some data retrieval issues'
+    elif len(property_data.get('data_sources', [])) >= 2:
+        return 'Low - Good data quality'
+    else:
+        return 'Medium - Limited data sources'
+
 @app.route('/api/calculate-strategies', methods=['POST'])
 def calculate_strategies():
     """
