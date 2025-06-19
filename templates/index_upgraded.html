@@ -185,33 +185,398 @@
                     
                     <!-- Wholesale Tab -->
                     <div id="wholesale-tab" class="tab-content active">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Wholesale Strategy (Cash Offer)</h3>
-                        <div id="wholesale-results" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <!-- Results will be populated here -->
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Wholesale Strategy (Cash Offer with Ackerman Method)</h3>
+                        
+                        <!-- Wholesale Assumptions -->
+                        <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Offer Assumptions</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">ARV Percentage (%)</label>
+                                    <input type="range" min="60" max="80" value="70" id="wholesale-arv-percent" class="w-full" onchange="updateWholesalePercent()">
+                                    <div class="text-center mt-1">
+                                        <span id="wholesale-arv-display" class="font-bold">70%</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Profit ($)</label>
+                                    <input type="number" value="15000" id="wholesale-min-profit" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateWholesale()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Assignment Fee ($)</label>
+                                    <input type="number" value="15000" id="wholesale-assignment-fee" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateWholesale()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MAO Calculation -->
+                        <div class="bg-white border border-gray-200 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Maximum Allowable Offer (MAO) Breakdown</h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span>ARV:</span>
+                                    <span class="font-bold">$<span id="mao-arv">155,000</span></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span>× Wholesale Percentage (<span id="mao-percent">70</span>%):</span>
+                                    <span class="font-bold">$<span id="mao-arv-calc">108,500</span></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span>- Estimated Repairs:</span>
+                                    <span class="font-bold text-red-600">-$<span id="mao-repairs">30,000</span></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span>- Assignment Profit:</span>
+                                    <span class="font-bold text-red-600">-$<span id="mao-assignment">15,000</span></span>
+                                </div>
+                                <hr class="border-gray-300">
+                                <div class="flex justify-between items-center text-lg font-bold">
+                                    <span>Maximum Allowable Offer:</span>
+                                    <span class="text-green-600">$<span id="wholesale-mao-result">63,500</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ackerman Offers -->
+                        <div class="bg-blue-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-blue-800 mb-4">Ackerman Method Offers</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="ackerman-offers">
+                                <div class="bg-white p-4 rounded-lg border border-blue-200">
+                                    <div class="text-sm text-blue-600 font-medium">Offer #1 (65%)</div>
+                                    <div class="text-2xl font-bold text-blue-800">$<span id="ackerman-1">41,275</span></div>
+                                    <div class="text-xs text-gray-600 mt-1">Aggressive opening</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border border-blue-200">
+                                    <div class="text-sm text-blue-600 font-medium">Offer #2 (85%)</div>
+                                    <div class="text-2xl font-bold text-blue-800">$<span id="ackerman-2">53,975</span></div>
+                                    <div class="text-xs text-gray-600 mt-1">Negotiation point</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border border-blue-200">
+                                    <div class="text-sm text-blue-600 font-medium">Offer #3 (95%)</div>
+                                    <div class="text-2xl font-bold text-blue-800">$<span id="ackerman-3">60,325</span></div>
+                                    <div class="text-xs text-gray-600 mt-1">Final offer</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profit Analysis -->
+                        <div class="bg-green-50 p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-green-800 mb-4">Profit Analysis</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <div class="text-sm text-green-700 mb-2">Total Investment</div>
+                                    <div class="text-xl font-bold text-green-800">$<span id="total-investment">108,500</span></div>
+                                    <div class="text-xs text-gray-600">Purchase + Repairs + Costs</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-green-700 mb-2">Assignment Profit</div>
+                                    <div class="text-xl font-bold text-green-800">$<span id="assignment-profit">15,000</span></div>
+                                    <div class="text-xs text-gray-600">Quick cash exit</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Installment Tab -->
                     <div id="installment-tab" class="tab-content">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6">Installment/Novation Strategy</h3>
-                        <div id="installment-results" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <!-- Results will be populated here -->
+                        
+                        <!-- Seller Psychology Framework -->
+                        <div class="bg-purple-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-purple-800 mb-4">Seller Psychology Framework</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-white p-4 rounded-lg border border-purple-200">
+                                    <div class="font-semibold text-purple-700">Speed</div>
+                                    <div class="text-sm text-gray-600">Quick closing process</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border border-purple-200">
+                                    <div class="font-semibold text-purple-700">Price</div>
+                                    <div class="text-sm text-gray-600">Higher than cash offers</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border border-purple-200">
+                                    <div class="font-semibold text-purple-700">Convenience</div>
+                                    <div class="text-sm text-gray-600">No showings or repairs</div>
+                                </div>
+                            </div>
+                            <div class="mt-4 text-sm text-purple-700 font-medium">
+                                Installment = Price + Convenience (Choose 2 of 3)
+                            </div>
+                        </div>
+
+                        <!-- Installment Assumptions -->
+                        <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Offer Assumptions</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Discount to Sell Fast ($)</label>
+                                    <input type="number" value="10000" id="installment-discount" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateInstallment()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Buyer Over-Ask Bonus ($)</label>
+                                    <input type="number" value="5000" id="installment-bonus" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateInstallment()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Closing & OOP Cost Builder -->
+                        <div class="bg-white border border-gray-200 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Closing & Out-of-Pocket Costs</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span>Title Insurance:</span>
+                                        <span>$<span id="title-insurance">1,200</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Attorney Fees:</span>
+                                        <span>$<span id="attorney-fees">800</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Recording Fees:</span>
+                                        <span>$<span id="recording-fees">300</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Inspections:</span>
+                                        <span>$<span id="inspections">500</span></span>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span>Marketing Costs:</span>
+                                        <span>$<span id="marketing-costs">2,000</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Holding Costs (6mo):</span>
+                                        <span>$<span id="holding-costs">3,600</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Contingency (5%):</span>
+                                        <span>$<span id="contingency">1,500</span></span>
+                                    </div>
+                                    <hr class="border-gray-300">
+                                    <div class="flex justify-between font-bold">
+                                        <span>Total Closing Costs:</span>
+                                        <span>$<span id="total-closing-costs">9,900</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profit Projections -->
+                        <div class="bg-indigo-50 p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-indigo-800 mb-4">Profit Projections</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="text-sm text-indigo-600 font-medium">Purchase Price</div>
+                                    <div class="text-2xl font-bold">$<span id="installment-purchase">145,000</span></div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="text-sm text-indigo-600 font-medium">Final Sales Price</div>
+                                    <div class="text-2xl font-bold">$<span id="installment-sales">160,000</span></div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="text-sm text-indigo-600 font-medium">Net Profit</div>
+                                    <div class="text-2xl font-bold text-green-600">$<span id="installment-profit">25,100</span></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Subject-To Tab -->
                     <div id="subject-to-tab" class="tab-content">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6">Subject-To Strategy</h3>
-                        <div id="subject-to-results" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <!-- Results will be populated here -->
+                        
+                        <!-- PITI & Equity Structure -->
+                        <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">PITI & Equity Structure</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Existing Loan Balance ($)</label>
+                                    <input type="number" value="116250" id="sub2-loan-balance" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Cash to Seller ($)</label>
+                                    <input type="number" value="4000" id="sub2-cash-seller" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Monthly P&I ($)</label>
+                                    <input type="number" value="800" id="sub2-monthly-pi" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Escrow ($)</label>
+                                    <input type="number" value="300" id="sub2-monthly-escrow" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Immediate Equity Position -->
+                        <div class="bg-green-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-green-800 mb-4">Immediate Equity Analysis</h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span>Property ARV:</span>
+                                    <span class="font-bold">$<span id="sub2-arv">155,000</span></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Existing Loan Balance:</span>
+                                    <span class="font-bold text-red-600">-$<span id="sub2-balance">116,250</span></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Cash to Seller:</span>
+                                    <span class="font-bold text-red-600">-$<span id="sub2-cash">4,000</span></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Acquisition Costs:</span>
+                                    <span class="font-bold text-red-600">-$<span id="sub2-costs">2,500</span></span>
+                                </div>
+                                <hr class="border-gray-300">
+                                <div class="flex justify-between text-lg font-bold">
+                                    <span>Immediate Equity:</span>
+                                    <span class="text-green-600">$<span id="sub2-equity">32,250</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cash Flow Timeline -->
+                        <div class="bg-blue-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-blue-800 mb-4">Monthly Cash Flow</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span>Monthly Rent Income:</span>
+                                        <span class="font-bold text-green-600">+$<span id="sub2-rent">1,425</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Monthly P&I Payment:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sub2-pi">800</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Monthly Escrow:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sub2-escrow">300</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Maintenance Reserve:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sub2-maintenance">100</span></span>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="text-center">
+                                        <div class="text-sm text-blue-700 mb-2">Monthly Cash Flow</div>
+                                        <div class="text-3xl font-bold text-green-600">+$<span id="sub2-cashflow">225</span></div>
+                                        <div class="text-sm text-gray-600 mt-1">Per month</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5-Year Exit Logic -->
+                        <div class="bg-purple-50 p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-purple-800 mb-4">5-Year Exit Strategies</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-white p-4 rounded-lg border border-purple-200">
+                                    <div class="font-semibold text-purple-700 mb-2">Lease Option Exit</div>
+                                    <div class="space-y-2 text-sm">
+                                        <div>Option Fee: $<span id="lease-option-fee">10,000</span></div>
+                                        <div>Sale Price: $<span id="lease-option-price">185,000</span></div>
+                                        <div>Total Profit: $<span id="lease-option-profit">42,250</span></div>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border border-purple-200">
+                                    <div class="font-semibold text-purple-700 mb-2">Refinance Exit</div>
+                                    <div class="space-y-2 text-sm">
+                                        <div>New Loan: 80% LTV</div>
+                                        <div>Cash Out: $<span id="refi-cashout">25,000</span></div>
+                                        <div>Improved Cash Flow: +$<span id="refi-cashflow">150</span>/mo</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Seller Finance Tab -->
                     <div id="seller-finance-tab" class="tab-content">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6">Seller Finance Strategy</h3>
-                        <div id="seller-finance-results" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <!-- Results will be populated here -->
+                        
+                        <!-- Loan Terms -->
+                        <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Loan Terms</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Purchase Price ($)</label>
+                                    <input type="number" value="147250" id="sf-purchase-price" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSellerFinance()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Down Payment ($)</label>
+                                    <input type="number" value="15000" id="sf-down-payment" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSellerFinance()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Interest Rate (%)</label>
+                                    <input type="number" step="0.1" value="6.5" id="sf-interest-rate" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSellerFinance()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Term (Years)</label>
+                                    <select id="sf-term" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSellerFinance()">
+                                        <option value="20">20 Years</option>
+                                        <option value="25">25 Years</option>
+                                        <option value="30" selected>30 Years</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Structure -->
+                        <div class="bg-blue-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-blue-800 mb-4">Payment Structure</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="text-sm text-blue-700 mb-2">Monthly Payment</div>
+                                    <div class="text-2xl font-bold">$<span id="sf-monthly-payment">876</span></div>
+                                    <div class="text-xs text-gray-600">P&I Only</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="text-sm text-blue-700 mb-2">Total Interest</div>
+                                    <div class="text-2xl font-bold">$<span id="sf-total-interest">183,360</span></div>
+                                    <div class="text-xs text-gray-600">Over loan term</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="text-sm text-blue-700 mb-2">Balloon (10yr)</div>
+                                    <div class="text-2xl font-bold">$<span id="sf-balloon">118,450</span></div>
+                                    <div class="text-xs text-gray-600">If balloon term</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cash Flow Analysis -->
+                        <div class="bg-green-50 p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-green-800 mb-4">Cash Flow Analysis</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span>Monthly Rent:</span>
+                                        <span class="font-bold text-green-600">+$<span id="sf-rent">1,425</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Monthly Payment:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sf-payment">876</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Taxes & Insurance:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sf-taxes-insurance">250</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Maintenance/CapEx:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sf-maintenance">100</span></span>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="text-center">
+                                        <div class="text-sm text-green-700 mb-2">Monthly Cash Flow</div>
+                                        <div class="text-3xl font-bold text-green-600">+$<span id="sf-cashflow">199</span></div>
+                                        <div class="text-sm text-gray-600 mt-1">Per month</div>
+                                        <div class="text-xs text-green-600 mt-2">14% Cash-on-Cash Return</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -462,8 +827,124 @@
             input.addEventListener('change', function() {
                 if (document.getElementById('analysis-results').classList.contains('hidden')) return;
                 calculateStrategies();
+                updateAllTabCalculations();
             });
         });
+
+        // Tab-specific calculation functions
+        function updateWholesalePercent() {
+            const percent = document.getElementById('wholesale-arv-percent').value;
+            document.getElementById('wholesale-arv-display').textContent = percent + '%';
+            recalculateWholesale();
+        }
+
+        function recalculateWholesale() {
+            const arv = parseFloat(document.getElementById('arv').value);
+            const repairs = parseFloat(document.getElementById('repairs').value);
+            const percent = parseFloat(document.getElementById('wholesale-arv-percent').value) / 100;
+            const assignmentFee = parseFloat(document.getElementById('wholesale-assignment-fee').value);
+            
+            const arvCalc = arv * percent;
+            const mao = arvCalc - repairs - assignmentFee;
+            
+            // Update MAO breakdown
+            document.getElementById('mao-arv').textContent = arv.toLocaleString();
+            document.getElementById('mao-percent').textContent = (percent * 100);
+            document.getElementById('mao-arv-calc').textContent = arvCalc.toLocaleString();
+            document.getElementById('mao-repairs').textContent = repairs.toLocaleString();
+            document.getElementById('mao-assignment').textContent = assignmentFee.toLocaleString();
+            document.getElementById('wholesale-mao-result').textContent = mao.toLocaleString();
+            
+            // Update Ackerman offers
+            document.getElementById('ackerman-1').textContent = (mao * 0.65).toLocaleString();
+            document.getElementById('ackerman-2').textContent = (mao * 0.85).toLocaleString();
+            document.getElementById('ackerman-3').textContent = (mao * 0.95).toLocaleString();
+            
+            // Update profit analysis
+            document.getElementById('total-investment').textContent = (mao + repairs).toLocaleString();
+            document.getElementById('assignment-profit').textContent = assignmentFee.toLocaleString();
+        }
+
+        function recalculateInstallment() {
+            const arv = parseFloat(document.getElementById('arv').value);
+            const repairs = parseFloat(document.getElementById('repairs').value);
+            const discount = parseFloat(document.getElementById('installment-discount').value);
+            const bonus = parseFloat(document.getElementById('installment-bonus').value);
+            
+            const purchasePrice = arv - discount;
+            const salesPrice = arv + bonus;
+            const profit = salesPrice - purchasePrice - repairs - 9900; // Including closing costs
+            
+            document.getElementById('installment-purchase').textContent = purchasePrice.toLocaleString();
+            document.getElementById('installment-sales').textContent = salesPrice.toLocaleString();
+            document.getElementById('installment-profit').textContent = profit.toLocaleString();
+        }
+
+        function recalculateSubjectTo() {
+            const arv = parseFloat(document.getElementById('arv').value);
+            const rent = parseFloat(document.getElementById('rent').value);
+            const loanBalance = parseFloat(document.getElementById('sub2-loan-balance').value);
+            const cashToSeller = parseFloat(document.getElementById('sub2-cash-seller').value);
+            const monthlyPI = parseFloat(document.getElementById('sub2-monthly-pi').value);
+            const monthlyEscrow = parseFloat(document.getElementById('sub2-monthly-escrow').value);
+            
+            const immediateEquity = arv - loanBalance - cashToSeller - 2500;
+            const monthlyCashFlow = rent - monthlyPI - monthlyEscrow - 100;
+            
+            // Update equity analysis
+            document.getElementById('sub2-arv').textContent = arv.toLocaleString();
+            document.getElementById('sub2-balance').textContent = loanBalance.toLocaleString();
+            document.getElementById('sub2-cash').textContent = cashToSeller.toLocaleString();
+            document.getElementById('sub2-equity').textContent = immediateEquity.toLocaleString();
+            
+            // Update cash flow
+            document.getElementById('sub2-rent').textContent = rent.toLocaleString();
+            document.getElementById('sub2-pi').textContent = monthlyPI.toLocaleString();
+            document.getElementById('sub2-escrow').textContent = monthlyEscrow.toLocaleString();
+            document.getElementById('sub2-cashflow').textContent = monthlyCashFlow.toLocaleString();
+            
+            // Update exit strategies
+            document.getElementById('lease-option-price').textContent = (arv * 1.2).toLocaleString();
+            document.getElementById('lease-option-profit').textContent = (immediateEquity + 10000).toLocaleString();
+            document.getElementById('refi-cashout').textContent = (arv * 0.8 - loanBalance).toLocaleString();
+        }
+
+        function recalculateSellerFinance() {
+            const purchasePrice = parseFloat(document.getElementById('sf-purchase-price').value);
+            const downPayment = parseFloat(document.getElementById('sf-down-payment').value);
+            const interestRate = parseFloat(document.getElementById('sf-interest-rate').value) / 100;
+            const termYears = parseFloat(document.getElementById('sf-term').value);
+            const rent = parseFloat(document.getElementById('rent').value);
+            
+            const loanAmount = purchasePrice - downPayment;
+            const monthlyRate = interestRate / 12;
+            const numPayments = termYears * 12;
+            
+            // Calculate monthly payment
+            const monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
+            const totalInterest = (monthlyPayment * numPayments) - loanAmount;
+            const balloonBalance = loanAmount * Math.pow(1 + monthlyRate, 120) - monthlyPayment * ((Math.pow(1 + monthlyRate, 120) - 1) / monthlyRate);
+            
+            const monthlyCashFlow = rent - monthlyPayment - 250 - 100;
+            
+            // Update payment structure
+            document.getElementById('sf-monthly-payment').textContent = monthlyPayment.toLocaleString();
+            document.getElementById('sf-total-interest').textContent = totalInterest.toLocaleString();
+            document.getElementById('sf-balloon').textContent = balloonBalance.toLocaleString();
+            
+            // Update cash flow
+            document.getElementById('sf-rent').textContent = rent.toLocaleString();
+            document.getElementById('sf-payment').textContent = monthlyPayment.toLocaleString();
+            document.getElementById('sf-cashflow').textContent = monthlyCashFlow.toLocaleString();
+        }
+
+        function updateAllTabCalculations() {
+            // Update all tab calculations when property data changes
+            recalculateWholesale();
+            recalculateInstallment();
+            recalculateSubjectTo();
+            recalculateSellerFinance();
+        }
     </script>
 </body>
 </html>
