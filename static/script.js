@@ -396,14 +396,25 @@ function initGooglePlaces() {
     const zipInput = document.getElementById('zip');
     const loadingSpinner = document.getElementById('address-loading');
     
-    if (!addressInput || !window.google) return;
+    if (!addressInput) return;
     
-    // Initialize Google Places Autocomplete
-    autocomplete = new google.maps.places.Autocomplete(addressInput, {
-        types: ['address'],
-        componentRestrictions: { country: 'us' },
-        fields: ['address_components', 'formatted_address', 'geometry', 'name']
-    });
+    // Check if Google Places API is available
+    if (!window.google || !window.google.maps || !window.google.maps.places) {
+        console.log('Google Places API not available - using manual entry mode');
+        return;
+    }
+    
+    // Initialize Google Places Autocomplete with error handling
+    try {
+        autocomplete = new google.maps.places.Autocomplete(addressInput, {
+            types: ['address'],
+            componentRestrictions: { country: 'us' },
+            fields: ['address_components', 'formatted_address', 'geometry', 'name']
+        });
+    } catch (error) {
+        console.log('Google Places API initialization failed:', error);
+        return;
+    }
     
     // Show loading spinner when user starts typing
     let typingTimer;
@@ -427,7 +438,7 @@ function initGooglePlaces() {
         const place = autocomplete.getPlace();
         
         if (!place.geometry) {
-            showNotification('Please select a valid address from the dropdown suggestions.', 'warning');
+            // Allow manual entry without requiring Google Places selection
             return;
         }
         
@@ -515,7 +526,8 @@ function initGooglePlaces() {
         loadingSpinner.classList.add('hidden');
         
         if (this.value && !selectedPlace) {
-            showNotification('Please select an address from the dropdown for best results.', 'info');
+            // Allow manual entry without Google Places - remove the notification requirement
+            // showNotification('Please select an address from the dropdown for best results.', 'info');
         }
     });
 }
