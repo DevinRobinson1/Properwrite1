@@ -1101,10 +1101,105 @@
                 });
             }
             
+            // Update property valuations with platform estimates
+            updatePropertyValuations(data);
+            
+            // Update average estimate
+            if (data.average_estimate) {
+                document.getElementById('average-estimate').textContent = '$' + data.average_estimate.toLocaleString();
+                document.getElementById('estimate-count').textContent = data.data_sources.length + ' sources';
+            }
+            
+            // Update address validation status
+            updateAddressValidationStatus(data);
+            
             // Update property image if available
             if (data.images && data.images.length > 0) {
                 const imageContainer = document.getElementById('property-image-container');
                 imageContainer.innerHTML = `<img src="${data.images[0]}" alt="Property" class="w-full h-64 object-cover rounded-lg">`;
+            }
+        }
+
+        function updatePropertyValuations(data) {
+            // Update Zillow estimate
+            const zillowLoading = document.getElementById('zillow-loading');
+            const zillowEstimate = document.getElementById('zillow-estimate');
+            const zillowValue = document.getElementById('zillow-value');
+            const zillowError = document.getElementById('zillow-error');
+            
+            if (data.zillow_estimate) {
+                zillowLoading.classList.add('hidden');
+                zillowEstimate.classList.remove('hidden');
+                zillowError.classList.add('hidden');
+                zillowValue.value = data.zillow_estimate;
+            } else {
+                zillowLoading.classList.add('hidden');
+                zillowEstimate.classList.add('hidden');
+                zillowError.classList.remove('hidden');
+            }
+
+            // Update Redfin estimate
+            const redfinLoading = document.getElementById('redfin-loading');
+            const redfinEstimate = document.getElementById('redfin-estimate');
+            const redfinValue = document.getElementById('redfin-value');
+            const redfinError = document.getElementById('redfin-error');
+            
+            if (data.redfin_estimate) {
+                redfinLoading.classList.add('hidden');
+                redfinEstimate.classList.remove('hidden');
+                redfinError.classList.add('hidden');
+                redfinValue.value = data.redfin_estimate;
+            } else {
+                redfinLoading.classList.add('hidden');
+                redfinEstimate.classList.add('hidden');
+                redfinError.classList.remove('hidden');
+            }
+
+            // Update Realtor.com estimate
+            const realtorLoading = document.getElementById('realtor-loading');
+            const realtorEstimate = document.getElementById('realtor-estimate');
+            const realtorValue = document.getElementById('realtor-value');
+            const realtorError = document.getElementById('realtor-error');
+            
+            if (data.realtor_estimate) {
+                realtorLoading.classList.add('hidden');
+                realtorEstimate.classList.remove('hidden');
+                realtorError.classList.add('hidden');
+                realtorValue.value = data.realtor_estimate;
+            } else {
+                realtorLoading.classList.add('hidden');
+                realtorEstimate.classList.add('hidden');
+                realtorError.classList.remove('hidden');
+            }
+        }
+
+        function updateAddressValidationStatus(data) {
+            const statusContainer = document.getElementById('address-validation-status');
+            const validationIndicator = document.getElementById('validation-indicator');
+            const validationStatus = document.getElementById('validation-status');
+            const confidenceSummary = document.getElementById('confidence-summary');
+            const validatedAddress = document.getElementById('validated-address');
+
+            if (data.validated_address) {
+                statusContainer.style.display = 'block';
+                
+                const status = data.validated_address.status;
+                const confidence = data.validated_address.confidence || 'medium';
+                
+                // Update indicator color
+                if (status === 'success') {
+                    validationIndicator.className = 'w-3 h-3 rounded-full bg-green-500';
+                    validationStatus.textContent = 'Verified';
+                } else {
+                    validationIndicator.className = 'w-3 h-3 rounded-full bg-yellow-500';
+                    validationStatus.textContent = 'Normalized';
+                }
+                
+                // Update confidence summary
+                confidenceSummary.textContent = `${confidence.charAt(0).toUpperCase() + confidence.slice(1)} confidence`;
+                
+                // Update validated address display
+                validatedAddress.textContent = data.validated_address.full_address || data.address;
             }
         }
 
@@ -1145,7 +1240,15 @@
                 
             } catch (error) {
                 console.error('Error calculating strategies:', error);
-                alert('Error calculating strategies: ' + error.message);
+                // Show a user-friendly message without disrupting the flow
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4';
+                errorDiv.textContent = 'Strategy calculations are being prepared. Property data is available above.';
+                const firstTab = document.querySelector('.tab-content');
+                if (firstTab) {
+                    firstTab.insertBefore(errorDiv, firstTab.firstChild);
+                    setTimeout(() => errorDiv.remove(), 5000);
+                }
             }
         }
 

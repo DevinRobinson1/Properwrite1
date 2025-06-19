@@ -110,8 +110,10 @@ class ExternalPropertyService:
                 
                 # Look for property image
                 img_elements = soup.find_all('img', {'alt': re.compile(r'property|home|house', re.I)})
-                if img_elements and hasattr(img_elements[0], 'get'):
-                    property_data['image_url'] = img_elements[0].get('src')
+                if img_elements and len(img_elements) > 0:
+                    first_img = img_elements[0]
+                    if hasattr(first_img, 'get') and callable(first_img.get):
+                        property_data['image_url'] = first_img.get('src')
                 
                 logging.info(f"Zillow data extracted: {property_data}")
                 return property_data
