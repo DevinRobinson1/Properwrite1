@@ -474,6 +474,34 @@ def calculate_offers():
         logging.error(f"Offer calculation error: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/api/recalculate', methods=['POST'])
+def recalculate_all():
+    """API endpoint for real-time recalculation of all strategies"""
+    try:
+        data = request.get_json()
+        arv = float(data.get('arv', 200000))
+        repairs = float(data.get('repairs', 30000))
+        beds = int(data.get('beds', 3))
+        baths = int(data.get('baths', 2))
+        sqft = int(data.get('sqft', 1200))
+        rent = float(data.get('rent', 2000))
+        
+        # Recalculate all strategies
+        wholesale_analysis = calculate_wholesale_offers(arv, repairs)
+        installment_analysis = calculate_installment_offers(arv, repairs)
+        subject_to_analysis = calculate_subject_to_offer(arv, principal_balance=150000, purchase_price=arv*0.85, cash_to_seller=4000)
+        seller_finance_analysis = calculate_seller_finance_offer(arv, seller_finance_purchase_price=arv*0.95)
+        
+        return jsonify({
+            'wholesale': wholesale_analysis,
+            'installment': installment_analysis,
+            'subject_to': subject_to_analysis,
+            'seller_finance': seller_finance_analysis
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
 @app.route('/share/<data>')
 def share_link(data):
     """Generate shareable link for property presentation"""

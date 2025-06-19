@@ -396,9 +396,105 @@
             const repairs = document.getElementById('global-repairs').value;
             const rent = document.getElementById('global-rent').value;
             
-            // Trigger recalculation for all strategies
-            console.log('Updating calculations with:', { beds, baths, sqft, arv, repairs, rent });
-            // Add API calls to recalculate each strategy
+            // Show loading indicator
+            showLoading();
+            
+            // API call to recalculate all strategies
+            fetch('/api/recalculate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    beds: parseInt(beds),
+                    baths: parseInt(baths),
+                    sqft: parseInt(sqft),
+                    arv: parseFloat(arv),
+                    repairs: parseFloat(repairs),
+                    rent: parseFloat(rent)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError('Calculation error: ' + data.error);
+                } else {
+                    updateDisplayedValues(data);
+                    showNotification('Calculations updated successfully', 'success');
+                }
+                hideLoading();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Failed to update calculations');
+                hideLoading();
+            });
+        }
+
+        function updateDisplayedValues(data) {
+            // Update wholesale values
+            if (data.wholesale) {
+                document.querySelectorAll('.wholesale-mao').forEach(el => {
+                    el.textContent = '$' + (data.wholesale.wholesale_mao || 0).toLocaleString();
+                });
+            }
+            
+            // Update installment values
+            if (data.installment) {
+                document.querySelectorAll('.installment-mao').forEach(el => {
+                    el.textContent = '$' + (data.installment.installment_mao || 0).toLocaleString();
+                });
+            }
+            
+            // Update comparison dashboard
+            updateComparisonDashboard(data);
+        }
+
+        function updateComparisonDashboard(data) {
+            const dashboard = document.getElementById('compare-dashboard');
+            if (dashboard && !dashboard.classList.contains('hidden')) {
+                // Update comparison values with new data
+                if (data.wholesale) {
+                    const wholesaleAmount = dashboard.querySelector('.wholesale-amount');
+                    if (wholesaleAmount) {
+                        wholesaleAmount.textContent = '$' + (data.wholesale.wholesale_mao || 0).toLocaleString();
+                    }
+                }
+            }
+        }
+
+        function showLoading() {
+            // Add loading overlay
+            const loading = document.createElement('div');
+            loading.id = 'loading-overlay';
+            loading.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            loading.innerHTML = '<div class="bg-white p-6 rounded-lg"><i class="fas fa-spinner fa-spin mr-2"></i>Updating calculations...</div>';
+            document.body.appendChild(loading);
+        }
+
+        function hideLoading() {
+            const loading = document.getElementById('loading-overlay');
+            if (loading) {
+                loading.remove();
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 ${
+                type === 'success' ? 'bg-green-600' : 
+                type === 'error' ? 'bg-red-600' : 'bg-blue-600'
+            }`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function showError(message) {
+            showNotification(message, 'error');
         }
 
         function updateWholesalePercentage() {
