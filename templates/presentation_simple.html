@@ -226,7 +226,7 @@
                         ${{ "{:,}".format(wholesale_analysis.assignment_price|int) }}
                     </div>
                     <div class="text-sm text-gray-600">
-                        ${{ "{:,}".format(wholesale_analysis.assignment_fee|int) }} profit
+                        ${{ "{:,}".format(wholesale_analysis.assignment_profit|int) }} profit
                     </div>
                 </div>
 
@@ -1675,7 +1675,7 @@
                         <div>ARV: ${{ "{:,}".format(cash.arv|int) }}</div>
                         <div>Repair Cost: ${{ "{:,}".format(cash.repair_cost|int) }}</div>
                         <div>Closing Costs: ${{ "{:,}".format(cash.closing_costs|int) }}</div>
-                        <div>Profit Margin: ${{ "{:,}".format(cash.profit|int) }}</div>
+                        <div>Strategy: {{ cash.strategy }}</div>
                     </div>
                 </div>
                 {% endif %}
