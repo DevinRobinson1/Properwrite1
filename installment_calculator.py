@@ -75,6 +75,7 @@ def calculate_installment_offers(arv, estimated_repairs, negative_adjustments=0,
         'mao_as_percent_of_arv': mao_as_percent_of_arv,
         'installment_vs_wholesale_gap': installment_vs_wholesale_gap,
         'net_profit': net_profit,
+        'gross_profit': gross_after_closing,  # Template expects this field
         'profit_margin': profit_margin,
         
         # Strategy framework

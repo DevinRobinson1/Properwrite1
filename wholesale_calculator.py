@@ -55,6 +55,7 @@ def calculate_wholesale_offers(arv, repairs, wholesale_arv_percent=0.70, negativ
         
         # Profit analysis
         'mao_as_percent_of_arv': mao_as_percent_of_arv,
+        'profit_margin': mao_as_percent_of_arv,  # Template expects this field
         'retail_gap_before_repairs': retail_gap_before_repairs,
         'retail_gap_gross_profit': retail_gap_gross_profit,
         'assignment_profit': assignment_profit,
@@ -85,6 +86,7 @@ def calculate_ackerman_sequence(base_mao, custom_percentages=None):
         offers.append({
             'offer_number': i + 1,
             'percentage': percentage * 100,
+            'percentage_of_mao': percentage * 100,  # Template expects this field
             'amount': base_mao * percentage,
             'strategy_note': get_ackerman_note(i + 1)
         })
