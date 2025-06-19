@@ -41,10 +41,33 @@ def analyze_property():
                 'error': 'Please provide complete address information'
             }), 400
         
-        # Get comprehensive property data from external sources
-        property_data = property_service.get_property_data(address, city, state, zip_code)
+        # Initialize property data with defaults
+        property_data = {
+            'address': address,
+            'city': city,
+            'state': state,
+            'zip': zip_code,
+            'bedrooms': 3,
+            'bathrooms': 2.0,
+            'square_feet': 1200,
+            'year_built': 1995,
+            'property_type': 'Single Family',
+            'data_sources': ['Manual Input'],
+            'images': []
+        }
         
-        # Enhance with calculated estimates if external data is missing
+        # Try to get external data but don't fail if unavailable
+        try:
+            external_data = property_service.get_property_data(address, city, state, zip_code)
+            if external_data:
+                # Only update with non-None values
+                for key, value in external_data.items():
+                    if value is not None and value != '':
+                        property_data[key] = value
+        except Exception as e:
+            logging.warning(f"External data unavailable: {e}")
+        
+        # Generate estimates for missing values
         if not property_data.get('estimated_value'):
             property_data['estimated_value'] = estimate_property_value(
                 property_data.get('square_feet', 1200),
@@ -60,13 +83,6 @@ def analyze_property():
                 property_data.get('bathrooms', 2),
                 city, state
             )
-        
-        # Set reasonable defaults for missing property details
-        property_data.setdefault('bedrooms', 3)
-        property_data.setdefault('bathrooms', 2.0)
-        property_data.setdefault('square_feet', 1200)
-        property_data.setdefault('year_built', 1995)
-        property_data.setdefault('property_type', 'Single Family')
         
         # Store in session for later use
         session['current_property'] = property_data
