@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ property.title }}</title>
+    <title>{{ property_title }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -38,26 +38,26 @@
     <div class="container mx-auto px-4 py-8 max-w-6xl">
         <!-- Property Title -->
         <div class="bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg p-8 mb-8 shadow-lg">
-            <h1 class="text-4xl font-bold mb-4 editable" data-field="title">{{ property.title }}</h1>
+            <h1 class="text-4xl font-bold mb-4 editable" data-field="title">{{ property_title }}</h1>
             <div class="flex flex-wrap items-center text-lg space-x-6">
-                <span><i class="fas fa-map-marker-alt mr-2"></i>{{ property.address }}, {{ property.city }}, {{ property.state }} {{ property.zip }}</span>
-                <span><i class="fas fa-bed mr-2"></i>{{ property.beds }} Bed</span>
-                <span><i class="fas fa-bath mr-2"></i>{{ property.baths }} Bath</span>
-                <span><i class="fas fa-ruler-combined mr-2"></i>{{ "{:,}".format(property.sqft) }} sqft</span>
+                <span><i class="fas fa-map-marker-alt mr-2"></i>{{ address }}, {{ city }}, {{ state }} {{ zip }}</span>
+                <span><i class="fas fa-bed mr-2"></i>{{ beds }} Bed</span>
+                <span><i class="fas fa-bath mr-2"></i>{{ baths }} Bath</span>
+                <span><i class="fas fa-ruler-combined mr-2"></i>{{ "{:,}".format(sqft) }} sqft</span>
             </div>
         </div>
 
-        <!-- Multi-Source Property Valuations -->
-        {% if property.property_valuations %}
+        <!-- Property Data Sources -->
+        {% if data_sources %}
         <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                <i class="fas fa-chart-line text-blue-500 mr-2"></i>Multi-Source Property Valuations
+                <i class="fas fa-chart-line text-blue-500 mr-2"></i>Data Sources
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {% for source, value in property.property_valuations.items() %}
+                {% for source, status in data_sources.items() %}
                 <div class="bg-gray-50 rounded-lg p-4 border-l-4 border-blue-500">
                     <div class="font-semibold text-gray-800">{{ source }}</div>
-                    <div class="text-lg font-bold text-blue-600">{{ value }}</div>
+                    <div class="text-sm text-gray-600">{{ status }}</div>
                 </div>
                 {% endfor %}
             </div>
@@ -69,7 +69,7 @@
             <h2 class="text-2xl font-bold text-gray-800 mb-4">
                 <i class="fas fa-star text-yellow-500 mr-2"></i>Investment Summary
             </h2>
-            <p class="text-lg text-gray-700 leading-relaxed editable" data-field="summary">{{ property.summary }}</p>
+            <p class="text-lg text-gray-700 leading-relaxed editable" data-field="summary">{{ property_summary }}</p>
         </div>
 
         <!-- Highlights Grid -->
@@ -82,20 +82,20 @@
                 <ul class="space-y-3 text-lg">
                     <li class="flex items-center">
                         <span class="text-2xl mr-3">🛏</span>
-                        <strong>{{ property.beds }} Bed / {{ property.baths }} Bath / {{ "{:,}".format(property.sqft) }} sqft</strong>
+                        <strong>{{ beds }} Bed / {{ baths }} Bath / {{ "{:,}".format(sqft) }} sqft</strong>
                     </li>
+                    {% if financials.buy_price %}
                     <li class="flex items-center">
                         <span class="text-2xl mr-3">💵</span>
-                        <span>Purchase Price: <strong>${{ "{:,}".format(property.financials.buy_price) }}</strong></span>
+                        <span>Purchase Price: <strong>${{ "{:,}".format(financials.buy_price) }}</strong></span>
                     </li>
-                    <li class="flex items-center">
-                        <span class="text-2xl mr-3">🛠</span>
-                        <span>Rehab Estimate: <strong>${{ "{:,}".format(property.financials.rehab_cost) }}</strong></span>
-                    </li>
+                    {% endif %}
+                    {% if financials.arv %}
                     <li class="flex items-center">
                         <span class="text-2xl mr-3">🏠</span>
-                        <span>ARV: <strong>${{ "{:,}".format(property.financials.arv) }}</strong></span>
+                        <span>Estimated Value: <strong>${{ "{:,}".format(financials.arv) }}</strong></span>
                     </li>
+                    {% endif %}
                     <li class="flex items-center">
                         <span class="text-2xl mr-3">📈</span>
                         <span>Net Profit: <strong class="text-green-600">${{ "{:,}".format(property.financials.net_profit) }}+</strong></span>
