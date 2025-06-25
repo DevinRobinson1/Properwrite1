@@ -223,6 +223,16 @@
                                 <div class="text-xs text-gray-500" id="estimate-count">-- sources</div>
                             </div>
                         </div>
+                        <!-- Rentcast Fallback Display -->
+                        <div id="rentcast-only-display" class="hidden mt-3 pt-3 border-t border-blue-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-white font-bold text-xs">R</div>
+                                    <span class="text-sm font-medium text-gray-700">Rentcast Estimate</span>
+                                </div>
+                                <div class="text-lg font-bold text-green-600" id="rentcast-estimate-value">$--</div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Address Validation Status -->
@@ -284,6 +294,9 @@
                     </button>
                     <button class="tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showTab('seller-finance')">
                         <i class="fas fa-university mr-2"></i>Seller Finance
+                    </button>
+                    <button class="tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showTab('dispositions')">
+                        <i class="fas fa-home mr-2"></i>Dispositions
                     </button>
                     <button class="tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showTab('compare')">
                         <i class="fas fa-chart-bar mr-2"></i>Compare All
