@@ -8,6 +8,9 @@ from flask import Flask, render_template, request, jsonify, session
 from property_data_service import property_service
 from rentcast_property_service import rentcast_property_service
 from ai_strategy_assistant import ai_strategy_assistant
+from acquisitions_module import acquisitions_module
+from dispositions_module import dispositions_module
+from ai_listing_generator import ai_listing_generator
 from wholesale_calculator import calculate_wholesale_offers
 from installment_calculator import calculate_installment_offers
 from subject_to_calculator import calculate_subject_to_offer
@@ -425,6 +428,164 @@ def ai_deal_analysis():
             'status': 'error',
             'error': str(e),
             'analysis': f'Unable to generate deal analysis: {str(e)}'
+        }), 500
+
+@app.route('/acquisitions_analysis', methods=['POST'])
+def acquisitions_analysis():
+    """
+    Comprehensive acquisitions analysis using the new Acquisitions Module
+    """
+    try:
+        data = request.get_json()
+        
+        # Get current property data from session or request
+        property_data = session.get('current_property', {})
+        if not property_data:
+            return jsonify({'error': 'No property data found. Please analyze a property first.'}), 400
+        
+        # Update with any new data from request
+        property_data.update(data)
+        
+        # Run comprehensive acquisitions analysis
+        analysis = acquisitions_module.analyze_all_acquisition_strategies(property_data)
+        
+        return jsonify(analysis)
+        
+    except Exception as e:
+        logging.error(f"Acquisitions analysis error: {e}")
+        return jsonify({
+            'status': 'error',
+            'error': str(e)
+        }), 500
+
+@app.route('/optimal_acquisition_strategy', methods=['POST'])
+def optimal_acquisition_strategy():
+    """
+    Get optimal acquisition strategy recommendation
+    """
+    try:
+        data = request.get_json()
+        
+        property_data = session.get('current_property', {})
+        if not property_data:
+            return jsonify({'error': 'No property data found. Please analyze a property first.'}), 400
+        
+        seller_goals = data.get('seller_goals', 'speed')
+        
+        # Get optimal strategy recommendation
+        recommendation = acquisitions_module.get_optimal_acquisition_strategy(property_data, seller_goals)
+        
+        return jsonify(recommendation)
+        
+    except Exception as e:
+        logging.error(f"Optimal strategy error: {e}")
+        return jsonify({
+            'status': 'error',
+            'error': str(e)
+        }), 500
+
+@app.route('/generate_offer_package', methods=['POST'])
+def generate_offer_package():
+    """
+    Generate complete offer package for selected strategy
+    """
+    try:
+        data = request.get_json()
+        
+        property_data = session.get('current_property', {})
+        if not property_data:
+            return jsonify({'error': 'No property data found. Please analyze a property first.'}), 400
+        
+        strategy_name = data.get('strategy', 'wholesale')
+        seller_profile = data.get('seller_profile', {})
+        
+        # Generate offer package
+        offer_package = acquisitions_module.generate_offer_package(strategy_name, property_data, seller_profile)
+        
+        return jsonify(offer_package)
+        
+    except Exception as e:
+        logging.error(f"Offer package error: {e}")
+        return jsonify({
+            'status': 'error',
+            'error': str(e)
+        }), 500
+
+@app.route('/dispositions_analysis', methods=['POST'])
+def dispositions_analysis():
+    """
+    Analyze exit strategies using the Dispositions Module
+    """
+    try:
+        data = request.get_json()
+        
+        property_data = session.get('current_property', {})
+        if not property_data:
+            return jsonify({'error': 'No property data found. Please analyze a property first.'}), 400
+        
+        # Update with acquisition cost if provided
+        acquisition_strategy = data.get('acquisition_strategy')
+        if 'acquisition_cost' in data:
+            property_data['acquisition_cost'] = data['acquisition_cost']
+        
+        # Run exit strategy analysis
+        analysis = dispositions_module.analyze_exit_strategies(property_data, acquisition_strategy)
+        
+        return jsonify(analysis)
+        
+    except Exception as e:
+        logging.error(f"Dispositions analysis error: {e}")
+        return jsonify({
+            'status': 'error',
+            'error': str(e)
+        }), 500
+
+@app.route('/generate_investor_listing', methods=['POST'])
+def generate_investor_listing():
+    """
+    Generate AI-powered investor listing using GPT-4o
+    """
+    try:
+        data = request.get_json()
+        
+        property_data = session.get('current_property', {})
+        if not property_data:
+            return jsonify({'error': 'No property data found. Please analyze a property first.'}), 400
+        
+        listing_type = data.get('listing_type', 'off_market')
+        
+        # Generate investor listing
+        listing_result = ai_listing_generator.generate_investor_listing(property_data, listing_type)
+        
+        return jsonify(listing_result)
+        
+    except Exception as e:
+        logging.error(f"Listing generation error: {e}")
+        return jsonify({
+            'status': 'error',
+            'error': str(e)
+        }), 500
+
+@app.route('/generate_listing_variations', methods=['POST'])
+def generate_listing_variations():
+    """
+    Generate multiple listing variations for A/B testing
+    """
+    try:
+        property_data = session.get('current_property', {})
+        if not property_data:
+            return jsonify({'error': 'No property data found. Please analyze a property first.'}), 400
+        
+        # Generate listing variations
+        variations_result = ai_listing_generator.generate_listing_variations(property_data)
+        
+        return jsonify(variations_result)
+        
+    except Exception as e:
+        logging.error(f"Listing variations error: {e}")
+        return jsonify({
+            'status': 'error',
+            'error': str(e)
         }), 500
 
 def estimate_property_value(square_feet, bedrooms, bathrooms, city, state):
