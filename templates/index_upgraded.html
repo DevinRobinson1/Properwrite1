@@ -1849,45 +1849,71 @@
         }
 
         function recalculateWholesale() {
-            const arv = parseFloat(document.getElementById('arv').value);
-            const repairs = parseFloat(document.getElementById('repairs').value);
-            const percent = parseFloat(document.getElementById('wholesale-arv-percent').value) / 100;
-            const assignmentFee = parseFloat(document.getElementById('wholesale-assignment-fee').value);
+            // Get values from property header inputs
+            const arvInput = document.getElementById('arv-input');
+            const repairsInput = document.getElementById('repairs-input');
+            const percentSlider = document.getElementById('wholesale-percentage');
+            const assignmentFeeInput = document.getElementById('wholesale-assignment-fee');
+            
+            const arv = parseFloat(arvInput ? arvInput.value.replace(/,/g, '') : '0') || 0;
+            const repairs = parseFloat(repairsInput ? repairsInput.value.replace(/,/g, '') : '0') || 0;
+            const percent = parseFloat(percentSlider ? percentSlider.value : '70') / 100;
+            const assignmentFee = parseFloat(assignmentFeeInput ? assignmentFeeInput.value.replace(/,/g, '') : '15000') || 15000;
+            
+            console.log('Wholesale calc:', { arv, repairs, percent, assignmentFee });
             
             const arvCalc = arv * percent;
             const mao = arvCalc - repairs - assignmentFee;
             
-            // Update MAO breakdown
-            document.getElementById('mao-arv').textContent = arv.toLocaleString();
-            document.getElementById('mao-percent').textContent = (percent * 100);
-            document.getElementById('mao-arv-calc').textContent = arvCalc.toLocaleString();
-            document.getElementById('mao-repairs').textContent = repairs.toLocaleString();
-            document.getElementById('mao-assignment').textContent = assignmentFee.toLocaleString();
-            document.getElementById('wholesale-mao-result').textContent = mao.toLocaleString();
+            // Update MAO breakdown with null checks
+            const elements = {
+                'wholesale-arv': arv,
+                'wholesale-percentage-display': Math.round(percent * 100),
+                'wholesale-percentage-calc': arvCalc,
+                'wholesale-repairs': repairs,
+                'wholesale-assignment': assignmentFee,
+                'wholesale-offer': mao
+            };
             
-            // Update Ackerman offers
-            document.getElementById('ackerman-1').textContent = (mao * 0.65).toLocaleString();
-            document.getElementById('ackerman-2').textContent = (mao * 0.85).toLocaleString();
-            document.getElementById('ackerman-3').textContent = (mao * 0.95).toLocaleString();
-            
-            // Update profit analysis
-            document.getElementById('total-investment').textContent = (mao + repairs).toLocaleString();
-            document.getElementById('assignment-profit').textContent = assignmentFee.toLocaleString();
+            Object.entries(elements).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = typeof value === 'number' ? Math.round(value).toLocaleString() : value;
+                }
+            });
         }
 
         function recalculateInstallment() {
-            const arv = parseFloat(document.getElementById('arv').value);
-            const repairs = parseFloat(document.getElementById('repairs').value);
-            const discount = parseFloat(document.getElementById('installment-discount').value);
-            const bonus = parseFloat(document.getElementById('installment-bonus').value);
+            // Get values from property header inputs
+            const arvInput = document.getElementById('arv-input');
+            const repairsInput = document.getElementById('repairs-input');
+            const commissionSlider = document.getElementById('installment-commission');
+            const ourFeeInput = document.getElementById('installment-our-fee');
             
-            const purchasePrice = arv - discount;
-            const salesPrice = arv + bonus;
-            const profit = salesPrice - purchasePrice - repairs - 9900; // Including closing costs
+            const arv = parseFloat(arvInput ? arvInput.value.replace(/,/g, '') : '0') || 0;
+            const repairs = parseFloat(repairsInput ? repairsInput.value.replace(/,/g, '') : '0') || 0;
+            const commission = parseFloat(commissionSlider ? commissionSlider.value : '6') / 100;
+            const ourFee = parseFloat(ourFeeInput ? ourFeeInput.value.replace(/,/g, '') : '0') || 0;
             
-            document.getElementById('installment-purchase').textContent = purchasePrice.toLocaleString();
-            document.getElementById('installment-sales').textContent = salesPrice.toLocaleString();
-            document.getElementById('installment-profit').textContent = profit.toLocaleString();
+            console.log('Installment calc:', { arv, repairs, commission, ourFee });
+            
+            const mao = Math.round(arv - repairs - 10000 - (arv * commission) - ourFee);
+            const salesPrice = Math.round(arv * 0.93); // 93% ARV typical
+            const netProfit = Math.round(salesPrice - mao - (arv * commission) - 3000); // closing costs
+            
+            // Update display values with null checks
+            const elements = {
+                'installment-purchase': mao,
+                'installment-sales': salesPrice,
+                'installment-profit': netProfit
+            };
+            
+            Object.entries(elements).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = Math.round(value).toLocaleString();
+                }
+            });
         }
 
         function recalculateSubjectTo() {
