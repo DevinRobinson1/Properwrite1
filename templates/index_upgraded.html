@@ -1618,16 +1618,18 @@
         });
 
         function populatePropertyData(data) {
+            console.log('Populating property data:', data);
+            
             // Update property overview
             document.getElementById('property-title').textContent = `${data.address}, ${data.city}`;
             document.getElementById('property-address').textContent = `${data.city}, ${data.state} ${data.zip}`;
             
-            // Populate editable fields
+            // Populate editable fields with comma formatting
             if (data.bedrooms) document.getElementById('bedrooms').value = data.bedrooms;
             if (data.bathrooms) document.getElementById('bathrooms').value = data.bathrooms;
-            if (data.square_feet) document.getElementById('square_feet').value = data.square_feet;
-            if (data.estimated_value) document.getElementById('arv').value = data.estimated_value;
-            if (data.rent_estimate) document.getElementById('rent').value = data.rent_estimate;
+            if (data.square_feet) document.getElementById('square_feet').value = formatNumber(data.square_feet);
+            if (data.estimated_value) document.getElementById('arv').value = formatNumber(data.estimated_value);
+            if (data.rent_estimate) document.getElementById('rent').value = formatNumber(data.rent_estimate);
             
             // Update data sources
             const dataSourcesContainer = document.getElementById('data-sources');
@@ -3012,6 +3014,97 @@
             `;
             document.body.appendChild(modal);
         }
+
+        // Debug form and add proper event listener
+        console.log('Script loaded, checking form...');
+        
+        function setupFormListener() {
+            const form = document.getElementById('property-form');
+            console.log('Form found:', !!form);
+            
+            if (form) {
+                // Remove any existing listeners
+                const newForm = form.cloneNode(true);
+                form.parentNode.replaceChild(newForm, form);
+                
+                console.log('Adding submit listener');
+                newForm.addEventListener('submit', async function(e) {
+                    console.log('Form submit triggered!');
+                    e.preventDefault();
+                    
+                    const address = document.getElementById('address').value.trim();
+                    const city = document.getElementById('city').value.trim();
+                    const state = document.getElementById('state').value.trim();
+                    const zip = document.getElementById('zip_code').value.trim();
+                    
+                    console.log('Form data:', { address, city, state, zip });
+                    
+                    if (!address || !city || !state || !zip) {
+                        alert('Please fill in all required fields');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    document.getElementById('loading-state').classList.remove('hidden');
+                    document.getElementById('analysis-results').classList.add('hidden');
+                    
+                    try {
+                        console.log('Sending request to /analyze_property');
+                        
+                        const response = await fetch('/analyze_property', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ address, city, state, zip })
+                        });
+                        
+                        console.log('Response status:', response.status);
+                        
+                        if (!response.ok) {
+                            throw new Error(`Server error: ${response.status}`);
+                        }
+                        
+                        const data = await response.json();
+                        console.log('Response data:', data);
+                        
+                        if (data.success) {
+                            populatePropertyData(data);
+                            await calculateStrategies();
+                            
+                            setTimeout(() => {
+                                updateAllTabCalculations();
+                            }, 200);
+                            
+                            document.getElementById('loading-state').classList.add('hidden');
+                            document.getElementById('analysis-results').classList.remove('hidden');
+                            
+                            initializeChartsAfterAnalysis();
+                        } else {
+                            alert('Error: ' + (data.error || 'Unable to analyze property'));
+                            document.getElementById('loading-state').classList.add('hidden');
+                        }
+                        
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error analyzing property: ' + error.message);
+                        document.getElementById('loading-state').classList.add('hidden');
+                    }
+                });
+                
+                console.log('Submit listener added successfully');
+                return true;
+            }
+            return false;
+        }
+        
+        // Try to setup immediately and on DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupFormListener);
+        } else {
+            setupFormListener();
+        }
+        
+        // Also try after a short delay as backup
+        setTimeout(setupFormListener, 100);
 
     </script>
 </body>
