@@ -261,19 +261,19 @@
                     </div>
                     <div class="text-center">
                         <label class="block text-sm font-medium text-gray-600 mb-2">Square Feet</label>
-                        <input type="number" id="square_feet" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="1200" onchange="updateAllTabCalculations()">
+                        <input type="text" id="square_feet" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="1,200" onchange="formatNumberInput(this); updateAllTabCalculations()">
                     </div>
                     <div class="text-center">
                         <label class="block text-sm font-medium text-gray-600 mb-2">ARV ($)</label>
-                        <input type="number" id="arv" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="200000" onchange="updateAllTabCalculations()">
+                        <input type="text" id="arv" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="200,000" onchange="formatCurrencyInput(this); updateAllTabCalculations()">
                     </div>
                     <div class="text-center">
                         <label class="block text-sm font-medium text-gray-600 mb-2">Repairs ($)</label>
-                        <input type="number" id="repairs" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="30000" onchange="updateAllTabCalculations()">
+                        <input type="text" id="repairs" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="30,000" onchange="formatCurrencyInput(this); updateAllTabCalculations()">
                     </div>
                     <div class="text-center">
                         <label class="block text-sm font-medium text-gray-600 mb-2">Monthly Rent ($)</label>
-                        <input type="number" id="rent" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="2000" onchange="updateAllTabCalculations()">
+                        <input type="text" id="rent" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="1,500" onchange="formatCurrencyInput(this); updateAllTabCalculations()">
                     </div>
                 </div>
             </div>
@@ -2436,6 +2436,361 @@
             `;
             
             document.body.appendChild(modal);
+        }
+
+        // Tab Navigation Functions
+        function showAcquisitionTab(tabName) {
+            // Hide all acquisition tab contents
+            const tabs = document.querySelectorAll('.acquisition-tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active class from all tab buttons
+            const buttons = document.querySelectorAll('.acquisition-tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected tab content
+            const selectedTab = document.getElementById(tabName + '-tab');
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section-content');
+            sections.forEach(section => section.classList.add('hidden'));
+            
+            // Remove active class from all section buttons
+            const buttons = document.querySelectorAll('.section-toggle-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-500', 'text-white', 'bg-purple-500');
+                btn.classList.add('bg-gray-300', 'text-gray-700');
+            });
+            
+            // Show selected section
+            const selectedSection = document.getElementById(sectionName + '-section');
+            if (selectedSection) {
+                selectedSection.classList.remove('hidden');
+            }
+            
+            // Update button styling
+            const activeButton = document.getElementById(sectionName + '-section-btn');
+            if (activeButton) {
+                activeButton.classList.remove('bg-gray-300', 'text-gray-700');
+                if (sectionName === 'acquisitions') {
+                    activeButton.classList.add('active', 'bg-blue-500', 'text-white');
+                } else {
+                    activeButton.classList.add('active', 'bg-purple-500', 'text-white');
+                }
+            }
+            
+            // Show/hide section divider
+            const divider = document.getElementById('section-divider');
+            if (divider) {
+                if (sectionName === 'dispositions') {
+                    divider.classList.remove('hidden');
+                } else {
+                    divider.classList.add('hidden');
+                }
+            }
+        }
+
+        // Missing Functions for Dispositions
+        function toggleDealVariables() {
+            const panel = document.getElementById('deal-variables-panel');
+            if (panel) {
+                panel.classList.toggle('hidden');
+            }
+        }
+
+        function toggleObjectionSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const button = event.target;
+            const icon = button.querySelector('i');
+            
+            if (section) {
+                section.classList.toggle('hidden');
+                if (section.classList.contains('hidden')) {
+                    icon.className = 'fas fa-chevron-down';
+                } else {
+                    icon.className = 'fas fa-chevron-up';
+                }
+            }
+        }
+
+        function generateListingCopy() {
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+            button.disabled = true;
+            
+            // Get property data
+            const propertyData = {
+                arv: parseFloat(document.getElementById('arv').value.replace(/,/g, '')) || 200000,
+                repairs: parseFloat(document.getElementById('repairs').value.replace(/,/g, '')) || 30000,
+                rent: parseFloat(document.getElementById('rent').value.replace(/,/g, '')) || 1500,
+                bedrooms: parseInt(document.getElementById('bedrooms').value) || 3,
+                bathrooms: parseFloat(document.getElementById('bathrooms').value) || 2,
+                square_feet: parseInt(document.getElementById('square_feet').value) || 1200
+            };
+
+            // Make API call to generate listing
+            fetch('/generate_investor_listing', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(propertyData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showListingModal(data.listing);
+                } else {
+                    alert('Error generating listing: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error generating listing');
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+
+        function showListingModal(listing) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
+                    <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-2xl font-bold text-gray-800">AI Generated Investor Listing</h3>
+                            <button onclick="this.closest('.fixed').remove()" class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg transition-colors">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="prose max-w-none">
+                            ${listing.formatted_listing || listing.listing_content || 'Listing content not available'}
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function openObjectionHandler() {
+            // Show objection handler modal (placeholder)
+            alert('Objection Handler feature coming soon!');
+        }
+
+        // Number Formatting Functions  
+        function formatCurrencyInput(input) {
+            let value = input.value.replace(/[^\d]/g, '');
+            if (value) {
+                value = parseInt(value).toLocaleString();
+                input.value = value;
+            }
+        }
+
+        function formatNumberInput(input) {
+            let value = input.value.replace(/[^\d]/g, '');
+            if (value) {
+                value = parseInt(value).toLocaleString();
+                input.value = value;
+            }
+        }
+
+        // Deep Dive Modal System
+        function openOfferDeepDive(strategy, specificOffer = null) {
+            const propertyData = {
+                arv: parseFloat(document.getElementById('arv').value.replace(/,/g, '')) || 200000,
+                repairs: parseFloat(document.getElementById('repairs').value.replace(/,/g, '')) || 30000,
+                rent: parseFloat(document.getElementById('rent').value.replace(/,/g, '')) || 1500,
+                bedrooms: parseInt(document.getElementById('bedrooms').value) || 3,
+                bathrooms: parseFloat(document.getElementById('bathrooms').value) || 2,
+                square_feet: parseInt(document.getElementById('square_feet').value) || 1200
+            };
+
+            const modalContent = generateDeepDiveContent(strategy, specificOffer, propertyData);
+            showDeepDiveModal(modalContent);
+        }
+
+        function generateDeepDiveContent(strategy, specificOffer, propertyData) {
+            let title, content;
+            
+            switch(strategy) {
+                case 'wholesale':
+                    title = specificOffer ? getAckermanOfferTitle(specificOffer) : 'Wholesale Strategy Deep Dive';
+                    content = generateWholesaleDeepDive(propertyData, specificOffer);
+                    break;
+                case 'installment':
+                    title = specificOffer ? getAckermanOfferTitle(specificOffer) : 'Installment/Novation Strategy Deep Dive';
+                    content = generateInstallmentDeepDive(propertyData, specificOffer);
+                    break;
+                case 'subject-to':
+                    title = specificOffer === 'cash-flow' ? 'Subject-To Cash Flow Analysis' : 'Subject-To Strategy Deep Dive';
+                    content = generateSubjectToDeepDive(propertyData, specificOffer);
+                    break;
+                case 'seller-finance':
+                    title = getSellerFinanceTitle(specificOffer) || 'Seller Finance Strategy Deep Dive';
+                    content = generateSellerFinanceDeepDive(propertyData, specificOffer);
+                    break;
+                default:
+                    title = 'Strategy Analysis';
+                    content = '<p>Strategy analysis not available.</p>';
+            }
+
+            return { title, content };
+        }
+
+        function generateWholesaleDeepDive(propertyData, specificOffer) {
+            const arv = propertyData.arv;
+            const repairs = propertyData.repairs;
+            const assignmentFeeElement = document.getElementById('wholesale-assignment-fee');
+            const assignmentFee = assignmentFeeElement ? parseFloat(assignmentFeeElement.value.replace(/,/g, '')) || 10000 : 10000;
+            const wholesalePercent = 70;
+            
+            const arvCalc = arv * (wholesalePercent / 100);
+            const mao = arvCalc - repairs - assignmentFee;
+            
+            let offerAmount, offerPercentage;
+            if (specificOffer) {
+                const percentages = { 'ackerman-65': 65, 'ackerman-85': 85, 'ackerman-95': 95, 'ackerman-max': 100 };
+                offerPercentage = percentages[specificOffer] || 100;
+                offerAmount = mao * (offerPercentage / 100);
+            } else {
+                offerAmount = mao;
+                offerPercentage = 100;
+            }
+
+            return `
+                <div class="space-y-6">
+                    <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                        <h4 class="text-xl font-bold text-blue-800 mb-4">📊 Detailed Financial Breakdown</h4>
+                        <div class="space-y-3 text-lg">
+                            <div class="flex justify-between">
+                                <span>Property ARV:</span>
+                                <span class="font-bold">$${arv.toLocaleString()}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Wholesale Formula (${wholesalePercent}%):</span>
+                                <span class="font-bold">$${arvCalc.toLocaleString()}</span>
+                            </div>
+                            <div class="flex justify-between text-red-600">
+                                <span>Less: Estimated Repairs:</span>
+                                <span class="font-bold">-$${repairs.toLocaleString()}</span>
+                            </div>
+                            <div class="flex justify-between text-red-600">
+                                <span>Less: Assignment Fee:</span>
+                                <span class="font-bold">-$${assignmentFee.toLocaleString()}</span>
+                            </div>
+                            <hr class="border-blue-300">
+                            <div class="flex justify-between text-xl font-bold text-blue-800">
+                                <span>Maximum Allowable Offer:</span>
+                                <span>$${mao.toLocaleString()}</span>
+                            </div>
+                            ${specificOffer ? `
+                                <div class="bg-white p-4 rounded border-2 border-blue-300 mt-4">
+                                    <div class="flex justify-between text-xl font-bold text-green-600">
+                                        <span>Your Offer (${offerPercentage}% of MAO):</span>
+                                        <span>$${Math.round(offerAmount).toLocaleString()}</span>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                        <h4 class="text-xl font-bold text-green-800 mb-4">💬 Seller Presentation Points</h4>
+                        <div class="space-y-3">
+                            <div class="bg-white p-4 rounded border">
+                                <h5 class="font-semibold text-green-700 mb-2">Opening Script:</h5>
+                                <p class="text-gray-700">"We're offering $${Math.round(offerAmount).toLocaleString()} cash for your property based on current market conditions."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateInstallmentDeepDive(propertyData, specificOffer) {
+            return '<div class="p-6"><h4 class="text-xl font-bold">Installment Strategy Analysis</h4><p class="mt-4">Detailed installment analysis coming soon...</p></div>';
+        }
+
+        function generateSubjectToDeepDive(propertyData, specificOffer) {
+            return '<div class="p-6"><h4 class="text-xl font-bold">Subject-To Strategy Analysis</h4><p class="mt-4">Detailed subject-to analysis coming soon...</p></div>';
+        }
+
+        function generateSellerFinanceDeepDive(propertyData, specificOffer) {
+            return '<div class="p-6"><h4 class="text-xl font-bold">Seller Finance Strategy Analysis</h4><p class="mt-4">Detailed seller finance analysis coming soon...</p></div>';
+        }
+
+        function getAckermanOfferTitle(specificOffer) {
+            const titles = {
+                'ackerman-65': '1st Offer (65% of MAO) - Deep Dive',
+                'ackerman-85': '2nd Offer (85% of MAO) - Deep Dive', 
+                'ackerman-95': '3rd Offer (95% of MAO) - Deep Dive',
+                'ackerman-max': '4th Offer (Maximum MAO) - Deep Dive'
+            };
+            return titles[specificOffer] || 'Offer Analysis';
+        }
+
+        function getSellerFinanceTitle(specificOffer) {
+            const titles = {
+                'monthly-payment': 'Monthly Payment Structure Analysis',
+                'total-interest': 'Interest & Tax Benefits Analysis',
+                'total-payout': 'Total Payout & Returns Analysis'
+            };
+            return titles[specificOffer];
+        }
+
+        function showDeepDiveModal(modalData) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
+                    <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-2xl font-bold text-gray-800">${modalData.title}</h3>
+                            <div class="flex space-x-2">
+                                <button onclick="copyDeepDiveContent()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors text-sm">
+                                    <i class="fas fa-copy mr-2"></i>Copy Analysis
+                                </button>
+                                <button onclick="this.closest('.fixed').remove()" class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg transition-colors">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6" id="deep-dive-content">
+                        ${modalData.content}
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function copyDeepDiveContent() {
+            const content = document.getElementById('deep-dive-content');
+            const text = content.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const button = event.target.closest('button');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check mr-2"></i>Copied!';
+                button.className = button.className.replace('bg-gray-100', 'bg-green-100').replace('text-gray-700', 'text-green-700');
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.className = button.className.replace('bg-green-100', 'bg-gray-100').replace('text-green-700', 'text-gray-700');
+                }, 2000);
+            });
         }
 
     </script>
