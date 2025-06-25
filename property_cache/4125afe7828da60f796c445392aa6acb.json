@@ -1,6 +1,7 @@
 {
-  "cache_timestamp": 1750865227.6603804,
+  "cache_timestamp": 1750870716.945997,
   "property_data": {
+    "status": "success",
     "address": "14303 Evening Flight Lane, Charlotte, NC, 28262",
     "validated_address": {
       "status": "normalized",
@@ -14,36 +15,29 @@
       "longitude": null,
       "confidence": "medium"
     },
-    "image_url": null,
+    "source": "Rentcast API",
+    "data_retrieved_at": "2025-06-25T16:58:36.945961",
+    "estimate": 415000,
+    "rent_estimate": 0,
+    "confidence": "low",
+    "data_quality": "low",
+    "comparable_sales": [],
+    "market_analysis": {
+      "avg_price_per_sqft": 0.0,
+      "sales_count": 0,
+      "price_range": {
+        "min": 0,
+        "max": 0,
+        "avg": 0
+      }
+    },
     "bedrooms": 3,
-    "bathrooms": 2,
-    "square_feet": 1400,
-    "year_built": 2005,
-    "lot_size_sqft": 8000,
-    "property_type": "Single Family",
-    "zillow_estimate": 303235,
-    "redfin_estimate": 266470,
-    "realtor_estimate": 264705,
-    "rent_estimate": 1852.935,
-    "data_sources": [
-      "Zillow",
-      "Redfin",
-      "Realtor.com"
-    ],
-    "data_errors": [],
-    "last_updated": "2025-06-25T15:27:07.659710",
-    "confidence_scores": {
-      "zillow": 0.9999999999999999,
-      "redfin": 0.9999999999999999,
-      "realtor": 0.9999999999999999
-    },
-    "average_estimate": 278136,
-    "estimate_range": {
-      "min": 264705,
-      "max": 303235,
-      "count": 3
-    },
-    "data_quality": "excellent"
+    "bathrooms": 2.0,
+    "square_feet": 1200,
+    "year_built": 1990,
+    "property_type": "Single Family Home",
+    "comps_count": 0,
+    "avg_price_per_sqft": 0.0
   },
-  "address_normalized": "14303 Evening Flight lane, Charlotte, NC 28262"
+  "address_normalized": "14303 evening Flight lane, charlotte, NC 28262"
 }

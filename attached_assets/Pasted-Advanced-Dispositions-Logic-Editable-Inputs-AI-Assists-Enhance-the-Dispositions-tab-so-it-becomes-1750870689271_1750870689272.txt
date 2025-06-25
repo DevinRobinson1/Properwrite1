@@ -1,0 +1,125 @@
+Advanced Dispositions Logic, Editable Inputs & AI Assists
+Enhance the Dispositions tab so it becomes a smart, data-driven selling console. Make the key variables editable, tie every exit-price formula to comps/repairs/cash-flow, and embed AI helpers for copywriting & objections.
+
+1️⃣ Global Inputs at Top of Dispositions
+Field	Behaviour
+Acquisition Cost ($)	Editable, comma-separated numeric input. Drives all profit calcs.
+Repairs Needed ($)	Auto-pulled from header; editable override.
+PITI ($/mo)	Pulled from Subject-To calculator (if any); editable.
+Rent Estimate ($/mo)	Pulled from header; editable.
+
+Show these in one slim strip above the Exit-Strategy cards.
+
+2️⃣ Exit-Strategy Cards & Logic
+🟩 Cash Sale to Investor
+ini
+Copy
+Edit
+CashPrice = (Avg ARV Comps × 0.70) − Repairs
+Pull Avg ARV from rehabbed comps ≤ 6 mo, ± 500 sq ft.
+
+Display Comp Count / Avg $/sq ft reference under price.
+
+🟦 MLS Novation / Installment
+pgsql
+Copy
+Edit
+ListPrice = (ARV − Repairs) − MAX(10% of As-Is, $20 000)
+“As-Is” = ARV − Repairs.
+
+Note below card: “90 % of As-Is OR $20K discount, whichever is lower.”
+
+Pull ListPrice directly from latest Installment-Novation calculator.
+
+🟪 Seller-Finance Wrap
+Inputs per deal (editable in small modal on the card):
+
+Down Payment ($)
+
+Buyer Interest Rate (%) (cannot price loan below underlying PITI rate)
+
+Wrap Term (yrs)
+
+Buyer’s Monthly P&I (auto from amortization OR custom override)
+
+Logic:
+
+makefile
+Copy
+Edit
+WrapLoanAmt   = ListPrice − DownPayment
+BuyerMonthly  = (Interest logic)  OR  Manual override
+CashFlow/mo   = BuyerMonthly − PITI
+ExitProfit    = DownPayment − AcquisitionCost + (CashFlow × HoldMonths)
+Color-code CashFlow: green if ≥ $200, gold if ≥ $500.
+
+Disable form if BuyerRate would drop BuyerMonthly below PITI.
+
+🟧 Lease-Option / Sub-Buyer Strategy
+Customizable sliders:
+
+Equity in Deal ($) – auto = ARV − LoanBalance
+
+Repairs Severity (None / Cosmetic / Heavy)
+
+Monthly Cash-Flow (auto from Rent − PITI)
+
+Heuristics:
+
+nginx
+Copy
+Edit
+BaseC2C = 8 % of ARV
+• + up to $10 K if CashFlow ≥ $500
+• − if Repairs = "Heavy"
+MaxAsk  = BaseC2C + EquityAdjust
+Show “Suggested Cash-to-Close” and let user overwrite.
+
+3️⃣ Customisable Variables Panel
+Add a collapsible “Deal Variables” panel right under the cards where users can fine-tune:
+
+Wholesale % of ARV (default = 70 %)
+
+MLS Discount % (default = 10 %)
+
+Commission % sliders (Listing / Buyer agent)
+
+Title % slider
+
+Transfer-Tax %
+
+Cash-Flow Thresholds (200 / 500)
+
+Every change instantly re-calculates card numbers.
+
+4️⃣ AI Helpers (GPT-4o)
+Button	Function
+“📝 Generate Listing Copy”	Uses deal data + comps to create Investorlift-style listing (template already defined)
+“🤖 Suggest Best Exit”	GPT-4o reviews card metrics & returns a ranked strategy list w/ reasoning
+“❓ Objection Handler”	Opens modal with common buyer questions (loaded from your Subject-To & Seller-Finance scripts) and GPT-4o answers
+
+5️⃣ Objection & Conversation Scripts
+Load text from Sub2 script and Points.docx and Seller Financing Script.docx into static markdown files.
+
+GPT-4o can reference these when generating tailored responses.
+
+6️⃣ UI/UX Tweaks
+Use different background hues for each card:
+Cash = light-green MLS = light-blue Wrap = lavender LeaseOpt = peach.
+
+Show profit & timeline subtags under every price.
+
+On hover, reveal mini-tooltip with formula breakdown.
+
+📋 Implementation Checklist for Ghostwriter
+Add editable acquisition-cost strip (comma-format JS).
+
+Implement new calculations per card.
+
+Build “Deal Variables” sliders panel (Tailwind UI).
+
+Wire GPT-4o endpoints for Listing / Best-Exit / Objection mods.
+
+Import markdown versions of objection scripts.
+
+Re-run unit tests on formulas.
