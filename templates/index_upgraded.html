@@ -101,9 +101,12 @@
                     </div>
                 </div>
                 
-                <div class="flex justify-center">
+                <div class="flex justify-center space-x-4">
                     <button type="submit" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-semibold">
                         <i class="fas fa-rocket mr-2"></i>Analyze Property
+                    </button>
+                    <button type="button" onclick="openAIObjectionHandler()" class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 font-semibold">
+                        <i class="fas fa-comments mr-2"></i>AI Objection Handler
                     </button>
                 </div>
             </form>
@@ -2751,6 +2754,102 @@
                     </div>
                 </div>
             `;
+        }
+
+        function openAIObjectionHandler() {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+                    <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-2xl font-bold text-gray-800">
+                                <i class="fas fa-comments text-orange-500 mr-2"></i>AI Objection Handler
+                            </h3>
+                            <button onclick="this.closest('.fixed').remove()" class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg transition-colors">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Enter the objection you're facing:</label>
+                            <textarea id="objection-input" 
+                                placeholder="e.g., 'I need to think about it' or 'Your offer is too low' or 'I don't trust investors'"
+                                class="w-full h-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"></textarea>
+                        </div>
+                        <div class="flex justify-center mb-6">
+                            <button onclick="generateObjectionResponse()" 
+                                    class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 font-semibold">
+                                <i class="fas fa-magic mr-2"></i>Generate Response Strategy
+                            </button>
+                        </div>
+                        <div id="objection-response" class="hidden">
+                            <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                                <h4 class="font-semibold text-gray-800 mb-2">AI Response Strategy:</h4>
+                                <div id="ai-response-content" class="text-gray-700"></div>
+                            </div>
+                            <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                                <h4 class="font-semibold text-blue-800 mb-2">Socratic Questions to Ask:</h4>
+                                <div id="socratic-questions" class="text-blue-700"></div>
+                            </div>
+                            <div class="bg-green-50 rounded-lg p-4">
+                                <h4 class="font-semibold text-green-800 mb-2">Key Talking Points:</h4>
+                                <div id="talking-points" class="text-green-700"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        async function generateObjectionResponse() {
+            const objectionInput = document.getElementById('objection-input');
+            const objection = objectionInput.value.trim();
+            
+            if (!objection) {
+                alert('Please enter an objection first.');
+                return;
+            }
+
+            const responseDiv = document.getElementById('objection-response');
+            const aiContent = document.getElementById('ai-response-content');
+            const socraticQuestions = document.getElementById('socratic-questions');
+            const talkingPoints = document.getElementById('talking-points');
+
+            // Show loading state
+            aiContent.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating AI response...';
+            socraticQuestions.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating questions...';
+            talkingPoints.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Preparing talking points...';
+            responseDiv.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/ai_objection_handler', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ objection: objection })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    aiContent.innerHTML = data.response;
+                    socraticQuestions.innerHTML = data.socratic_questions;
+                    talkingPoints.innerHTML = data.talking_points;
+                } else {
+                    aiContent.innerHTML = 'Error generating response. Please try again.';
+                    socraticQuestions.innerHTML = '';
+                    talkingPoints.innerHTML = '';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                aiContent.innerHTML = 'Error connecting to AI service. Please try again.';
+                socraticQuestions.innerHTML = '';
+                talkingPoints.innerHTML = '';
+            }
         }
 
         function showDeepDiveModal(modalData) {
