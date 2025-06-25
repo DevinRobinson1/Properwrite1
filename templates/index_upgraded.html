@@ -758,49 +758,124 @@
                     <div id="subject-to-tab" class="acquisition-tab-content hidden">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6">Subject-To Strategy</h3>
                         
-                        <!-- PITI & Equity Structure -->
-                        <div class="bg-gray-50 p-6 rounded-lg mb-6">
-                            <h4 class="text-lg font-semibold text-gray-800 mb-4">PITI & Equity Structure</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Existing Loan Balance ($)</label>
-                                    <input type="number" value="116250" id="sub2-loan-balance" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Cash to Seller ($)</label>
-                                    <input type="number" value="4000" id="sub2-cash-seller" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Monthly P&I ($)</label>
-                                    <input type="number" value="800" id="sub2-monthly-pi" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Escrow ($)</label>
-                                    <input type="number" value="300" id="sub2-monthly-escrow" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
+                        <!-- Subject-To Buying Guide -->
+                        <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
+                            <h4 class="text-lg font-semibold text-green-800 mb-2">Subject-To Buying Guide</h4>
+                            <div class="text-green-700 space-y-2">
+                                <p>Take control by assuming existing mortgage payments. Acquire immediate equity with favorable loan terms.</p>
+                                <div class="bg-white p-3 rounded mt-3 border border-green-200">
+                                    <p><strong>Target Purchase:</strong> 8-10% of ARV • <strong>Resale Target:</strong> 12-15% of ARV</p>
+                                    <p><strong>Premium Resale:</strong> If cash flow ≥ $500/month • <strong>Minimum:</strong> $200/month cash flow</p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Immediate Equity Position -->
-                        <div class="bg-green-50 p-6 rounded-lg mb-6">
-                            <h4 class="text-lg font-semibold text-green-800 mb-4">Immediate Equity Analysis</h4>
-                            <div class="space-y-3">
-                                <div class="flex justify-between">
-                                    <span>Property ARV:</span>
-                                    <span class="font-bold">$<span id="sub2-arv">155,000</span></span>
+                        <!-- Subject-To Inputs -->
+                        <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Property Details & Loan Information</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Existing Loan Balance ($)</label>
+                                    <input type="text" value="116,250" id="sub2-loan-balance" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-center font-semibold" onchange="formatNumberInput(this); recalculateSubjectTo()">
                                 </div>
-                                <div class="flex justify-between">
-                                    <span>Existing Loan Balance:</span>
-                                    <span class="font-bold text-red-600">-$<span id="sub2-balance">116,250</span></span>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Cash to Seller ($)</label>
+                                    <input type="text" value="4,000" id="sub2-cash-seller" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-center font-semibold" onchange="formatNumberInput(this); recalculateSubjectTo()">
                                 </div>
-                                <div class="flex justify-between">
-                                    <span>Cash to Seller:</span>
-                                    <span class="font-bold text-red-600">-$<span id="sub2-cash">4,000</span></span>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Arrears/Liens ($)</label>
+                                    <input type="text" value="0" id="sub2-arrears" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-center font-semibold" onchange="formatNumberInput(this); recalculateSubjectTo()">
                                 </div>
-                                <div class="flex justify-between">
-                                    <span>Acquisition Costs:</span>
-                                    <span class="font-bold text-red-600">-$<span id="sub2-costs">2,500</span></span>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Monthly P&I ($)</label>
+                                    <input type="text" value="800" id="sub2-monthly-pi" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-center font-semibold" onchange="formatNumberInput(this); recalculateSubjectTo()">
                                 </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Escrow (T&I) ($)</label>
+                                    <input type="text" value="300" id="sub2-monthly-escrow" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-center font-semibold" onchange="formatNumberInput(this); recalculateSubjectTo()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Interest Rate (%)</label>
+                                    <input type="number" step="0.01" value="4.5" id="sub2-interest-rate" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-center font-semibold" onchange="recalculateSubjectTo()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Monthly Cash Flow Analysis -->
+                        <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 mb-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Monthly Cash Flow (Rent - PITI - Repairs Reserve)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span>Monthly Rent Income:</span>
+                                        <span class="font-bold text-green-600">+$<span id="sub2-rent">1,500</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Principal & Interest:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sub2-pi-display">800</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Taxes & Insurance:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sub2-escrow-display">300</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Repairs Reserve (10%):</span>
+                                        <span class="font-bold text-red-600">-$<span id="sub2-maintenance">150</span></span>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border-2 border-green-300">
+                                    <div class="text-center">
+                                        <div class="text-sm text-gray-600 mb-1">Monthly Cash Flow</div>
+                                        <div class="text-3xl font-bold text-green-600">$<span id="sub2-cashflow">250</span></div>
+                                        <div class="text-xs text-gray-500 mt-1">Per Month</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Purchase Analysis -->
+                        <div class="bg-blue-50 rounded-lg p-6 mb-6">
+                            <h4 class="text-lg font-semibold text-blue-800 mb-4">Purchase Analysis</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="text-center p-4 bg-white rounded-lg border">
+                                    <div class="text-sm text-blue-600 mb-1">Total Acquisition Cost</div>
+                                    <div class="text-xl font-bold text-blue-800">$<span id="sub2-total-cost">120,250</span></div>
+                                    <div class="text-xs text-gray-500" id="sub2-arv-percent">6.0% of ARV</div>
+                                </div>
+                                <div class="text-center p-4 bg-white rounded-lg border">
+                                    <div class="text-sm text-green-600 mb-1">Immediate Equity</div>
+                                    <div class="text-xl font-bold text-green-600">$<span id="sub2-equity">79,750</span></div>
+                                    <div class="text-xs text-gray-500">Equity Position</div>
+                                </div>
+                                <div class="text-center p-4 bg-white rounded-lg border">
+                                    <div class="text-sm text-purple-600 mb-1">Target Resale</div>
+                                    <div class="text-xl font-bold text-purple-600">$<span id="sub2-target-resale">26,000</span></div>
+                                    <div class="text-xs text-gray-500">13% of ARV</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subject-To Objection Handling -->
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6">
+                            <h4 class="text-lg font-semibold text-yellow-800 mb-4">Common Objections & Responses</h4>
+                            <div class="space-y-4">
+                                <div class="bg-white p-4 rounded border-l-4 border-yellow-400">
+                                    <h5 class="font-semibold text-gray-800">"This sounds illegal"</h5>
+                                    <p class="text-sm text-gray-700 mt-1">Response: "Subject-to is completely legal. It's a legitimate real estate investment strategy used by thousands of investors. The deed transfers to us, but we take over your mortgage payments."</p>
+                                    <div class="text-xs text-gray-600 mt-2">Socratic Question: "What specific part concerns you most - the legality or how it works?"</div>
+                                </div>
+                                <div class="bg-white p-4 rounded border-l-4 border-yellow-400">
+                                    <h5 class="font-semibold text-gray-800">"What about the due-on-sale clause?"</h5>
+                                    <p class="text-sm text-gray-700 mt-1">Response: "Banks rarely call loans due when payments are made on time. We've never had a bank call a loan due in our experience. We ensure payments are never late."</p>
+                                    <div class="text-xs text-gray-600 mt-2">Socratic Question: "If the bank wanted the loan paid off, wouldn't they prefer that over foreclosure?"</div>
+                                </div>
+                                <div class="bg-white p-4 rounded border-l-4 border-yellow-400">
+                                    <h5 class="font-semibold text-gray-800">"I'll still be responsible for the mortgage"</h5>
+                                    <p class="text-sm text-gray-700 mt-1">Response: "Yes, but we guarantee payments through insurance and our track record. We'll provide you with monthly payment confirmations and you can monitor the account."</p>
+                                    <div class="text-xs text-gray-600 mt-2">Socratic Question: "Would you rather have guaranteed payments or risk foreclosure and credit damage?"</div>
+                                </div>
+                            </div>
+                        </div>
                                 <hr class="border-gray-300">
                                 <div class="flex justify-between text-lg font-bold">
                                     <span>Immediate Equity:</span>
