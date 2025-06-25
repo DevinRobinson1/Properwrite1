@@ -32,7 +32,8 @@ def index():
 @app.route('/analyze_property', methods=['POST'])
 def analyze_property():
     """
-    Analyze property and redirect to dedicated analysis page
+    Analyze property with external data enrichment from multiple sources
+    Pulls data from Zillow, Redfin, Realtor.com and other sources
     """
     try:
         data = request.get_json()
@@ -125,14 +126,8 @@ def analyze_property():
         # Store in session for later use
         session['current_property'] = property_data
         
-        # Generate unique analysis ID for clean URL
-        import uuid
-        analysis_id = str(uuid.uuid4())[:8]
-        session[f'analysis_{analysis_id}'] = property_data
-        
         return jsonify({
             'success': True,
-            'redirect_url': f'/analysis/{analysis_id}',
             **property_data
         })
         
@@ -142,26 +137,6 @@ def analyze_property():
             'success': False,
             'error': 'Failed to analyze property. Please check the address and try again.'
         }), 500
-
-@app.route('/analysis/<analysis_id>')
-def analysis_page(analysis_id):
-    """
-    Dedicated property analysis page with full calculator interface
-    """
-    try:
-        # Retrieve analysis data
-        property_data = session.get(f'analysis_{analysis_id}')
-        
-        if not property_data:
-            return render_template('analysis_not_found.html'), 404
-            
-        return render_template('analysis_page.html', 
-                             property_data=property_data,
-                             analysis_id=analysis_id)
-        
-    except Exception as e:
-        logging.error(f"Analysis page error: {e}")
-        return render_template('analysis_not_found.html'), 404
 
 def _assess_investment_potential(property_data: dict) -> str:
     """Assess investment potential based on available data"""
@@ -816,64 +791,6 @@ def ai_objection_handler():
             'success': False,
             'error': 'Unable to generate response. Please try again.'
         }), 500
-
-@app.route('/share_property_analysis', methods=['POST'])
-def share_property_analysis():
-    """
-    Generate a shareable link for property analysis report
-    """
-    try:
-        data = request.get_json()
-        
-        # Generate unique share ID
-        import uuid
-        import time
-        share_id = str(uuid.uuid4())[:8] + str(int(time.time()))[-4:]
-        
-        # Store analysis data in session with share ID
-        session[f'shared_analysis_{share_id}'] = {
-            'property_data': data,
-            'created_at': time.time(),
-            'share_id': share_id
-        }
-        
-        # Generate share URL
-        share_url = f"{request.url_root}shared/{share_id}"
-        
-        return jsonify({
-            'success': True,
-            'share_url': share_url,
-            'share_id': share_id
-        })
-        
-    except Exception as e:
-        logging.error(f"Share analysis error: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'Unable to generate share link. Please try again.'
-        }), 500
-
-@app.route('/shared/<share_id>')
-def view_shared_analysis(share_id):
-    """
-    View shared property analysis report
-    """
-    try:
-        # Retrieve shared analysis data
-        shared_data = session.get(f'shared_analysis_{share_id}')
-        
-        if not shared_data:
-            return render_template('shared_not_found.html'), 404
-            
-        property_data = shared_data.get('property_data', {})
-        
-        return render_template('shared_analysis.html', 
-                             property_data=property_data,
-                             share_id=share_id)
-        
-    except Exception as e:
-        logging.error(f"Shared analysis view error: {e}")
-        return render_template('shared_not_found.html'), 404
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

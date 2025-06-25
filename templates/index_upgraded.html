@@ -290,66 +290,6 @@
                         <input type="text" id="rent" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="1,500" onchange="formatCurrencyInput(this); updateAllTabCalculations()">
                     </div>
                 </div>
-                
-                <!-- Share Property Analysis Button -->
-                <div class="flex justify-center mt-4">
-                    <button onclick="sharePropertyAnalysis()" class="bg-gradient-to-r from-green-500 to-blue-500 text-white px-6 py-3 rounded-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 font-semibold">
-                        <i class="fas fa-share-alt mr-2"></i>Share Property Analysis Report
-                    </button>
-                </div>
-                
-                <!-- Real-time Market Trend Visualization -->
-                <div class="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-4 mt-4">
-                    <h4 class="text-lg font-semibold text-purple-800 mb-3">
-                        <i class="fas fa-chart-line text-purple-600 mr-2"></i>Market Trends & Analysis
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <!-- Property Value Trend -->
-                        <div class="bg-white rounded-lg p-4 border border-purple-100">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-sm font-medium text-gray-700">Property Values</span>
-                                <span class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">+3.2%</span>
-                            </div>
-                            <div class="text-lg font-bold text-gray-800 mb-2">$198K avg</div>
-                            <canvas id="property-trend-chart" width="200" height="40" class="w-full h-10"></canvas>
-                        </div>
-                        
-                        <!-- Rental Market Trend -->
-                        <div class="bg-white rounded-lg p-4 border border-purple-100">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-sm font-medium text-gray-700">Rental Rates</span>
-                                <span class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">+1.8%</span>
-                            </div>
-                            <div class="text-lg font-bold text-gray-800 mb-2">$1,450 avg</div>
-                            <canvas id="rental-trend-chart" width="200" height="40" class="w-full h-10"></canvas>
-                        </div>
-                        
-                        <!-- Market Activity -->
-                        <div class="bg-white rounded-lg p-4 border border-purple-100">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-sm font-medium text-gray-700">Market Activity</span>
-                                <span class="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded">Hot</span>
-                            </div>
-                            <div class="text-lg font-bold text-gray-800 mb-2">28 days DOM</div>
-                            <canvas id="activity-trend-chart" width="200" height="40" class="w-full h-10"></canvas>
-                        </div>
-                    </div>
-                    
-                    <!-- Market Insights -->
-                    <div class="mt-4 p-3 bg-white rounded-lg border border-purple-100">
-                        <div class="flex items-start space-x-3">
-                            <i class="fas fa-lightbulb text-yellow-500 mt-1"></i>
-                            <div class="flex-1">
-                                <h5 class="font-semibold text-gray-800 mb-1">Market Insights</h5>
-                                <div class="text-sm text-gray-600 space-y-1">
-                                    <div>• <span class="font-medium">Strong seller's market</span> with inventory 15% below normal</div>
-                                    <div>• <span class="font-medium">Rental demand increasing</span> due to interest rate environment</div>
-                                    <div>• <span class="font-medium">Best buy zones:</span> Within 2 miles of major employers</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Strategy Tabs -->
@@ -1564,10 +1504,7 @@
 
     <script>
         // Form submission and property analysis
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('property-form');
-            if (form) {
-                form.addEventListener('submit', async function(e) {
+        document.getElementById('property-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const address = document.getElementById('address').value;
@@ -1601,9 +1538,6 @@
                     // Show results
                     document.getElementById('loading-state').classList.add('hidden');
                     document.getElementById('analysis-results').classList.remove('hidden');
-                    
-                    // Initialize market trend charts
-                    initializeChartsAfterAnalysis();
                 } else {
                     throw new Error(data.error || 'Failed to analyze property');
                 }
@@ -1613,29 +1547,19 @@
                 alert('Error analyzing property: ' + error.message);
                 document.getElementById('loading-state').classList.add('hidden');
             }
-                });
-            }
         });
 
-        // Helper function to format numbers with commas
-        function formatNumber(num) {
-            if (!num) return '';
-            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        }
-
         function populatePropertyData(data) {
-            console.log('Populating property data:', data);
-            
             // Update property overview
             document.getElementById('property-title').textContent = `${data.address}, ${data.city}`;
             document.getElementById('property-address').textContent = `${data.city}, ${data.state} ${data.zip}`;
             
-            // Populate editable fields with comma formatting
+            // Populate editable fields
             if (data.bedrooms) document.getElementById('bedrooms').value = data.bedrooms;
             if (data.bathrooms) document.getElementById('bathrooms').value = data.bathrooms;
-            if (data.square_feet) document.getElementById('square_feet').value = formatNumber(data.square_feet);
-            if (data.estimated_value) document.getElementById('arv').value = formatNumber(data.estimated_value);
-            if (data.rent_estimate) document.getElementById('rent').value = formatNumber(data.rent_estimate);
+            if (data.square_feet) document.getElementById('square_feet').value = data.square_feet;
+            if (data.estimated_value) document.getElementById('arv').value = data.estimated_value;
+            if (data.rent_estimate) document.getElementById('rent').value = data.rent_estimate;
             
             // Update data sources
             const dataSourcesContainer = document.getElementById('data-sources');
@@ -3020,88 +2944,6 @@
             `;
             document.body.appendChild(modal);
         }
-
-        // Debug form and add proper event listener
-        console.log('Script loaded, checking form...');
-        
-        function setupFormListener() {
-            const form = document.getElementById('property-form');
-            console.log('Form found:', !!form);
-            
-            if (form) {
-                // Remove any existing listeners
-                const newForm = form.cloneNode(true);
-                form.parentNode.replaceChild(newForm, form);
-                
-                console.log('Adding submit listener');
-                newForm.addEventListener('submit', async function(e) {
-                    console.log('Form submit triggered!');
-                    e.preventDefault();
-                    
-                    const address = document.getElementById('address').value.trim();
-                    const city = document.getElementById('city').value.trim();
-                    const state = document.getElementById('state').value.trim();
-                    const zip = document.getElementById('zip_code').value.trim();
-                    
-                    console.log('Form data:', { address, city, state, zip });
-                    
-                    if (!address || !city || !state || !zip) {
-                        alert('Please fill in all required fields');
-                        return;
-                    }
-                    
-                    // Show loading state
-                    document.getElementById('loading-state').classList.remove('hidden');
-                    document.getElementById('analysis-results').classList.add('hidden');
-                    
-                    try {
-                        console.log('Sending request to /analyze_property');
-                        
-                        const response = await fetch('/analyze_property', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ address, city, state, zip })
-                        });
-                        
-                        console.log('Response status:', response.status);
-                        
-                        if (!response.ok) {
-                            throw new Error(`Server error: ${response.status}`);
-                        }
-                        
-                        const data = await response.json();
-                        console.log('Response data:', data);
-                        
-                        if (data.success) {
-                            // Redirect to dedicated analysis page
-                            window.location.href = data.redirect_url;
-                        } else {
-                            alert('Error: ' + (data.error || 'Unable to analyze property'));
-                            document.getElementById('loading-state').classList.add('hidden');
-                        }
-                        
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert('Error analyzing property: ' + error.message);
-                        document.getElementById('loading-state').classList.add('hidden');
-                    }
-                });
-                
-                console.log('Submit listener added successfully');
-                return true;
-            }
-            return false;
-        }
-        
-        // Try to setup immediately and on DOM ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', setupFormListener);
-        } else {
-            setupFormListener();
-        }
-        
-        // Also try after a short delay as backup
-        setTimeout(setupFormListener, 100);
 
     </script>
 </body>
