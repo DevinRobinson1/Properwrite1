@@ -125,8 +125,14 @@ def analyze_property():
         # Store in session for later use
         session['current_property'] = property_data
         
+        # Generate unique analysis ID for clean URL
+        import uuid
+        analysis_id = str(uuid.uuid4())[:8]
+        session[f'analysis_{analysis_id}'] = property_data
+        
         return jsonify({
             'success': True,
+            'redirect_url': f'/analysis/{analysis_id}',
             **property_data
         })
         
@@ -136,6 +142,26 @@ def analyze_property():
             'success': False,
             'error': 'Failed to analyze property. Please check the address and try again.'
         }), 500
+
+@app.route('/analysis/<analysis_id>')
+def analysis_page(analysis_id):
+    """
+    Dedicated property analysis page with full calculator interface
+    """
+    try:
+        # Retrieve analysis data
+        property_data = session.get(f'analysis_{analysis_id}')
+        
+        if not property_data:
+            return render_template('analysis_not_found.html'), 404
+            
+        return render_template('analysis_page.html', 
+                             property_data=property_data,
+                             analysis_id=analysis_id)
+        
+    except Exception as e:
+        logging.error(f"Analysis page error: {e}")
+        return render_template('analysis_not_found.html'), 404
 
 def _assess_investment_potential(property_data: dict) -> str:
     """Assess investment potential based on available data"""
