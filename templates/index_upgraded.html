@@ -101,12 +101,9 @@
                     </div>
                 </div>
                 
-                <div class="flex justify-center space-x-4">
+                <div class="flex justify-center">
                     <button type="submit" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-semibold">
                         <i class="fas fa-rocket mr-2"></i>Analyze Property
-                    </button>
-                    <button type="button" onclick="openAIObjectionHandler()" class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 font-semibold">
-                        <i class="fas fa-comments mr-2"></i>AI Objection Handler
                     </button>
                 </div>
             </form>
@@ -1521,7 +1518,7 @@
             
             try {
                 // Analyze property with external data
-                const response = await fetch('/api/analyze-property', {
+                const response = await fetch('/analyze_property', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ address, city, state, zip })
