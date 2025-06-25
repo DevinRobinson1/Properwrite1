@@ -1617,6 +1617,12 @@
             }
         });
 
+        // Helper function to format numbers with commas
+        function formatNumber(num) {
+            if (!num) return '';
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
         function populatePropertyData(data) {
             console.log('Populating property data:', data);
             
