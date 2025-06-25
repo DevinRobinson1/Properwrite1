@@ -1852,7 +1852,7 @@
             // Get values from property header inputs
             const arvInput = document.getElementById('arv-input');
             const repairsInput = document.getElementById('repairs-input');
-            const percentSlider = document.getElementById('wholesale-percentage');
+            const percentSlider = document.getElementById('wholesale-arv-percent');
             const assignmentFeeInput = document.getElementById('wholesale-assignment-fee');
             
             const arv = parseFloat(arvInput ? arvInput.value.replace(/,/g, '') : '0') || 0;
@@ -1865,20 +1865,47 @@
             const arvCalc = arv * percent;
             const mao = arvCalc - repairs - assignmentFee;
             
-            // Update MAO breakdown with null checks
+            // Update MAO breakdown using correct element IDs
             const elements = {
-                'wholesale-arv': arv,
-                'wholesale-percentage-display': Math.round(percent * 100),
-                'wholesale-percentage-calc': arvCalc,
-                'wholesale-repairs': repairs,
-                'wholesale-assignment': assignmentFee,
-                'wholesale-offer': mao
+                'mao-arv': arv,
+                'mao-percent': Math.round(percent * 100),
+                'mao-arv-calc': arvCalc,
+                'mao-repairs': repairs,
+                'mao-assignment': assignmentFee,
+                'wholesale-mao-result': mao
             };
             
             Object.entries(elements).forEach(([id, value]) => {
                 const element = document.getElementById(id);
                 if (element) {
                     element.textContent = typeof value === 'number' ? Math.round(value).toLocaleString() : value;
+                }
+            });
+            
+            // Update Ackerman offers
+            const ackermanElements = {
+                'ackerman-1': mao * 0.65,
+                'ackerman-2': mao * 0.85,
+                'ackerman-3': mao * 0.95
+            };
+            
+            Object.entries(ackermanElements).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = Math.round(value).toLocaleString();
+                }
+            });
+            
+            // Update profit analysis
+            const profitElements = {
+                'total-investment': mao + repairs,
+                'assignment-profit': assignmentFee
+            };
+            
+            Object.entries(profitElements).forEach(([id, value]) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = Math.round(value).toLocaleString();
                 }
             });
         }
