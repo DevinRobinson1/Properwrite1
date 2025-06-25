@@ -27,7 +27,7 @@
                     </h1>
                     <p class="text-blue-100">{{ property_data.address }}, {{ property_data.city }}</p>
                     <div class="text-sm text-blue-200 mt-1">
-                        {{ property_data.bedrooms }} bed / {{ property_data.bathrooms }} bath / {{ property_data.square_feet | default(1200) | int | format_with_commas }} sqft
+                        {{ property_data.bedrooms }} bed / {{ property_data.bathrooms }} bath / {{ "{:,}".format(property_data.square_feet | default(1200) | int) }} sqft
                     </div>
                 </div>
                 <div class="flex space-x-3">
@@ -58,11 +58,11 @@
                 </div>
                 <div class="text-center">
                     <label class="block text-sm font-medium text-gray-600 mb-2">Square Feet</label>
-                    <input type="text" id="square_feet" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="{{ property_data.square_feet | default(1200) | int | format_with_commas }}" onchange="formatInput(this); updateCalculations()">
+                    <input type="text" id="square_feet" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="{{ "{:,}".format(property_data.square_feet | default(1200) | int) }}" onchange="formatInput(this); updateCalculations()">
                 </div>
                 <div class="text-center">
                     <label class="block text-sm font-medium text-gray-600 mb-2">ARV ($)</label>
-                    <input type="text" id="arv" class="w-full text-center py-2 border border-gray-300 rounded-lg text-green-600 font-bold" value="{{ property_data.estimated_value | int | format_with_commas }}" onchange="formatInput(this); updateCalculations()">
+                    <input type="text" id="arv" class="w-full text-center py-2 border border-gray-300 rounded-lg text-green-600 font-bold" value="{{ "{:,}".format(property_data.estimated_value | int) }}" onchange="formatInput(this); updateCalculations()">
                 </div>
                 <div class="text-center">
                     <label class="block text-sm font-medium text-gray-600 mb-2">Repairs ($)</label>
@@ -70,7 +70,7 @@
                 </div>
                 <div class="text-center">
                     <label class="block text-sm font-medium text-gray-600 mb-2">Monthly Rent ($)</label>
-                    <input type="text" id="rent" class="w-full text-center py-2 border border-gray-300 rounded-lg text-purple-600 font-bold" value="{{ property_data.rent_estimate | int | format_with_commas }}" onchange="formatInput(this); updateCalculations()">
+                    <input type="text" id="rent" class="w-full text-center py-2 border border-gray-300 rounded-lg text-purple-600 font-bold" value="{{ "{:,}".format(property_data.rent_estimate | int) }}" onchange="formatInput(this); updateCalculations()">
                 </div>
             </div>
         </div>
@@ -97,7 +97,7 @@
                         <span class="text-sm font-medium text-gray-700">Rental Rates</span>
                         <span class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">+1.8%</span>
                     </div>
-                    <div class="text-lg font-bold text-gray-800 mb-2">${{ property_data.rent_estimate | int | format_with_commas }} avg</div>
+                    <div class="text-lg font-bold text-gray-800 mb-2">${{ "{:,}".format(property_data.rent_estimate | int) }} avg</div>
                     <canvas id="rental-trend-chart" width="200" height="40" class="w-full h-10"></canvas>
                 </div>
                 
