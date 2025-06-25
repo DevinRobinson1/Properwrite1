@@ -11,6 +11,7 @@ from ai_strategy_assistant import ai_strategy_assistant
 from acquisitions_module import acquisitions_module
 from dispositions_module import dispositions_module
 from ai_listing_generator import ai_listing_generator
+from property_risk_analyzer import property_risk_analyzer
 from wholesale_calculator import calculate_wholesale_offers
 from installment_calculator import calculate_installment_offers
 from subject_to_calculator import calculate_subject_to_offer
@@ -651,6 +652,40 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/analyze_property_risk', methods=['POST'])
+def analyze_property_risk():
+    """
+    Generate comprehensive property risk analysis with interactive heatmap data
+    """
+    try:
+        # Get current property data from session
+        property_data = session.get('current_property_data', {})
+        
+        if not property_data:
+            return jsonify({
+                'status': 'error',
+                'error': 'No property data available. Please analyze a property first.'
+            })
+        
+        # Generate risk analysis
+        risk_analysis = property_risk_analyzer.analyze_property_risk(property_data)
+        
+        # Generate heatmap data
+        heatmap_data = property_risk_analyzer.generate_risk_heatmap_data(property_data)
+        
+        return jsonify({
+            'status': 'success',
+            'risk_analysis': risk_analysis,
+            'heatmap_data': heatmap_data
+        })
+        
+    except Exception as e:
+        print(f"Error analyzing property risk: {e}")
+        return jsonify({
+            'status': 'error',
+            'error': str(e)
+        })
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

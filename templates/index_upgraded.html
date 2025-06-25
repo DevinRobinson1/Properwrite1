@@ -1127,6 +1127,57 @@
                             </div>
                         </div>
 
+                        <!-- Property Risk Heatmap -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-lg font-semibold text-gray-800">Property Risk Analysis</h4>
+                                <button onclick="generateRiskHeatmap()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                                    <i class="fas fa-chart-area mr-2"></i>Generate Risk Heatmap
+                                </button>
+                            </div>
+                            
+                            <!-- Risk Heatmap Container -->
+                            <div id="risk-heatmap-container" class="hidden">
+                                <!-- Overall Risk Score -->
+                                <div class="mb-6 p-4 rounded-lg" id="overall-risk-display">
+                                    <div class="text-center">
+                                        <div class="text-3xl font-bold mb-2" id="overall-risk-score">--</div>
+                                        <div class="text-lg font-medium" id="risk-zone-label">Risk Zone</div>
+                                        <div class="text-sm text-gray-600 mt-1" id="risk-zone-description">Loading analysis...</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Interactive Risk Zones -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6" id="risk-zones-grid">
+                                    <!-- Risk zones will be populated here -->
+                                </div>
+                                
+                                <!-- Risk Legend -->
+                                <div class="mb-6">
+                                    <h5 class="font-semibold text-gray-800 mb-3">Risk Level Legend</h5>
+                                    <div class="flex flex-wrap gap-3" id="risk-legend">
+                                        <!-- Legend items will be populated here -->
+                                    </div>
+                                </div>
+                                
+                                <!-- Risk Recommendations -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <h5 class="font-semibold text-gray-800 mb-3">Recommendations</h5>
+                                        <ul id="risk-recommendations" class="space-y-2 text-sm text-gray-700">
+                                            <!-- Recommendations will be populated here -->
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold text-gray-800 mb-3">Mitigation Strategies</h5>
+                                        <ul id="risk-mitigation" class="space-y-2 text-sm text-gray-700">
+                                            <!-- Mitigation strategies will be populated here -->
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Market Analysis -->
                         <div class="bg-white border border-gray-200 rounded-lg p-6">
                             <h4 class="text-lg font-semibold text-gray-800 mb-4">Market Analysis</h4>
@@ -1890,6 +1941,165 @@
                     countElement.textContent = 'See Rentcast below';
                 }
             }
+        }
+
+        // Property Risk Heatmap functions
+        function generateRiskHeatmap() {
+            console.log('Generating property risk heatmap');
+            
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Analyzing...';
+            button.disabled = true;
+            
+            fetch('/analyze_property_risk', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    displayRiskHeatmap(data.heatmap_data);
+                    document.getElementById('risk-heatmap-container').classList.remove('hidden');
+                } else {
+                    alert('Error generating risk analysis: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error generating risk heatmap:', error);
+                alert('Error generating risk analysis. Please try again.');
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+
+        function displayRiskHeatmap(heatmapData) {
+            console.log('Displaying risk heatmap:', heatmapData);
+            
+            // Update overall risk display
+            const overallScore = heatmapData.overall_risk;
+            const riskZone = heatmapData.risk_zone;
+            
+            document.getElementById('overall-risk-score').textContent = overallScore.toFixed(1);
+            document.getElementById('risk-zone-label').textContent = riskZone.label;
+            document.getElementById('risk-zone-description').textContent = 
+                `Score Range: ${riskZone.score_range[0]}-${riskZone.score_range[1]}`;
+            
+            // Set overall risk display color
+            const overallDisplay = document.getElementById('overall-risk-display');
+            overallDisplay.style.backgroundColor = riskZone.color + '20';
+            overallDisplay.style.borderColor = riskZone.color;
+            overallDisplay.style.border = '2px solid';
+            
+            document.getElementById('overall-risk-score').style.color = riskZone.color;
+            
+            // Display risk zones grid
+            const zonesGrid = document.getElementById('risk-zones-grid');
+            zonesGrid.innerHTML = '';
+            
+            heatmapData.zones.forEach(zone => {
+                const zoneElement = document.createElement('div');
+                zoneElement.className = 'p-4 rounded-lg border-2 cursor-pointer hover:shadow-lg transition-all duration-300';
+                zoneElement.style.backgroundColor = zone.color + '20';
+                zoneElement.style.borderColor = zone.color;
+                
+                zoneElement.innerHTML = `
+                    <div class="text-lg font-semibold text-gray-800 mb-2">${zone.category}</div>
+                    <div class="text-2xl font-bold mb-1" style="color: ${zone.color}">${zone.score.toFixed(1)}</div>
+                    <div class="text-sm text-gray-600 mb-2">Weight: ${(zone.weight * 100).toFixed(0)}%</div>
+                    <div class="text-xs text-gray-500">Click for details</div>
+                `;
+                
+                // Add click event for details
+                zoneElement.addEventListener('click', () => showZoneDetails(zone));
+                
+                zonesGrid.appendChild(zoneElement);
+            });
+            
+            // Display legend
+            const legend = document.getElementById('risk-legend');
+            legend.innerHTML = '';
+            
+            heatmapData.legend.forEach(item => {
+                const legendItem = document.createElement('div');
+                legendItem.className = 'flex items-center space-x-2';
+                legendItem.innerHTML = `
+                    <div class="w-4 h-4 rounded" style="background-color: ${item.color}"></div>
+                    <span class="text-sm text-gray-700">${item.range}: ${item.label}</span>
+                `;
+                legend.appendChild(legendItem);
+            });
+            
+            // Display recommendations
+            const recommendations = document.getElementById('risk-recommendations');
+            recommendations.innerHTML = '';
+            
+            heatmapData.recommendations.forEach(rec => {
+                const li = document.createElement('li');
+                li.className = 'flex items-start space-x-2';
+                li.innerHTML = `
+                    <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                    <span>${rec}</span>
+                `;
+                recommendations.appendChild(li);
+            });
+            
+            // Display mitigation strategies
+            const mitigation = document.getElementById('risk-mitigation');
+            mitigation.innerHTML = '';
+            
+            heatmapData.mitigation_strategies.forEach(strategy => {
+                const li = document.createElement('li');
+                li.className = 'flex items-start space-x-2';
+                li.innerHTML = `
+                    <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                    <span>${strategy}</span>
+                `;
+                mitigation.appendChild(li);
+            });
+        }
+
+        function showZoneDetails(zone) {
+            let factorsHtml = '';
+            zone.factors.forEach(factor => {
+                const impactColor = factor.impact === 'Low' ? 'text-green-600' : 
+                                  factor.impact === 'Medium' ? 'text-yellow-600' : 'text-red-600';
+                factorsHtml += `
+                    <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                        <span class="font-medium">${factor.factor}</span>
+                        <div class="text-right">
+                            <div class="text-sm text-gray-600">${factor.status}</div>
+                            <div class="text-xs ${impactColor}">${factor.impact} Impact</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">${zone.category} Details</h3>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="mb-4">
+                        <div class="text-2xl font-bold mb-2" style="color: ${zone.color}">${zone.score.toFixed(1)} Risk Score</div>
+                        <div class="text-sm text-gray-600">Weighted Impact: ${(zone.weight * 100).toFixed(0)}%</div>
+                    </div>
+                    <div class="space-y-2">
+                        ${factorsHtml}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
         }
 
     </script>
