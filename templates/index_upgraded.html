@@ -281,26 +281,103 @@
             <!-- Strategy Tabs -->
             <div class="bg-white rounded-xl shadow-lg overflow-hidden">
                 
-                <!-- Tab Navigation -->
-                <div class="flex flex-wrap bg-gray-100 border-b">
-                    <button class="tab-button px-6 py-4 font-semibold transition-all duration-300 active" onclick="showTab('wholesale')">
-                        <i class="fas fa-dollar-sign mr-2"></i>Wholesale
-                    </button>
-                    <button class="tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showTab('installment')">
-                        <i class="fas fa-calendar-alt mr-2"></i>Installment
-                    </button>
-                    <button class="tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showTab('subject-to')">
-                        <i class="fas fa-handshake mr-2"></i>Subject-To
-                    </button>
-                    <button class="tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showTab('seller-finance')">
-                        <i class="fas fa-university mr-2"></i>Seller Finance
-                    </button>
-                    <button class="tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showTab('dispositions')">
-                        <i class="fas fa-home mr-2"></i>Dispositions
-                    </button>
-                    <button class="tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showTab('compare')">
-                        <i class="fas fa-chart-bar mr-2"></i>Compare All
-                    </button>
+                <!-- Section Navigation -->
+                <div class="mb-6">
+                    <div class="flex justify-center space-x-4 mb-6">
+                        <button id="acquisitions-section-btn" class="section-toggle-btn active px-8 py-3 font-bold text-lg rounded-lg transition-all duration-300 bg-blue-500 text-white hover:bg-blue-600" onclick="showSection('acquisitions')">
+                            <i class="fas fa-briefcase mr-3"></i>🏗 Acquisitions
+                        </button>
+                        <button id="dispositions-section-btn" class="section-toggle-btn px-8 py-3 font-bold text-lg rounded-lg transition-all duration-300 bg-gray-300 text-gray-700 hover:bg-purple-500 hover:text-white" onclick="showSection('dispositions')">
+                            <i class="fas fa-chart-line mr-3"></i>🏠 Dispositions
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Acquisitions Section -->
+                <div id="acquisitions-section" class="section-content">
+                    <!-- Acquisitions Header -->
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-t-lg mb-0">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold mb-2">💼 Seller Offers & Deal Structure</h2>
+                                <p class="text-blue-100">Create competitive offers for property sellers across multiple strategies</p>
+                            </div>
+                            <div class="text-blue-100 text-sm">
+                                <div class="bg-blue-400 bg-opacity-30 px-3 py-1 rounded">Phase 1: Acquisitions</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acquisitions Tab Navigation -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 shadow-sm">
+                        <div class="acquisitions-tabs flex flex-wrap">
+                            <button class="acquisition-tab-button px-6 py-4 font-semibold transition-all duration-300 active" onclick="showAcquisitionTab('wholesale')">
+                                <i class="fas fa-dollar-sign mr-2"></i>Wholesale MAO
+                            </button>
+                            <button class="acquisition-tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showAcquisitionTab('installment')">
+                                <i class="fas fa-calendar-alt mr-2"></i>Installment
+                            </button>
+                            <button class="acquisition-tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showAcquisitionTab('subject-to')">
+                                <i class="fas fa-handshake mr-2"></i>Subject-To
+                            </button>
+                            <button class="acquisition-tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showAcquisitionTab('seller-finance')">
+                                <i class="fas fa-university mr-2"></i>Seller Finance
+                            </button>
+                            <button class="acquisition-tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showAcquisitionTab('compare')">
+                                <i class="fas fa-chart-bar mr-2"></i>Compare Offers
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Divider -->
+                <div id="section-divider" class="hidden my-8">
+                    <div class="flex items-center">
+                        <div class="flex-grow h-px bg-gradient-to-r from-blue-300 via-purple-400 to-green-300"></div>
+                        <div class="px-6 py-3 bg-white border-2 border-gray-200 rounded-full shadow-lg">
+                            <span class="text-sm font-medium text-gray-600">🔒 End of Seller Analysis — Beginning of Investor Disposition 📈</span>
+                        </div>
+                        <div class="flex-grow h-px bg-gradient-to-l from-blue-300 via-purple-400 to-green-300"></div>
+                    </div>
+                </div>
+
+                <!-- Dispositions Section -->
+                <div id="dispositions-section" class="section-content hidden">
+                    <!-- Dispositions Header -->
+                    <div class="bg-gradient-to-r from-purple-500 to-green-500 text-white p-6 rounded-t-lg mb-0">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold mb-2">📈 Exit Strategies & Market Disposition</h2>
+                                <p class="text-purple-100">Analyze resale options and create investor listings for maximum profit</p>
+                            </div>
+                            <div class="text-purple-100 text-sm">
+                                <div class="bg-purple-400 bg-opacity-30 px-3 py-1 rounded">Phase 2: Dispositions</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acquisition Values Reference -->
+                    <div class="bg-gradient-to-r from-purple-50 to-green-50 border-l-4 border-purple-500 p-4 mb-4">
+                        <h4 class="font-semibold text-gray-800 mb-3">🔒 Reference Values from Acquisitions</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                            <div class="bg-white p-3 rounded border border-purple-200">
+                                <div class="text-gray-600">Acquisition Cost</div>
+                                <div class="font-bold text-purple-700" id="ref-acquisition-cost">$140,000</div>
+                            </div>
+                            <div class="bg-white p-3 rounded border border-purple-200">
+                                <div class="text-gray-600">ARV</div>
+                                <div class="font-bold text-purple-700" id="ref-arv">$200,000</div>
+                            </div>
+                            <div class="bg-white p-3 rounded border border-purple-200">
+                                <div class="text-gray-600">Repairs</div>
+                                <div class="font-bold text-purple-700" id="ref-repairs">$30,000</div>
+                            </div>
+                            <div class="bg-white p-3 rounded border border-purple-200">
+                                <div class="text-gray-600">Strategy Used</div>
+                                <div class="font-bold text-purple-700" id="ref-strategy">Wholesale</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Acquisitions Tab Content -->
@@ -1796,6 +1873,91 @@
             };
             
             populateComparisonResults(comparisonResults);
+        }
+
+        // Section functionality
+        function showSection(sectionName) {
+            // Hide all sections
+            document.getElementById('acquisitions-section').classList.toggle('hidden', sectionName !== 'acquisitions');
+            document.getElementById('dispositions-section').classList.toggle('hidden', sectionName !== 'dispositions');
+            document.getElementById('acquisitions-tab-content').classList.toggle('hidden', sectionName !== 'acquisitions');
+            document.getElementById('dispositions-tab-content').classList.toggle('hidden', sectionName !== 'dispositions');
+            
+            // Show/hide divider
+            document.getElementById('section-divider').classList.toggle('hidden', sectionName === 'acquisitions');
+            
+            // Update section toggle buttons
+            document.querySelectorAll('.section-toggle-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (sectionName === 'acquisitions') {
+                    btn.classList.remove('bg-purple-500', 'bg-green-500', 'text-white');
+                    btn.classList.add('bg-gray-300', 'text-gray-700');
+                } else {
+                    btn.classList.remove('bg-blue-500', 'text-white');
+                    btn.classList.add('bg-gray-300', 'text-gray-700');
+                }
+            });
+            
+            if (sectionName === 'acquisitions') {
+                document.getElementById('acquisitions-section-btn').classList.remove('bg-gray-300', 'text-gray-700');
+                document.getElementById('acquisitions-section-btn').classList.add('bg-blue-500', 'text-white', 'active');
+            } else {
+                document.getElementById('dispositions-section-btn').classList.remove('bg-gray-300', 'text-gray-700');
+                document.getElementById('dispositions-section-btn').classList.add('bg-purple-500', 'text-white', 'active');
+                
+                // Update reference values when switching to dispositions
+                updateDispositionsReference();
+            }
+        }
+
+        // Acquisition tab functionality
+        function showAcquisitionTab(tabName) {
+            // Hide all acquisition tab contents
+            document.querySelectorAll('.acquisition-tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all acquisition tab buttons
+            document.querySelectorAll('.acquisition-tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            const tabElement = document.getElementById(tabName + '-tab');
+            if (tabElement) {
+                tabElement.classList.add('active');
+            }
+            
+            // Add active class to clicked button
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+        }
+
+        // Legacy function for compatibility
+        function showTab(tabName) {
+            if (tabName === 'dispositions') {
+                showSection('dispositions');
+            } else {
+                showSection('acquisitions');
+                showAcquisitionTab(tabName);
+            }
+        }
+
+        function updateDispositionsReference() {
+            // Update reference values from current property data
+            const arv = document.getElementById('arv')?.value || '200,000';
+            const repairs = document.getElementById('repairs')?.value || '30,000';
+            
+            // Get the best acquisition strategy from comparison
+            const wholesaleMao = document.getElementById('wholesale-mao-result')?.textContent || '140,000';
+            
+            if (document.getElementById('ref-acquisition-cost')) {
+                document.getElementById('ref-acquisition-cost').textContent = '$' + wholesaleMao.replace(/,/g, '');
+                document.getElementById('ref-arv').textContent = '$' + parseFloat(arv).toLocaleString();
+                document.getElementById('ref-repairs').textContent = '$' + parseFloat(repairs).toLocaleString();
+                document.getElementById('ref-strategy').textContent = 'Wholesale MAO';
+            }
         }
 
         // Dispositions functions
