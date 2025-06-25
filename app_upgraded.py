@@ -338,6 +338,95 @@ def update_strategy():
         logging.error(f"Strategy update error: {e}")
         return jsonify({'error': 'Failed to update strategy calculations'}), 500
 
+@app.route('/ai_strategy_insight', methods=['POST'])
+def ai_strategy_insight():
+    """
+    Generate AI-powered strategy insights for real estate deals
+    """
+    try:
+        data = request.get_json()
+        
+        # Extract deal parameters
+        arv = int(data.get('arv', 200000))
+        repairs = int(data.get('repairs', 30000))
+        rent = int(data.get('rent', 2000))
+        equity = int(data.get('equity', arv * 0.25))  # Assume 25% equity
+        location = data.get('location', 'Unknown Location')
+        exit_goals = data.get('exit_goals', 'speed')
+        comparable_sales = data.get('comparable_sales', [])
+        
+        # Generate AI insights
+        ai_insight = ai_strategy_assistant.generate_strategy_insight(
+            arv=arv,
+            repairs=repairs,
+            rent=rent,
+            equity=equity,
+            location=location,
+            exit_goals=exit_goals,
+            comparable_sales=comparable_sales
+        )
+        
+        # Get seller psychology guidance
+        psychology_guidance = ai_strategy_assistant.get_seller_psychology_guidance(exit_goals)
+        
+        return jsonify({
+            'status': 'success',
+            'ai_insight': ai_insight,
+            'psychology_guidance': psychology_guidance,
+            'deal_parameters': {
+                'arv': arv,
+                'repairs': repairs,
+                'rent': rent,
+                'equity': equity,
+                'location': location,
+                'exit_goals': exit_goals
+            }
+        })
+        
+    except Exception as e:
+        logging.error(f"AI strategy insight error: {e}")
+        return jsonify({
+            'status': 'error',
+            'error': str(e),
+            'ai_insight': {'insight': f'Unable to generate AI insights: {str(e)}'}
+        }), 500
+
+@app.route('/ai_deal_analysis', methods=['POST'])
+def ai_deal_analysis():
+    """
+    AI-powered comparison of all four investment strategies
+    """
+    try:
+        data = request.get_json()
+        
+        # Extract strategy data
+        wholesale_data = data.get('wholesale_data', {})
+        installment_data = data.get('installment_data', {})
+        subject_to_data = data.get('subject_to_data', {})
+        seller_finance_data = data.get('seller_finance_data', {})
+        
+        # Generate comprehensive analysis
+        deal_analysis = ai_strategy_assistant.analyze_deal_feasibility(
+            wholesale_data=wholesale_data,
+            installment_data=installment_data,
+            subject_to_data=subject_to_data,
+            seller_finance_data=seller_finance_data
+        )
+        
+        return jsonify({
+            'status': 'success',
+            'deal_analysis': deal_analysis,
+            'strategies_analyzed': 4
+        })
+        
+    except Exception as e:
+        logging.error(f"AI deal analysis error: {e}")
+        return jsonify({
+            'status': 'error',
+            'error': str(e),
+            'analysis': f'Unable to generate deal analysis: {str(e)}'
+        }), 500
+
 def estimate_property_value(square_feet, bedrooms, bathrooms, city, state):
     """
     Estimate property value based on size and location when external data unavailable
