@@ -1,0 +1,100 @@
+Acquisitions vs Dispositions Refactor + Calculator Revisions + Objection Handling
+High-level goal:
+
+Polish the Property-Info header (clear labels, bigger font)
+
+Keep Acquisitions & Dispositions fully separated (tabs + strong visual styles)
+
+Refine every offer calculator with the logic/fees below
+
+Inject objection-handling sections in Dispositions using attached scripts (GPT-4o can auto-suggest responses)
+
+1️⃣ Top Property-Info Block (always visible)
+Field label	Notes
+Bedrooms / Bathrooms / Sq Ft	Larger pill inputs, placeholders (“3 Beds”)
+ARV ($)	Editable; pulled from APIs
+Repairs ($)	Editable
+Monthly Rent ($)	Editable
+Estimated Market Value	Average of Zillow / Redfin / Realtor + small “# sources” link
+
+2️⃣ Acquisitions Section 💼 (tabbed – one offer visible unless “Compare Offers”)
+2.1 Global “Seller Psychology Framework” box
+Move this to top of Acquisitions (applies to all offers): Speed • Convenience • Price.
+
+2.2 Wholesale MAO (unchanged)
+Remove either “Minimum Profit” or “Assignment Fee” – keep just one input.
+
+2.3 Installments / Novations (rename tab)
+Rename “Buyer Over-Ask Bonus” ➜ Installment Payment (non-refundable; credit back at closing).
+
+Replace fee table with editable Closing/OOP Costs builder (include Realtor commissions).
+
+Default numbers (for $190 k list):
+
+Listing 2 % = $3,800 Buyer Agent 2 % = $3,800 Title 1 % = $1,900 … (use table in prompt)
+
+OOP costs = $8,350
+
+Total fees = $20,475
+
+Installment MAO formula:
+
+ini
+Copy
+Edit
+MAO = ARV − Repairs − 10 000 − Total Fees − Our Fee
+Ackerman offers:
+
+4th (Max) 3rd = 95 % 2nd = 85 % 1st = 65 %
+
+Allowed timeframe: 30 – 120 days
+
+2.4 Subject-To
+Inputs: Existing Loan Balance, Cash to Seller, Arrears/Liens, Monthly PI, Monthly Escrow(TI), Interest Rate
+
+Show Monthly Cash-Flow (Rent − PITI − Repairs reserve)
+
+Buying guide: aim 8–10 % of ARV purchase; resale ≈ 12–15 % of ARV if ≥ $200/mo CF (premium if ≥ $500/mo).
+
+Remove 5-year models from Acquisitions.
+
+Defer “Legal Risks” & “Performance Analysis” panels to Dispositions.
+
+2.5 Seller Finance
+Offers based on three knobs: Price • Monthly Payment • Timeline
+
+Keep Interest-Rate & Down-Payment fields (optional)
+
+Add Balloon Payment field
+
+Add Custom Monthly Payment override slider
+
+3️⃣ Dispositions Section 🏠
+Show Exit Strategy cards (Cash sale, MLS, Seller-Fin wrap, Lease-Option).
+
+Move “Legal Risks”, “Performance Analysis”, and Objection Handling accordions here.
+
+Load Subject-To objections & answers Sub2 script and Points
+
+Load Seller-Finance objections & answers Seller Financing Script
+
+Keep “AI Listing Generator” (GPT-4o) button set.
+
+4️⃣ Visual Separation
+Area	Style
+Acquisitions	Light-blue background #f7f9fc, 💼 icon in tab
+Dispositions	Light-lavender #f9f6ff, 🏠 icon in tab
+Thick divider	“── End Seller Offers / Begin Exit Strategies ──”
+
+5️⃣ Tasks for Replit Ghostwriter
+Refactor file structure: src/acquisitions/ vs src/dispositions/.
+
+Update Installment calculator with new fee inputs & formula.
+
+Add dynamic Realtor commission sliders (% of list).
+
+Insert objection-handling markdown into Dispositions modals.
+
+Keep Compare-Offers tab unchanged (shows all at once).
+
+Ensure GPT-4o is used for listing generation & objection-response suggestions.
