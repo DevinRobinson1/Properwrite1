@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Analysis Report - {{ property_data.address or 'Property Report' }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        @media print {
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="gradient-bg text-white p-6 mb-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">
+                        <i class="fas fa-chart-line mr-3"></i>Property Investment Analysis
+                    </h1>
+                    <p class="text-blue-100">{{ property_data.address or 'Shared Property Report' }}</p>
+                    <div class="text-sm text-blue-200 mt-1">{{ property_data.city or '' }}</div>
+                </div>
+                <div class="no-print flex space-x-3">
+                    <button onclick="window.print()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-print mr-2"></i>Print Report
+                    </button>
+                    <a href="/" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-home mr-2"></i>New Analysis
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 pb-12">
+        <!-- Property Overview -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Property Overview</h2>
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-6">
+                <div class="text-center">
+                    <div class="text-sm font-medium text-gray-600 mb-2">Bedrooms</div>
+                    <div class="text-xl font-bold text-blue-600">{{ property_data.bedrooms or 3 }}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm font-medium text-gray-600 mb-2">Bathrooms</div>
+                    <div class="text-xl font-bold text-blue-600">{{ property_data.bathrooms or 2 }}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm font-medium text-gray-600 mb-2">Square Feet</div>
+                    <div class="text-xl font-bold text-blue-600">{{ property_data.square_feet or '1,200' }}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm font-medium text-gray-600 mb-2">ARV</div>
+                    <div class="text-xl font-bold text-green-600">${{ property_data.arv or '200,000' }}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm font-medium text-gray-600 mb-2">Repairs</div>
+                    <div class="text-xl font-bold text-red-600">${{ property_data.repairs or '30,000' }}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-sm font-medium text-gray-600 mb-2">Monthly Rent</div>
+                    <div class="text-xl font-bold text-purple-600">${{ property_data.rent or '1,500' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Investment Strategy Comparison -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Investment Strategy Analysis</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Wholesale Strategy -->
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6">
+                    <h3 class="text-lg font-bold text-blue-800 mb-4">
+                        <i class="fas fa-dollar-sign mr-2"></i>Wholesale
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="text-center">
+                            <div class="text-sm text-gray-600">Maximum Offer</div>
+                            <div class="text-2xl font-bold text-blue-700">${{ property_data.wholesale_mao or '125,000' }}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-sm text-gray-600">Assignment Profit</div>
+                            <div class="text-xl font-bold text-green-600">${{ property_data.assignment_profit or '15,000' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Installment Strategy -->
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-6">
+                    <h3 class="text-lg font-bold text-purple-800 mb-4">
+                        <i class="fas fa-calendar-alt mr-2"></i>Installment
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="text-center">
+                            <div class="text-sm text-gray-600">Purchase Price</div>
+                            <div class="text-2xl font-bold text-purple-700">${{ property_data.installment_purchase or '140,000' }}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-sm text-gray-600">Net Profit</div>
+                            <div class="text-xl font-bold text-green-600">${{ property_data.installment_profit or '25,000' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subject-To Strategy -->
+                <div class="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-6">
+                    <h3 class="text-lg font-bold text-green-800 mb-4">
+                        <i class="fas fa-handshake mr-2"></i>Subject-To
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="text-center">
+                            <div class="text-sm text-gray-600">Monthly Cash Flow</div>
+                            <div class="text-2xl font-bold text-green-700">${{ property_data.sub2_cashflow or '250' }}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-sm text-gray-600">Immediate Equity</div>
+                            <div class="text-xl font-bold text-blue-600">${{ property_data.sub2_equity or '80,000' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seller Finance Strategy -->
+                <div class="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-6">
+                    <h3 class="text-lg font-bold text-orange-800 mb-4">
+                        <i class="fas fa-university mr-2"></i>Seller Finance
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="text-center">
+                            <div class="text-sm text-gray-600">Purchase Price</div>
+                            <div class="text-2xl font-bold text-orange-700">${{ property_data.sf_purchase or '160,000' }}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-sm text-gray-600">Monthly Cash Flow</div>
+                            <div class="text-xl font-bold text-green-600">${{ property_data.sf_cashflow or '350' }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Footer -->
+        <div class="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-6 text-center">
+            <div class="text-sm text-gray-600 mb-2">
+                <i class="fas fa-info-circle mr-2"></i>
+                This analysis was generated using the Real Estate Investment Analyzer
+            </div>
+            <div class="text-xs text-gray-500">
+                Report ID: {{ share_id }} | Generated on {{ moment().format('MMMM Do, YYYY [at] h:mm A') }}
+            </div>
+            <div class="mt-4 no-print">
+                <a href="/" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Create Your Own Analysis
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
