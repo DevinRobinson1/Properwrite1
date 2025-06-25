@@ -3073,17 +3073,8 @@
                         console.log('Response data:', data);
                         
                         if (data.success) {
-                            populatePropertyData(data);
-                            await calculateStrategies();
-                            
-                            setTimeout(() => {
-                                updateAllTabCalculations();
-                            }, 200);
-                            
-                            document.getElementById('loading-state').classList.add('hidden');
-                            document.getElementById('analysis-results').classList.remove('hidden');
-                            
-                            initializeChartsAfterAnalysis();
+                            // Redirect to dedicated analysis page
+                            window.location.href = data.redirect_url;
                         } else {
                             alert('Error: ' + (data.error || 'Unable to analyze property'));
                             document.getElementById('loading-state').classList.add('hidden');

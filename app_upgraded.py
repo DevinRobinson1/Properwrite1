@@ -32,8 +32,7 @@ def index():
 @app.route('/analyze_property', methods=['POST'])
 def analyze_property():
     """
-    Analyze property with external data enrichment from multiple sources
-    Pulls data from Zillow, Redfin, Realtor.com and other sources
+    Analyze property and redirect to dedicated analysis page
     """
     try:
         data = request.get_json()
