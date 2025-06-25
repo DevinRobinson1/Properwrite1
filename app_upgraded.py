@@ -26,7 +26,8 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-2024")
 @app.route('/')
 def index():
     """Enhanced property input form with external data integration"""
-    return render_template('index_upgraded.html')
+    google_maps_api_key = os.environ.get('GOOGLE_MAPS_API_KEY', '')
+    return render_template('index_upgraded.html', google_maps_api_key=google_maps_api_key)
 
 @app.route('/api/analyze-property', methods=['POST'])
 def analyze_property():

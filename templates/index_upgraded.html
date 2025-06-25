@@ -1849,16 +1849,16 @@
         }
 
         function recalculateWholesale() {
-            // Get values from property header inputs
-            const arvInput = document.getElementById('arv-input');
-            const repairsInput = document.getElementById('repairs-input');
+            // Get values from property header inputs - try multiple possible IDs
+            const arvInput = document.getElementById('arv') || document.getElementById('arv-input');
+            const repairsInput = document.getElementById('repairs') || document.getElementById('repairs-input');
             const percentSlider = document.getElementById('wholesale-arv-percent');
             const assignmentFeeInput = document.getElementById('wholesale-assignment-fee');
             
             const arv = parseFloat(arvInput ? arvInput.value.replace(/,/g, '') : '0') || 0;
             const repairs = parseFloat(repairsInput ? repairsInput.value.replace(/,/g, '') : '0') || 0;
             const percent = parseFloat(percentSlider ? percentSlider.value : '70') / 100;
-            const assignmentFee = parseFloat(assignmentFeeInput ? assignmentFeeInput.value.replace(/,/g, '') : '15000') || 15000;
+            const assignmentFee = parseFloat(assignmentFeeInput ? assignmentFeeInput.value.replace(/,/g, '') : '10000') || 10000;
             
             console.log('Wholesale calc:', { arv, repairs, percent, assignmentFee });
             
@@ -1911,9 +1911,9 @@
         }
 
         function recalculateInstallment() {
-            // Get values from property header inputs
-            const arvInput = document.getElementById('arv-input');
-            const repairsInput = document.getElementById('repairs-input');
+            // Get values from property header inputs - try multiple possible IDs
+            const arvInput = document.getElementById('arv') || document.getElementById('arv-input');
+            const repairsInput = document.getElementById('repairs') || document.getElementById('repairs-input');
             const commissionSlider = document.getElementById('installment-commission');
             const ourFeeInput = document.getElementById('installment-our-fee');
             
