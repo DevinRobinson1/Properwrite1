@@ -58,31 +58,28 @@ def analyze_property():
             'images': []
         }
         
-        # Get comprehensive property data from external sources first
+        # Get comprehensive property data from Rentcast API
         try:
-            external_data = enhanced_property_service.get_comprehensive_property_data(address, city, state, zip_code)
+            rentcast_data = rentcast_property_service.get_comprehensive_property_data(address, city, state, zip_code)
             
-            if external_data and external_data.get('data_sources'):
-                # Use external data as primary source
+            if rentcast_data and rentcast_data.get('status') in ['success', 'partial']:
+                # Use Rentcast data as primary source
                 property_data.update({
-                    'bedrooms': external_data.get('bedrooms') or property_data['bedrooms'],
-                    'bathrooms': external_data.get('bathrooms') or property_data['bathrooms'],
-                    'square_feet': external_data.get('square_feet') or property_data['square_feet'],
-                    'year_built': external_data.get('year_built') or property_data['year_built'],
-                    'lot_size_sqft': external_data.get('lot_size_sqft'),
-                    'property_type': external_data.get('property_type') or property_data['property_type'],
-                    'image_url': external_data.get('image_url'),
-                    'zillow_estimate': external_data.get('zillow_estimate'),
-                    'redfin_estimate': external_data.get('redfin_estimate'),
-                    'realtor_estimate': external_data.get('realtor_estimate'),
-                    'rent_estimate': external_data.get('rent_estimate') or property_data.get('rent_estimate'),
-                    'data_sources': external_data.get('data_sources', []),
-                    'data_errors': external_data.get('data_errors', []),
-                    'last_updated': external_data.get('last_updated'),
-                    'average_estimate': external_data.get('average_estimate'),
-                    'estimate_range': external_data.get('estimate_range')
+                    'bedrooms': rentcast_data.get('bedrooms', 3),
+                    'bathrooms': rentcast_data.get('bathrooms', 2.0),
+                    'square_feet': rentcast_data.get('square_feet', 1200),
+                    'year_built': rentcast_data.get('year_built', 1990),
+                    'property_type': rentcast_data.get('property_type', 'Single Family Home'),
+                    'estimated_value': rentcast_data.get('estimate', 0),
+                    'rent_estimate': rentcast_data.get('rent_estimate', 0),
+                    'data_source': 'Rentcast API',
+                    'data_quality': rentcast_data.get('data_quality', 'medium'),
+                    'comparable_sales': rentcast_data.get('comparable_sales', []),
+                    'market_analysis': rentcast_data.get('market_analysis', {}),
+                    'last_updated': rentcast_data.get('data_retrieved_at'),
+                    'comps_count': rentcast_data.get('comps_count', 0)
                 })
-                logging.info(f"Retrieved data from {len(external_data.get('data_sources', []))} external sources")
+                logging.info(f"Retrieved Rentcast data: Estimate ${rentcast_data.get('estimate', 0):,}, {rentcast_data.get('comps_count', 0)} comps")
             else:
                 # Fall back to location-based estimates only if external fails
                 fallback_data = property_service.get_property_data(address, city, state, zip_code)
@@ -90,10 +87,10 @@ def analyze_property():
                     for key, value in fallback_data.items():
                         if value is not None and value != '':
                             property_data[key] = value
-                logging.warning("Using location-based estimates - external data sources unavailable")
+                logging.warning("Using location-based estimates - Rentcast API unavailable")
                 
         except Exception as e:
-            logging.error(f"External data retrieval failed: {e}")
+            logging.error(f"Rentcast data retrieval failed: {e}")
             # Use location-based fallback
             try:
                 fallback_data = property_service.get_property_data(address, city, state, zip_code)
