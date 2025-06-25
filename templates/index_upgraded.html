@@ -1955,11 +1955,11 @@
         }
 
         function recalculateSellerFinance() {
-            const purchasePrice = parseFloat(document.getElementById('sf-purchase-price').value);
-            const downPayment = parseFloat(document.getElementById('sf-down-payment').value);
-            const interestRate = parseFloat(document.getElementById('sf-interest-rate').value) / 100;
-            const termYears = parseFloat(document.getElementById('sf-term').value);
-            const rent = parseFloat(document.getElementById('rent').value);
+            const purchasePrice = parseFloat(document.getElementById('sf-purchase-price').value.replace(/,/g, '')) || 0;
+            const downPayment = parseFloat(document.getElementById('sf-down-payment').value.replace(/,/g, '')) || 0;
+            const interestRate = parseFloat(document.getElementById('sf-interest-rate').value) / 100 || 0.07;
+            const termYears = parseFloat(document.getElementById('sf-term').value) || 30;
+            const rent = parseFloat(document.getElementById('rent').value.replace(/,/g, '')) || 1500;
             
             const loanAmount = purchasePrice - downPayment;
             const monthlyRate = interestRate / 12;
@@ -1999,9 +1999,9 @@
 
         function updateComparisonFromTabs() {
             // Get current values from tabs and update comparison
-            const arv = parseFloat(document.getElementById('arv').value);
-            const repairs = parseFloat(document.getElementById('repairs').value);
-            const rent = parseFloat(document.getElementById('rent').value);
+            const arv = parseFloat(document.getElementById('arv').value.replace(/,/g, '')) || 200000;
+            const repairs = parseFloat(document.getElementById('repairs').value.replace(/,/g, '')) || 30000;
+            const rent = parseFloat(document.getElementById('rent').value.replace(/,/g, '')) || 1500;
             
             // Calculate simplified results for comparison
             const wholesaleMao = parseFloat(document.getElementById('wholesale-mao-result').textContent.replace(/,/g, ''));
@@ -2015,9 +2015,9 @@
             const sub2CashFlow = parseFloat(document.getElementById('sub2-cashflow').textContent.replace(/,/g, ''));
             const sub2Payment = parseFloat(document.getElementById('sub2-pi').textContent.replace(/,/g, ''));
             
-            const sfPurchase = parseFloat(document.getElementById('sf-purchase-price').value);
-            const sfDown = parseFloat(document.getElementById('sf-down-payment').value);
-            const sfCashFlow = parseFloat(document.getElementById('sf-cashflow').textContent.replace(/,/g, ''));
+            const sfPurchase = parseFloat(document.getElementById('sf-purchase-price').value.replace(/,/g, '')) || 0;
+            const sfDown = parseFloat(document.getElementById('sf-down-payment').value.replace(/,/g, '')) || 0;
+            const sfCashFlow = parseFloat(document.getElementById('sf-cashflow').textContent.replace(/,/g, '')) || 0;
             
             const comparisonResults = {
                 wholesale: {
@@ -2085,8 +2085,10 @@
             }
         }
 
-        // Acquisition tab functionality - FIXED VERSION
+        // Acquisition tab functionality - WORKING VERSION
         function showAcquisitionTab(tabName) {
+            console.log('Switching to tab:', tabName);
+            
             // Hide all acquisition tab contents
             document.querySelectorAll('.acquisition-tab-content').forEach(content => {
                 content.classList.remove('active');
@@ -2101,11 +2103,9 @@
             const tabElement = document.getElementById(tabName + '-tab');
             if (tabElement) {
                 tabElement.classList.add('active');
-            }
-            
-            // Add active class to clicked button
-            if (event && event.target) {
-                event.target.classList.add('active');
+                console.log('Activated tab:', tabName);
+            } else {
+                console.error('Tab element not found:', tabName + '-tab');
             }
             
             // Add active class to clicked button
