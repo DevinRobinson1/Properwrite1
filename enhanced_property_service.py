@@ -12,6 +12,7 @@ import time
 from datetime import datetime
 from address_validation_service import address_validator
 from property_cache_service import property_cache
+from rentcast_service import rentcast_service
 
 class EnhancedPropertyService:
     def __init__(self):

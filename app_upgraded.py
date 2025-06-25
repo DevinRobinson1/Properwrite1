@@ -6,7 +6,8 @@ import os
 import logging
 from flask import Flask, render_template, request, jsonify, session
 from property_data_service import property_service
-from enhanced_property_service import enhanced_property_service
+from rentcast_property_service import rentcast_property_service
+from ai_strategy_assistant import ai_strategy_assistant
 from wholesale_calculator import calculate_wholesale_offers
 from installment_calculator import calculate_installment_offers
 from subject_to_calculator import calculate_subject_to_offer

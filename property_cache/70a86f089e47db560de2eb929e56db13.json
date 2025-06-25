@@ -1,0 +1,49 @@
+{
+  "cache_timestamp": 1750515634.0452921,
+  "property_data": {
+    "address": "5208 Teakwood Drive, Kannapolis, NC, 28083",
+    "validated_address": {
+      "status": "normalized",
+      "source": "Manual Normalization",
+      "street": "5208 Teakwood Drive",
+      "city": "Kannapolis",
+      "state": "NC",
+      "zip": "28083",
+      "full_address": "5208 Teakwood Drive, Kannapolis, NC, 28083",
+      "latitude": null,
+      "longitude": null,
+      "confidence": "medium"
+    },
+    "image_url": null,
+    "bedrooms": 3,
+    "bathrooms": 2,
+    "square_feet": 1400,
+    "year_built": 2005,
+    "lot_size_sqft": 8000,
+    "property_type": "Single Family",
+    "zillow_estimate": 300673,
+    "redfin_estimate": 301346,
+    "realtor_estimate": 257019,
+    "rent_estimate": 1799.133,
+    "data_sources": [
+      "Zillow",
+      "Redfin",
+      "Realtor.com"
+    ],
+    "data_errors": [],
+    "last_updated": "2025-06-21T14:20:34.044769",
+    "confidence_scores": {
+      "zillow": 0.9999999999999999,
+      "redfin": 0.9999999999999999,
+      "realtor": 0.9999999999999999
+    },
+    "average_estimate": 286346,
+    "estimate_range": {
+      "min": 257019,
+      "max": 301346,
+      "count": 3
+    },
+    "data_quality": "excellent"
+  },
+  "address_normalized": "5208 Teakwood Dr, Kannapolis, Nc 28083"
+}
