@@ -1029,6 +1029,124 @@
                         </div>
                     </div>
 
+                    <!-- Dispositions Tab -->
+                    <div id="dispositions-tab" class="tab-content">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Dispositions & Exit Strategies</h3>
+                        
+                        <!-- Exit Strategy Analysis -->
+                        <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Exit Strategy Options</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Acquisition Cost ($)</label>
+                                    <input type="number" value="140000" id="acquisition-cost" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateDispositions()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Exit Strategy Type</label>
+                                    <select id="exit-strategy-type" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateDispositions()">
+                                        <option value="cash_sale">Cash Sale to Investors</option>
+                                        <option value="mls_listing">MLS Listing (Renovated)</option>
+                                        <option value="seller_finance_wrap">Seller Finance Wrap</option>
+                                        <option value="lease_option">Lease Option Resale</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Exit Strategy Results -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <h5 class="font-semibold text-gray-800 mb-2">Cash Sale</h5>
+                                <div class="text-2xl font-bold text-green-600 mb-1" id="cash-sale-price">$161,000</div>
+                                <div class="text-sm text-gray-600">70% ARV - Repairs</div>
+                                <div class="mt-3 text-sm">
+                                    <div class="text-green-700 font-medium" id="cash-sale-profit">Profit: $21,000</div>
+                                    <div class="text-gray-600">Timeline: 30-60 days</div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <h5 class="font-semibold text-gray-800 mb-2">MLS Listing</h5>
+                                <div class="text-2xl font-bold text-blue-600 mb-1" id="mls-price">$190,000</div>
+                                <div class="text-sm text-gray-600">95% of ARV</div>
+                                <div class="mt-3 text-sm">
+                                    <div class="text-blue-700 font-medium" id="mls-profit">Profit: $38,600</div>
+                                    <div class="text-gray-600">Timeline: 90-120 days</div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                <h5 class="font-semibold text-gray-800 mb-2">Seller Finance</h5>
+                                <div class="text-2xl font-bold text-purple-600 mb-1" id="wrap-price">$210,000</div>
+                                <div class="text-sm text-gray-600">105% of ARV</div>
+                                <div class="mt-3 text-sm">
+                                    <div class="text-purple-700 font-medium" id="wrap-profit">Profit: $70,000</div>
+                                    <div class="text-gray-600">Timeline: 60-90 days</div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                                <h5 class="font-semibold text-gray-800 mb-2">Lease Option</h5>
+                                <div class="text-2xl font-bold text-orange-600 mb-1" id="lease-price">$220,000</div>
+                                <div class="text-sm text-gray-600">110% of ARV</div>
+                                <div class="mt-3 text-sm">
+                                    <div class="text-orange-700 font-medium" id="lease-profit">Profit: $80,000</div>
+                                    <div class="text-gray-600">Timeline: 30-45 days</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Listing Generator -->
+                        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-6 mb-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                                <i class="fas fa-robot text-indigo-600 mr-2"></i>AI Listing Generator
+                            </h4>
+                            <p class="text-gray-600 mb-4">Generate professional investor listings using GPT-4o with market data and comparable sales.</p>
+                            
+                            <div class="flex flex-wrap gap-3 mb-4">
+                                <button onclick="generateInvestorListing('off_market')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                                    <i class="fas fa-file-alt mr-2"></i>Generate Off-Market Listing
+                                </button>
+                                <button onclick="generateInvestorListing('mls')" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                                    <i class="fas fa-home mr-2"></i>Generate MLS Listing
+                                </button>
+                                <button onclick="generateListingVariations()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                    <i class="fas fa-copy mr-2"></i>A/B Test Variations
+                                </button>
+                            </div>
+                            
+                            <!-- Listing Output -->
+                            <div id="generated-listing" class="hidden mt-4 p-4 bg-white border border-gray-200 rounded-lg">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h5 class="font-semibold text-gray-800">Generated Listing</h5>
+                                    <button onclick="copyListingToClipboard()" class="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded transition-colors">
+                                        <i class="fas fa-copy mr-1"></i>Copy
+                                    </button>
+                                </div>
+                                <div id="listing-content" class="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap"></div>
+                            </div>
+                        </div>
+
+                        <!-- Market Analysis -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Market Analysis</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-gray-700 mb-1" id="market-temperature">Balanced</div>
+                                    <div class="text-sm text-gray-600">Market Temperature</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-green-600 mb-1" id="investor-demand">High</div>
+                                    <div class="text-sm text-gray-600">Investor Demand</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-blue-600 mb-1" id="absorption-rate">Moderate</div>
+                                    <div class="text-sm text-gray-600">Absorption Rate</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Compare All Tab -->
                     <div id="compare-tab" class="tab-content">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6">Strategy Comparison Dashboard</h3>
@@ -1624,6 +1742,156 @@
             
             populateComparisonResults(comparisonResults);
         }
+
+        // Dispositions functions
+        function recalculateDispositions() {
+            const arv = parseFloat(document.getElementById('arv').value) || 200000;
+            const repairs = parseFloat(document.getElementById('repairs').value) || 30000;
+            const acquisitionCost = parseFloat(document.getElementById('acquisition-cost')?.value) || 140000;
+            
+            // Calculate exit strategy prices
+            const cashSalePrice = Math.max(0, (arv * 0.70) - repairs);
+            const mlsPrice = arv * 0.95;
+            const wrapPrice = arv * 1.05;
+            const leasePrice = arv * 1.10;
+            
+            // Calculate profits
+            const cashSaleProfit = cashSalePrice - acquisitionCost;
+            const mlsProfit = mlsPrice - acquisitionCost - repairs - (mlsPrice * 0.06);
+            const wrapProfit = wrapPrice - acquisitionCost - repairs;
+            const leaseProfit = leasePrice - acquisitionCost - repairs;
+            
+            // Update display if elements exist
+            const elements = {
+                'cash-sale-price': '$' + Math.round(cashSalePrice).toLocaleString(),
+                'cash-sale-profit': 'Profit: $' + Math.round(cashSaleProfit).toLocaleString(),
+                'mls-price': '$' + Math.round(mlsPrice).toLocaleString(),
+                'mls-profit': 'Profit: $' + Math.round(mlsProfit).toLocaleString(),
+                'wrap-price': '$' + Math.round(wrapPrice).toLocaleString(),
+                'wrap-profit': 'Profit: $' + Math.round(wrapProfit).toLocaleString(),
+                'lease-price': '$' + Math.round(leasePrice).toLocaleString(),
+                'lease-profit': 'Profit: $' + Math.round(leaseProfit).toLocaleString()
+            };
+            
+            Object.keys(elements).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = elements[id];
+                }
+            });
+        }
+
+        // AI Listing Generator functions
+        function generateInvestorListing(listingType) {
+            console.log('Generating investor listing:', listingType);
+            
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+            button.disabled = true;
+            
+            fetch('/generate_investor_listing', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    listing_type: listingType
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('listing-content').textContent = data.listing;
+                    document.getElementById('generated-listing').classList.remove('hidden');
+                } else {
+                    alert('Error generating listing: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error generating listing:', error);
+                alert('Error generating listing. Please try again.');
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+
+        function generateListingVariations() {
+            console.log('Generating listing variations');
+            
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+            button.disabled = true;
+            
+            fetch('/generate_listing_variations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    let combinedContent = '';
+                    if (data.variations.off_market) {
+                        combinedContent += 'OFF-MARKET VERSION:\n\n' + data.variations.off_market + '\n\n';
+                    }
+                    if (data.variations.mls) {
+                        combinedContent += 'MLS VERSION:\n\n' + data.variations.mls;
+                    }
+                    document.getElementById('listing-content').textContent = combinedContent;
+                    document.getElementById('generated-listing').classList.remove('hidden');
+                } else {
+                    alert('Error generating variations: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error generating variations:', error);
+                alert('Error generating variations. Please try again.');
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+
+        function copyListingToClipboard() {
+            const content = document.getElementById('listing-content').textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                const button = event.target;
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check mr-1"></i>Copied!';
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('Error copying to clipboard:', err);
+                alert('Error copying to clipboard. Please copy manually.');
+            });
+        }
+
+        // Update Rentcast fallback display
+        function updateRentcastFallback(data) {
+            const rentcastElement = document.getElementById('rentcast-estimate-value');
+            const rentcastDisplay = document.getElementById('rentcast-only-display');
+            
+            if (rentcastElement && rentcastDisplay && data.estimated_value) {
+                rentcastElement.textContent = '$' + data.estimated_value.toLocaleString();
+                rentcastDisplay.classList.remove('hidden');
+                
+                // Update average estimate text
+                const avgElement = document.getElementById('average-estimate');
+                const countElement = document.getElementById('estimate-count');
+                if (avgElement && countElement) {
+                    avgElement.textContent = '$--';
+                    countElement.textContent = 'See Rentcast below';
+                }
+            }
+        }
+
     </script>
 </body>
 </html>
