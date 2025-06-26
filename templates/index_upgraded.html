@@ -263,6 +263,19 @@
                     </div>
                 </div>
 
+                <!-- AI Objection Handler Section -->
+                <div class="mt-6 p-4 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-orange-800">AI Objection Handler</h3>
+                            <p class="text-sm text-orange-600">Get strategic responses to seller objections using AI</p>
+                        </div>
+                        <button type="button" onclick="openAIObjectionHandler()" class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 font-semibold">
+                            <i class="fas fa-comments mr-2"></i>Handle Objections
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Editable Property Details -->
                 <div class="grid grid-cols-2 md:grid-cols-6 gap-6 p-6 bg-gray-50 rounded-lg">
                     <div class="text-center">
@@ -1504,48 +1517,66 @@
 
     <script>
         // Form submission and property analysis
-        document.getElementById('property-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Script loaded, checking form...');
+            const form = document.getElementById('property-form');
+            console.log('Form found:', !!form);
             
-            const address = document.getElementById('address').value;
-            const city = document.getElementById('city').value;
-            const state = document.getElementById('state').value;
-            const zip = document.getElementById('zip').value;
-            
-            // Show loading state
-            document.getElementById('loading-state').classList.remove('hidden');
-            document.getElementById('analysis-results').classList.add('hidden');
-            
-            try {
-                // Analyze property with external data
-                const response = await fetch('/analyze_property', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ address, city, state, zip })
+            if (form) {
+                console.log('Adding submit listener');
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    console.log('Form submit triggered!');
+                    
+                    const address = document.getElementById('address').value;
+                    const city = document.getElementById('city').value;
+                    const state = document.getElementById('state').value;
+                    const zip = document.getElementById('zip').value;
+                    
+                    console.log('Form data:', { address, city, state, zip });
+                    
+                    // Show loading state
+                    document.getElementById('loading-state').classList.remove('hidden');
+                    document.getElementById('analysis-results').classList.add('hidden');
+                    
+                    try {
+                        console.log('Sending request to /analyze_property');
+                        // Analyze property with external data
+                        const response = await fetch('/analyze_property', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ address, city, state, zip })
+                        });
+                        
+                        console.log('Response status:', response.status);
+                        const data = await response.json();
+                        console.log('Response data:', data);
+                        
+                        if (data.success) {
+                            populatePropertyData(data);
+                            await calculateStrategies();
+                            
+                            // Initialize tab calculations and comparison
+                            setTimeout(() => {
+                                updateAllTabCalculations();
+                            }, 200);
+                            
+                            // Show results
+                            document.getElementById('loading-state').classList.add('hidden');
+                            document.getElementById('analysis-results').classList.remove('hidden');
+                        } else {
+                            throw new Error(data.error || 'Failed to analyze property');
+                        }
+                        
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error analyzing property: ' + error.message);
+                        document.getElementById('loading-state').classList.add('hidden');
+                    }
                 });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    populatePropertyData(data);
-                    await calculateStrategies();
-                    
-                    // Initialize tab calculations and comparison
-                    setTimeout(() => {
-                        updateAllTabCalculations();
-                    }, 200);
-                    
-                    // Show results
-                    document.getElementById('loading-state').classList.add('hidden');
-                    document.getElementById('analysis-results').classList.remove('hidden');
-                } else {
-                    throw new Error(data.error || 'Failed to analyze property');
-                }
-                
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error analyzing property: ' + error.message);
-                document.getElementById('loading-state').classList.add('hidden');
+                console.log('Submit listener added successfully');
+            } else {
+                console.error('Form not found!');
             }
         });
 
