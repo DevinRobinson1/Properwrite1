@@ -26,10 +26,9 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-2024")
 @app.route('/')
 def index():
     """Enhanced property input form with external data integration"""
-    google_maps_api_key = os.environ.get('GOOGLE_MAPS_API_KEY', '')
-    return render_template('index_upgraded.html', google_maps_api_key=google_maps_api_key)
+    return render_template('index_upgraded.html')
 
-@app.route('/analyze_property', methods=['POST'])
+@app.route('/api/analyze-property', methods=['POST'])
 def analyze_property():
     """
     Analyze property with external data enrichment from multiple sources
@@ -687,110 +686,6 @@ def analyze_property_risk():
             'status': 'error',
             'error': str(e)
         })
-
-@app.route('/ai_objection_handler', methods=['POST'])
-def ai_objection_handler():
-    """
-    Generate AI-powered objection handling responses with talking points and socratic questions
-    """
-    try:
-        data = request.get_json()
-        objection = data.get('objection', '').strip()
-        
-        if not objection:
-            return jsonify({
-                'success': False,
-                'error': 'No objection provided'
-            }), 400
-        
-        # Initialize AI assistant
-        from ai_strategy_assistant import AIStrategyAssistant
-        
-        # Create prompt for objection handling
-        prompt = f"""
-        You are an expert real estate investor and negotiation coach. A real estate investor is facing this objection from a seller:
-        
-        OBJECTION: "{objection}"
-        
-        Please provide:
-        1. A strategic response that addresses their concern professionally and builds trust
-        2. 3-4 socratic questions to help understand their underlying concerns
-        3. Key talking points to handle this objection effectively
-        
-        Focus on building rapport, addressing concerns honestly, and positioning the solution as mutually beneficial.
-        Keep responses concise and practical for real-world use.
-        """
-        
-        # Get AI response using OpenAI
-        from openai import OpenAI
-        client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
-        
-        response = client.chat.completions.create(
-            model="gpt-4o",  # the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-            messages=[
-                {"role": "system", "content": "You are an expert real estate negotiation coach with 20+ years of experience helping investors handle seller objections."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=1000,
-            temperature=0.7
-        )
-        
-        ai_response = response.choices[0].message.content
-        
-        # Parse the response into sections
-        sections = ai_response.split('\n\n')
-        
-        # Extract different parts (this is a simple parsing - could be enhanced)
-        response_text = ""
-        socratic_questions_text = ""
-        talking_points_text = ""
-        
-        current_section = ""
-        for section in sections:
-            if "strategic response" in section.lower() or "response" in section.lower():
-                current_section = "response"
-                response_text += section + "\n\n"
-            elif "socratic" in section.lower() or "questions" in section.lower():
-                current_section = "socratic"
-                socratic_questions_text += section + "\n\n"
-            elif "talking points" in section.lower() or "points" in section.lower():
-                current_section = "talking"
-                talking_points_text += section + "\n\n"
-            else:
-                if current_section == "response":
-                    response_text += section + "\n\n"
-                elif current_section == "socratic":
-                    socratic_questions_text += section + "\n\n"
-                elif current_section == "talking":
-                    talking_points_text += section + "\n\n"
-                else:
-                    response_text += section + "\n\n"
-        
-        # Format for HTML display
-        def format_for_html(text):
-            lines = text.strip().split('\n')
-            formatted_lines = []
-            for line in lines:
-                line = line.strip()
-                if line.startswith('•') or line.startswith('-') or line.startswith('*'):
-                    formatted_lines.append(f"<div class='mb-2'>{line}</div>")
-                elif line and not line.isspace():
-                    formatted_lines.append(f"<p class='mb-2'>{line}</p>")
-            return ''.join(formatted_lines)
-        
-        return jsonify({
-            'success': True,
-            'response': format_for_html(response_text or ai_response),
-            'socratic_questions': format_for_html(socratic_questions_text or "• What specific aspect concerns you most?\n• What would need to change for this to work for you?\n• How long have you been dealing with this situation?"),
-            'talking_points': format_for_html(talking_points_text or "• Focus on their specific situation and needs\n• Provide examples of similar successful transactions\n• Address concerns with concrete solutions\n• Emphasize mutual benefit and win-win outcomes")
-        })
-        
-    except Exception as e:
-        logging.error(f"AI objection handler error: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'Unable to generate response. Please try again.'
-        }), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

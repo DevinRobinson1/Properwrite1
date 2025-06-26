@@ -37,20 +37,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .acquisition-tab-content {
-            display: none !important;
-        }
-        .acquisition-tab-content.active {
-            display: block !important;
-        }
-        .acquisition-tab-button {
-            transition: all 0.3s ease;
-        }
-        .acquisition-tab-button.active {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
-            transform: translateY(-1px);
-        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -95,7 +81,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">ZIP Code *</label>
-                        <input type="text" id="zip_code" required
+                        <input type="text" id="zip" required
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                placeholder="28202">
                     </div>
@@ -263,19 +249,6 @@
                     </div>
                 </div>
 
-                <!-- AI Objection Handler Section -->
-                <div class="mt-6 p-4 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold text-orange-800">AI Objection Handler</h3>
-                            <p class="text-sm text-orange-600">Get strategic responses to seller objections using AI</p>
-                        </div>
-                        <button type="button" onclick="openAIObjectionHandler()" class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 font-semibold">
-                            <i class="fas fa-comments mr-2"></i>Handle Objections
-                        </button>
-                    </div>
-                </div>
-
                 <!-- Editable Property Details -->
                 <div class="grid grid-cols-2 md:grid-cols-6 gap-6 p-6 bg-gray-50 rounded-lg">
                     <div class="text-center">
@@ -288,19 +261,19 @@
                     </div>
                     <div class="text-center">
                         <label class="block text-sm font-medium text-gray-600 mb-2">Square Feet</label>
-                        <input type="text" id="square_feet" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="1,200" onchange="formatNumberInput(this); updateAllTabCalculations()">
+                        <input type="number" id="square_feet" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="1200" onchange="updateAllTabCalculations()">
                     </div>
                     <div class="text-center">
                         <label class="block text-sm font-medium text-gray-600 mb-2">ARV ($)</label>
-                        <input type="text" id="arv" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="200,000" onchange="formatCurrencyInput(this); updateAllTabCalculations()">
+                        <input type="number" id="arv" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="200000" onchange="updateAllTabCalculations()">
                     </div>
                     <div class="text-center">
                         <label class="block text-sm font-medium text-gray-600 mb-2">Repairs ($)</label>
-                        <input type="text" id="repairs" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="30,000" onchange="formatCurrencyInput(this); updateAllTabCalculations()">
+                        <input type="number" id="repairs" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="30000" onchange="updateAllTabCalculations()">
                     </div>
                     <div class="text-center">
                         <label class="block text-sm font-medium text-gray-600 mb-2">Monthly Rent ($)</label>
-                        <input type="text" id="rent" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="1,500" onchange="formatCurrencyInput(this); updateAllTabCalculations()">
+                        <input type="number" id="rent" class="w-full text-center py-2 border border-gray-300 rounded-lg" value="2000" onchange="updateAllTabCalculations()">
                     </div>
                 </div>
             </div>
@@ -456,7 +429,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Assignment Fee ($)</label>
-                                    <input type="text" value="10,000" id="wholesale-assignment-fee" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="formatNumberInput(this); recalculateWholesale()">
+                                    <input type="text" value="10,000" id="wholesale-assignment-fee" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="formatCurrencyInput(this); recalculateWholesale()">
                                 </div>
                             </div>
                         </div>
@@ -583,7 +556,7 @@
                     </div>
 
                     <!-- Installment Tab -->
-                    <div id="installment-tab" class="acquisition-tab-content">
+                    <div id="installment-tab" class="acquisition-tab-content hidden">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6">Installments/Novations Strategy</h3>
                         
                         <!-- Seller Psychology Framework -->
@@ -768,124 +741,49 @@
                     <div id="subject-to-tab" class="acquisition-tab-content hidden">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6">Subject-To Strategy</h3>
                         
-                        <!-- Subject-To Buying Guide -->
-                        <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
-                            <h4 class="text-lg font-semibold text-green-800 mb-2">Subject-To Buying Guide</h4>
-                            <div class="text-green-700 space-y-2">
-                                <p>Take control by assuming existing mortgage payments. Acquire immediate equity with favorable loan terms.</p>
-                                <div class="bg-white p-3 rounded mt-3 border border-green-200">
-                                    <p><strong>Target Purchase:</strong> 8-10% of ARV • <strong>Resale Target:</strong> 12-15% of ARV</p>
-                                    <p><strong>Premium Resale:</strong> If cash flow ≥ $500/month • <strong>Minimum:</strong> $200/month cash flow</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Subject-To Inputs -->
+                        <!-- PITI & Equity Structure -->
                         <div class="bg-gray-50 p-6 rounded-lg mb-6">
-                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Property Details & Loan Information</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">PITI & Equity Structure</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Existing Loan Balance ($)</label>
-                                    <input type="text" value="116,250" id="sub2-loan-balance" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-center font-semibold" onchange="formatNumberInput(this); recalculateSubjectTo()">
+                                    <input type="number" value="116250" id="sub2-loan-balance" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Cash to Seller ($)</label>
-                                    <input type="text" value="4,000" id="sub2-cash-seller" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-center font-semibold" onchange="formatNumberInput(this); recalculateSubjectTo()">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Arrears/Liens ($)</label>
-                                    <input type="text" value="0" id="sub2-arrears" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-center font-semibold" onchange="formatNumberInput(this); recalculateSubjectTo()">
+                                    <input type="number" value="4000" id="sub2-cash-seller" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Monthly P&I ($)</label>
-                                    <input type="text" value="800" id="sub2-monthly-pi" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-center font-semibold" onchange="formatNumberInput(this); recalculateSubjectTo()">
+                                    <input type="number" value="800" id="sub2-monthly-pi" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Escrow (T&I) ($)</label>
-                                    <input type="text" value="300" id="sub2-monthly-escrow" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-center font-semibold" onchange="formatNumberInput(this); recalculateSubjectTo()">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Interest Rate (%)</label>
-                                    <input type="number" step="0.01" value="4.5" id="sub2-interest-rate" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-center font-semibold" onchange="recalculateSubjectTo()">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Escrow ($)</label>
+                                    <input type="number" value="300" id="sub2-monthly-escrow" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Monthly Cash Flow Analysis -->
-                        <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 mb-6">
-                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Monthly Cash Flow (Rent - PITI - Repairs Reserve)</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="space-y-3">
-                                    <div class="flex justify-between">
-                                        <span>Monthly Rent Income:</span>
-                                        <span class="font-bold text-green-600">+$<span id="sub2-rent">1,500</span></span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span>Principal & Interest:</span>
-                                        <span class="font-bold text-red-600">-$<span id="sub2-pi-display">800</span></span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span>Taxes & Insurance:</span>
-                                        <span class="font-bold text-red-600">-$<span id="sub2-escrow-display">300</span></span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span>Repairs Reserve (10%):</span>
-                                        <span class="font-bold text-red-600">-$<span id="sub2-maintenance">150</span></span>
-                                    </div>
+                        <!-- Immediate Equity Position -->
+                        <div class="bg-green-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-green-800 mb-4">Immediate Equity Analysis</h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span>Property ARV:</span>
+                                    <span class="font-bold">$<span id="sub2-arv">155,000</span></span>
                                 </div>
-                                <div class="bg-white p-4 rounded-lg border-2 border-green-300">
-                                    <div class="text-center">
-                                        <div class="text-sm text-gray-600 mb-1">Monthly Cash Flow</div>
-                                        <div class="text-3xl font-bold text-green-600">$<span id="sub2-cashflow">250</span></div>
-                                        <div class="text-xs text-gray-500 mt-1">Per Month</div>
-                                    </div>
+                                <div class="flex justify-between">
+                                    <span>Existing Loan Balance:</span>
+                                    <span class="font-bold text-red-600">-$<span id="sub2-balance">116,250</span></span>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Purchase Analysis -->
-                        <div class="bg-blue-50 rounded-lg p-6 mb-6">
-                            <h4 class="text-lg font-semibold text-blue-800 mb-4">Purchase Analysis</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="text-center p-4 bg-white rounded-lg border">
-                                    <div class="text-sm text-blue-600 mb-1">Total Acquisition Cost</div>
-                                    <div class="text-xl font-bold text-blue-800">$<span id="sub2-total-cost">120,250</span></div>
-                                    <div class="text-xs text-gray-500" id="sub2-arv-percent">6.0% of ARV</div>
+                                <div class="flex justify-between">
+                                    <span>Cash to Seller:</span>
+                                    <span class="font-bold text-red-600">-$<span id="sub2-cash">4,000</span></span>
                                 </div>
-                                <div class="text-center p-4 bg-white rounded-lg border">
-                                    <div class="text-sm text-green-600 mb-1">Immediate Equity</div>
-                                    <div class="text-xl font-bold text-green-600">$<span id="sub2-equity">79,750</span></div>
-                                    <div class="text-xs text-gray-500">Equity Position</div>
+                                <div class="flex justify-between">
+                                    <span>Acquisition Costs:</span>
+                                    <span class="font-bold text-red-600">-$<span id="sub2-costs">2,500</span></span>
                                 </div>
-                                <div class="text-center p-4 bg-white rounded-lg border">
-                                    <div class="text-sm text-purple-600 mb-1">Target Resale</div>
-                                    <div class="text-xl font-bold text-purple-600">$<span id="sub2-target-resale">26,000</span></div>
-                                    <div class="text-xs text-gray-500">13% of ARV</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Subject-To Objection Handling -->
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6">
-                            <h4 class="text-lg font-semibold text-yellow-800 mb-4">Common Objections & Responses</h4>
-                            <div class="space-y-4">
-                                <div class="bg-white p-4 rounded border-l-4 border-yellow-400">
-                                    <h5 class="font-semibold text-gray-800">"This sounds illegal"</h5>
-                                    <p class="text-sm text-gray-700 mt-1">Response: "Subject-to is completely legal. It's a legitimate real estate investment strategy used by thousands of investors. The deed transfers to us, but we take over your mortgage payments."</p>
-                                    <div class="text-xs text-gray-600 mt-2">Socratic Question: "What specific part concerns you most - the legality or how it works?"</div>
-                                </div>
-                                <div class="bg-white p-4 rounded border-l-4 border-yellow-400">
-                                    <h5 class="font-semibold text-gray-800">"What about the due-on-sale clause?"</h5>
-                                    <p class="text-sm text-gray-700 mt-1">Response: "Banks rarely call loans due when payments are made on time. We've never had a bank call a loan due in our experience. We ensure payments are never late."</p>
-                                    <div class="text-xs text-gray-600 mt-2">Socratic Question: "If the bank wanted the loan paid off, wouldn't they prefer that over foreclosure?"</div>
-                                </div>
-                                <div class="bg-white p-4 rounded border-l-4 border-yellow-400">
-                                    <h5 class="font-semibold text-gray-800">"I'll still be responsible for the mortgage"</h5>
-                                    <p class="text-sm text-gray-700 mt-1">Response: "Yes, but we guarantee payments through insurance and our track record. We'll provide you with monthly payment confirmations and you can monitor the account."</p>
-                                    <div class="text-xs text-gray-600 mt-2">Socratic Question: "Would you rather have guaranteed payments or risk foreclosure and credit damage?"</div>
-                                </div>
-                            </div>
-                        </div>
                                 <hr class="border-gray-300">
                                 <div class="flex justify-between text-lg font-bold">
                                     <span>Immediate Equity:</span>
@@ -1335,7 +1233,56 @@
                             </div>
                         </div>
 
+                        <!-- Objection Handling Sections -->
+                        <div class="mb-8 space-y-4">
+                            <!-- Subject-To Objection Handling -->
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg">
+                                <button class="w-full px-6 py-4 text-left font-semibold text-blue-800 hover:bg-blue-100 transition-colors flex items-center justify-between" onclick="toggleObjectionSection('subject-to-objections')">
+                                    <span>📞 Subject-To Objection Handling</span>
+                                    <i class="fas fa-chevron-down transform transition-transform" id="subject-to-objections-icon"></i>
+                                </button>
+                                <div id="subject-to-objections-section" class="hidden px-6 pb-4">
+                                    <div class="space-y-4 text-sm">
+                                        <div class="bg-white p-4 rounded border">
+                                            <div class="font-semibold text-blue-800 mb-2">Q: "How long until we can close?"</div>
+                                            <div class="text-blue-700">A: We can generally close in about 15 days. Depending on the title and everything being clean, the average timeframe is 30-45 days at the longest.</div>
+                                        </div>
+                                        <div class="bg-white p-4 rounded border">
+                                            <div class="font-semibold text-blue-800 mb-2">Q: "Do I continue to make my mortgage payments?"</div>
+                                            <div class="text-blue-700">A: No, we take over the mortgage and that's why we call it a "sub2". We take over the property subject to the existing mortgage, relieving you of those mortgages, taxes, insurance, etc.</div>
+                                        </div>
+                                        <div class="bg-white p-4 rounded border">
+                                            <div class="font-semibold text-blue-800 mb-2">Q: "What happens if you stop making payments?"</div>
+                                            <div class="text-blue-700">A: Our contract includes an addendum that protects both of us. If we miss two payments in a row, you can report it and have the property deeded back to you if we don't pay the balance within 30 days.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
+                            <!-- Seller Finance Objection Handling -->
+                            <div class="bg-purple-50 border border-purple-200 rounded-lg">
+                                <button class="w-full px-6 py-4 text-left font-semibold text-purple-800 hover:bg-purple-100 transition-colors flex items-center justify-between" onclick="toggleObjectionSection('seller-finance-objections')">
+                                    <span>🏦 Seller Finance Objection Handling</span>
+                                    <i class="fas fa-chevron-down transform transition-transform" id="seller-finance-objections-icon"></i>
+                                </button>
+                                <div id="seller-finance-objections-section" class="hidden px-6 pb-4">
+                                    <div class="space-y-4 text-sm">
+                                        <div class="bg-white p-4 rounded border">
+                                            <div class="font-semibold text-purple-800 mb-2">Q: "What about a down payment?"</div>
+                                            <div class="text-purple-700">A: We don't do down payments. Instead of giving you a down payment, we simply add more to the purchase price. You'll walk away with more money at the end of the day.</div>
+                                        </div>
+                                        <div class="bg-white p-4 rounded border">
+                                            <div class="font-semibold text-purple-800 mb-2">Q: "What about interest?"</div>
+                                            <div class="text-purple-700">A: We typically structure these by leaving interest out and adding it to the purchase price. This means no interest income to report on taxes, higher purchase price, and you net more.</div>
+                                        </div>
+                                        <div class="bg-white p-4 rounded border">
+                                            <div class="font-semibold text-purple-800 mb-2">Q: "What if something goes wrong?"</div>
+                                            <div class="text-purple-700">A: We take pride in our reputation and will improve the property. Even if something happened to us, you'd get an improved property back. We have everything to lose.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         
                         <!-- Exit Strategy Analysis -->
                         <div class="bg-gray-50 p-6 rounded-lg mb-6">
@@ -1517,66 +1464,48 @@
 
     <script>
         // Form submission and property analysis
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Script loaded, checking form...');
-            const form = document.getElementById('property-form');
-            console.log('Form found:', !!form);
+        document.getElementById('property-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            if (form) {
-                console.log('Adding submit listener');
-                form.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    console.log('Form submit triggered!');
-                    
-                    const address = document.getElementById('address').value;
-                    const city = document.getElementById('city').value;
-                    const state = document.getElementById('state').value;
-                    const zip = document.getElementById('zip').value;
-                    
-                    console.log('Form data:', { address, city, state, zip });
-                    
-                    // Show loading state
-                    document.getElementById('loading-state').classList.remove('hidden');
-                    document.getElementById('analysis-results').classList.add('hidden');
-                    
-                    try {
-                        console.log('Sending request to /analyze_property');
-                        // Analyze property with external data
-                        const response = await fetch('/analyze_property', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ address, city, state, zip })
-                        });
-                        
-                        console.log('Response status:', response.status);
-                        const data = await response.json();
-                        console.log('Response data:', data);
-                        
-                        if (data.success) {
-                            populatePropertyData(data);
-                            await calculateStrategies();
-                            
-                            // Initialize tab calculations and comparison
-                            setTimeout(() => {
-                                updateAllTabCalculations();
-                            }, 200);
-                            
-                            // Show results
-                            document.getElementById('loading-state').classList.add('hidden');
-                            document.getElementById('analysis-results').classList.remove('hidden');
-                        } else {
-                            throw new Error(data.error || 'Failed to analyze property');
-                        }
-                        
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert('Error analyzing property: ' + error.message);
-                        document.getElementById('loading-state').classList.add('hidden');
-                    }
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            const state = document.getElementById('state').value;
+            const zip = document.getElementById('zip').value;
+            
+            // Show loading state
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('analysis-results').classList.add('hidden');
+            
+            try {
+                // Analyze property with external data
+                const response = await fetch('/api/analyze-property', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address, city, state, zip })
                 });
-                console.log('Submit listener added successfully');
-            } else {
-                console.error('Form not found!');
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    populatePropertyData(data);
+                    await calculateStrategies();
+                    
+                    // Initialize tab calculations and comparison
+                    setTimeout(() => {
+                        updateAllTabCalculations();
+                    }, 200);
+                    
+                    // Show results
+                    document.getElementById('loading-state').classList.add('hidden');
+                    document.getElementById('analysis-results').classList.remove('hidden');
+                } else {
+                    throw new Error(data.error || 'Failed to analyze property');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error analyzing property: ' + error.message);
+                document.getElementById('loading-state').classList.add('hidden');
             }
         });
 
@@ -1955,98 +1884,45 @@
         }
 
         function recalculateWholesale() {
-            // Get values from property header inputs - try multiple possible IDs
-            const arvInput = document.getElementById('arv') || document.getElementById('arv-input');
-            const repairsInput = document.getElementById('repairs') || document.getElementById('repairs-input');
-            const percentSlider = document.getElementById('wholesale-arv-percent');
-            const assignmentFeeInput = document.getElementById('wholesale-assignment-fee');
-            
-            const arv = parseFloat(arvInput ? arvInput.value.replace(/,/g, '') : '0') || 0;
-            const repairs = parseFloat(repairsInput ? repairsInput.value.replace(/,/g, '') : '0') || 0;
-            const percent = parseFloat(percentSlider ? percentSlider.value : '70') / 100;
-            const assignmentFee = parseFloat(assignmentFeeInput ? assignmentFeeInput.value.replace(/,/g, '') : '10000') || 10000;
-            
-            console.log('Wholesale calc:', { arv, repairs, percent, assignmentFee });
+            const arv = parseFloat(document.getElementById('arv').value);
+            const repairs = parseFloat(document.getElementById('repairs').value);
+            const percent = parseFloat(document.getElementById('wholesale-arv-percent').value) / 100;
+            const assignmentFee = parseFloat(document.getElementById('wholesale-assignment-fee').value);
             
             const arvCalc = arv * percent;
             const mao = arvCalc - repairs - assignmentFee;
             
-            // Update MAO breakdown using correct element IDs
-            const elements = {
-                'mao-arv': arv,
-                'mao-percent': Math.round(percent * 100),
-                'mao-arv-calc': arvCalc,
-                'mao-repairs': repairs,
-                'mao-assignment': assignmentFee,
-                'wholesale-mao-result': mao
-            };
-            
-            Object.entries(elements).forEach(([id, value]) => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.textContent = typeof value === 'number' ? Math.round(value).toLocaleString() : value;
-                }
-            });
+            // Update MAO breakdown
+            document.getElementById('mao-arv').textContent = arv.toLocaleString();
+            document.getElementById('mao-percent').textContent = (percent * 100);
+            document.getElementById('mao-arv-calc').textContent = arvCalc.toLocaleString();
+            document.getElementById('mao-repairs').textContent = repairs.toLocaleString();
+            document.getElementById('mao-assignment').textContent = assignmentFee.toLocaleString();
+            document.getElementById('wholesale-mao-result').textContent = mao.toLocaleString();
             
             // Update Ackerman offers
-            const ackermanElements = {
-                'ackerman-1': mao * 0.65,
-                'ackerman-2': mao * 0.85,
-                'ackerman-3': mao * 0.95
-            };
-            
-            Object.entries(ackermanElements).forEach(([id, value]) => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.textContent = Math.round(value).toLocaleString();
-                }
-            });
+            document.getElementById('ackerman-1').textContent = (mao * 0.65).toLocaleString();
+            document.getElementById('ackerman-2').textContent = (mao * 0.85).toLocaleString();
+            document.getElementById('ackerman-3').textContent = (mao * 0.95).toLocaleString();
             
             // Update profit analysis
-            const profitElements = {
-                'total-investment': mao + repairs,
-                'assignment-profit': assignmentFee
-            };
-            
-            Object.entries(profitElements).forEach(([id, value]) => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.textContent = Math.round(value).toLocaleString();
-                }
-            });
+            document.getElementById('total-investment').textContent = (mao + repairs).toLocaleString();
+            document.getElementById('assignment-profit').textContent = assignmentFee.toLocaleString();
         }
 
         function recalculateInstallment() {
-            // Get values from property header inputs - try multiple possible IDs
-            const arvInput = document.getElementById('arv') || document.getElementById('arv-input');
-            const repairsInput = document.getElementById('repairs') || document.getElementById('repairs-input');
-            const commissionSlider = document.getElementById('installment-commission');
-            const ourFeeInput = document.getElementById('installment-our-fee');
+            const arv = parseFloat(document.getElementById('arv').value);
+            const repairs = parseFloat(document.getElementById('repairs').value);
+            const discount = parseFloat(document.getElementById('installment-discount').value);
+            const bonus = parseFloat(document.getElementById('installment-bonus').value);
             
-            const arv = parseFloat(arvInput ? arvInput.value.replace(/,/g, '') : '0') || 0;
-            const repairs = parseFloat(repairsInput ? repairsInput.value.replace(/,/g, '') : '0') || 0;
-            const commission = parseFloat(commissionSlider ? commissionSlider.value : '6') / 100;
-            const ourFee = parseFloat(ourFeeInput ? ourFeeInput.value.replace(/,/g, '') : '0') || 0;
+            const purchasePrice = arv - discount;
+            const salesPrice = arv + bonus;
+            const profit = salesPrice - purchasePrice - repairs - 9900; // Including closing costs
             
-            console.log('Installment calc:', { arv, repairs, commission, ourFee });
-            
-            const mao = Math.round(arv - repairs - 10000 - (arv * commission) - ourFee);
-            const salesPrice = Math.round(arv * 0.93); // 93% ARV typical
-            const netProfit = Math.round(salesPrice - mao - (arv * commission) - 3000); // closing costs
-            
-            // Update display values with null checks
-            const elements = {
-                'installment-purchase': mao,
-                'installment-sales': salesPrice,
-                'installment-profit': netProfit
-            };
-            
-            Object.entries(elements).forEach(([id, value]) => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.textContent = Math.round(value).toLocaleString();
-                }
-            });
+            document.getElementById('installment-purchase').textContent = purchasePrice.toLocaleString();
+            document.getElementById('installment-sales').textContent = salesPrice.toLocaleString();
+            document.getElementById('installment-profit').textContent = profit.toLocaleString();
         }
 
         function recalculateSubjectTo() {
@@ -2079,11 +1955,11 @@
         }
 
         function recalculateSellerFinance() {
-            const purchasePrice = parseFloat(document.getElementById('sf-purchase-price').value.replace(/,/g, '')) || 0;
-            const downPayment = parseFloat(document.getElementById('sf-down-payment').value.replace(/,/g, '')) || 0;
-            const interestRate = parseFloat(document.getElementById('sf-interest-rate').value) / 100 || 0.07;
-            const termYears = parseFloat(document.getElementById('sf-term').value) || 30;
-            const rent = parseFloat(document.getElementById('rent').value.replace(/,/g, '')) || 1500;
+            const purchasePrice = parseFloat(document.getElementById('sf-purchase-price').value);
+            const downPayment = parseFloat(document.getElementById('sf-down-payment').value);
+            const interestRate = parseFloat(document.getElementById('sf-interest-rate').value) / 100;
+            const termYears = parseFloat(document.getElementById('sf-term').value);
+            const rent = parseFloat(document.getElementById('rent').value);
             
             const loanAmount = purchasePrice - downPayment;
             const monthlyRate = interestRate / 12;
@@ -2108,24 +1984,19 @@
         }
 
         function updateAllTabCalculations() {
-            console.log('Updating all tab calculations');
             // Update all tab calculations when property data changes
-            try {
-                recalculateWholesale();
-                recalculateInstallment();
-                recalculateSubjectTo();
-                recalculateSellerFinance();
-                updateComparisonFromTabs();
-            } catch (error) {
-                console.error('Error updating calculations:', error);
-            }
+            recalculateWholesale();
+            recalculateInstallment();
+            recalculateSubjectTo();
+            recalculateSellerFinance();
+            updateComparisonFromTabs();
         }
 
         function updateComparisonFromTabs() {
             // Get current values from tabs and update comparison
-            const arv = parseFloat(document.getElementById('arv').value.replace(/,/g, '')) || 200000;
-            const repairs = parseFloat(document.getElementById('repairs').value.replace(/,/g, '')) || 30000;
-            const rent = parseFloat(document.getElementById('rent').value.replace(/,/g, '')) || 1500;
+            const arv = parseFloat(document.getElementById('arv').value);
+            const repairs = parseFloat(document.getElementById('repairs').value);
+            const rent = parseFloat(document.getElementById('rent').value);
             
             // Calculate simplified results for comparison
             const wholesaleMao = parseFloat(document.getElementById('wholesale-mao-result').textContent.replace(/,/g, ''));
@@ -2139,9 +2010,9 @@
             const sub2CashFlow = parseFloat(document.getElementById('sub2-cashflow').textContent.replace(/,/g, ''));
             const sub2Payment = parseFloat(document.getElementById('sub2-pi').textContent.replace(/,/g, ''));
             
-            const sfPurchase = parseFloat(document.getElementById('sf-purchase-price').value.replace(/,/g, '')) || 0;
-            const sfDown = parseFloat(document.getElementById('sf-down-payment').value.replace(/,/g, '')) || 0;
-            const sfCashFlow = parseFloat(document.getElementById('sf-cashflow').textContent.replace(/,/g, '')) || 0;
+            const sfPurchase = parseFloat(document.getElementById('sf-purchase-price').value);
+            const sfDown = parseFloat(document.getElementById('sf-down-payment').value);
+            const sfCashFlow = parseFloat(document.getElementById('sf-cashflow').textContent.replace(/,/g, ''));
             
             const comparisonResults = {
                 wholesale: {
@@ -2174,7 +2045,7 @@
             populateComparisonResults(comparisonResults);
         }
 
-        // Section functionality - FIXED VERSION
+        // Section functionality
         function showSection(sectionName) {
             // Hide all sections
             document.getElementById('acquisitions-section').classList.toggle('hidden', sectionName !== 'acquisitions');
@@ -2209,10 +2080,8 @@
             }
         }
 
-        // Acquisition tab functionality - WORKING VERSION
+        // Acquisition tab functionality
         function showAcquisitionTab(tabName) {
-            console.log('Switching to tab:', tabName);
-            
             // Hide all acquisition tab contents
             document.querySelectorAll('.acquisition-tab-content').forEach(content => {
                 content.classList.remove('active');
@@ -2227,9 +2096,6 @@
             const tabElement = document.getElementById(tabName + '-tab');
             if (tabElement) {
                 tabElement.classList.add('active');
-                console.log('Activated tab:', tabName);
-            } else {
-                console.error('Tab element not found:', tabName + '-tab');
             }
             
             // Add active class to clicked button
@@ -2569,410 +2435,6 @@
                 </div>
             `;
             
-            document.body.appendChild(modal);
-        }
-
-
-
-
-
-        // All Missing Functions - CONSOLIDATED VERSION
-        function toggleDealVariables() {
-            const panel = document.getElementById('deal-variables-panel');
-            if (panel) {
-                panel.classList.toggle('hidden');
-            }
-        }
-
-        function toggleObjectionSection(sectionId) {
-            const section = document.getElementById(sectionId);
-            const button = event.target;
-            const icon = button.querySelector('i');
-            
-            if (section) {
-                section.classList.toggle('hidden');
-                if (section.classList.contains('hidden')) {
-                    icon.className = 'fas fa-chevron-down';
-                } else {
-                    icon.className = 'fas fa-chevron-up';
-                }
-            }
-        }
-
-        function generateListingCopy() {
-            const button = event.target;
-            const originalText = button.innerHTML;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
-            button.disabled = true;
-            
-            const propertyData = {
-                arv: parseFloat(document.getElementById('arv').value.replace(/,/g, '')) || 200000,
-                repairs: parseFloat(document.getElementById('repairs').value.replace(/,/g, '')) || 30000,
-                rent: parseFloat(document.getElementById('rent').value.replace(/,/g, '')) || 1500,
-                bedrooms: parseInt(document.getElementById('bedrooms').value) || 3,
-                bathrooms: parseFloat(document.getElementById('bathrooms').value) || 2,
-                square_feet: parseInt(document.getElementById('square_feet').value.replace(/,/g, '')) || 1200
-            };
-
-            fetch('/generate_investor_listing', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(propertyData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showListingModal(data.listing);
-                } else {
-                    alert('Error generating listing: ' + (data.error || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error generating listing');
-            })
-            .finally(() => {
-                button.innerHTML = originalText;
-                button.disabled = false;
-            });
-        }
-
-        function suggestBestExit() {
-            const button = event.target;
-            const originalText = button.innerHTML;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Analyzing...';
-            button.disabled = true;
-            
-            // Get dispositions data from the form
-            const dispositionsData = {
-                acquisition_cost: parseFloat(document.getElementById('acquisition-cost').value.replace(/,/g, '')) || 0,
-                repairs: parseFloat(document.getElementById('ref-repairs-input').value.replace(/,/g, '')) || 0,
-                piti: parseFloat(document.getElementById('piti-input').value.replace(/,/g, '')) || 0,
-                rent: parseFloat(document.getElementById('rent-input').value.replace(/,/g, '')) || 0,
-                wholesale_percent: parseFloat(document.getElementById('wholesale-percent-slider').value) || 70,
-                mls_discount: parseFloat(document.getElementById('mls-discount-slider').value) || 10,
-                title_percent: parseFloat(document.getElementById('title-percent-slider').value) || 3
-            };
-
-            fetch('/ai_exit_strategy', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dispositionsData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showExitStrategyModal(data.recommendation);
-                } else {
-                    alert('Error analyzing exit strategies: ' + (data.error || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error analyzing exit strategies');
-            })
-            .finally(() => {
-                button.innerHTML = originalText;
-                button.disabled = false;
-            });
-        }
-
-        function showExitStrategyModal(recommendation) {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-            modal.innerHTML = `
-                <div class="bg-white rounded-xl max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
-                    <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-2xl font-bold text-gray-800">AI Exit Strategy Recommendation</h3>
-                            <button onclick="this.closest('.fixed').remove()" class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg transition-colors">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="prose max-w-none">
-                            ${recommendation.formatted_recommendation || recommendation.analysis || 'Recommendation not available'}
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        function showListingModal(listing) {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-            modal.innerHTML = `
-                <div class="bg-white rounded-xl max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
-                    <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-2xl font-bold text-gray-800">AI Generated Investor Listing</h3>
-                            <button onclick="this.closest('.fixed').remove()" class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg transition-colors">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="prose max-w-none">
-                            ${listing.formatted_listing || listing.listing_content || 'Listing content not available'}
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        function openObjectionHandler() {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-            modal.innerHTML = `
-                <div class="bg-white rounded-xl max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
-                    <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-2xl font-bold text-gray-800">Seller Objection Handler</h3>
-                            <button onclick="this.closest('.fixed').remove()" class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg transition-colors">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="bg-blue-50 p-4 rounded-lg">
-                                <h4 class="font-bold text-blue-800 mb-3">Subject-To Objections</h4>
-                                <div class="space-y-3 text-sm">
-                                    <div class="bg-white p-3 rounded border">
-                                        <div class="font-semibold text-blue-700 mb-1">Q: "How long until we can close?"</div>
-                                        <div class="text-blue-600">A: We can generally close in about 15 days. Depending on the title and everything being clean, the average timeframe is 30-45 days at the longest.</div>
-                                    </div>
-                                    <div class="bg-white p-3 rounded border">
-                                        <div class="font-semibold text-blue-700 mb-1">Q: "Do I continue to make mortgage payments?"</div>
-                                        <div class="text-blue-600">A: No, we take over the mortgage. We take over the property subject to the existing mortgage, relieving you of those payments.</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="bg-purple-50 p-4 rounded-lg">
-                                <h4 class="font-bold text-purple-800 mb-3">Seller Finance Objections</h4>
-                                <div class="space-y-3 text-sm">
-                                    <div class="bg-white p-3 rounded border">
-                                        <div class="font-semibold text-purple-700 mb-1">Q: "What about a down payment?"</div>
-                                        <div class="text-purple-600">A: We don't do down payments. Instead, we add more to the purchase price. You'll walk away with more money.</div>
-                                    </div>
-                                    <div class="bg-white p-3 rounded border">
-                                        <div class="font-semibold text-purple-700 mb-1">Q: "What about interest?"</div>
-                                        <div class="text-purple-600">A: We structure these by leaving interest out and adding it to the purchase price. No interest income to report on taxes.</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        function formatCurrencyInput(input) {
-            let value = input.value.replace(/[^\d]/g, '');
-            if (value) {
-                value = parseInt(value).toLocaleString();
-                input.value = value;
-            }
-        }
-
-        function formatNumberInput(input) {
-            let value = input.value.replace(/[^\d]/g, '');
-            if (value) {
-                value = parseInt(value).toLocaleString();
-                input.value = value;
-            }
-        }
-
-        function openOfferDeepDive(strategy, specificOffer = null) {
-            const propertyData = {
-                arv: parseFloat(document.getElementById('arv').value.replace(/,/g, '')) || 200000,
-                repairs: parseFloat(document.getElementById('repairs').value.replace(/,/g, '')) || 30000,
-                rent: parseFloat(document.getElementById('rent').value.replace(/,/g, '')) || 1500,
-                bedrooms: parseInt(document.getElementById('bedrooms').value) || 3,
-                bathrooms: parseFloat(document.getElementById('bathrooms').value) || 2,
-                square_feet: parseInt(document.getElementById('square_feet').value.replace(/,/g, '')) || 1200
-            };
-
-            const modalContent = generateDeepDiveContent(strategy, specificOffer, propertyData);
-            showDeepDiveModal(modalContent);
-        }
-
-        function generateDeepDiveContent(strategy, specificOffer, propertyData) {
-            let title, content;
-            
-            switch(strategy) {
-                case 'wholesale':
-                    title = 'Wholesale Strategy Deep Dive';
-                    content = generateWholesaleDeepDive(propertyData, specificOffer);
-                    break;
-                default:
-                    title = 'Strategy Analysis';
-                    content = '<div class="p-6"><h4 class="text-xl font-bold">Strategy Analysis</h4><p class="mt-4">Detailed analysis coming soon...</p></div>';
-            }
-
-            return { title, content };
-        }
-
-        function generateWholesaleDeepDive(propertyData, specificOffer) {
-            const arv = propertyData.arv;
-            const repairs = propertyData.repairs;
-            const assignmentFeeElement = document.getElementById('wholesale-assignment-fee');
-            const assignmentFee = assignmentFeeElement ? parseFloat(assignmentFeeElement.value.replace(/,/g, '')) || 10000 : 10000;
-            const wholesalePercent = 70;
-            
-            const arvCalc = arv * (wholesalePercent / 100);
-            const mao = arvCalc - repairs - assignmentFee;
-
-            return `
-                <div class="space-y-6">
-                    <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
-                        <h4 class="text-xl font-bold text-blue-800 mb-4">Financial Breakdown</h4>
-                        <div class="space-y-3 text-lg">
-                            <div class="flex justify-between">
-                                <span>Property ARV:</span>
-                                <span class="font-bold">$${arv.toLocaleString()}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Wholesale Formula (${wholesalePercent}%):</span>
-                                <span class="font-bold">$${arvCalc.toLocaleString()}</span>
-                            </div>
-                            <div class="flex justify-between text-red-600">
-                                <span>Less: Estimated Repairs:</span>
-                                <span class="font-bold">-$${repairs.toLocaleString()}</span>
-                            </div>
-                            <div class="flex justify-between text-red-600">
-                                <span>Less: Assignment Fee:</span>
-                                <span class="font-bold">-$${assignmentFee.toLocaleString()}</span>
-                            </div>
-                            <hr class="border-blue-300">
-                            <div class="flex justify-between text-xl font-bold text-blue-800">
-                                <span>Maximum Allowable Offer:</span>
-                                <span>$${mao.toLocaleString()}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function openAIObjectionHandler() {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-            modal.innerHTML = `
-                <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-                    <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-2xl font-bold text-gray-800">
-                                <i class="fas fa-comments text-orange-500 mr-2"></i>AI Objection Handler
-                            </h3>
-                            <button onclick="this.closest('.fixed').remove()" class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg transition-colors">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Enter the objection you're facing:</label>
-                            <textarea id="objection-input" 
-                                placeholder="e.g., 'I need to think about it' or 'Your offer is too low' or 'I don't trust investors'"
-                                class="w-full h-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"></textarea>
-                        </div>
-                        <div class="flex justify-center mb-6">
-                            <button onclick="generateObjectionResponse()" 
-                                    class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 font-semibold">
-                                <i class="fas fa-magic mr-2"></i>Generate Response Strategy
-                            </button>
-                        </div>
-                        <div id="objection-response" class="hidden">
-                            <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                                <h4 class="font-semibold text-gray-800 mb-2">AI Response Strategy:</h4>
-                                <div id="ai-response-content" class="text-gray-700"></div>
-                            </div>
-                            <div class="bg-blue-50 rounded-lg p-4 mb-4">
-                                <h4 class="font-semibold text-blue-800 mb-2">Socratic Questions to Ask:</h4>
-                                <div id="socratic-questions" class="text-blue-700"></div>
-                            </div>
-                            <div class="bg-green-50 rounded-lg p-4">
-                                <h4 class="font-semibold text-green-800 mb-2">Key Talking Points:</h4>
-                                <div id="talking-points" class="text-green-700"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        async function generateObjectionResponse() {
-            const objectionInput = document.getElementById('objection-input');
-            const objection = objectionInput.value.trim();
-            
-            if (!objection) {
-                alert('Please enter an objection first.');
-                return;
-            }
-
-            const responseDiv = document.getElementById('objection-response');
-            const aiContent = document.getElementById('ai-response-content');
-            const socraticQuestions = document.getElementById('socratic-questions');
-            const talkingPoints = document.getElementById('talking-points');
-
-            // Show loading state
-            aiContent.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating AI response...';
-            socraticQuestions.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating questions...';
-            talkingPoints.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Preparing talking points...';
-            responseDiv.classList.remove('hidden');
-
-            try {
-                const response = await fetch('/ai_objection_handler', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ objection: objection })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    aiContent.innerHTML = data.response;
-                    socraticQuestions.innerHTML = data.socratic_questions;
-                    talkingPoints.innerHTML = data.talking_points;
-                } else {
-                    aiContent.innerHTML = 'Error generating response. Please try again.';
-                    socraticQuestions.innerHTML = '';
-                    talkingPoints.innerHTML = '';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                aiContent.innerHTML = 'Error connecting to AI service. Please try again.';
-                socraticQuestions.innerHTML = '';
-                talkingPoints.innerHTML = '';
-            }
-        }
-
-        function showDeepDiveModal(modalData) {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-            modal.innerHTML = `
-                <div class="bg-white rounded-xl max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
-                    <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-2xl font-bold text-gray-800">${modalData.title}</h3>
-                            <button onclick="this.closest('.fixed').remove()" class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg transition-colors">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-6">
-                        ${modalData.content}
-                    </div>
-                </div>
-            `;
             document.body.appendChild(modal);
         }
 
