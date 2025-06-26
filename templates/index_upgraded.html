@@ -469,11 +469,54 @@
                     <div class="bg-gradient-to-r from-purple-500 to-green-500 text-white p-6 rounded-t-lg mb-0">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h2 class="text-2xl font-bold mb-2">📈 Exit Strategies & Market Disposition</h2>
-                                <p class="text-purple-100">Analyze resale options and create investor listings for maximum profit</p>
+                                <h2 class="text-2xl font-bold mb-2">📈 Full Dispositions Pricing Engine</h2>
+                                <p class="text-purple-100">Advanced buyer persona logic with AI-powered pricing strategies</p>
                             </div>
                             <div class="text-purple-100 text-sm">
                                 <div class="bg-purple-400 bg-opacity-30 px-3 py-1 rounded">Phase 2: Dispositions</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Global Editable Inputs -->
+                    <div class="bg-white p-6 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">💼 Global Deal Inputs</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                            <div class="bg-gray-50 p-3 rounded border">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Acquisition Price</label>
+                                <input type="text" id="dispo-acquisition-price" value="140,000" 
+                                       class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-purple-500"
+                                       onchange="formatAndRecalculateDispositions(this)">
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded border">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">ARV</label>
+                                <input type="text" id="dispo-arv" value="415,000" 
+                                       class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-green-500"
+                                       onchange="formatAndRecalculateDispositions(this)">
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded border">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Repairs</label>
+                                <input type="text" id="dispo-repairs" value="30,000" 
+                                       class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-red-500"
+                                       onchange="formatAndRecalculateDispositions(this)">
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded border">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Rent $/mo</label>
+                                <input type="text" id="dispo-rent" value="1,325" 
+                                       class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-purple-500"
+                                       onchange="formatAndRecalculateDispositions(this)">
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded border">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">PITI $/mo</label>
+                                <input type="text" id="dispo-piti" value="850" 
+                                       class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"
+                                       onchange="formatAndRecalculateDispositions(this)">
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded border">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Closing Costs</label>
+                                <input type="text" id="dispo-closing-costs" value="4,200" 
+                                       class="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-orange-500"
+                                       onchange="formatAndRecalculateDispositions(this)">
                             </div>
                         </div>
                     </div>
@@ -488,7 +531,7 @@
                             </div>
                             <div class="bg-white p-3 rounded border border-purple-200">
                                 <div class="text-gray-600">ARV</div>
-                                <div class="font-bold text-purple-700" id="ref-arv">$200,000</div>
+                                <div class="font-bold text-purple-700" id="ref-arv">$415,000</div>
                             </div>
                             <div class="bg-white p-3 rounded border border-purple-200">
                                 <div class="text-gray-600">Repairs</div>
@@ -497,6 +540,115 @@
                             <div class="bg-white p-3 rounded border border-purple-200">
                                 <div class="text-gray-600">Strategy Used</div>
                                 <div class="font-bold text-purple-700" id="ref-strategy">Wholesale</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wholesale Exit - Buyer Persona Matrix -->
+                    <div class="mb-6">
+                        <div class="bg-green-50 border border-green-200 rounded-lg">
+                            <div class="flex items-center justify-between p-4 cursor-pointer" onclick="toggleWholesaleBuyers()">
+                                <div class="flex items-center">
+                                    <h3 class="text-lg font-semibold text-green-800">💰 Wholesale Exit — Buyer Persona Matrix</h3>
+                                    <span class="ml-3 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">4 Buyer Types</span>
+                                </div>
+                                <i id="wholesale-buyers-icon" class="fas fa-chevron-down text-green-600 transition-transform duration-200"></i>
+                            </div>
+                            
+                            <div id="wholesale-buyers-content" class="hidden p-6 pt-0">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <!-- 1% Rent Rule Buyer -->
+                                    <div class="bg-white border border-green-200 p-4 rounded-lg">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <h4 class="font-semibold text-green-800">🏡 1% Rent Rule Investor</h4>
+                                            <input type="radio" name="wholesale-buyer" value="rent-rule" onchange="selectWholesaleBuyer('rent-rule')">
+                                        </div>
+                                        <div class="space-y-2 text-sm">
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Target Price:</span>
+                                                <span class="font-bold text-green-600" id="rent-rule-price">$132,500</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Rent/Price Ratio:</span>
+                                                <span class="font-bold" id="rent-rule-ratio">1.0%</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Timeline:</span>
+                                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">30-60 days</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Volume Flipper -->
+                                    <div class="bg-white border border-green-200 p-4 rounded-lg">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <h4 class="font-semibold text-green-800">🔁 Volume Flipper</h4>
+                                            <input type="radio" name="wholesale-buyer" value="volume-flipper" onchange="selectWholesaleBuyer('volume-flipper')">
+                                        </div>
+                                        <div class="space-y-2 text-sm">
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Target Price:</span>
+                                                <span class="font-bold text-green-600" id="volume-flipper-price">$355,000</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Their Profit Target:</span>
+                                                <input type="text" id="volume-flipper-profit" value="30,000" 
+                                                       class="w-16 px-1 py-0 border border-gray-300 rounded text-xs text-right"
+                                                       onchange="formatAndRecalculateDispositions(this)">
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Timeline:</span>
+                                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">45-90 days</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- BRRR Investor -->
+                                    <div class="bg-white border border-green-200 p-4 rounded-lg">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <h4 class="font-semibold text-green-800">🛠 BRRR Investor</h4>
+                                            <input type="radio" name="wholesale-buyer" value="brrr-investor" onchange="selectWholesaleBuyer('brrr-investor')">
+                                        </div>
+                                        <div class="space-y-2 text-sm">
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Target Price:</span>
+                                                <span class="font-bold text-green-600" id="brrr-investor-price">$260,500</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">70% ARV Rule:</span>
+                                                <span class="font-bold" id="brrr-investor-arv">$290,500</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Timeline:</span>
+                                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">60-120 days</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Max-Profit Flipper -->
+                                    <div class="bg-white border border-green-200 p-4 rounded-lg">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <h4 class="font-semibold text-green-800">💸 Max-Profit Flipper</h4>
+                                            <input type="radio" name="wholesale-buyer" value="max-profit-flipper" onchange="selectWholesaleBuyer('max-profit-flipper')">
+                                        </div>
+                                        <div class="space-y-2 text-sm">
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Target Price:</span>
+                                                <span class="font-bold text-green-600" id="max-profit-flipper-price">$219,000</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">ARV Percentage:</span>
+                                                <input type="range" min="55" max="65" value="60" id="max-profit-slider" 
+                                                       class="w-16" onchange="updateMaxProfitFlipperPrice()">
+                                                <span class="text-xs" id="max-profit-percent">60%</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Timeline:</span>
+                                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">30-45 days</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2916,6 +3068,220 @@
                 copyBtn.classList.add('opacity-50');
                 rewriteBtn.classList.add('opacity-50');
             }
+        }
+        
+        // Dispositions Pricing Engine Functions
+        function formatAndRecalculateDispositions(input) {
+            formatNumber(input);
+            recalculateAllDispositionStrategies();
+        }
+        
+        function toggleWholesaleBuyers() {
+            const content = document.getElementById('wholesale-buyers-content');
+            const icon = document.getElementById('wholesale-buyers-icon');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.classList.add('rotate-180');
+            } else {
+                content.classList.add('hidden');
+                icon.classList.remove('rotate-180');
+            }
+        }
+        
+        function selectWholesaleBuyer(buyerType) {
+            console.log('Selected buyer type:', buyerType);
+            // Additional logic for buyer selection can be added here
+        }
+        
+        function updateMaxProfitFlipperPrice() {
+            const slider = document.getElementById('max-profit-slider');
+            const percentDisplay = document.getElementById('max-profit-percent');
+            const priceDisplay = document.getElementById('max-profit-flipper-price');
+            
+            const percent = slider.value;
+            percentDisplay.textContent = percent + '%';
+            
+            // Calculate price: (ARV × percent) - Repairs
+            const arv = parseFloat(document.getElementById('dispo-arv').value.replace(/,/g, '')) || 415000;
+            const repairs = parseFloat(document.getElementById('dispo-repairs').value.replace(/,/g, '')) || 30000;
+            const price = (arv * (percent / 100)) - repairs;
+            
+            priceDisplay.textContent = '$' + price.toLocaleString();
+        }
+        
+        function recalculateAllDispositionStrategies() {
+            const arv = parseFloat(document.getElementById('dispo-arv').value.replace(/,/g, '')) || 415000;
+            const rent = parseFloat(document.getElementById('dispo-rent').value.replace(/,/g, '')) || 1325;
+            const repairs = parseFloat(document.getElementById('dispo-repairs').value.replace(/,/g, '')) || 30000;
+            const piti = parseFloat(document.getElementById('dispo-piti').value.replace(/,/g, '')) || 850;
+            const closingCosts = parseFloat(document.getElementById('dispo-closing-costs').value.replace(/,/g, '')) || 4200;
+            
+            // Update 1% Rent Rule
+            const rentRulePrice = rent / 0.01;
+            updateElementIfExists('rent-rule-price', '$' + rentRulePrice.toLocaleString());
+            updateElementIfExists('rent-rule-ratio', ((rent / rentRulePrice) * 100).toFixed(1) + '%');
+            
+            // Update Volume Flipper
+            const volumeFlipperProfit = parseFloat(document.getElementById('volume-flipper-profit').value.replace(/,/g, '')) || 30000;
+            const volumeFlipperPrice = arv - repairs - volumeFlipperProfit;
+            updateElementIfExists('volume-flipper-price', '$' + volumeFlipperPrice.toLocaleString());
+            
+            // Update BRRR Investor
+            const brrrPrice = (arv * 0.70) - repairs;
+            const brrrARV = arv * 0.70;
+            updateElementIfExists('brrr-investor-price', '$' + brrrPrice.toLocaleString());
+            updateElementIfExists('brrr-investor-arv', '$' + brrrARV.toLocaleString());
+            
+            // Update Max-Profit Flipper
+            updateMaxProfitFlipperPrice();
+            
+            // Update other strategies
+            updateNovationCalculation();
+            formatAndRecalculateSubjectTo(null);
+            updateWrapConfiguration();
+            updateLeaseOptionCalculation();
+        }
+        
+        function updateNovationCalculation() {
+            const arv = parseFloat(document.getElementById('dispo-arv').value.replace(/,/g, '')) || 415000;
+            const repairs = parseFloat(document.getElementById('dispo-repairs').value.replace(/,/g, '')) || 30000;
+            
+            // List Price = (ARV - Repairs) - MAX(10% of (ARV-Repairs), 20000)
+            const afterRepairs = arv - repairs;
+            const discount = Math.max(afterRepairs * 0.10, 20000);
+            const listPrice = afterRepairs - discount;
+            
+            const listingCommission = parseFloat(document.getElementById('listing-commission').value) || 2;
+            const buyerCommission = parseFloat(document.getElementById('buyer-commission').value) || 2;
+            const totalCommissionRate = (listingCommission + buyerCommission) / 100;
+            const totalCommissions = listPrice * totalCommissionRate;
+            const ourFee = 20475;
+            const netToUs = listPrice - totalCommissions - ourFee;
+            
+            updateElementIfExists('novation-list-price', '$' + listPrice.toLocaleString());
+            updateElementIfExists('novation-gross-sale', '$' + listPrice.toLocaleString());
+            updateElementIfExists('novation-commissions', '$' + totalCommissions.toLocaleString());
+            updateElementIfExists('novation-our-fee', '$' + ourFee.toLocaleString());
+            updateElementIfExists('novation-net-to-us', '$' + netToUs.toLocaleString());
+            updateElementIfExists('listing-commission-value', listingCommission.toFixed(1) + '%');
+            updateElementIfExists('buyer-commission-value', buyerCommission.toFixed(1) + '%');
+        }
+        
+        function formatAndRecalculateSubjectTo(input) {
+            if (input) formatNumber(input);
+            
+            const cashToSeller = parseFloat(document.getElementById('subject-to-cash-seller').value.replace(/,/g, '')) || 5000;
+            const assignmentFee = parseFloat(document.getElementById('subject-to-assignment-fee').value.replace(/,/g, '')) || 15000;
+            const arrears = parseFloat(document.getElementById('subject-to-arrears').value.replace(/,/g, '')) || 2500;
+            const closingCosts = parseFloat(document.getElementById('dispo-closing-costs').value.replace(/,/g, '')) || 4200;
+            const rent = parseFloat(document.getElementById('dispo-rent').value.replace(/,/g, '')) || 1325;
+            const piti = parseFloat(document.getElementById('dispo-piti').value.replace(/,/g, '')) || 850;
+            const arv = parseFloat(document.getElementById('dispo-arv').value.replace(/,/g, '')) || 415000;
+            
+            const cashToClose = cashToSeller + assignmentFee + arrears + closingCosts;
+            const equity = arv - 243000; // Assuming loan balance
+            const monthlyCashFlow = rent - piti;
+            
+            updateElementIfExists('subject-to-cash-close', '$' + cashToClose.toLocaleString());
+            updateElementIfExists('subject-to-equity', '$' + equity.toLocaleString());
+            updateElementIfExists('subject-to-cash-flow', '$' + monthlyCashFlow.toLocaleString());
+            
+            // Update cash flow status
+            const statusElement = document.getElementById('subject-to-cash-flow-status');
+            if (statusElement) {
+                if (monthlyCashFlow >= 500) {
+                    statusElement.className = 'mt-3 p-2 rounded bg-green-100 text-green-800';
+                    statusElement.innerHTML = '<div class="text-xs font-medium text-center">Premium Cash Flow</div>';
+                } else if (monthlyCashFlow >= 200) {
+                    statusElement.className = 'mt-3 p-2 rounded bg-yellow-100 text-yellow-800';
+                    statusElement.innerHTML = '<div class="text-xs font-medium text-center">Good Cash Flow</div>';
+                } else {
+                    statusElement.className = 'mt-3 p-2 rounded bg-red-100 text-red-800';
+                    statusElement.innerHTML = '<div class="text-xs font-medium text-center">Marginal Cash Flow</div>';
+                }
+            }
+        }
+        
+        function updateWrapConfiguration() {
+            const arv = parseFloat(document.getElementById('dispo-arv').value.replace(/,/g, '')) || 415000;
+            const downPaymentPercent = parseFloat(document.getElementById('wrap-down-payment-percent').value) || 10;
+            const term = parseFloat(document.getElementById('wrap-term').value) || 30;
+            const piti = parseFloat(document.getElementById('dispo-piti').value.replace(/,/g, '')) || 850;
+            
+            // Auto-calculate interest rate based on down payment
+            let buyerRate;
+            if (downPaymentPercent >= 15) {
+                buyerRate = 6.0;
+            } else if (downPaymentPercent < 10) {
+                buyerRate = 9.0;
+            } else {
+                buyerRate = 7.5;
+            }
+            
+            const priceToBuyer = arv * 1.10; // ARV + 10%
+            const downPaymentAmount = priceToBuyer * (downPaymentPercent / 100);
+            const loanAmount = priceToBuyer - downPaymentAmount;
+            
+            // Simple monthly payment calculation
+            const monthlyRate = buyerRate / 100 / 12;
+            const numPayments = term * 12;
+            const buyerPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
+            
+            const monthlyCashFlow = buyerPayment - piti;
+            const frontEndProfit = downPaymentAmount - 140000; // Assuming acquisition cost
+            
+            updateElementIfExists('wrap-down-payment-display', downPaymentPercent + '%');
+            updateElementIfExists('wrap-down-payment-amount', downPaymentAmount.toLocaleString());
+            updateElementIfExists('wrap-buyer-rate', buyerRate.toFixed(1) + '%');
+            updateElementIfExists('wrap-price-to-buyer', '$' + priceToBuyer.toLocaleString());
+            updateElementIfExists('wrap-buyer-payment', '$' + buyerPayment.toLocaleString());
+            updateElementIfExists('wrap-monthly-cash-flow', '$' + monthlyCashFlow.toLocaleString());
+            updateElementIfExists('wrap-front-end-profit', '$' + frontEndProfit.toLocaleString());
+        }
+        
+        function formatAndRecalculateLeaseOption(input) {
+            if (input) formatNumber(input);
+            updateLeaseOptionCalculation();
+        }
+        
+        function updateLeaseOptionCalculation() {
+            const arv = parseFloat(document.getElementById('dispo-arv').value.replace(/,/g, '')) || 415000;
+            const equity = parseFloat(document.getElementById('lease-option-equity').value.replace(/,/g, '')) || 172000;
+            const repairs = document.getElementById('lease-option-repairs').value;
+            const desiredCashFlow = parseFloat(document.getElementById('lease-option-cash-flow').value.replace(/,/g, '')) || 475;
+            
+            // Base Cash-to-Close = 8% of ARV
+            let baseCashToClose = arv * 0.08;
+            
+            // Cash Flow Bonus
+            const cashFlowBonus = desiredCashFlow >= 350 ? 5000 : 0;
+            
+            // Equity Bonus
+            const equityBonus = equity >= 20000 ? 5000 : 0;
+            
+            // Repair Adjustment
+            const repairAdjustment = repairs === 'heavy' ? -5000 : 0;
+            
+            const targetCashToClose = baseCashToClose + cashFlowBonus + equityBonus + repairAdjustment;
+            
+            updateElementIfExists('lease-option-base-c2c', '$' + baseCashToClose.toLocaleString());
+            updateElementIfExists('lease-option-cf-bonus', '$' + cashFlowBonus.toLocaleString());
+            updateElementIfExists('lease-option-equity-bonus', '$' + equityBonus.toLocaleString());
+            updateElementIfExists('lease-option-target-c2c', '$' + targetCashToClose.toLocaleString());
+        }
+        
+        // AI Assistant Functions
+        function suggestBestBuyerPersona() {
+            alert('AI Buyer Persona Analysis coming soon!');
+        }
+        
+        function draftBuyerFacingPitch() {
+            alert('AI Buyer Pitch Generator coming soon!');
+        }
+        
+        function openBuyerObjectionHandler() {
+            alert('Buyer Objection Handler coming soon!');
         }
 
         function formatAndRecalculateInstallment(input) {
