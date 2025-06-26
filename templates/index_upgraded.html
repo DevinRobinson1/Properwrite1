@@ -2259,7 +2259,11 @@
             const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 415000;
             const existingLoanBalance = parseFloat(document.getElementById('sub2-loan-balance')?.value?.replace(/[^\d]/g, '')) || 116250;
             const cashToSeller = parseFloat(document.getElementById('sub2-cash-seller')?.value?.replace(/[^\d]/g, '')) || 15000;
-            const rent = parseFloat(document.getElementById('rent')?.value?.replace(/[^\d]/g, '')) || 1325;
+            
+            // Use rent from Cash Offer Calculator if available, fallback to header
+            const rent = parseFloat(document.getElementById('subject-to-rent')?.value?.replace(/[^\d]/g, '')) || 
+                        parseFloat(document.getElementById('rent')?.value?.replace(/[^\d]/g, '')) || 1325;
+            
             const monthlyPI = parseFloat(document.getElementById('sub2-monthly-pi')?.value?.replace(/[^\d]/g, '')) || 800;
             const monthlyEscrow = parseFloat(document.getElementById('sub2-monthly-escrow')?.value?.replace(/[^\d]/g, '')) || 300;
             
