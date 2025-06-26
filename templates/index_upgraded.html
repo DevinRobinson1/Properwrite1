@@ -883,10 +883,32 @@
                     <div id="subject-to-tab" class="acquisition-tab-content hidden">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6">Subject-To Strategy</h3>
                         
-                        <!-- PITI & Equity Structure -->
+                        <!-- Buying Guide -->
+                        <div class="bg-purple-50 border border-purple-200 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-purple-800 mb-4">Subject-To Buying Guide</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <div class="text-sm text-purple-700 mb-2">Target Purchase</div>
+                                    <div class="text-2xl font-bold text-purple-600">8-10% ARV</div>
+                                    <div class="text-xs text-gray-600">Below market entry</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <div class="text-sm text-purple-700 mb-2">Target Resale</div>
+                                    <div class="text-2xl font-bold text-purple-600">12-15% ARV</div>
+                                    <div class="text-xs text-gray-600">Quick exit strategy</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <div class="text-sm text-purple-700 mb-2">Minimum Cash Flow</div>
+                                    <div class="text-2xl font-bold text-green-600">$200/mo</div>
+                                    <div class="text-xs text-gray-600">Premium if $500+</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Subject-To Deal Structure -->
                         <div class="bg-gray-50 p-6 rounded-lg mb-6">
-                            <h4 class="text-lg font-semibold text-gray-800 mb-4">PITI & Equity Structure</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Deal Structure Inputs</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Existing Loan Balance ($)</label>
                                     <input type="number" value="116250" id="sub2-loan-balance" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
@@ -896,40 +918,59 @@
                                     <input type="number" value="4000" id="sub2-cash-seller" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
                                 </div>
                                 <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Arrears/Liens ($)</label>
+                                    <input type="number" value="2500" id="sub2-arrears" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
+                                </div>
+                                <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Monthly P&I ($)</label>
                                     <input type="number" value="800" id="sub2-monthly-pi" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Escrow ($)</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Escrow (TI) ($)</label>
                                     <input type="number" value="300" id="sub2-monthly-escrow" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Interest Rate (%)</label>
+                                    <input type="number" step="0.1" value="4.5" id="sub2-interest-rate" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Immediate Equity Position -->
+                        <!-- Monthly Cash Flow Analysis -->
                         <div class="bg-green-50 p-6 rounded-lg mb-6">
-                            <h4 class="text-lg font-semibold text-green-800 mb-4">Immediate Equity Analysis</h4>
-                            <div class="space-y-3">
-                                <div class="flex justify-between">
-                                    <span>Property ARV:</span>
-                                    <span class="font-bold">$<span id="sub2-arv">155,000</span></span>
+                            <h4 class="text-lg font-semibold text-green-800 mb-4">Monthly Cash Flow Calculation</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span>Monthly Rent Income:</span>
+                                        <span class="font-bold text-green-600">+$<span id="sub2-rent">1,425</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Monthly P&I Payment:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sub2-pi">800</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Monthly Escrow (TI):</span>
+                                        <span class="font-bold text-red-600">-$<span id="sub2-escrow">300</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Repairs Reserve:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sub2-repairs-reserve">100</span></span>
+                                    </div>
+                                    <hr class="border-gray-300">
+                                    <div class="flex justify-between text-lg font-bold">
+                                        <span>Net Monthly Cash Flow:</span>
+                                        <span class="text-green-600" id="sub2-monthly-cashflow">+$225</span>
+                                    </div>
                                 </div>
-                                <div class="flex justify-between">
-                                    <span>Existing Loan Balance:</span>
-                                    <span class="font-bold text-red-600">-$<span id="sub2-balance">116,250</span></span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Cash to Seller:</span>
-                                    <span class="font-bold text-red-600">-$<span id="sub2-cash">4,000</span></span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Acquisition Costs:</span>
-                                    <span class="font-bold text-red-600">-$<span id="sub2-costs">2,500</span></span>
-                                </div>
-                                <hr class="border-gray-300">
-                                <div class="flex justify-between text-lg font-bold">
-                                    <span>Immediate Equity:</span>
-                                    <span class="text-green-600">$<span id="sub2-equity">32,250</span></span>
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="text-center">
+                                        <div class="text-3xl font-bold text-green-600 mb-2" id="sub2-annual-cashflow">$2,700</div>
+                                        <div class="text-sm text-gray-600">Annual Cash Flow</div>
+                                        <div class="mt-3 text-xs text-gray-500">
+                                            <span id="sub2-cashflow-status" class="px-2 py-1 bg-green-100 text-green-800 rounded">Good Cash Flow</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -966,97 +1007,36 @@
                             </div>
                         </div>
 
-                        <!-- 5-Year Exit Logic -->
-                        <div class="bg-purple-50 p-6 rounded-lg mb-6">
-                            <h4 class="text-lg font-semibold text-purple-800 mb-4">5-Year Exit Strategies</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="bg-white p-4 rounded-lg border border-purple-200">
-                                    <div class="font-semibold text-purple-700 mb-2">Lease Option Exit</div>
-                                    <div class="space-y-2 text-sm">
-                                        <div>Option Fee: $<span id="lease-option-fee">10,000</span></div>
-                                        <div>Sale Price: $<span id="lease-option-price">185,000</span></div>
-                                        <div>Total Profit: $<span id="lease-option-profit">42,250</span></div>
-                                    </div>
-                                </div>
-                                <div class="bg-white p-4 rounded-lg border border-purple-200">
-                                    <div class="font-semibold text-purple-700 mb-2">Refinance Exit</div>
-                                    <div class="space-y-2 text-sm">
-                                        <div>New Loan: 80% LTV</div>
-                                        <div>Cash Out: $<span id="refi-cashout">25,000</span></div>
-                                        <div>Improved Cash Flow: +$<span id="refi-cashflow">150</span>/mo</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Subject-To Objection Handling -->
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg mb-6">
-                            <button class="w-full px-6 py-4 text-left font-semibold text-blue-800 hover:bg-blue-100 transition-colors flex items-center justify-between" onclick="toggleObjectionSection('subject-to-objections')">
-                                <span>📞 Subject-To Objection Handling</span>
-                                <i class="fas fa-chevron-down transform transition-transform" id="subject-to-objections-icon"></i>
-                            </button>
-                            <div id="subject-to-objections-section" class="hidden px-6 pb-4">
-                                <div class="space-y-4 text-sm">
-                                    <div class="bg-white p-4 rounded border">
-                                        <div class="font-semibold text-blue-800 mb-2">Q: "How long until we can close?"</div>
-                                        <div class="text-blue-700">A: We can generally close in about 15 days. Depending on the title and everything being clean, the average timeframe is 30-45 days at the longest.</div>
-                                    </div>
-                                    <div class="bg-white p-4 rounded border">
-                                        <div class="font-semibold text-blue-800 mb-2">Q: "What if something goes wrong with the loan?"</div>
-                                        <div class="text-blue-700">A: We maintain comprehensive insurance and have legal safeguards in place. Our attorney will review all documentation to ensure everything is handled properly.</div>
-                                    </div>
-                                    <div class="bg-white p-4 rounded border">
-                                        <div class="font-semibold text-blue-800 mb-2">Q: "Is this legal?"</div>
-                                        <div class="text-blue-700">A: Absolutely. Subject-to transactions are legal when done correctly with proper documentation and disclosure. We work with experienced real estate attorneys.</div>
-                                    </div>
-                                    <div class="bg-white p-4 rounded border">
-                                        <div class="font-semibold text-blue-800 mb-2">Q: "What about the due-on-sale clause?"</div>
-                                        <div class="text-blue-700">A: While due-on-sale clauses exist, they're rarely enforced on performing loans. We maintain all payments and insurance to keep the loan in good standing.</div>
-                                    </div>
+                        <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-blue-800 mb-4">Common Questions & Objections</h4>
+                            <div class="space-y-4">
+                                <div class="bg-white p-4 rounded border">
+                                    <div class="font-semibold text-blue-800 mb-2">Q: "How long until we can close?"</div>
+                                    <div class="text-blue-700">A: We can generally close in about 15 days. Depending on the title and everything being clean, the average timeframe is 30-45 days at the longest.</div>
+                                </div>
+                                <div class="bg-white p-4 rounded border">
+                                    <div class="font-semibold text-blue-800 mb-2">Q: "Do I continue to make my mortgage payments?"</div>
+                                    <div class="text-blue-700">A: No, we take over the mortgage and that's why we call it a "sub2". We take over the property, subject to the existing mortgage in place and relieve you of those mortgages, taxes, insurance, etc. You really don't have any responsibility for the property anymore.</div>
+                                </div>
+                                <div class="bg-white p-4 rounded border">
+                                    <div class="font-semibold text-blue-800 mb-2">Q: "When do I get my money?"</div>
+                                    <div class="text-blue-700">A: We pay you once the deed is transferred over to us. Your entire profit will be paid directly at the closing once you sign all the closing docs.</div>
+                                </div>
+                                <div class="bg-white p-4 rounded border">
+                                    <div class="font-semibold text-blue-800 mb-2">Q: "What happens if you stop making payments?"</div>
+                                    <div class="text-blue-700">A: I will be sending two documents: the contract and an addendum that protects both of us. In there, it states that if we were to miss two payments in a row, you could report it and have the property deeded back to you if we don't pay the balance within 30 days. This has never happened before, but you are fully protected.</div>
+                                </div>
+                                <div class="bg-white p-4 rounded border">
+                                    <div class="font-semibold text-blue-800 mb-2">Q: "Why do I need to stay on the mortgage?"</div>
+                                    <div class="text-blue-700">A: We won't have to go to the bank and take out a loan with an extremely high interest rate, or pay fees to start the loan. This keeps costs down and allows us to offer you more money.</div>
+                                </div>
+                                <div class="bg-white p-4 rounded border">
+                                    <div class="font-semibold text-blue-800 mb-2">Q: "Can I stay in the house?"</div>
+                                    <div class="text-blue-700">A: You would have to qualify with: 2 months of previous bank statements, proof of occupation, 3 pay stubs. We charge market rent with a 3-month lease term. If you miss 1 month, you can't stay. We'll extend to 12 months if you make all payments.</div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Legal & Risk Considerations -->
-                        <div class="bg-yellow-50 p-6 rounded-lg mb-6">
-                            <h4 class="text-lg font-semibold text-yellow-800 mb-4">Legal & Risk Considerations</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <h5 class="font-semibold text-yellow-700 mb-3">Legal Structure</h5>
-                                    <div class="space-y-2 text-sm">
-                                        <div class="flex items-start">
-                                            <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2 mr-2"></div>
-                                            <span>Land trust or LLC ownership</span>
-                                        </div>
-                                        <div class="flex items-start">
-                                            <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2 mr-2"></div>
-                                            <span>Insurance assignment required</span>
-                                        </div>
-                                        <div class="flex items-start">
-                                            <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2 mr-2"></div>
-                                            <span>Power of attorney for loan servicing</span>
-                                        </div>
-                                        <div class="flex items-start">
-                                            <div class="w-2 h-2 bg-red-500 rounded-full mt-2 mr-2"></div>
-                                            <span>Check state regulations</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h5 class="font-semibold text-yellow-700 mb-3">Risk Mitigation</h5>
-                                    <div class="space-y-2 text-sm">
-                                        <div class="flex items-start">
-                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
-                                            <span>Automatic payment setup</span>
-                                        </div>
-                                        <div class="flex items-start">
-                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
-                                            <span>Comprehensive insurance coverage</span>
-                                        </div>
-                                        <div class="flex items-start">
-                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
-                                            <span>Emergency reserve fund</span>
-                                        </div>
                                         <div class="flex items-start">
                                             <div class="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-2"></div>
                                             <span>Due-on-sale clause risk</span>
@@ -2377,7 +2357,7 @@
             const comparisonResults = {
                 wholesale: {
                     wholesale_mao: wholesaleMao,
-                    assignment_profit: assignmentFee,
+                    assignment_profit: minAcceptableProfit,
                     all_in_amount: wholesaleMao + repairs,
                     strategy_type: 'Cash Acquisition'
                 },
