@@ -559,27 +559,7 @@
                     <div id="installment-tab" class="acquisition-tab-content hidden">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6">Installments/Novations Strategy</h3>
                         
-                        <!-- Seller Psychology Framework -->
-                        <div class="bg-purple-50 p-6 rounded-lg mb-6">
-                            <h4 class="text-lg font-semibold text-purple-800 mb-4">Seller Psychology Framework</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="bg-white p-4 rounded-lg border border-purple-200">
-                                    <div class="font-semibold text-purple-700">Speed</div>
-                                    <div class="text-sm text-gray-600">Quick closing process</div>
-                                </div>
-                                <div class="bg-white p-4 rounded-lg border border-purple-200">
-                                    <div class="font-semibold text-purple-700">Price</div>
-                                    <div class="text-sm text-gray-600">Higher than cash offers</div>
-                                </div>
-                                <div class="bg-white p-4 rounded-lg border border-purple-200">
-                                    <div class="font-semibold text-purple-700">Convenience</div>
-                                    <div class="text-sm text-gray-600">No showings or repairs</div>
-                                </div>
-                            </div>
-                            <div class="mt-4 text-sm text-purple-700 font-medium">
-                                Installment = Price + Convenience (Choose 2 of 3)
-                            </div>
-                        </div>
+
 
                         <!-- Installment Assumptions -->
                         <div class="bg-gray-50 p-6 rounded-lg mb-6">
@@ -2143,7 +2123,7 @@
             recalculateInstallment();
             recalculateSubjectTo();
             recalculateSellerFinance();
-            updateComparisonFromTabs();
+            if (typeof updateComparisonResults === 'function') updateComparisonResults();
         }
 
         function recalculateSellerFinance() {
