@@ -55,6 +55,14 @@
         .acquisition-tab-btn:hover:not(.active) {
             color: #374151;
         }
+        
+        .acquisition-tab-content {
+            display: block;
+        }
+        
+        .acquisition-tab-content.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -1149,7 +1157,7 @@
                         <!-- Tab Content -->
                         <div class="p-6">
                             <!-- Wholesale Tab -->
-                            <div id="wholesale-content" class="acquisition-tab-content">
+                            <div id="wholesale-content" class="acquisition-tab-content block">
                                 <h3 class="text-lg font-semibold text-gray-800 mb-4">💰 Wholesale MAO Calculator</h3>
                                 
                                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
