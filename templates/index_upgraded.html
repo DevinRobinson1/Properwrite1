@@ -1112,6 +1112,83 @@
             }
         }
 
+        // Form submission handling
+        document.getElementById('property-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            const state = document.getElementById('state').value;
+            const zip = document.getElementById('zip').value;
+            
+            // Validate required fields
+            if (!address || !city || !state || !zip) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            // Show loading state
+            document.getElementById('loading-state').classList.remove('hidden');
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('address', address);
+            formData.append('city', city);
+            formData.append('state', state);
+            formData.append('zip', zip);
+            
+            // Submit to backend
+            fetch('/analyze_property', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading state
+                document.getElementById('loading-state').classList.add('hidden');
+                
+                if (data.success) {
+                    // Show analysis results
+                    document.getElementById('analysis-results').classList.remove('hidden');
+                    
+                    // Update property details if data available
+                    if (data.property_data) {
+                        updatePropertyDetails(data.property_data);
+                    }
+                    
+                    // Show success message
+                    alert('Property analysis complete! You can now view the Dispositions and Acquisitions sections.');
+                } else {
+                    alert('Error analyzing property: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                // Hide loading state
+                document.getElementById('loading-state').classList.add('hidden');
+                alert('Error connecting to server: ' + error.message);
+            });
+        });
+
+        function updatePropertyDetails(propertyData) {
+            // Update form fields with fetched data if available
+            if (propertyData.bedrooms) {
+                document.getElementById('bedrooms').value = propertyData.bedrooms;
+            }
+            if (propertyData.bathrooms) {
+                document.getElementById('bathrooms').value = propertyData.bathrooms;
+            }
+            if (propertyData.square_feet) {
+                document.getElementById('square_feet').value = propertyData.square_feet.toLocaleString();
+            }
+            if (propertyData.arv) {
+                document.getElementById('arv').value = propertyData.arv.toLocaleString();
+            }
+            if (propertyData.rent) {
+                document.getElementById('rent').value = propertyData.rent.toLocaleString();
+            }
+        }
+
         // Initialize with first tab active
         document.addEventListener('DOMContentLoaded', function() {
             showDispositionTab('cash-sale');
