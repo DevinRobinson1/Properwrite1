@@ -2097,63 +2097,7 @@
             updateElementIfExists('installment-profit', netProfit);
         }
 
-        function recalculateSubjectTo() {
-            const arv = parseFloat(document.getElementById('arv').value);
-            const rent = parseFloat(document.getElementById('rent').value);
-            const loanBalance = parseFloat(document.getElementById('sub2-loan-balance').value);
-            const cashToSeller = parseFloat(document.getElementById('sub2-cash-seller').value);
-            const monthlyPI = parseFloat(document.getElementById('sub2-monthly-pi').value);
-            const monthlyEscrow = parseFloat(document.getElementById('sub2-monthly-escrow').value);
-            
-            const immediateEquity = arv - loanBalance - cashToSeller - 2500;
-            const monthlyCashFlow = rent - monthlyPI - monthlyEscrow - 100;
-            
-            // Update equity analysis
-            document.getElementById('sub2-arv').textContent = arv.toLocaleString();
-            document.getElementById('sub2-balance').textContent = loanBalance.toLocaleString();
-            document.getElementById('sub2-cash').textContent = cashToSeller.toLocaleString();
-            document.getElementById('sub2-equity').textContent = immediateEquity.toLocaleString();
-            
-            // Update cash flow
-            document.getElementById('sub2-rent').textContent = rent.toLocaleString();
-            document.getElementById('sub2-pi').textContent = monthlyPI.toLocaleString();
-            document.getElementById('sub2-escrow').textContent = monthlyEscrow.toLocaleString();
-            document.getElementById('sub2-cashflow').textContent = monthlyCashFlow.toLocaleString();
-            
-            // Update exit strategies
-            document.getElementById('lease-option-price').textContent = (arv * 1.2).toLocaleString();
-            document.getElementById('lease-option-profit').textContent = (immediateEquity + 10000).toLocaleString();
-            document.getElementById('refi-cashout').textContent = (arv * 0.8 - loanBalance).toLocaleString();
-        }
 
-        function recalculateSellerFinance() {
-            const purchasePrice = parseFloat(document.getElementById('sf-purchase-price').value);
-            const downPayment = parseFloat(document.getElementById('sf-down-payment').value);
-            const interestRate = parseFloat(document.getElementById('sf-interest-rate').value) / 100;
-            const termYears = parseFloat(document.getElementById('sf-term').value);
-            const rent = parseFloat(document.getElementById('rent').value);
-            
-            const loanAmount = purchasePrice - downPayment;
-            const monthlyRate = interestRate / 12;
-            const numPayments = termYears * 12;
-            
-            // Calculate monthly payment
-            const monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
-            const totalInterest = (monthlyPayment * numPayments) - loanAmount;
-            const balloonBalance = loanAmount * Math.pow(1 + monthlyRate, 120) - monthlyPayment * ((Math.pow(1 + monthlyRate, 120) - 1) / monthlyRate);
-            
-            const monthlyCashFlow = rent - monthlyPayment - 250 - 100;
-            
-            // Update payment structure
-            document.getElementById('sf-monthly-payment').textContent = monthlyPayment.toLocaleString();
-            document.getElementById('sf-total-interest').textContent = totalInterest.toLocaleString();
-            document.getElementById('sf-balloon').textContent = balloonBalance.toLocaleString();
-            
-            // Update cash flow
-            document.getElementById('sf-rent').textContent = rent.toLocaleString();
-            document.getElementById('sf-payment').textContent = monthlyPayment.toLocaleString();
-            document.getElementById('sf-cashflow').textContent = monthlyCashFlow.toLocaleString();
-        }
 
         function updateAllTabCalculations() {
             // Update all tab calculations when property data changes
@@ -2350,20 +2294,30 @@
                 statusClass = "bg-red-100 text-red-800";
             }
             
-            // Update display elements
+            // Update both cash flow sections with identical values
+            // Top section (Monthly Cash Flow Calculation)
             updateElementIfExists('sub2-rent', rent);
             updateElementIfExists('sub2-pi', monthlyPI);
             updateElementIfExists('sub2-escrow', monthlyEscrow);
             updateElementIfExists('sub2-repairs-reserve', repairsReserve);
+            updateElementIfExists('sub2-annual-cashflow', Math.abs(annualCashFlow));
             
-            // Format and update cash flow
+            // Bottom section (Monthly Cash Flow)
+            updateElementIfExists('sub2-maintenance', repairsReserve);
+            updateElementIfExists('sub2-cashflow', Math.abs(monthlyCashFlow));
+            
+            // Update monthly cash flow element formatting
             const monthlyCashFlowElement = document.getElementById('sub2-monthly-cashflow');
             if (monthlyCashFlowElement) {
                 monthlyCashFlowElement.textContent = (monthlyCashFlow >= 0 ? '+$' : '-$') + Math.abs(monthlyCashFlow).toLocaleString();
                 monthlyCashFlowElement.className = monthlyCashFlow >= 0 ? 'text-green-600' : 'text-red-600';
             }
             
-            updateElementIfExists('sub2-annual-cashflow', Math.abs(annualCashFlow));
+            // Ensure rent values are consistent in both sections by forcing update
+            const rentElements = document.querySelectorAll('[id^="sub2-rent"]');
+            rentElements.forEach(element => {
+                if (element) element.textContent = rent.toLocaleString();
+            });
             
             // Update cash flow status
             const statusElement = document.getElementById('sub2-cashflow-status');
