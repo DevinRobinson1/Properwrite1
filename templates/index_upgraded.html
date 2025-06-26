@@ -2428,7 +2428,7 @@
                 if (tabName === 'installment') recalculateInstallment();
                 if (tabName === 'subject-to') recalculateSubjectTo();
                 if (tabName === 'seller-finance') recalculateSellerFinance();
-                if (tabName === 'compare') updateComparisonResults();
+                if (tabName === 'compare' && typeof updateComparisonResults === 'function') updateComparisonResults();
             }, 100);
         }
 
