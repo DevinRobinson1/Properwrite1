@@ -2039,20 +2039,20 @@
             const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 200000;
             const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/[^\d]/g, '')) || 30000;
             
-            // Use global acquisitions price as the base MAO, or calculate from ARV percentage
+            // Use global minimum acceptable profit as assignment fee
+            const assignmentFee = window.globalMinAcceptableProfit || 15000;
+            
+            // Use global acquisitions price as MAO if set, otherwise calculate
             let mao;
             if (window.globalAcquisitionsPrice) {
                 mao = window.globalAcquisitionsPrice;
             } else {
+                // Calculate MAO: ARV * 70% - Repairs - Assignment Fee
                 const percent = parseFloat(document.getElementById('wholesale-arv-percent')?.value) / 100 || 0.70;
-                const assignmentFee = parseFloat(document.getElementById('wholesale-assignment-fee')?.value?.replace(/[^\d]/g, '')) || 10000;
                 mao = (arv * percent) - repairs - assignmentFee;
             }
             
-            const minProfit = window.globalMinAcceptableProfit || 15000;
-            const assignmentFee = Math.max(minProfit, parseFloat(document.getElementById('wholesale-assignment-fee')?.value?.replace(/[^\d]/g, '')) || 10000);
-            
-            // Calculate percentage for display
+            // Calculate effective percentage for display
             const effectivePercent = ((mao + repairs + assignmentFee) / arv) * 100;
             
             // Update MAO breakdown
@@ -2071,6 +2071,12 @@
             // Update profit analysis
             updateElementIfExists('total-investment', (mao + repairs));
             updateElementIfExists('assignment-profit', assignmentFee);
+            
+            // Sync wholesale assignment fee input with global value
+            const wholesaleAssignmentInput = document.getElementById('wholesale-assignment-fee');
+            if (wholesaleAssignmentInput && wholesaleAssignmentInput.value !== assignmentFee.toLocaleString()) {
+                wholesaleAssignmentInput.value = assignmentFee.toLocaleString();
+            }
         }
 
         function recalculateInstallment() {
@@ -2086,24 +2092,24 @@
                 totalCombinedFees = recalculateInstallmentFees();
             }
             
-            // Use global minimum acceptable profit or default
+            // Use global minimum acceptable profit
             const ourMinimumProfit = window.globalMinAcceptableProfit || 15000;
             
             // Use global acquisitions price as maximum allowable offer if set
             let maxAllowableOffer;
             if (window.globalAcquisitionsPrice) {
-                maxAllowableOffer = Math.min(window.globalAcquisitionsPrice, arv - repairs - discountToSellFast - totalCombinedFees - ourMinimumProfit);
+                maxAllowableOffer = window.globalAcquisitionsPrice;
             } else {
-                // New formula: ARV - Repairs - Discount to Sell Fast - Total Combined Fees - Our Minimum Profit = MAO
+                // Calculate: ARV - Repairs - Discount to Sell Fast - Total Combined Fees - Our Minimum Profit = MAO
                 maxAllowableOffer = arv - repairs - discountToSellFast - totalCombinedFees - ourMinimumProfit;
             }
             
             // Calculate final sales price (what we'll sell for)
             const finalSalesPrice = arv - discountToSellFast;
             
-            // Calculate our net profit
-            const grossProfit = finalSalesPrice - maxAllowableOffer - repairs;
-            const netProfit = Math.max(ourMinimumProfit, grossProfit - totalCombinedFees);
+            // Calculate our net profit ensuring minimum is met
+            const grossProfit = finalSalesPrice - maxAllowableOffer - repairs - totalCombinedFees;
+            const netProfit = Math.max(ourMinimumProfit, grossProfit);
             
             // Update display elements
             updateElementIfExists('installment-purchase', maxAllowableOffer);
@@ -2301,17 +2307,25 @@
             
             // Get current fee total
             const totalCombinedFees = recalculateInstallmentFees();
-            const ourMinimumProfit = 15000; // Our minimum profit requirement
             
-            // New formula: ARV - Repairs - Discount to Sell Fast - Total Combined Fees - Our Minimum Profit = MAO
-            const maxAllowableOffer = arv - repairs - discountToSellFast - totalCombinedFees - ourMinimumProfit;
+            // Use global minimum acceptable profit
+            const ourMinimumProfit = window.globalMinAcceptableProfit || 15000;
+            
+            // Use global acquisitions price as MAO if set
+            let maxAllowableOffer;
+            if (window.globalAcquisitionsPrice) {
+                maxAllowableOffer = window.globalAcquisitionsPrice;
+            } else {
+                // Calculate: ARV - Repairs - Discount to Sell Fast - Total Combined Fees - Our Minimum Profit = MAO
+                maxAllowableOffer = arv - repairs - discountToSellFast - totalCombinedFees - ourMinimumProfit;
+            }
             
             // Calculate final sales price (what we'll sell for)
             const finalSalesPrice = arv - discountToSellFast;
             
-            // Calculate our net profit
-            const grossProfit = finalSalesPrice - maxAllowableOffer - repairs;
-            const netProfit = grossProfit - totalCombinedFees;
+            // Calculate our net profit ensuring minimum is met
+            const grossProfit = finalSalesPrice - maxAllowableOffer - repairs - totalCombinedFees;
+            const netProfit = Math.max(ourMinimumProfit, grossProfit);
             
             // Update display elements
             updateElementIfExists('installment-purchase', maxAllowableOffer);
@@ -2330,10 +2344,18 @@
             const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/[^\d]/g, '')) || 30000;
             const rent = parseFloat(document.getElementById('rent')?.value?.replace(/[^\d]/g, '')) || 1425;
             
-            // Calculate simplified results for comparison
-            const wholesalePercent = parseFloat(document.getElementById('wholesale-arv-percent')?.value || 70) / 100;
-            const assignmentFee = parseFloat(document.getElementById('wholesale-assignment-fee')?.value?.replace(/[^\d]/g, '') || 10000);
-            const wholesaleMao = (arv * wholesalePercent) - repairs - assignmentFee;
+            // Use global variables for consistent calculations
+            const minAcceptableProfit = window.globalMinAcceptableProfit || 15000;
+            const acquisitionsPrice = window.globalAcquisitionsPrice;
+            
+            // Calculate wholesale MAO using global variables
+            let wholesaleMao;
+            if (acquisitionsPrice) {
+                wholesaleMao = acquisitionsPrice;
+            } else {
+                const wholesalePercent = parseFloat(document.getElementById('wholesale-arv-percent')?.value || 70) / 100;
+                wholesaleMao = (arv * wholesalePercent) - repairs - minAcceptableProfit;
+            }
             
             const installmentDiscount = parseFloat(document.getElementById('installment-discount')?.value?.replace(/[^\d]/g, '') || 40000);
             const installmentBonus = parseFloat(document.getElementById('installment-bonus')?.value?.replace(/[^\d]/g, '') || 20000);
