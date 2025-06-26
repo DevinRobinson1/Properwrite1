@@ -37,6 +37,24 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        .acquisition-tab-btn {
+            transition: all 0.2s;
+        }
+        
+        .acquisition-tab-btn.active {
+            border-color: #3b82f6 !important;
+            color: #2563eb !important;
+        }
+        
+        .acquisition-tab-btn:not(.active) {
+            border-color: transparent;
+            color: #6b7280;
+        }
+        
+        .acquisition-tab-btn:hover:not(.active) {
+            color: #374151;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -1018,7 +1036,149 @@
                         <p class="text-gray-600">Determine optimal seller offer strategies</p>
                     </div>
 
-                    <p class="text-center text-gray-500 text-lg">Acquisitions section coming soon...</p>
+                    <!-- Seller Psychology Framework -->
+                    <div class="mb-8">
+                        <div class="bg-white rounded-lg shadow-sm border p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">🧠 Seller Psychology Framework</h3>
+                            <p class="text-gray-600 mb-4">Every seller prioritizes these three factors differently. Understanding their motivation helps you present the right offer.</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                    <h4 class="font-semibold text-green-800 mb-2">🟢 Speed</h4>
+                                    <p class="text-sm text-green-700">Quick closings, immediate cash, minimal hassle</p>
+                                </div>
+                                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                    <h4 class="font-semibold text-blue-800 mb-2">🔵 Convenience</h4>
+                                    <p class="text-sm text-blue-700">No repairs, no showings, flexible terms</p>
+                                </div>
+                                <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                                    <h4 class="font-semibold text-purple-800 mb-2">🟣 Price</h4>
+                                    <p class="text-sm text-purple-700">Maximum value, willing to wait, flexible process</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Objection Handler -->
+                    <div class="mb-8">
+                        <div class="bg-white rounded-lg shadow-sm border">
+                            <div class="p-4 border-b cursor-pointer" onclick="toggleObjectionHandler()">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-robot text-blue-600 mr-2"></i>
+                                        <h3 class="text-lg font-semibold text-gray-800">AI Objection Handler</h3>
+                                        <span class="ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">GPT-4o Powered</span>
+                                    </div>
+                                    <i class="fas fa-chevron-down transition-transform duration-200" id="objection-handler-arrow"></i>
+                                </div>
+                            </div>
+                            <div id="objection-handler-content" class="hidden p-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Seller Objection</label>
+                                        <textarea id="seller-objection" rows="4" 
+                                                  class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                                                  placeholder="Enter the seller's objection or concern..."></textarea>
+                                        <div class="mt-2">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Category (Optional)</label>
+                                            <select id="objection-category" class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                                                <option value="">Select category...</option>
+                                                <option value="price">Price</option>
+                                                <option value="timeline">Timeline</option>
+                                                <option value="fees">Fees</option>
+                                                <option value="trust">Trust</option>
+                                                <option value="process">Process</option>
+                                                <option value="competition">Competition</option>
+                                                <option value="family">Family</option>
+                                                <option value="condition">Condition</option>
+                                            </select>
+                                        </div>
+                                        <button onclick="generateObjectionResponse()" 
+                                                class="mt-3 w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                                            Generate Response
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">AI Response</label>
+                                        <div id="objection-response" class="bg-gray-50 p-3 rounded border min-h-[150px] text-sm">
+                                            <p class="text-gray-500 italic">AI response will appear here...</p>
+                                        </div>
+                                        <div class="mt-2 flex space-x-2">
+                                            <button onclick="copyObjectionResponse()" 
+                                                    class="flex-1 bg-gray-100 text-gray-700 px-3 py-1 rounded hover:bg-gray-200 text-sm">
+                                                Copy to Clipboard
+                                            </button>
+                                            <button onclick="regenerateObjectionResponse()" 
+                                                    class="flex-1 bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 text-sm">
+                                                Re-Write
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acquisition Strategy Tabs -->
+                    <div class="bg-white rounded-lg shadow-sm border">
+                        <div class="border-b">
+                            <nav class="flex space-x-8 px-6" role="tablist">
+                                <button class="acquisition-tab-btn py-4 px-1 border-b-2 font-medium text-sm active" 
+                                        onclick="showAcquisitionTab('wholesale')" data-tab="wholesale">
+                                    💰 Wholesale MAO
+                                </button>
+                                <button class="acquisition-tab-btn py-4 px-1 border-b-2 font-medium text-sm" 
+                                        onclick="showAcquisitionTab('installment')" data-tab="installment">
+                                    🏗 Installments/Novations
+                                </button>
+                                <button class="acquisition-tab-btn py-4 px-1 border-b-2 font-medium text-sm" 
+                                        onclick="showAcquisitionTab('subject-to')" data-tab="subject-to">
+                                    🎯 Subject-To
+                                </button>
+                                <button class="acquisition-tab-btn py-4 px-1 border-b-2 font-medium text-sm" 
+                                        onclick="showAcquisitionTab('seller-finance')" data-tab="seller-finance">
+                                    🏦 Seller Finance
+                                </button>
+                                <button class="acquisition-tab-btn py-4 px-1 border-b-2 font-medium text-sm" 
+                                        onclick="showAcquisitionTab('compare')" data-tab="compare">
+                                    📊 Compare Offers
+                                </button>
+                            </nav>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div class="p-6">
+                            <!-- Wholesale Tab -->
+                            <div id="wholesale-content" class="acquisition-tab-content">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Wholesale MAO Calculator</h3>
+                                <p class="text-center text-gray-500">Wholesale calculator content will be restored here...</p>
+                            </div>
+
+                            <!-- Installment Tab -->
+                            <div id="installment-content" class="acquisition-tab-content hidden">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Installment/Novation Calculator</h3>
+                                <p class="text-center text-gray-500">Installment calculator content will be restored here...</p>
+                            </div>
+
+                            <!-- Subject-To Tab -->
+                            <div id="subject-to-content" class="acquisition-tab-content hidden">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Subject-To Calculator</h3>
+                                <p class="text-center text-gray-500">Subject-To calculator content will be restored here...</p>
+                            </div>
+
+                            <!-- Seller Finance Tab -->
+                            <div id="seller-finance-content" class="acquisition-tab-content hidden">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Seller Finance Calculator</h3>
+                                <p class="text-center text-gray-500">Seller Finance calculator content will be restored here...</p>
+                            </div>
+
+                            <!-- Compare Tab -->
+                            <div id="compare-content" class="acquisition-tab-content hidden">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Compare All Offers</h3>
+                                <p class="text-center text-gray-500">Comparison dashboard will be restored here...</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1146,6 +1306,108 @@
         function updateLeaseOptionCalculation() {
             // Update lease option calculations
             recalculateDispositions();
+        }
+
+        // Acquisition tab functionality
+        function showAcquisitionTab(tabName) {
+            console.log('Switching to acquisition tab:', tabName);
+            
+            // Hide all tab contents
+            const allTabs = document.querySelectorAll('.acquisition-tab-content');
+            allTabs.forEach(tab => tab.classList.add('hidden'));
+            
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName + '-content');
+            if (selectedTab) {
+                selectedTab.classList.remove('hidden');
+            }
+            
+            // Update tab button styles
+            const allButtons = document.querySelectorAll('.acquisition-tab-btn');
+            allButtons.forEach(btn => {
+                btn.classList.remove('active', 'border-blue-500', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Highlight active button
+            const activeButton = document.querySelector(`[data-tab="${tabName}"]`);
+            if (activeButton) {
+                activeButton.classList.add('active', 'border-blue-500', 'text-blue-600');
+                activeButton.classList.remove('border-transparent', 'text-gray-500');
+            }
+        }
+
+        // AI Objection Handler functionality
+        function toggleObjectionHandler() {
+            const content = document.getElementById('objection-handler-content');
+            const arrow = document.getElementById('objection-handler-arrow');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                arrow.classList.add('rotate-180');
+            } else {
+                content.classList.add('hidden');
+                arrow.classList.remove('rotate-180');
+            }
+        }
+
+        function generateObjectionResponse() {
+            const objection = document.getElementById('seller-objection').value;
+            const category = document.getElementById('objection-category').value;
+            const responseDiv = document.getElementById('objection-response');
+            
+            if (!objection.trim()) {
+                alert('Please enter a seller objection first.');
+                return;
+            }
+            
+            // Show loading state
+            responseDiv.innerHTML = '<p class="text-gray-500 italic">Generating AI response...</p>';
+            
+            // Call API endpoint
+            fetch('/api/objection_handler', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    objection: objection,
+                    category: category
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    responseDiv.innerHTML = data.response;
+                } else {
+                    responseDiv.innerHTML = '<p class="text-red-500">Error: ' + (data.error || 'Failed to generate response') + '</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                responseDiv.innerHTML = '<p class="text-red-500">Error: Failed to generate response</p>';
+            });
+        }
+
+        function copyObjectionResponse() {
+            const responseDiv = document.getElementById('objection-response');
+            const text = responseDiv.innerText;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                // Temporarily change button text
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+
+        function regenerateObjectionResponse() {
+            generateObjectionResponse();
         }
 
         function formatNumber(element) {

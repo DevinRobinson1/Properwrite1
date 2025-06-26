@@ -1,0 +1,84 @@
+Restore Acquisitions Tabs + AI Objection Handler
+
+Critical Bug Report
+Symptoms
+Inner-tabs in Acquisitions (“Wholesale MAO / Installments-Novations / Subject-To / Seller Finance / Compare Offers”) are no longer clickable; UI is stuck on a blank panel.
+
+AI Objection Handler accordion will not expand.
+
+Offer components and calculators (Wholesale, Novation, etc.) are not rendering.
+
+Likely Root Causes
+Recent refactor removed or renamed the state key controlling activeAcqTab.
+
+Click handler on the tab buttons no longer updates state.
+
+Offer components were un-imported or gated behind a failing conditional.
+
+The Objection-Handler collapse is still wired to the old isObjectionOpen state key.
+
+Fix Requirements
+1️⃣ Reinstate Tab Router Logic
+jsx
+Copy
+Edit
+const acqTabMap = {
+  WHOLESALE:   <WholesaleMAO />,
+  NOVATION:    <InstallmentNovation />,
+  SUB2:        <SubjectToCalculator />,
+  SF:          <SellerFinanceCalculator />,
+  COMPARE:     <CompareOffersPanel />
+};
+
+const [activeAcqTab, setActiveAcqTab] = useState("WHOLESALE");
+
+<TabButton id="WHOLESALE"  onClick={() => setActiveAcqTab("WHOLESALE")} />
+...
+{acqTabMap[activeAcqTab]}
+Ensure each <TabButton> passes a string id that exists in acqTabMap.
+
+Remove stale checks like if (!acqState.wholesale) that block render.
+
+2️⃣ Import / Mount Offer Components
+Confirm these files are exported & referenced:
+
+bash
+Copy
+Edit
+/components/acq/WholesaleMAO.jsx
+/components/acq/InstallmentNovation.jsx
+/components/acq/SubjectToCalculator.jsx
+/components/acq/SellerFinanceCalculator.jsx
+/components/acq/CompareOffersPanel.jsx
+3️⃣ Repair AI Objection Handler Accordion
+jsx
+Copy
+Edit
+const [open, setOpen] = useState(false);
+<AccordionHeader onClick={() => setOpen(!open)} />
+{open && <ObjectionHandlerBody />}
+Make sure the state variable matches the one controlling the down-arrow icon.
+
+Verify ObjectionHandlerBody still calls GPT-4o endpoint.
+
+4️⃣ QA Checklist
+Launch app fresh → Acquisitions tab loads; Wholesale MAO visible.
+
+Click each inner-tab → corresponding calculator appears; others unmount.
+
+Click AI Objection Handler → body expands, textarea + “Generate Response” button visible.
+
+Generate objection → GPT-4o returns markdown reply.
+
+No console errors.
+
+5️⃣ Regression Guard
+Add unit tests:
+
+tsx
+Copy
+Edit
+it("renders Wholesale tab by default", ...)
+it("switches to Subject-To tab on click", ...)
+it("AI Objection Handler toggles open/closed", ...)
+Please restore the tab-router state, re-mount offer components, and fix the accordion toggle so the Acquisitions suite and AI tools are fully operational again.
