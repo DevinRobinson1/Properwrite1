@@ -1,5 +1,5 @@
 {
-  "cache_timestamp": 1750952723.4994977,
+  "cache_timestamp": 1750956807.3255863,
   "property_data": {
     "status": "success",
     "address": "14303 Evening Flight Lane, Charlotte, NORTH CAROLINA, 28262",
@@ -16,7 +16,7 @@
       "confidence": "medium"
     },
     "source": "Rentcast API",
-    "data_retrieved_at": "2025-06-26T15:45:23.499443",
+    "data_retrieved_at": "2025-06-26T16:53:27.325539",
     "estimate": 415000,
     "rent_estimate": 0,
     "confidence": "low",
