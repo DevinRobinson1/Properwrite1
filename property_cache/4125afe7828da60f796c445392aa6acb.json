@@ -1,5 +1,5 @@
 {
-  "cache_timestamp": 1750870716.945997,
+  "cache_timestamp": 1750942286.1425197,
   "property_data": {
     "status": "success",
     "address": "14303 Evening Flight Lane, Charlotte, NC, 28262",
@@ -16,7 +16,7 @@
       "confidence": "medium"
     },
     "source": "Rentcast API",
-    "data_retrieved_at": "2025-06-25T16:58:36.945961",
+    "data_retrieved_at": "2025-06-26T12:51:26.142483",
     "estimate": 415000,
     "rent_estimate": 0,
     "confidence": "low",
@@ -39,5 +39,5 @@
     "comps_count": 0,
     "avg_price_per_sqft": 0.0
   },
-  "address_normalized": "14303 evening Flight lane, charlotte, NC 28262"
+  "address_normalized": "14303 Evening Flight lane, Charlotte, NC 28262"
 }
