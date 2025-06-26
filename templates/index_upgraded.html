@@ -717,6 +717,192 @@
                             </div>
                         </div>
 
+                        <!-- Dynamic Fee Section -->
+                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-6 mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-lg font-semibold text-orange-800">📥 Installment Closing Costs & Out-of-Pocket Concessions</h4>
+                                <button onclick="toggleAdvancedFees()" class="text-sm bg-orange-200 hover:bg-orange-300 px-3 py-1 rounded text-orange-800">
+                                    <i class="fas fa-cogs mr-1"></i>Advanced Settings
+                                </button>
+                            </div>
+                            
+                            <!-- Closing Costs Section -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div class="bg-white p-4 rounded-lg">
+                                    <h5 class="font-semibold text-orange-700 mb-3">🏢 Closing Costs</h5>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Flat Fee Listing Service</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="flat-fee-listing" value="500" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $500">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Listing Agent Commission (%)</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="listing-commission" value="2" step="0.1" class="w-16 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: 2% of List Price">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Buyer's Agent Commission (%)</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="buyer-commission" value="2" step="0.1" class="w-16 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: 2% of List Price">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Title & Escrow Fees (%)</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="title-fees-percent" value="1" step="0.1" class="w-16 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: 1% of List Price">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Loan Concessions to Buyer</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="loan-concessions" value="400" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $400 or 0.25%">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Home Warranty</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="home-warranty" value="650" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $650">ℹ️</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white p-4 rounded-lg">
+                                    <h5 class="font-semibold text-orange-700 mb-3">💰 Out-of-Pocket Costs</h5>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Professional Staging</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="staging-fee" value="2500" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $2,500">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Make-Ready Cleaning</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="cleaning-fee" value="750" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $750">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Photography</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="photography-fee" value="350" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $350">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Matterport</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="matterport-fee" value="250" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $250">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Inspection Fee</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="inspection-fee" value="1000" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $1,000">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Max Repairs Prior to Closing</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="max-repairs" value="3000" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $3,000 or 10% of repair budget">ℹ️</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Advanced Settings (Hidden by Default) -->
+                            <div id="advanced-fees-section" class="hidden">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                                    <div class="bg-white p-4 rounded-lg">
+                                        <h5 class="font-semibold text-orange-700 mb-3">🏘️ Additional Fees</h5>
+                                        <div class="space-y-3">
+                                            <div class="flex justify-between items-center">
+                                                <label class="text-sm text-gray-700">HOA Resale Certificate</label>
+                                                <input type="number" id="hoa-resale" value="500" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <label class="text-sm text-gray-700">HOA Transfer Fee</label>
+                                                <input type="number" id="hoa-transfer" value="350" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <label class="text-sm text-gray-700">Survey Fee</label>
+                                                <input type="number" id="survey-fee" value="650" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-white p-4 rounded-lg">
+                                        <h5 class="font-semibold text-orange-700 mb-3">📝 Optional Line Items</h5>
+                                        <div class="space-y-3">
+                                            <div class="flex justify-between items-center">
+                                                <input type="text" id="other-1-label" placeholder="Other Fee 1" class="w-32 px-2 py-1 border border-gray-300 rounded text-sm">
+                                                <input type="number" id="other-1-amount" value="0" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <input type="text" id="other-2-label" placeholder="Other Fee 2" class="w-32 px-2 py-1 border border-gray-300 rounded text-sm">
+                                                <input type="number" id="other-2-amount" value="0" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <input type="text" id="other-3-label" placeholder="Other Fee 3" class="w-32 px-2 py-1 border border-gray-300 rounded text-sm">
+                                                <input type="number" id="other-3-amount" value="0" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Fee Totals -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+                                <div class="bg-gray-100 p-4 rounded-lg">
+                                    <div class="text-sm text-gray-700 mb-1">Total Closing Costs</div>
+                                    <div class="text-xl font-bold text-gray-800">$<span id="total-closing-costs-fee">18,400</span></div>
+                                    <div class="text-xs text-gray-500">Do not edit</div>
+                                </div>
+                                <div class="bg-gray-100 p-4 rounded-lg">
+                                    <div class="text-sm text-gray-700 mb-1">Total Out-of-Pocket</div>
+                                    <div class="text-xl font-bold text-gray-800">$<span id="total-oop-costs">7,850</span></div>
+                                    <div class="text-xs text-gray-500">Do not edit</div>
+                                </div>
+                                <div class="bg-orange-100 p-4 rounded-lg">
+                                    <div class="text-sm text-orange-700 mb-1">Total Combined Fees</div>
+                                    <div class="text-xl font-bold text-orange-800">$<span id="total-installment-fees">26,250</span></div>
+                                    <div class="text-xs text-orange-600">Auto-calculated</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Recalculate Button -->
+                            <div class="text-center">
+                                <button onclick="recalculateNovationMAO()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-semibold">
+                                    🧮 Recalculate Novation MAO
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Risk Analysis -->
                         <div class="bg-orange-50 p-6 rounded-lg">
                             <h4 class="text-lg font-semibold text-orange-800 mb-4">Risk Assessment</h4>
@@ -2053,51 +2239,158 @@
             }
         }
 
-        function updateComparisonFromTabs() {
+        // Dynamic Fee Section Functions
+        function toggleAdvancedFees() {
+            const section = document.getElementById('advanced-fees-section');
+            if (section) {
+                section.classList.toggle('hidden');
+            }
+        }
+
+        function recalculateInstallmentFees() {
+            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 200000;
+            const installmentBonus = parseFloat(document.getElementById('installment-bonus')?.value?.replace(/[^\d]/g, '')) || 20000;
+            const listPrice = arv + installmentBonus;
+
+            // Closing Costs
+            const flatFeeListing = parseFloat(document.getElementById('flat-fee-listing')?.value || 500);
+            const listingCommissionPercent = parseFloat(document.getElementById('listing-commission')?.value || 2) / 100;
+            const buyerCommissionPercent = parseFloat(document.getElementById('buyer-commission')?.value || 2) / 100;
+            const titleFeesPercent = parseFloat(document.getElementById('title-fees-percent')?.value || 1) / 100;
+            const loanConcessions = parseFloat(document.getElementById('loan-concessions')?.value || 400);
+            const homeWarranty = parseFloat(document.getElementById('home-warranty')?.value || 650);
+
+            // Calculate percentage-based fees
+            const listingCommission = listPrice * listingCommissionPercent;
+            const buyerCommission = listPrice * buyerCommissionPercent;
+            const titleFees = listPrice * titleFeesPercent;
+
+            // Advanced fees (if visible)
+            const hoaResale = parseFloat(document.getElementById('hoa-resale')?.value || 0);
+            const hoaTransfer = parseFloat(document.getElementById('hoa-transfer')?.value || 0);
+            const surveyFee = parseFloat(document.getElementById('survey-fee')?.value || 0);
+
+            // Other fees
+            const other1 = parseFloat(document.getElementById('other-1-amount')?.value || 0);
+            const other2 = parseFloat(document.getElementById('other-2-amount')?.value || 0);
+            const other3 = parseFloat(document.getElementById('other-3-amount')?.value || 0);
+
+            // Out-of-Pocket Costs
+            const stagingFee = parseFloat(document.getElementById('staging-fee')?.value || 2500);
+            const cleaningFee = parseFloat(document.getElementById('cleaning-fee')?.value || 750);
+            const photographyFee = parseFloat(document.getElementById('photography-fee')?.value || 350);
+            const matterportFee = parseFloat(document.getElementById('matterport-fee')?.value || 250);
+            const inspectionFee = parseFloat(document.getElementById('inspection-fee')?.value || 1000);
+            const maxRepairs = parseFloat(document.getElementById('max-repairs')?.value || 3000);
+
+            // Calculate totals
+            const totalClosingCosts = flatFeeListing + listingCommission + buyerCommission + titleFees + 
+                                    loanConcessions + homeWarranty + hoaResale + hoaTransfer + surveyFee + 
+                                    other1 + other2 + other3;
+
+            const totalOOPCosts = stagingFee + cleaningFee + photographyFee + matterportFee + 
+                                inspectionFee + maxRepairs;
+
+            const totalCombinedFees = totalClosingCosts + totalOOPCosts;
+
+            // Update display elements
+            updateElementIfExists('total-closing-costs-fee', totalClosingCosts);
+            updateElementIfExists('total-oop-costs', totalOOPCosts);
+            updateElementIfExists('total-installment-fees', totalCombinedFees);
+
+            // Store total fees for MAO recalculation
+            window.currentInstallmentFees = totalCombinedFees;
+
+            return totalCombinedFees;
+        }
+
+        function recalculateNovationMAO() {
+            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 200000;
+            const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/[^\d]/g, '')) || 30000;
+            const installmentBonus = parseFloat(document.getElementById('installment-bonus')?.value?.replace(/[^\d]/g, '')) || 20000;
+            
+            // Get current fee total
+            const totalFees = recalculateInstallmentFees();
+            const minAcceptableProfit = 10000; // Default minimum profit
+            
+            // Updated MAO formula: Final Sales Price - Total Fees - Min Profit
+            const finalSalesPrice = arv + installmentBonus;
+            const updatedMAO = finalSalesPrice - totalFees - minAcceptableProfit;
+            
+            // Update the installment purchase price
+            updateElementIfExists('installment-purchase', updatedMAO);
+            
+            // Recalculate profit with new MAO
+            const grossProfit = finalSalesPrice - updatedMAO;
+            const netProfit = grossProfit - totalFees;
+            
+            updateElementIfExists('installment-sales', finalSalesPrice);
+            updateElementIfExists('installment-profit', netProfit);
+            
+            // Also update the installment discount to reflect new MAO
+            const newDiscount = arv - updatedMAO;
+            const discountElement = document.getElementById('installment-discount');
+            if (discountElement) {
+                discountElement.value = newDiscount.toLocaleString();
+            }
+            
+            // Update comparison if needed
+            if (typeof updateComparisonResults === 'function') {
+                updateComparisonResults();
+            }
+        }
+
+        function updateComparisonResults() {
             // Get current values from tabs and update comparison
-            const arv = parseFloat(document.getElementById('arv').value);
-            const repairs = parseFloat(document.getElementById('repairs').value);
-            const rent = parseFloat(document.getElementById('rent').value);
+            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 200000;
+            const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/[^\d]/g, '')) || 30000;
+            const rent = parseFloat(document.getElementById('rent')?.value?.replace(/[^\d]/g, '')) || 1425;
             
             // Calculate simplified results for comparison
-            const wholesaleMao = parseFloat(document.getElementById('wholesale-mao-result').textContent.replace(/,/g, ''));
-            const assignmentProfit = parseFloat(document.getElementById('assignment-profit').textContent.replace(/,/g, ''));
+            const wholesalePercent = parseFloat(document.getElementById('wholesale-arv-percent')?.value || 70) / 100;
+            const assignmentFee = parseFloat(document.getElementById('wholesale-assignment-fee')?.value?.replace(/[^\d]/g, '') || 10000);
+            const wholesaleMao = (arv * wholesalePercent) - repairs - assignmentFee;
             
-            const installmentPurchase = parseFloat(document.getElementById('installment-purchase').textContent.replace(/,/g, ''));
-            const installmentSales = parseFloat(document.getElementById('installment-sales').textContent.replace(/,/g, ''));
-            const installmentProfit = parseFloat(document.getElementById('installment-profit').textContent.replace(/,/g, ''));
+            const installmentDiscount = parseFloat(document.getElementById('installment-discount')?.value?.replace(/[^\d]/g, '') || 40000);
+            const installmentBonus = parseFloat(document.getElementById('installment-bonus')?.value?.replace(/[^\d]/g, '') || 20000);
+            const installmentMao = arv - installmentDiscount;
+            const installmentProfit = (arv + installmentBonus) - installmentMao - repairs - 9900;
             
-            const sub2Equity = parseFloat(document.getElementById('sub2-equity').textContent.replace(/,/g, ''));
-            const sub2CashFlow = parseFloat(document.getElementById('sub2-cashflow').textContent.replace(/,/g, ''));
-            const sub2Payment = parseFloat(document.getElementById('sub2-pi').textContent.replace(/,/g, ''));
+            const loanBalance = parseFloat(document.getElementById('sub2-loan-balance')?.value?.replace(/[^\d]/g, '') || 116250);
+            const cashToSeller = parseFloat(document.getElementById('sub2-cash-seller')?.value?.replace(/[^\d]/g, '') || 4000);
+            const sub2Equity = arv - loanBalance - cashToSeller - 2500;
+            const monthlyPI = parseFloat(document.getElementById('sub2-monthly-pi')?.value?.replace(/[^\d]/g, '') || 800);
+            const monthlyEscrow = parseFloat(document.getElementById('sub2-monthly-escrow')?.value?.replace(/[^\d]/g, '') || 300);
+            const sub2CashFlow = rent - monthlyPI - monthlyEscrow - 100;
             
-            const sfPurchase = parseFloat(document.getElementById('sf-purchase-price').value);
-            const sfDown = parseFloat(document.getElementById('sf-down-payment').value);
-            const sfCashFlow = parseFloat(document.getElementById('sf-cashflow').textContent.replace(/,/g, ''));
+            const downPayment = parseFloat(document.getElementById('sf-down-payment')?.value?.replace(/[^\d]/g, '') || 15000);
+            const sfPurchase = arv + downPayment;
+            const monthlyPayment = parseFloat(document.getElementById('sf-monthly-payment')?.textContent?.replace(/[^\d]/g, '') || 876);
+            const sfCashFlow = rent - monthlyPayment - 250 - 100;
             
             const comparisonResults = {
                 wholesale: {
                     wholesale_mao: wholesaleMao,
-                    assignment_profit: assignmentProfit,
+                    assignment_profit: assignmentFee,
                     all_in_amount: wholesaleMao + repairs,
                     strategy_type: 'Cash Acquisition'
                 },
                 installment: {
-                    installment_mao: installmentPurchase,
+                    installment_mao: installmentMao,
                     net_profit: installmentProfit,
-                    final_sales_price: installmentSales,
+                    final_sales_price: arv + installmentBonus,
                     strategy_type: 'Payment Plan'
                 },
                 subject_to: {
                     equity_position: sub2Equity,
                     monthly_cash_flow: sub2CashFlow,
-                    monthly_payment: sub2Payment,
-                    total_cash_needed: 6500,
+                    monthly_payment: monthlyPI + monthlyEscrow,
+                    total_cash_needed: cashToSeller + 2500,
                     strategy_type: 'Creative Financing'
                 },
                 seller_finance: {
                     purchase_price: sfPurchase,
-                    down_payment: sfDown,
+                    down_payment: downPayment,
                     monthly_cash_flow: sfCashFlow,
                     strategy_type: 'Owner Financing'
                 }
@@ -2177,7 +2470,7 @@
                 if (tabName === 'installment') recalculateInstallment();
                 if (tabName === 'subject-to') recalculateSubjectTo();
                 if (tabName === 'seller-finance') recalculateSellerFinance();
-                if (tabName === 'compare') updateComparisonFromTabs();
+                if (tabName === 'compare') updateComparisonResults();
             }, 100);
         }
 
@@ -2649,6 +2942,9 @@
                 // Initialize calculations
                 setTimeout(() => {
                     recalculateWholesale();
+                    if (typeof recalculateInstallmentFees === 'function') {
+                        recalculateInstallmentFees();
+                    }
                 }, 200);
             }
         });
