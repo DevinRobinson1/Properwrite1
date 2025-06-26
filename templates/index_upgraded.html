@@ -546,7 +546,12 @@
                                 <button onclick="showDispositionTab('seller-finance-wrap')" 
                                         class="disposition-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50"
                                         id="seller-finance-wrap-tab">
-                                    SF Wrap / Lease-Option
+                                    SF Wrap
+                                </button>
+                                <button onclick="showDispositionTab('lease-option')" 
+                                        class="disposition-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50"
+                                        id="lease-option-tab">
+                                    Lease Option
                                 </button>
                                 <button onclick="showDispositionTab('compare-all')" 
                                         class="disposition-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50"
@@ -838,61 +843,7 @@
                                 </div>
                             </div>
 
-                            <!-- Lease-Option Calculator -->
-                            <div class="mb-6">
-                                <h4 class="text-md font-semibold text-purple-700 mb-3">Lease-Option (Sub-Buyer)</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div class="space-y-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-purple-700 mb-1">Equity Available</label>
-                                            <input type="text" id="lease-option-equity" value="172,000" 
-                                                   class="w-full px-3 py-2 border border-purple-300 rounded focus:ring-2 focus:ring-purple-500"
-                                                   onchange="formatAndRecalculateLeaseOption(this)">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-purple-700 mb-1">Repairs Needed</label>
-                                            <select id="lease-option-repairs" class="w-full px-3 py-2 border border-purple-300 rounded focus:ring-2 focus:ring-purple-500"
-                                                    onchange="updateLeaseOptionCalculation()">
-                                                <option value="none">None</option>
-                                                <option value="some" selected>Some</option>
-                                                <option value="heavy">Heavy</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-purple-700 mb-1">Desired Cash Flow</label>
-                                            <input type="text" id="lease-option-cash-flow" value="475" 
-                                                   class="w-full px-3 py-2 border border-purple-300 rounded focus:ring-2 focus:ring-purple-500"
-                                                   onchange="formatAndRecalculateLeaseOption(this)">
-                                        </div>
-                                    </div>
-                                    <div class="bg-white p-4 rounded border">
-                                        <h5 class="font-semibold text-purple-800 mb-3">Lease-Option Target</h5>
-                                        <div class="space-y-2 text-sm">
-                                            <div class="flex justify-between">
-                                                <span>Base Cash-to-Close:</span>
-                                                <span class="font-bold" id="lease-option-base-c2c">$33,200</span>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <span>Cash Flow Bonus:</span>
-                                                <span class="font-bold text-green-600" id="lease-option-cf-bonus">$5,000</span>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <span>Equity Bonus:</span>
-                                                <span class="font-bold text-green-600" id="lease-option-equity-bonus">$5,000</span>
-                                            </div>
-                                            <hr class="my-2">
-                                            <div class="flex justify-between font-bold">
-                                                <span>Target Cash-to-Close:</span>
-                                                <span class="text-purple-600" id="lease-option-target-c2c">$43,200</span>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <span>Timeline:</span>
-                                                <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">30-45 days</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <!-- End of SF Wrap Component -->
 
                             <!-- End of SF Wrap / Lease-Option Component -->
                         </div>
@@ -988,6 +939,66 @@
                                     <span>🤖 AI: Suggest Best Exit Strategy</span>
                                 </button>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Lease Option Tab Content -->
+                    <div id="lease-option-content" class="disposition-tab-content hidden">
+                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-orange-800 mb-4">🏡 Lease-Option (Sub-Buyer)</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-orange-700 mb-1">Equity Available</label>
+                                        <input type="text" id="lease-option-equity" value="172,000" 
+                                               class="w-full px-3 py-2 border border-orange-300 rounded focus:ring-2 focus:ring-orange-500"
+                                               onchange="formatAndRecalculateLeaseOption(this)">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-orange-700 mb-1">Repairs Needed</label>
+                                        <select id="lease-option-repairs" class="w-full px-3 py-2 border border-orange-300 rounded focus:ring-2 focus:ring-orange-500"
+                                                onchange="updateLeaseOptionCalculation()">
+                                            <option value="none">None</option>
+                                            <option value="some" selected>Some</option>
+                                            <option value="heavy">Heavy</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-orange-700 mb-1">Desired Cash Flow</label>
+                                        <input type="text" id="lease-option-cash-flow" value="475" 
+                                               class="w-full px-3 py-2 border border-orange-300 rounded focus:ring-2 focus:ring-orange-500"
+                                               onchange="formatAndRecalculateLeaseOption(this)">
+                                    </div>
+                                </div>
+                                <div class="bg-white p-4 rounded border">
+                                    <h4 class="font-semibold text-orange-800 mb-3">Lease-Option Target</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between">
+                                            <span>Base Cash-to-Close:</span>
+                                            <span class="font-bold" id="lease-option-base-c2c">$33,200</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Cash Flow Bonus:</span>
+                                            <span class="font-bold text-green-600" id="lease-option-cf-bonus">$5,000</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Equity Bonus:</span>
+                                            <span class="font-bold text-green-600" id="lease-option-equity-bonus">$5,000</span>
+                                        </div>
+                                        <hr class="my-2">
+                                        <div class="flex justify-between font-bold">
+                                            <span>Target Cash-to-Close:</span>
+                                            <span class="text-orange-600" id="lease-option-target-c2c">$43,200</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Timeline:</span>
+                                            <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs">30-45 days</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- End of Lease Option Component -->
                         </div>
                     </div>
 
@@ -1099,9 +1110,41 @@
             // Update wrap configuration displays
             const downPaymentSlider = document.getElementById('wrap-down-payment-percent');
             const downPaymentDisplay = document.getElementById('wrap-down-payment-display');
+            const downPaymentAmount = document.getElementById('wrap-down-payment-amount');
+            
             if (downPaymentSlider && downPaymentDisplay) {
-                downPaymentDisplay.textContent = downPaymentSlider.value + '%';
+                const percentage = downPaymentSlider.value;
+                downPaymentDisplay.textContent = percentage + '%';
+                
+                // Calculate down payment amount based on ARV
+                const arv = parseInt(document.getElementById('arv').value.replace(/,/g, '')) || 415000;
+                const amount = (arv * percentage / 100);
+                if (downPaymentAmount) {
+                    downPaymentAmount.textContent = amount.toLocaleString();
+                }
+                
+                // Update buyer interest rate based on down payment
+                const buyerRateElement = document.getElementById('wrap-buyer-rate');
+                if (buyerRateElement) {
+                    let rate;
+                    if (percentage >= 20) rate = 6.0;
+                    else if (percentage >= 15) rate = 6.5;
+                    else if (percentage >= 10) rate = 7.0;
+                    else if (percentage >= 5) rate = 7.5;
+                    else rate = 8.0;
+                    buyerRateElement.textContent = rate + '%';
+                }
             }
+            recalculateDispositions();
+        }
+
+        function formatAndRecalculateLeaseOption(element) {
+            formatNumber(element);
+            updateLeaseOptionCalculation();
+        }
+
+        function updateLeaseOptionCalculation() {
+            // Update lease option calculations
             recalculateDispositions();
         }
 
