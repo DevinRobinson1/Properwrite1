@@ -1112,6 +1112,20 @@
             }
         }
 
+        function updateAllTabCalculations() {
+            // Update global variables and recalculate all tabs
+            recalculateDispositions();
+        }
+
+        function updateGlobalAcquisitionsPriceFromHeader() {
+            // Sync header acquisitions price with global variable
+            const headerPrice = document.getElementById('global-acquisitions-price-header');
+            if (headerPrice) {
+                window.globalAcquisitionsPrice = parseInt(headerPrice.value.replace(/,/g, '')) || 269750;
+                updateAllTabCalculations();
+            }
+        }
+
         // Form submission handling
         document.getElementById('property-form').addEventListener('submit', function(e) {
             e.preventDefault();
