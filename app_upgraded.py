@@ -653,6 +653,93 @@ def page_not_found(e):
 def internal_server_error(e):
     return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/api/objection_handler', methods=['POST'])
+def objection_handler():
+    """
+    AI-powered objection handling assistant using GPT-4o
+    """
+    try:
+        from openai import OpenAI
+        import os
+        
+        data = request.get_json()
+        objection_text = data.get('objection_text', '').strip()
+        category = data.get('category', '')
+        regenerate = data.get('regenerate', False)
+        
+        if not objection_text:
+            return jsonify({'success': False, 'error': 'Objection text is required'})
+        
+        # Initialize OpenAI client
+        client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+        
+        # Build the expert prompt
+        category_context = ""
+        if category:
+            category_contexts = {
+                'price': "This is a price/value objection. Focus on demonstrating value and exploring their true concerns about price.",
+                'timeline': "This is a timeline/urgency objection. Explore their timeline concerns and offer flexible solutions.",
+                'fees': "This is a fees/costs objection. Break down the value of services and explore their budget concerns.",
+                'trust': "This is a trust/credibility objection. Build rapport and provide social proof and credentials.",
+                'process': "This is a process/paperwork objection. Simplify the process and address their administrative concerns.",
+                'competition': "This is about other offers. Focus on unique value propositions and relationship building.",
+                'family': "This is a family/emotional objection. Show empathy and address emotional concerns.",
+                'condition': "This is about property condition. Address repair concerns and adjustment possibilities."
+            }
+            category_context = f"\n\nCONTEXT: {category_contexts.get(category, '')}"
+        
+        creativity_instruction = "Use high creativity and varied approaches." if regenerate else "Use standard professional approach."
+        
+        prompt = f"""You are a real-estate acquisitions coach trained on the selling techniques of:
+• Chris Voss (tactical empathy, calibrated questions)
+• Steve Trang (wholesaling sales frameworks)  
+• Ian Ross (creative finance negotiation)
+• John Martinez (pain funnels, soft closes)
+
+{creativity_instruction}{category_context}
+
+SELLER'S OBJECTION:
+"{objection_text}"
+
+INSTRUCTIONS:
+1. Restate the seller's objection to show understanding
+2. Provide a concise empathy statement
+3. Ask 2-3 Socratic/calibrated questions to uncover root cause
+4. Offer one compelling solution or concession
+5. End with a soft close that invites the seller to talk further
+
+Output in markdown with sections:
+**Empathy** – [Empathetic acknowledgment]
+**Questions** – [2-3 bullet points with calibrated questions]
+**Suggested Solution** – [One compelling solution]
+**Soft Close** – [Invitation to continue conversation]"""
+
+        # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
+        # do not change this unless explicitly requested by the user
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are an expert real estate acquisitions coach specializing in objection handling using proven sales methodologies."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.8 if regenerate else 0.7,
+            max_tokens=800
+        )
+        
+        ai_response = response.choices[0].message.content
+        
+        return jsonify({
+            'success': True,
+            'response': ai_response
+        })
+        
+    except Exception as e:
+        print(f"Error in objection handler: {e}")
+        return jsonify({
+            'success': False,
+            'error': f'Failed to generate objection response: {str(e)}'
+        })
+
 @app.route('/analyze_property_risk', methods=['POST'])
 def analyze_property_risk():
     """

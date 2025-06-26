@@ -1,0 +1,64 @@
+ Add “AI Objection Handler” Panel to Acquisitions
+Build an AI-powered objection-handling assistant inside the Acquisitions section. The user (acquisitions rep) types or pastes a seller’s objection; GPT-4o returns a highly trained, Socratic-style response that blends tactics from Chris Voss, Steve Trang, Ian Ross, and John Martinez.
+
+🔧 1. UI Component
+Place a new collapsible card below the offer tabs (but inside Acquisitions):
+“🤖 AI Objection Handler”
+
+Elements inside card:
+
+Textarea – “Paste seller objection…”
+
+Dropdown (optional) – quick-select objection types (Price, Timeline, Fees, Trust, etc.)
+
+🔍 Generate Response button
+
+Output area showing GPT-4o reply (markdown formatted)
+
+🧠 2. GPT-4o Prompt Template (backend):
+text
+Copy
+Edit
+You are a real-estate acquisitions coach trained on the selling techniques of:
+• Chris Voss (tactical empathy, calibrated questions)
+• Steve Trang (wholesaling sales frameworks)
+• Ian Ross (creative finance negotiation)
+• John Martinez (pain funnels, soft closes)
+
+INSTRUCTIONS
+1. Restate the seller’s objection to show understanding.
+2. Provide a concise empathy statement.
+3. Ask 2-3 Socratic / calibrated questions to uncover root cause.
+4. Offer one compelling solution or concession.
+5. End with a soft close that invites the seller to talk further.
+
+Output in markdown with sections:
+**Empathy** –  
+**Questions** – (bullet list)  
+**Suggested Solution** –  
+**Soft Close** –
+⚙️ 3. Implementation Steps
+Install OpenAI SDK (if not already).
+
+New API route /api/objection that accepts { objectionText, category }.
+
+Build the prompt using the template above + user text.
+
+Return GPT-4o response → render in output area (markdown parser).
+
+✨ 4. Extra Options
+“Copy to Clipboard” button next to response.
+
+“Save to Deal Notes” checkbox to store the generated script in deal history.
+
+Show a “Re-Write” button (regenerates with new creativity).
+
+🗂 5. File / Component Suggestions
+swift
+Copy
+Edit
+/src/acquisitions/components/
+  ObjectionHandler.jsx
+  objectionPrompt.js       // contains prompt builder
+/routes/objectionRoute.js  // API endpoint
+Add this feature and acquisitions reps will have real-time, high-level sales coaching at their fingertips.
