@@ -1131,17 +1131,21 @@
             // Show loading state
             document.getElementById('loading-state').classList.remove('hidden');
             
-            // Create form data
-            const formData = new FormData();
-            formData.append('address', address);
-            formData.append('city', city);
-            formData.append('state', state);
-            formData.append('zip', zip);
+            // Create JSON data
+            const requestData = {
+                address: address,
+                city: city,
+                state: state,
+                zip: zip
+            };
             
             // Submit to backend
-            fetch('/analyze_property', {
+            fetch('/api/analyze-property', {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
             })
             .then(response => response.json())
             .then(data => {
