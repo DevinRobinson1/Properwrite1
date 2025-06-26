@@ -341,7 +341,92 @@
                         </div>
                     </div>
 
-
+                    <!-- AI Objection Handler Panel -->
+                    <div class="mt-8 mb-6">
+                        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg">
+                            <div class="flex items-center justify-between p-4 cursor-pointer" onclick="toggleObjectionHandler()">
+                                <div class="flex items-center">
+                                    <h3 class="text-lg font-semibold text-indigo-800">🤖 AI Objection Handler</h3>
+                                    <span class="ml-3 bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full text-xs font-medium">GPT-4o Powered</span>
+                                </div>
+                                <i id="objection-handler-icon" class="fas fa-chevron-down text-indigo-600 transition-transform duration-200"></i>
+                            </div>
+                            
+                            <div id="objection-handler-content" class="hidden p-6 pt-0">
+                                <div class="space-y-4">
+                                    <!-- Input Section -->
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <div class="md:col-span-3">
+                                            <label class="block text-sm font-medium text-indigo-700 mb-2">Seller's Objection</label>
+                                            <textarea id="seller-objection" 
+                                                      placeholder="Paste or type the seller's objection here..." 
+                                                      class="w-full px-3 py-2 border border-indigo-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-vertical" 
+                                                      rows="3"></textarea>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-indigo-700 mb-2">Category (Optional)</label>
+                                            <select id="objection-category" class="w-full px-3 py-2 border border-indigo-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                                <option value="">Select Category</option>
+                                                <option value="price">Price/Value</option>
+                                                <option value="timeline">Timeline/Urgency</option>
+                                                <option value="fees">Fees/Costs</option>
+                                                <option value="trust">Trust/Credibility</option>
+                                                <option value="process">Process/Paperwork</option>
+                                                <option value="competition">Other Offers</option>
+                                                <option value="family">Family/Emotional</option>
+                                                <option value="condition">Property Condition</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="flex items-center space-x-3">
+                                        <button id="generate-response-btn" 
+                                                onclick="generateObjectionResponse()" 
+                                                class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded-md transition-colors duration-200 flex items-center">
+                                            <i class="fas fa-brain mr-2"></i>Generate Response
+                                        </button>
+                                        <button id="copy-response-btn" 
+                                                onclick="copyResponseToClipboard()" 
+                                                class="bg-gray-500 hover:bg-gray-600 text-white font-medium px-4 py-2 rounded-md transition-colors duration-200 flex items-center disabled:opacity-50" 
+                                                disabled>
+                                            <i class="fas fa-copy mr-2"></i>Copy
+                                        </button>
+                                        <button id="rewrite-response-btn" 
+                                                onclick="regenerateResponse()" 
+                                                class="bg-purple-500 hover:bg-purple-600 text-white font-medium px-4 py-2 rounded-md transition-colors duration-200 flex items-center disabled:opacity-50" 
+                                                disabled>
+                                            <i class="fas fa-redo mr-2"></i>Re-Write
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Loading State -->
+                                    <div id="objection-loading" class="hidden text-center py-4">
+                                        <div class="inline-flex items-center">
+                                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mr-3"></div>
+                                            <span class="text-indigo-700">AI is crafting your response...</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Response Output -->
+                                    <div id="objection-response" class="hidden">
+                                        <div class="bg-white border border-indigo-200 rounded-lg p-6">
+                                            <div class="flex items-center justify-between mb-4">
+                                                <h4 class="text-lg font-semibold text-indigo-800">AI-Generated Response</h4>
+                                                <div class="flex items-center text-sm text-gray-500">
+                                                    <i class="fas fa-robot mr-1"></i>
+                                                    <span>Powered by GPT-4o</span>
+                                                </div>
+                                            </div>
+                                            <div id="response-content" class="prose prose-sm max-w-none">
+                                                <!-- AI response will be populated here -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Acquisitions Tab Navigation -->
                     <div class="bg-blue-50 border-l-4 border-blue-500 shadow-sm">
@@ -365,92 +450,7 @@
                     </div>
                 </div>
 
-                <!-- AI Objection Handler Panel -->
-                <div class="mt-8 mb-6">
-                    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg">
-                        <div class="flex items-center justify-between p-4 cursor-pointer" onclick="toggleObjectionHandler()">
-                            <div class="flex items-center">
-                                <h3 class="text-lg font-semibold text-indigo-800">🤖 AI Objection Handler</h3>
-                                <span class="ml-3 bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full text-xs font-medium">GPT-4o Powered</span>
-                            </div>
-                            <i id="objection-handler-icon" class="fas fa-chevron-down text-indigo-600 transition-transform duration-200"></i>
-                        </div>
-                        
-                        <div id="objection-handler-content" class="hidden p-6 pt-0">
-                            <div class="space-y-4">
-                                <!-- Input Section -->
-                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                    <div class="md:col-span-3">
-                                        <label class="block text-sm font-medium text-indigo-700 mb-2">Seller's Objection</label>
-                                        <textarea id="seller-objection" 
-                                                  placeholder="Paste or type the seller's objection here..." 
-                                                  class="w-full px-3 py-2 border border-indigo-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-vertical" 
-                                                  rows="3"></textarea>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-indigo-700 mb-2">Category (Optional)</label>
-                                        <select id="objection-category" class="w-full px-3 py-2 border border-indigo-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                            <option value="">Select Category</option>
-                                            <option value="price">Price/Value</option>
-                                            <option value="timeline">Timeline/Urgency</option>
-                                            <option value="fees">Fees/Costs</option>
-                                            <option value="trust">Trust/Credibility</option>
-                                            <option value="process">Process/Paperwork</option>
-                                            <option value="competition">Other Offers</option>
-                                            <option value="family">Family/Emotional</option>
-                                            <option value="condition">Property Condition</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <!-- Action Buttons -->
-                                <div class="flex items-center space-x-3">
-                                    <button id="generate-response-btn" 
-                                            onclick="generateObjectionResponse()" 
-                                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded-md transition-colors duration-200 flex items-center">
-                                        <i class="fas fa-brain mr-2"></i>Generate Response
-                                    </button>
-                                    <button id="copy-response-btn" 
-                                            onclick="copyResponseToClipboard()" 
-                                            class="bg-gray-500 hover:bg-gray-600 text-white font-medium px-4 py-2 rounded-md transition-colors duration-200 flex items-center disabled:opacity-50" 
-                                            disabled>
-                                        <i class="fas fa-copy mr-2"></i>Copy
-                                    </button>
-                                    <button id="rewrite-response-btn" 
-                                            onclick="regenerateResponse()" 
-                                            class="bg-purple-500 hover:bg-purple-600 text-white font-medium px-4 py-2 rounded-md transition-colors duration-200 flex items-center disabled:opacity-50" 
-                                            disabled>
-                                        <i class="fas fa-redo mr-2"></i>Re-Write
-                                    </button>
-                                </div>
-                                
-                                <!-- Loading State -->
-                                <div id="objection-loading" class="hidden text-center py-4">
-                                    <div class="inline-flex items-center">
-                                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mr-3"></div>
-                                        <span class="text-indigo-700">AI is crafting your response...</span>
-                                    </div>
-                                </div>
-                                
-                                <!-- Response Output -->
-                                <div id="objection-response" class="hidden">
-                                    <div class="bg-white border border-indigo-200 rounded-lg p-6">
-                                        <div class="flex items-center justify-between mb-4">
-                                            <h4 class="text-lg font-semibold text-indigo-800">AI-Generated Response</h4>
-                                            <div class="flex items-center text-sm text-gray-500">
-                                                <i class="fas fa-robot mr-1"></i>
-                                                <span>Powered by GPT-4o</span>
-                                            </div>
-                                        </div>
-                                        <div id="response-content" class="prose prose-sm max-w-none">
-                                            <!-- AI response will be populated here -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
 
                 <!-- Section Divider -->
                 <div id="section-divider" class="hidden my-8">
