@@ -894,26 +894,7 @@
                                 </div>
                             </div>
 
-                            <!-- AI Assistant Buttons for SF Wrap -->
-                            <div class="mt-6 pt-4 border-t border-purple-200">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <button onclick="draftBuyerFacingPitch()" 
-                                            class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
-                                        <i class="fas fa-edit mr-2"></i>
-                                        <span class="text-sm">📋 Generate SF Pitch</span>
-                                    </button>
-                                    <button onclick="suggestBestBuyerPersona()" 
-                                            class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
-                                        <i class="fas fa-chart-bar mr-2"></i>
-                                        <span class="text-sm">📊 Rate Comparison</span>
-                                    </button>
-                                    <button onclick="openBuyerObjectionHandler()" 
-                                            class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
-                                        <i class="fas fa-question-circle mr-2"></i>
-                                        <span class="text-sm">❓ Financing Concerns</span>
-                                    </button>
-                                </div>
-                            </div>
+                            <!-- End of SF Wrap / Lease-Option Component -->
                         </div>
                     </div>
 
@@ -1010,62 +991,74 @@
                         </div>
                     </div>
 
-                    <!-- Remove old Novation/Installment section that follows -->
-                    <div class="mb-6">
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                            <h3 class="text-lg font-semibold text-blue-800 mb-4">🏠 Novation/Installment (MLS Listing)</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="space-y-4">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-gray-700">List Price:</span>
-                                        <span class="font-bold text-blue-600 text-lg" id="novation-list-price">$365,000</span>
-                                    </div>
-                                    <div class="space-y-2">
-                                        <div class="flex justify-between">
-                                            <span>Listing Commission:</span>
-                                            <div class="flex items-center">
-                                                <input type="range" min="1" max="4" step="0.5" value="2" id="listing-commission" 
-                                                       class="w-16 mr-2" onchange="updateNovationCalculation()">
-                                                <span id="listing-commission-value">2.0%</span>
-                                            </div>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span>Buyer Agent Commission:</span>
-                                            <div class="flex items-center">
-                                                <input type="range" min="1" max="4" step="0.5" value="2" id="buyer-commission" 
-                                                       class="w-16 mr-2" onchange="updateNovationCalculation()">
-                                                <span id="buyer-commission-value">2.0%</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="bg-white p-4 rounded border">
-                                    <h4 class="font-semibold text-blue-800 mb-2">Net Proceeds</h4>
-                                    <div class="space-y-1 text-sm">
-                                        <div class="flex justify-between">
-                                            <span>Gross Sale Price:</span>
-                                            <span id="novation-gross-sale">$365,000</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span>Total Commissions:</span>
-                                            <span id="novation-commissions">$14,600</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span>Our Fee:</span>
-                                            <span id="novation-our-fee">$20,475</span>
-                                        </div>
-                                        <hr class="my-2">
-                                        <div class="flex justify-between font-bold">
-                                            <span>Net to Us:</span>
-                                            <span class="text-blue-600" id="novation-net-to-us">$329,925</span>
-                                        </div>
-                                    </div>
-                                </div>
+                    <!-- End of Dispositions Section -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Acquisitions Section -->
+        <div id="acquisitions-section" class="hidden">
+            <div class="bg-blue-50 min-h-screen">
+                <div class="container mx-auto px-4 py-8">
+                    
+                    <!-- Section Header -->
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-blue-800 mb-4">🏗 Acquisitions</h2>
+                        <p class="text-gray-600">Determine optimal seller offer strategies</p>
+                    </div>
+
+                    <!-- Seller Psychology Framework -->
+                    <div class="bg-white border border-blue-200 rounded-lg p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-blue-800 mb-4">🧠 Seller Psychology Framework</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                            <div class="p-3 bg-blue-50 rounded border">
+                                <h4 class="font-medium text-blue-800">💰 SPEED (Quick Sale)</h4>
+                                <p class="text-gray-700">Cash offers, fast close, as-is condition</p>
+                            </div>
+                            <div class="p-3 bg-green-50 rounded border">
+                                <h4 class="font-medium text-green-800">💸 PRICE (Max Value)</h4>
+                                <p class="text-gray-700">Seller finance, lease options, novation</p>
+                            </div>
+                            <div class="p-3 bg-yellow-50 rounded border">
+                                <h4 class="font-medium text-yellow-800">🔄 CONVENIENCE</h4>
+                                <p class="text-gray-700">Handle repairs, no showings, flexible terms</p>
+                            </div>
+                            <div class="p-3 bg-purple-50 rounded border">
+                                <h4 class="font-medium text-purple-800">⚡ RELIEF (Problem Solver)</h4>
+                                <p class="text-gray-700">Take over payments, handle liens, distress</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Subject-To "Cash-to-Close" Builder -->
+                    <!-- Strategy Tabs -->
+                    <div class="bg-white rounded-lg shadow-lg">
+                        <!-- Tab Navigation -->
+                        <div class="flex border-b">
+                            <button onclick="showAcquisitionTab('wholesale')" 
+                                    class="acquisition-tab-btn active flex-1 py-4 px-6 text-center font-medium border-b-2 border-blue-500 text-blue-600 bg-blue-50">
+                                💰 Wholesale
+                            </button>
+                            <button onclick="showAcquisitionTab('installment')" 
+                                    class="acquisition-tab-btn flex-1 py-4 px-6 text-center font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                                📋 Installment
+                            </button>
+                            <button onclick="showAcquisitionTab('subject-to')" 
+                                    class="acquisition-tab-btn flex-1 py-4 px-6 text-center font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                                🏦 Subject-To
+                            </button>
+                            <button onclick="showAcquisitionTab('seller-finance')" 
+                                    class="acquisition-tab-btn flex-1 py-4 px-6 text-center font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                                🏠 Seller Finance
+                            </button>
+                            <button onclick="showAcquisitionTab('compare')" 
+                                    class="acquisition-tab-btn flex-1 py-4 px-6 text-center font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                                📊 Compare
+                            </button>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div class="p-6">
+                            <!-- Wholesale Tab -->
                     <div class="mb-6">
                         <div class="bg-purple-50 border border-purple-200 rounded-lg p-6">
                             <h3 class="text-lg font-semibold text-purple-800 mb-4">🏦 Subject-To "Cash-to-Close" Builder</h3>
