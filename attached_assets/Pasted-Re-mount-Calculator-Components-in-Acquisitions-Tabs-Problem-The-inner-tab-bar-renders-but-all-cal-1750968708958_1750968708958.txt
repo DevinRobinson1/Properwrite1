@@ -1,0 +1,70 @@
+Re-mount Calculator Components in Acquisitions Tabs
+Problem
+– The inner-tab bar renders, but all calculator bodies (Wholesale MAO, Installments/Novations, Subject-To, Seller Finance, Compare Offers) are missing.
+– Only the Seller Psychology header and AI Objection Handler appear.
+
+1️⃣ Ensure Each Tab Maps to a Component
+jsx
+Copy
+Edit
+// AcquisitionsTabs.jsx  (or equivalent)
+const ACQ_TAB_MAP = {
+  WHOLESALE:   <WholesaleMAO />,          // 💲 Cash MAO calculator
+  NOVATION:    <InstallmentNovation />,   // 🏠 Installment / Novation calculator
+  SUB2:        <SubjectToCalc />,         // 🏦 Subject-To calculator
+  SF:          <SellerFinanceCalc />,     // 💰 Seller-Finance calculator
+  COMPARE:     <CompareOffersPanel />,    // 🗂 Side-by-side view
+};
+Import each file and confirm default export exists.
+
+2️⃣ Tab Router Logic
+jsx
+Copy
+Edit
+const [activeTab, setActiveTab] = useState("WHOLESALE");
+
+<TabButton id="WHOLESALE"  onClick={() => setActiveTab("WHOLESALE")} />
+...
+<div className="tab-body">
+  {ACQ_TAB_MAP[activeTab]}
+</div>
+Delete any previous conditional that prevents mounting if inputs are blank; calculators will display placeholders until user types numbers.
+
+3️⃣ Reconnect Global State
+All calculators need props from the central deal store:
+
+jsx
+Copy
+Edit
+<WholesaleMAO
+  arv={deal.arv}
+  repairs={deal.repairs}
+  minProfit={deal.minProfit}
+/>
+Make sure Context/Redux provider wraps AcquisitionsTabs so state flows.
+
+4️⃣ Component Files Must Export
+swift
+Copy
+Edit
+/src/components/acq/WholesaleMAO.jsx
+/src/components/acq/InstallmentNovation.jsx
+/src/components/acq/SubjectToCalc.jsx
+/src/components/acq/SellerFinanceCalc.jsx
+/src/components/acq/CompareOffersPanel.jsx
+If any were renamed or deleted during refactor, restore them from Git history.
+
+5️⃣ QA Checklist
+Wholesale MAO tab – input sliders & Ackerman offers calculate.
+
+Installments/Novations – list-price logic & fee table appear.
+
+Subject-To – cash-to-close builder shows.
+
+Seller Finance – DP/interest slider + wrap analysis renders.
+
+Compare Offers – four colored cards display totals.
+
+Switching tabs never unmounts the Tab bar.
+
+Implement this mapping & state wiring so acquisitions reps can once again generate live offer prices from each calculator.

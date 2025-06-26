@@ -1150,32 +1150,219 @@
                         <div class="p-6">
                             <!-- Wholesale Tab -->
                             <div id="wholesale-content" class="acquisition-tab-content">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Wholesale MAO Calculator</h3>
-                                <p class="text-center text-gray-500">Wholesale calculator content will be restored here...</p>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">💰 Wholesale MAO Calculator</h3>
+                                
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <!-- Left Column: Inputs -->
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Assignment Fee</label>
+                                            <input type="text" id="wholesale-assignment-fee" value="15,000" 
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                                                   onchange="formatNumber(this); recalculateWholesale();">
+                                        </div>
+                                        
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">ARV Percentage</label>
+                                            <div class="flex items-center space-x-3">
+                                                <input type="range" id="wholesale-arv-percent" min="60" max="80" value="70" 
+                                                       class="flex-1" onchange="updateWholesalePercentage()">
+                                                <span id="wholesale-arv-display" class="text-sm font-medium text-blue-600">70%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Right Column: Results -->
+                                    <div class="bg-blue-50 p-4 rounded-lg">
+                                        <h4 class="font-semibold text-blue-800 mb-3">Maximum Allowable Offer</h4>
+                                        <div class="space-y-2 text-sm">
+                                            <div class="flex justify-between">
+                                                <span>ARV (70%):</span>
+                                                <span id="wholesale-arv-amount" class="font-bold">$290,500</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Less Repairs:</span>
+                                                <span class="text-red-600">-$35,000</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Less Assignment Fee:</span>
+                                                <span class="text-red-600" id="wholesale-fee-display">-$15,000</span>
+                                            </div>
+                                            <hr class="my-2">
+                                            <div class="flex justify-between font-bold text-lg">
+                                                <span>Maximum Offer:</span>
+                                                <span class="text-blue-600" id="wholesale-max-offer">$240,500</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Ackerman Offers -->
+                                <div class="mt-6">
+                                    <h4 class="font-semibold text-gray-800 mb-3">Ackerman Offers Structure</h4>
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        <div class="bg-gray-50 p-3 rounded text-center">
+                                            <div class="text-xs text-gray-600 mb-1">65% of MAO</div>
+                                            <div class="font-bold text-gray-800" id="ackerman-65">$156,325</div>
+                                            <div class="text-xs text-gray-500">30 days</div>
+                                        </div>
+                                        <div class="bg-blue-50 p-3 rounded text-center">
+                                            <div class="text-xs text-blue-600 mb-1">85% of MAO</div>
+                                            <div class="font-bold text-blue-800" id="ackerman-85">$204,425</div>
+                                            <div class="text-xs text-blue-500">60 days</div>
+                                        </div>
+                                        <div class="bg-green-50 p-3 rounded text-center">
+                                            <div class="text-xs text-green-600 mb-1">95% of MAO</div>
+                                            <div class="font-bold text-green-800" id="ackerman-95">$228,475</div>
+                                            <div class="text-xs text-green-500">90 days</div>
+                                        </div>
+                                        <div class="bg-purple-50 p-3 rounded text-center">
+                                            <div class="text-xs text-purple-600 mb-1">100% of MAO</div>
+                                            <div class="font-bold text-purple-800" id="ackerman-100">$240,500</div>
+                                            <div class="text-xs text-purple-500">120 days</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Installment Tab -->
                             <div id="installment-content" class="acquisition-tab-content hidden">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Installment/Novation Calculator</h3>
-                                <p class="text-center text-gray-500">Installment calculator content will be restored here...</p>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">🏗 Installment/Novation Calculator</h3>
+                                
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <!-- Left Column: Inputs -->
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Acceptable Profit</label>
+                                            <input type="text" id="installment-min-profit" value="15,000" 
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500"
+                                                   onchange="formatNumber(this); recalculateInstallment();">
+                                        </div>
+                                        
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Discount to Sell Fast</label>
+                                            <input type="text" id="installment-discount" value="10,000" 
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500"
+                                                   onchange="formatNumber(this); recalculateInstallment();">
+                                        </div>
+                                        
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Refundable Consideration</label>
+                                            <input type="text" id="installment-refundable" value="1,000" 
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500"
+                                                   onchange="formatNumber(this); recalculateInstallment();">
+                                        </div>
+                                        
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Non-Refundable Costs</label>
+                                            <input type="text" id="installment-non-refundable" value="3,500" 
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500"
+                                                   onchange="formatNumber(this); recalculateInstallment();">
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Right Column: Results -->
+                                    <div class="bg-orange-50 p-4 rounded-lg">
+                                        <h4 class="font-semibold text-orange-800 mb-3">Maximum Allowable Offer</h4>
+                                        <div class="space-y-2 text-sm">
+                                            <div class="flex justify-between">
+                                                <span>ARV:</span>
+                                                <span class="font-bold">$415,000</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Less Repairs:</span>
+                                                <span class="text-red-600">-$35,000</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Less Discount:</span>
+                                                <span class="text-red-600" id="installment-discount-display">-$10,000</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Less Min Profit:</span>
+                                                <span class="text-red-600" id="installment-profit-display">-$15,000</span>
+                                            </div>
+                                            <hr class="my-2">
+                                            <div class="flex justify-between font-bold text-lg">
+                                                <span>Maximum Offer:</span>
+                                                <span class="text-orange-600" id="installment-max-offer">$355,000</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Ackerman Structure -->
+                                <div class="mt-6">
+                                    <h4 class="font-semibold text-gray-800 mb-3">Ackerman Offers (Based on MAO)</h4>
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        <div class="bg-gray-50 p-3 rounded text-center">
+                                            <div class="text-xs text-gray-600 mb-1">65% of MAO</div>
+                                            <div class="font-bold text-gray-800" id="installment-ackerman-65">$230,750</div>
+                                            <div class="text-xs text-gray-500">30 days</div>
+                                        </div>
+                                        <div class="bg-blue-50 p-3 rounded text-center">
+                                            <div class="text-xs text-blue-600 mb-1">85% of MAO</div>
+                                            <div class="font-bold text-blue-800" id="installment-ackerman-85">$301,750</div>
+                                            <div class="text-xs text-blue-500">60 days</div>
+                                        </div>
+                                        <div class="bg-green-50 p-3 rounded text-center">
+                                            <div class="text-xs text-green-600 mb-1">95% of MAO</div>
+                                            <div class="font-bold text-green-800" id="installment-ackerman-95">$337,250</div>
+                                            <div class="text-xs text-green-500">90 days</div>
+                                        </div>
+                                        <div class="bg-purple-50 p-3 rounded text-center">
+                                            <div class="text-xs text-purple-600 mb-1">100% of MAO</div>
+                                            <div class="font-bold text-purple-800" id="installment-ackerman-100">$355,000</div>
+                                            <div class="text-xs text-purple-500">120 days</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Subject-To Tab -->
                             <div id="subject-to-content" class="acquisition-tab-content hidden">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Subject-To Calculator</h3>
-                                <p class="text-center text-gray-500">Subject-To calculator content will be restored here...</p>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">🎯 Subject-To Calculator</h3>
+                                <div class="bg-purple-50 p-6 rounded-lg text-center">
+                                    <p class="text-purple-700 font-medium">Subject-To Calculator</p>
+                                    <p class="text-sm text-purple-600 mt-2">Cash flow analysis and acquisition structuring</p>
+                                    <p class="text-xs text-purple-500 mt-2">Calculator content will be restored next</p>
+                                </div>
                             </div>
 
                             <!-- Seller Finance Tab -->
                             <div id="seller-finance-content" class="acquisition-tab-content hidden">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Seller Finance Calculator</h3>
-                                <p class="text-center text-gray-500">Seller Finance calculator content will be restored here...</p>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">🏦 Seller Finance Calculator</h3>
+                                <div class="bg-indigo-50 p-6 rounded-lg text-center">
+                                    <p class="text-indigo-700 font-medium">Seller Finance Calculator</p>
+                                    <p class="text-sm text-indigo-600 mt-2">Owner financing terms and balloon analysis</p>
+                                    <p class="text-xs text-indigo-500 mt-2">Calculator content will be restored next</p>
+                                </div>
                             </div>
 
                             <!-- Compare Tab -->
                             <div id="compare-content" class="acquisition-tab-content hidden">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Compare All Offers</h3>
-                                <p class="text-center text-gray-500">Comparison dashboard will be restored here...</p>
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">📊 Compare All Offers</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <div class="bg-blue-50 p-4 rounded-lg text-center">
+                                        <h4 class="font-bold text-blue-800">Wholesale</h4>
+                                        <div class="text-2xl font-bold text-blue-600" id="compare-wholesale">$240,500</div>
+                                        <p class="text-xs text-blue-600">Assignment Fee</p>
+                                    </div>
+                                    <div class="bg-orange-50 p-4 rounded-lg text-center">
+                                        <h4 class="font-bold text-orange-800">Installment</h4>
+                                        <div class="text-2xl font-bold text-orange-600" id="compare-installment">$355,000</div>
+                                        <p class="text-xs text-orange-600">Novation Structure</p>
+                                    </div>
+                                    <div class="bg-purple-50 p-4 rounded-lg text-center">
+                                        <h4 class="font-bold text-purple-800">Subject-To</h4>
+                                        <div class="text-2xl font-bold text-purple-600" id="compare-subject-to">~$380,000</div>
+                                        <p class="text-xs text-purple-600">Cash Flow Focus</p>
+                                    </div>
+                                    <div class="bg-indigo-50 p-4 rounded-lg text-center">
+                                        <h4 class="font-bold text-indigo-800">Seller Finance</h4>
+                                        <div class="text-2xl font-bold text-indigo-600" id="compare-seller-finance">~$395,000</div>
+                                        <p class="text-xs text-indigo-600">Owner Terms</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1408,6 +1595,61 @@
 
         function regenerateObjectionResponse() {
             generateObjectionResponse();
+        }
+
+        // Wholesale calculator functions
+        function updateWholesalePercentage() {
+            const slider = document.getElementById('wholesale-arv-percent');
+            const display = document.getElementById('wholesale-arv-display');
+            if (slider && display) {
+                display.textContent = slider.value + '%';
+            }
+            recalculateWholesale();
+        }
+
+        function recalculateWholesale() {
+            // Get values from property header and wholesale inputs
+            const arv = parseInt(document.getElementById('arv').value.replace(/,/g, '')) || 415000;
+            const repairs = parseInt(document.getElementById('repairs').value.replace(/,/g, '')) || 35000;
+            const assignmentFee = parseInt(document.getElementById('wholesale-assignment-fee').value.replace(/,/g, '')) || 15000;
+            const arvPercent = parseInt(document.getElementById('wholesale-arv-percent').value) || 70;
+            
+            // Calculate values
+            const arvAmount = arv * (arvPercent / 100);
+            const maxOffer = arvAmount - repairs - assignmentFee;
+            
+            // Update displays
+            updateElementIfExists('wholesale-arv-amount', '$' + arvAmount.toLocaleString());
+            updateElementIfExists('wholesale-fee-display', '-$' + assignmentFee.toLocaleString());
+            updateElementIfExists('wholesale-max-offer', '$' + maxOffer.toLocaleString());
+            
+            // Update Ackerman offers (based on MAO percentages)
+            updateElementIfExists('ackerman-65', '$' + (maxOffer * 0.65).toLocaleString());
+            updateElementIfExists('ackerman-85', '$' + (maxOffer * 0.85).toLocaleString());
+            updateElementIfExists('ackerman-95', '$' + (maxOffer * 0.95).toLocaleString());
+            updateElementIfExists('ackerman-100', '$' + maxOffer.toLocaleString());
+        }
+
+        function recalculateInstallment() {
+            // Get values from property header and installment inputs
+            const arv = parseInt(document.getElementById('arv').value.replace(/,/g, '')) || 415000;
+            const repairs = parseInt(document.getElementById('repairs').value.replace(/,/g, '')) || 35000;
+            const minProfit = parseInt(document.getElementById('installment-min-profit').value.replace(/,/g, '')) || 15000;
+            const discount = parseInt(document.getElementById('installment-discount').value.replace(/,/g, '')) || 10000;
+            
+            // Calculate MAO: ARV - Repairs - Discount - Min Profit
+            const maxOffer = arv - repairs - discount - minProfit;
+            
+            // Update displays
+            updateElementIfExists('installment-discount-display', '-$' + discount.toLocaleString());
+            updateElementIfExists('installment-profit-display', '-$' + minProfit.toLocaleString());
+            updateElementIfExists('installment-max-offer', '$' + maxOffer.toLocaleString());
+            
+            // Update Ackerman offers (based on MAO percentages)
+            updateElementIfExists('installment-ackerman-65', '$' + (maxOffer * 0.65).toLocaleString());
+            updateElementIfExists('installment-ackerman-85', '$' + (maxOffer * 0.85).toLocaleString());
+            updateElementIfExists('installment-ackerman-95', '$' + (maxOffer * 0.95).toLocaleString());
+            updateElementIfExists('installment-ackerman-100', '$' + maxOffer.toLocaleString());
         }
 
         function formatNumber(element) {
