@@ -308,27 +308,20 @@
                         </div>
                     </div>
 
-                    <!-- Purchase Price Adjustment Variables -->
+                    <!-- Purchase Price Variables -->
                     <div class="bg-gradient-to-r from-green-100 to-blue-100 p-6 rounded-lg mb-4 border-l-4 border-green-500">
                         <h3 class="text-xl font-bold text-green-800 mb-3">⚙️ Purchase Price Variables</h3>
                         <p class="text-green-700 mb-4">Adjust these key variables to optimize your offers across all acquisition strategies.</p>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="bg-white p-4 rounded-lg border border-green-200">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Wholesale ARV %</label>
-                                <input type="range" min="60" max="80" value="70" id="global-wholesale-percent" class="w-full mb-2" onchange="updateGlobalWholesalePercent()">
-                                <div class="text-center font-bold text-green-600" id="global-wholesale-display">70%</div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Acquisitions Price</label>
+                                <input type="text" value="140,000" id="global-acquisitions-price" class="w-full px-3 py-2 border border-gray-300 rounded text-center text-lg font-semibold" onchange="formatCurrencyInput(this); updateGlobalAcquisitionsPrice()">
+                                <div class="text-xs text-gray-500 mt-1">Maximum purchase price across all strategies</div>
                             </div>
                             <div class="bg-white p-4 rounded-lg border border-green-200">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Assignment Fee</label>
-                                <input type="text" value="10,000" id="global-assignment-fee" class="w-full px-3 py-2 border border-gray-300 rounded text-center" onchange="formatCurrencyInput(this); updateGlobalAssignmentFee()">
-                            </div>
-                            <div class="bg-white p-4 rounded-lg border border-green-200">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Min Profit Target</label>
-                                <input type="text" value="15,000" id="global-min-profit" class="w-full px-3 py-2 border border-gray-300 rounded text-center" onchange="formatCurrencyInput(this); updateGlobalMinProfit()">
-                            </div>
-                            <div class="bg-white p-4 rounded-lg border border-green-200">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Discount to Sell</label>
-                                <input type="text" value="10,000" id="global-discount-sell" class="w-full px-3 py-2 border border-gray-300 rounded text-center" onchange="formatCurrencyInput(this); updateGlobalDiscountSell()">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Acceptable Profit</label>
+                                <input type="text" value="15,000" id="global-min-acceptable-profit" class="w-full px-3 py-2 border border-gray-300 rounded text-center text-lg font-semibold" onchange="formatCurrencyInput(this); updateGlobalMinAcceptableProfit()">
+                                <div class="text-xs text-gray-500 mt-1">Minimum profit required for any deal</div>
                             </div>
                         </div>
                     </div>
@@ -2046,28 +2039,31 @@
             const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 200000;
             const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/[^\d]/g, '')) || 30000;
             
-            // Use global variables if available, otherwise use tab-specific values
-            let percent = (parseFloat(document.getElementById('global-wholesale-percent')?.value) || 70) / 100;
-            let assignmentFee = parseFloat(document.getElementById('global-assignment-fee')?.value?.replace(/[^\d]/g, '')) || 10000;
-            
-            // Fallback to tab-specific controls
-            if (!document.getElementById('global-wholesale-percent') || !document.getElementById('global-assignment-fee')) {
-                percent = parseFloat(document.getElementById('wholesale-arv-percent')?.value) / 100 || 0.70;
-                assignmentFee = parseFloat(document.getElementById('wholesale-assignment-fee')?.value?.replace(/[^\d]/g, '')) || 10000;
+            // Use global acquisitions price as the base MAO, or calculate from ARV percentage
+            let mao;
+            if (window.globalAcquisitionsPrice) {
+                mao = window.globalAcquisitionsPrice;
+            } else {
+                const percent = parseFloat(document.getElementById('wholesale-arv-percent')?.value) / 100 || 0.70;
+                const assignmentFee = parseFloat(document.getElementById('wholesale-assignment-fee')?.value?.replace(/[^\d]/g, '')) || 10000;
+                mao = (arv * percent) - repairs - assignmentFee;
             }
             
-            const arvCalc = arv * percent;
-            const mao = arvCalc - repairs - assignmentFee;
+            const minProfit = window.globalMinAcceptableProfit || 15000;
+            const assignmentFee = Math.max(minProfit, parseFloat(document.getElementById('wholesale-assignment-fee')?.value?.replace(/[^\d]/g, '')) || 10000);
+            
+            // Calculate percentage for display
+            const effectivePercent = ((mao + repairs + assignmentFee) / arv) * 100;
             
             // Update MAO breakdown
             updateElementIfExists('mao-arv', arv);
-            updateElementIfExists('mao-percent', (percent * 100));
-            updateElementIfExists('mao-arv-calc', arvCalc);
+            updateElementIfExists('mao-percent', Math.round(effectivePercent));
+            updateElementIfExists('mao-arv-calc', (mao + repairs + assignmentFee));
             updateElementIfExists('mao-repairs', repairs);
             updateElementIfExists('mao-assignment', assignmentFee);
             updateElementIfExists('wholesale-mao-result', mao);
             
-            // Update Ackerman offers
+            // Update Ackerman offers based on MAO
             updateElementIfExists('ackerman-1', (mao * 0.65));
             updateElementIfExists('ackerman-2', (mao * 0.85));
             updateElementIfExists('ackerman-3', (mao * 0.95));
@@ -2090,17 +2086,24 @@
                 totalCombinedFees = recalculateInstallmentFees();
             }
             
-            const ourMinimumProfit = 15000; // Our minimum profit requirement
+            // Use global minimum acceptable profit or default
+            const ourMinimumProfit = window.globalMinAcceptableProfit || 15000;
             
-            // New formula: ARV - Repairs - Discount to Sell Fast - Total Combined Fees - Our Minimum Profit = MAO
-            const maxAllowableOffer = arv - repairs - discountToSellFast - totalCombinedFees - ourMinimumProfit;
+            // Use global acquisitions price as maximum allowable offer if set
+            let maxAllowableOffer;
+            if (window.globalAcquisitionsPrice) {
+                maxAllowableOffer = Math.min(window.globalAcquisitionsPrice, arv - repairs - discountToSellFast - totalCombinedFees - ourMinimumProfit);
+            } else {
+                // New formula: ARV - Repairs - Discount to Sell Fast - Total Combined Fees - Our Minimum Profit = MAO
+                maxAllowableOffer = arv - repairs - discountToSellFast - totalCombinedFees - ourMinimumProfit;
+            }
             
             // Calculate final sales price (what we'll sell for)
             const finalSalesPrice = arv - discountToSellFast;
             
             // Calculate our net profit
             const grossProfit = finalSalesPrice - maxAllowableOffer - repairs;
-            const netProfit = grossProfit - totalCombinedFees;
+            const netProfit = Math.max(ourMinimumProfit, grossProfit - totalCombinedFees);
             
             // Update display elements
             updateElementIfExists('installment-purchase', maxAllowableOffer);
@@ -2456,61 +2459,25 @@
         }
 
         // Global purchase price adjustment functions
-        function updateGlobalWholesalePercent() {
-            const slider = document.getElementById('global-wholesale-percent');
-            const display = document.getElementById('global-wholesale-display');
-            const tabSlider = document.getElementById('wholesale-arv-percent');
+        function updateGlobalAcquisitionsPrice() {
+            const globalInput = document.getElementById('global-acquisitions-price');
+            const value = parseFloat(globalInput.value.replace(/[^\d]/g, '')) || 140000;
             
-            display.textContent = slider.value + '%';
+            // Store global acquisitions price
+            window.globalAcquisitionsPrice = value;
             
-            // Update tab-specific slider
-            if (tabSlider) {
-                tabSlider.value = slider.value;
-                updateWholesalePercent();
-            }
-            
-            // Recalculate all strategies
+            // Update all strategy calculations based on this maximum purchase price
             updateAllTabCalculations();
         }
 
-        function updateGlobalAssignmentFee() {
-            const globalInput = document.getElementById('global-assignment-fee');
-            const tabInput = document.getElementById('wholesale-assignment-fee');
-            
-            // Sync with tab-specific input
-            if (tabInput) {
-                tabInput.value = globalInput.value;
-            }
-            
-            // Recalculate all strategies
-            updateAllTabCalculations();
-        }
-
-        function updateGlobalMinProfit() {
-            const globalInput = document.getElementById('global-min-profit');
+        function updateGlobalMinAcceptableProfit() {
+            const globalInput = document.getElementById('global-min-acceptable-profit');
             const value = parseFloat(globalInput.value.replace(/[^\d]/g, '')) || 15000;
             
+            // Store global minimum acceptable profit
+            window.globalMinAcceptableProfit = value;
+            
             // Update all strategy minimum profits
-            window.globalMinProfit = value;
-            
-            // Recalculate all strategies
-            updateAllTabCalculations();
-        }
-
-        function updateGlobalDiscountSell() {
-            const globalInput = document.getElementById('global-discount-sell');
-            const tabInput = document.getElementById('installment-discount');
-            const value = parseFloat(globalInput.value.replace(/[^\d]/g, '')) || 10000;
-            
-            // Sync with installment tab input
-            if (tabInput) {
-                tabInput.value = value.toLocaleString();
-            }
-            
-            // Update global variable
-            window.globalDiscountSell = value;
-            
-            // Recalculate all strategies
             updateAllTabCalculations();
         }
 
