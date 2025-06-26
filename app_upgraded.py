@@ -179,13 +179,13 @@ def calculate_strategies():
     try:
         data = request.get_json()
         
-        # Extract property inputs with proper type conversion
-        arv = float(data.get('arv', 200000))
-        repairs = float(data.get('repairs', 30000))
-        bedrooms = int(data.get('bedrooms', 3))
-        bathrooms = float(data.get('bathrooms', 2))
-        square_feet = int(data.get('square_feet', 1200))
-        monthly_rent = float(data.get('rent', 2000))
+        # Extract property inputs with proper type conversion and None handling
+        arv = float(data.get('arv', 200000)) if data.get('arv') is not None else 200000
+        repairs = float(data.get('repairs', 30000)) if data.get('repairs') is not None else 30000
+        bedrooms = int(data.get('bedrooms', 3)) if data.get('bedrooms') is not None else 3
+        bathrooms = float(data.get('bathrooms', 2)) if data.get('bathrooms') is not None else 2
+        square_feet = int(data.get('square_feet', 1200)) if data.get('square_feet') is not None else 1200
+        monthly_rent = float(data.get('rent', 2000)) if data.get('rent') is not None else 2000
         
         # Validate inputs
         if arv < 50000 or arv > 5000000:
