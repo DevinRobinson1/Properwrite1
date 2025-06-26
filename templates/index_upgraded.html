@@ -341,181 +341,7 @@
                         </div>
                     </div>
 
-                    <!-- AI Control Center -->
-                    <div class="mt-8 mb-6">
-                        <div class="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-200 rounded-lg shadow-md">
-                            <div class="flex items-center justify-between p-6 cursor-pointer" onclick="toggleAIControlCenter()">
-                                <div class="flex items-center">
-                                    <h3 class="text-xl font-bold text-indigo-800">🤖 AI Control Center</h3>
-                                    <span class="ml-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium">GPT-4o Powered</span>
-                                </div>
-                                <i id="ai-control-center-icon" class="fas fa-chevron-down text-indigo-600 transition-transform duration-200"></i>
-                            </div>
-                            
-                            <div id="ai-control-center-content" class="hidden p-6 pt-0">
-                                <!-- AI Feature Tabs -->
-                                <div class="mb-6">
-                                    <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg">
-                                        <button class="ai-feature-tab flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 bg-white text-indigo-700 shadow-sm" 
-                                                onclick="showAIFeature('objections')" data-feature="objections">
-                                            <i class="fas fa-comments mr-2"></i>Objection Handler
-                                        </button>
-                                        <button class="ai-feature-tab flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 text-gray-600 hover:text-indigo-700" 
-                                                onclick="showAIFeature('disposition')" data-feature="disposition">
-                                            <i class="fas fa-chart-line mr-2"></i>Deal Analysis
-                                        </button>
-                                        <button class="ai-feature-tab flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 text-gray-600 hover:text-indigo-700" 
-                                                onclick="showAIFeature('listing')" data-feature="listing">
-                                            <i class="fas fa-file-alt mr-2"></i>Listing Generator
-                                        </button>
-                                    </div>
-                                </div>
 
-                                <!-- Objection Handler Content -->
-                                <div id="ai-objections-content" class="ai-feature-content">
-                                    <div class="space-y-4">
-                                        <div class="bg-white border border-indigo-100 rounded-lg p-4">
-                                            <h4 class="text-lg font-semibold text-indigo-800 mb-3">Handle Seller Objections</h4>
-                                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                                                <div class="md:col-span-3">
-                                                    <label class="block text-sm font-medium text-indigo-700 mb-2">Seller's Objection</label>
-                                                    <textarea id="seller-objection" 
-                                                              placeholder="Paste or type the seller's objection here..." 
-                                                              class="w-full px-3 py-2 border border-indigo-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-vertical" 
-                                                              rows="3"></textarea>
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm font-medium text-indigo-700 mb-2">Category</label>
-                                                    <select id="objection-category" class="w-full px-3 py-2 border border-indigo-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                                        <option value="">Auto-Detect</option>
-                                                        <option value="price">Price/Value</option>
-                                                        <option value="timeline">Timeline/Urgency</option>
-                                                        <option value="fees">Fees/Costs</option>
-                                                        <option value="trust">Trust/Credibility</option>
-                                                        <option value="process">Process/Paperwork</option>
-                                                        <option value="competition">Other Offers</option>
-                                                        <option value="family">Family/Emotional</option>
-                                                        <option value="condition">Property Condition</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="flex items-center space-x-3">
-                                                <button id="generate-response-btn" 
-                                                        onclick="generateObjectionResponse()" 
-                                                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded-md transition-colors duration-200 flex items-center">
-                                                    <i class="fas fa-brain mr-2"></i>Generate Response
-                                                </button>
-                                                <button id="copy-response-btn" 
-                                                        onclick="copyResponseToClipboard()" 
-                                                        class="bg-gray-500 hover:bg-gray-600 text-white font-medium px-4 py-2 rounded-md transition-colors duration-200 flex items-center disabled:opacity-50" 
-                                                        disabled>
-                                                    <i class="fas fa-copy mr-2"></i>Copy
-                                                </button>
-                                                <button id="rewrite-response-btn" 
-                                                        onclick="regenerateResponse()" 
-                                                        class="bg-purple-500 hover:bg-purple-600 text-white font-medium px-4 py-2 rounded-md transition-colors duration-200 flex items-center disabled:opacity-50" 
-                                                        disabled>
-                                                    <i class="fas fa-redo mr-2"></i>Re-Write
-                                                </button>
-                                            </div>
-                                            
-                                            <!-- Loading State -->
-                                            <div id="objection-loading" class="hidden text-center py-4 mt-4">
-                                                <div class="inline-flex items-center">
-                                                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mr-3"></div>
-                                                    <span class="text-indigo-700">AI is crafting your response...</span>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Response Output -->
-                                            <div id="objection-response" class="hidden mt-4">
-                                                <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-                                                    <div class="flex items-center justify-between mb-3">
-                                                        <h5 class="text-lg font-semibold text-indigo-800">AI-Generated Response</h5>
-                                                        <div class="flex items-center text-sm text-gray-500">
-                                                            <i class="fas fa-robot mr-1"></i>
-                                                            <span>GPT-4o</span>
-                                                        </div>
-                                                    </div>
-                                                    <div id="response-content" class="prose prose-sm max-w-none">
-                                                        <!-- AI response will be populated here -->
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Deal Analysis Content -->
-                                <div id="ai-disposition-content" class="ai-feature-content hidden">
-                                    <div class="bg-white border border-purple-100 rounded-lg p-4">
-                                        <h4 class="text-lg font-semibold text-purple-800 mb-3">AI Deal Analysis & Strategy</h4>
-                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            <button onclick="suggestBestBuyerPersona()" 
-                                                    class="flex items-center justify-center px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors">
-                                                <i class="fas fa-users mr-2"></i>
-                                                <div class="text-left">
-                                                    <div class="font-semibold">Best Buyer Persona</div>
-                                                    <div class="text-xs opacity-90">Analysis & Targeting</div>
-                                                </div>
-                                            </button>
-                                            <button onclick="draftBuyerPitch()" 
-                                                    class="flex items-center justify-center px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg transition-colors">
-                                                <i class="fas fa-pen mr-2"></i>
-                                                <div class="text-left">
-                                                    <div class="font-semibold">Draft Buyer Pitch</div>
-                                                    <div class="text-xs opacity-90">Marketing Copy</div>
-                                                </div>
-                                            </button>
-                                            <button onclick="handleBuyerObjections()" 
-                                                    class="flex items-center justify-center px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white font-medium rounded-lg transition-colors">
-                                                <i class="fas fa-comments mr-2"></i>
-                                                <div class="text-left">
-                                                    <div class="font-semibold">Buyer Objections</div>
-                                                    <div class="text-xs opacity-90">Sales Coaching</div>
-                                                </div>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Listing Generator Content -->
-                                <div id="ai-listing-content" class="ai-feature-content hidden">
-                                    <div class="bg-white border border-green-100 rounded-lg p-4">
-                                        <h4 class="text-lg font-semibold text-green-800 mb-3">AI Listing Generator</h4>
-                                        <p class="text-sm text-gray-600 mb-4">Generate professional investor listings using GPT-4o with market data and comparable sales.</p>
-                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            <button onclick="generateOffMarketListing()" 
-                                                    class="flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
-                                                <i class="fas fa-file-alt mr-2"></i>
-                                                <div class="text-left">
-                                                    <div class="font-semibold">Off-Market Listing</div>
-                                                    <div class="text-xs opacity-90">Investor Focus</div>
-                                                </div>
-                                            </button>
-                                            <button onclick="generateMLSListing()" 
-                                                    class="flex items-center justify-center px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors">
-                                                <i class="fas fa-home mr-2"></i>
-                                                <div class="text-left">
-                                                    <div class="font-semibold">MLS Listing</div>
-                                                    <div class="text-xs opacity-90">Market Ready</div>
-                                                </div>
-                                            </button>
-                                            <button onclick="generateListingVariations()" 
-                                                    class="flex items-start justify-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors">
-                                                <i class="fas fa-sync-alt mr-2 mt-1"></i>
-                                                <div class="text-left">
-                                                    <div class="font-semibold">A/B Test Variations</div>
-                                                    <div class="text-xs opacity-90">Multiple Versions</div>
-                                                </div>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Acquisitions Tab Navigation -->
                     <div class="bg-blue-50 border-l-4 border-blue-500 shadow-sm">
@@ -549,6 +375,183 @@
                             <span class="text-sm font-medium text-gray-600">🔒 End of Seller Analysis — Beginning of Investor Disposition 📈</span>
                         </div>
                         <div class="flex-grow h-px bg-gradient-to-l from-blue-300 via-purple-400 to-green-300"></div>
+                    </div>
+                </div>
+
+                <!-- AI Control Center - Positioned Between Acquisitions and Dispositions -->
+                <div id="ai-control-center-wrapper" class="hidden mb-8">
+                    <div class="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-200 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between p-6 cursor-pointer" onclick="toggleAIControlCenter()">
+                            <div class="flex items-center">
+                                <h3 class="text-xl font-bold text-indigo-800">🤖 AI Control Center</h3>
+                                <span class="ml-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium">GPT-4o Powered</span>
+                                <span class="ml-3 text-sm text-gray-600">For Both Acquisitions & Dispositions</span>
+                            </div>
+                            <i id="ai-control-center-icon" class="fas fa-chevron-down text-indigo-600 transition-transform duration-200"></i>
+                        </div>
+                        
+                        <div id="ai-control-center-content" class="hidden p-6 pt-0">
+                            <!-- AI Feature Tabs -->
+                            <div class="mb-6">
+                                <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+                                    <button class="ai-feature-tab flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 bg-white text-indigo-700 shadow-sm" 
+                                            onclick="showAIFeature('objections')" data-feature="objections">
+                                        <i class="fas fa-comments mr-2"></i>Objection Handler
+                                    </button>
+                                    <button class="ai-feature-tab flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 text-gray-600 hover:text-indigo-700" 
+                                            onclick="showAIFeature('disposition')" data-feature="disposition">
+                                        <i class="fas fa-chart-line mr-2"></i>Deal Analysis
+                                    </button>
+                                    <button class="ai-feature-tab flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 text-gray-600 hover:text-indigo-700" 
+                                            onclick="showAIFeature('listing')" data-feature="listing">
+                                        <i class="fas fa-file-alt mr-2"></i>Listing Generator
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Objection Handler Content -->
+                            <div id="ai-objections-content" class="ai-feature-content">
+                                <div class="space-y-4">
+                                    <div class="bg-white border border-indigo-100 rounded-lg p-4">
+                                        <h4 class="text-lg font-semibold text-indigo-800 mb-3">Handle Seller Objections</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                                            <div class="md:col-span-3">
+                                                <label class="block text-sm font-medium text-indigo-700 mb-2">Seller's Objection</label>
+                                                <textarea id="seller-objection" 
+                                                          placeholder="Paste or type the seller's objection here..." 
+                                                          class="w-full px-3 py-2 border border-indigo-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-vertical" 
+                                                          rows="3"></textarea>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-indigo-700 mb-2">Category</label>
+                                                <select id="objection-category" class="w-full px-3 py-2 border border-indigo-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                                    <option value="">Auto-Detect</option>
+                                                    <option value="price">Price/Value</option>
+                                                    <option value="timeline">Timeline/Urgency</option>
+                                                    <option value="fees">Fees/Costs</option>
+                                                    <option value="trust">Trust/Credibility</option>
+                                                    <option value="process">Process/Paperwork</option>
+                                                    <option value="competition">Other Offers</option>
+                                                    <option value="family">Family/Emotional</option>
+                                                    <option value="condition">Property Condition</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-center space-x-3">
+                                            <button id="generate-response-btn" 
+                                                    onclick="generateObjectionResponse()" 
+                                                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded-md transition-colors duration-200 flex items-center">
+                                                <i class="fas fa-brain mr-2"></i>Generate Response
+                                            </button>
+                                            <button id="copy-response-btn" 
+                                                    onclick="copyResponseToClipboard()" 
+                                                    class="bg-gray-500 hover:bg-gray-600 text-white font-medium px-4 py-2 rounded-md transition-colors duration-200 flex items-center disabled:opacity-50" 
+                                                    disabled>
+                                                <i class="fas fa-copy mr-2"></i>Copy
+                                            </button>
+                                            <button id="rewrite-response-btn" 
+                                                    onclick="regenerateResponse()" 
+                                                    class="bg-purple-500 hover:bg-purple-600 text-white font-medium px-4 py-2 rounded-md transition-colors duration-200 flex items-center disabled:opacity-50" 
+                                                    disabled>
+                                                <i class="fas fa-redo mr-2"></i>Re-Write
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- Loading State -->
+                                        <div id="objection-loading" class="hidden text-center py-4 mt-4">
+                                            <div class="inline-flex items-center">
+                                                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mr-3"></div>
+                                                <span class="text-indigo-700">AI is crafting your response...</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Response Output -->
+                                        <div id="objection-response" class="hidden mt-4">
+                                            <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <h5 class="text-lg font-semibold text-indigo-800">AI-Generated Response</h5>
+                                                    <div class="flex items-center text-sm text-gray-500">
+                                                        <i class="fas fa-robot mr-1"></i>
+                                                        <span>GPT-4o</span>
+                                                    </div>
+                                                </div>
+                                                <div id="response-content" class="prose prose-sm max-w-none">
+                                                    <!-- AI response will be populated here -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Deal Analysis Content -->
+                            <div id="ai-disposition-content" class="ai-feature-content hidden">
+                                <div class="bg-white border border-purple-100 rounded-lg p-4">
+                                    <h4 class="text-lg font-semibold text-purple-800 mb-3">AI Deal Analysis & Strategy</h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <button onclick="suggestBestBuyerPersona()" 
+                                                class="flex items-center justify-center px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors">
+                                            <i class="fas fa-users mr-2"></i>
+                                            <div class="text-left">
+                                                <div class="font-semibold">Best Buyer Persona</div>
+                                                <div class="text-xs opacity-90">Analysis & Targeting</div>
+                                            </div>
+                                        </button>
+                                        <button onclick="draftBuyerPitch()" 
+                                                class="flex items-center justify-center px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg transition-colors">
+                                            <i class="fas fa-pen mr-2"></i>
+                                            <div class="text-left">
+                                                <div class="font-semibold">Draft Buyer Pitch</div>
+                                                <div class="text-xs opacity-90">Marketing Copy</div>
+                                            </div>
+                                        </button>
+                                        <button onclick="handleBuyerObjections()" 
+                                                class="flex items-center justify-center px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white font-medium rounded-lg transition-colors">
+                                            <i class="fas fa-comments mr-2"></i>
+                                            <div class="text-left">
+                                                <div class="font-semibold">Buyer Objections</div>
+                                                <div class="text-xs opacity-90">Sales Coaching</div>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Listing Generator Content -->
+                            <div id="ai-listing-content" class="ai-feature-content hidden">
+                                <div class="bg-white border border-green-100 rounded-lg p-4">
+                                    <h4 class="text-lg font-semibold text-green-800 mb-3">AI Listing Generator</h4>
+                                    <p class="text-sm text-gray-600 mb-4">Generate professional investor listings using GPT-4o with market data and comparable sales.</p>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <button onclick="generateOffMarketListing()" 
+                                                class="flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                                            <i class="fas fa-file-alt mr-2"></i>
+                                            <div class="text-left">
+                                                <div class="font-semibold">Off-Market Listing</div>
+                                                <div class="text-xs opacity-90">Investor Focus</div>
+                                            </div>
+                                        </button>
+                                        <button onclick="generateMLSListing()" 
+                                                class="flex items-center justify-center px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors">
+                                            <i class="fas fa-home mr-2"></i>
+                                            <div class="text-left">
+                                                <div class="font-semibold">MLS Listing</div>
+                                                <div class="text-xs opacity-90">Market Ready</div>
+                                            </div>
+                                        </button>
+                                        <button onclick="generateListingVariations()" 
+                                                class="flex items-start justify-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors">
+                                            <i class="fas fa-sync-alt mr-2 mt-1"></i>
+                                            <div class="text-left">
+                                                <div class="font-semibold">A/B Test Variations</div>
+                                                <div class="text-xs opacity-90">Multiple Versions</div>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -4282,8 +4285,9 @@
             document.getElementById('acquisitions-tab-content').classList.toggle('hidden', sectionName !== 'acquisitions');
             document.getElementById('dispositions-tab-content').classList.toggle('hidden', sectionName !== 'dispositions');
             
-            // Show/hide divider
+            // Show/hide divider and AI Control Center
             document.getElementById('section-divider').classList.toggle('hidden', sectionName === 'acquisitions');
+            document.getElementById('ai-control-center-wrapper').classList.toggle('hidden', sectionName === 'acquisitions');
             
             // Update section toggle buttons
             document.querySelectorAll('.section-toggle-btn').forEach(btn => {
