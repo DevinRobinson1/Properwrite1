@@ -655,35 +655,18 @@
                                     <div class="text-sm font-medium text-green-700 mb-2">4th Offer (Max)</div>
                                     <div class="text-2xl font-bold text-green-800 mb-1">100%</div>
                                     <div class="text-lg font-semibold text-gray-800">$<span id="ackerman-4th">415,000</span></div>
-                                    <div class="text-xs text-gray-600 mt-1">Maximum ARV offer</div>
+                                    <div class="text-xs text-gray-600 mt-1">Maximum Allowable Offer</div>
                                 </div>
                             </div>
                             <div class="mt-4 text-center">
                                 <div class="text-sm text-yellow-700 font-medium">Timeframe: 30-120 days between offers</div>
-                                <div class="text-xs text-gray-600 mt-1">Strategic escalation based on seller response and market conditions</div>
+                                <div class="text-xs text-gray-600 mt-1">Offers based on Maximum Allowable Offer (ARV - Repairs - Discount - Fees - Profit)</div>
                             </div>
                         </div>
 
 
 
-                        <!-- Profit Projections -->
-                        <div class="bg-indigo-50 p-6 rounded-lg mb-6">
-                            <h4 class="text-lg font-semibold text-indigo-800 mb-4">Profit Projections</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="bg-white p-4 rounded-lg">
-                                    <div class="text-sm text-indigo-600 font-medium">Purchase Price</div>
-                                    <div class="text-2xl font-bold">$<span id="installment-purchase">145,000</span></div>
-                                </div>
-                                <div class="bg-white p-4 rounded-lg">
-                                    <div class="text-sm text-indigo-600 font-medium">Final Sales Price</div>
-                                    <div class="text-2xl font-bold">$<span id="installment-sales">160,000</span></div>
-                                </div>
-                                <div class="bg-white p-4 rounded-lg">
-                                    <div class="text-sm text-indigo-600 font-medium">Net Profit</div>
-                                    <div class="text-2xl font-bold text-green-600">$<span id="installment-profit">25,100</span></div>
-                                </div>
-                            </div>
-                        </div>
+
 
                         <!-- Installment Strategy Details -->
                         <div class="bg-white border border-gray-200 p-6 rounded-lg mb-6">
@@ -2183,37 +2166,20 @@
             updateElementIfExists('total-non-refundable', nonRefundableCosts);
             updateElementIfExists('total-equitable-deposit', totalEquitableDeposit);
             
-            // Calculate Ackerman offers (65%, 85%, 95%, 100% of ARV)
-            const ackerman1st = Math.round(arv * 0.65);
-            const ackerman2nd = Math.round(arv * 0.85);
-            const ackerman3rd = Math.round(arv * 0.95);
-            const ackerman4th = Math.round(arv * 1.00);
+            // Calculate Maximum Allowable Offer using proper formula
+            // ARV - Repairs - Discount to Sell Fast - Closing Fees - Minimum Profit = MAO
+            const maxAllowableOffer = arv - repairs - discountToSellFast - totalCombinedFees - ourMinimumProfit - nonRefundableCosts;
+            
+            // Calculate Ackerman offers as percentages of Maximum Allowable Offer
+            const ackerman1st = Math.round(maxAllowableOffer * 0.65);
+            const ackerman2nd = Math.round(maxAllowableOffer * 0.85);
+            const ackerman3rd = Math.round(maxAllowableOffer * 0.95);
+            const ackerman4th = Math.round(maxAllowableOffer * 1.00); // 100% of MAO, not ARV
             
             updateElementIfExists('ackerman-1st', ackerman1st);
             updateElementIfExists('ackerman-2nd', ackerman2nd);
             updateElementIfExists('ackerman-3rd', ackerman3rd);
             updateElementIfExists('ackerman-4th', ackerman4th);
-            
-            // Get current fee total or calculate it
-            let totalCombinedFees = 0;
-            if (typeof recalculateInstallmentFees === 'function') {
-                totalCombinedFees = recalculateInstallmentFees() || 0;
-            } else {
-                // Fallback calculation for basic fees
-                totalCombinedFees = 15000; // Default combined fees
-            }
-            
-            // Use local minimum acceptable profit from installment tab
-            const ourMinimumProfit = parseFloat(document.getElementById('installment-min-profit')?.value?.replace(/[^\d]/g, '')) || 15000;
-            
-            // Use global acquisitions price as maximum allowable offer if set
-            let maxAllowableOffer;
-            if (window.globalAcquisitionsPrice) {
-                maxAllowableOffer = window.globalAcquisitionsPrice;
-            } else {
-                // Calculate: ARV - Repairs - Discount to Sell Fast - Total Combined Fees - Our Minimum Profit - Non-Refundable Costs = MAO
-                maxAllowableOffer = arv - repairs - discountToSellFast - totalCombinedFees - ourMinimumProfit - nonRefundableCosts;
-            }
             
             // Calculate final sales price (what we'll sell for)
             const finalSalesPrice = arv - discountToSellFast;
