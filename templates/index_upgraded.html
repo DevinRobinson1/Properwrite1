@@ -574,7 +574,7 @@
                                             </div>
                                             <div class="flex justify-between">
                                                 <span class="text-gray-600">Timeline:</span>
-                                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">30-60 days</span>
+                                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">14-30 days</span>
                                             </div>
                                         </div>
                                     </div>
@@ -591,14 +591,12 @@
                                                 <span class="font-bold text-green-600" id="volume-flipper-price">$355,000</span>
                                             </div>
                                             <div class="flex justify-between">
-                                                <span class="text-gray-600">Their Profit Target:</span>
-                                                <input type="text" id="volume-flipper-profit" value="30,000" 
-                                                       class="w-16 px-1 py-0 border border-gray-300 rounded text-xs text-right"
-                                                       onchange="formatAndRecalculateDispositions(this)">
+                                                <span class="text-gray-600">Formula:</span>
+                                                <span class="text-xs text-gray-500" title="70% of ARV minus repairs and $3.5k buffer for acquisition closing/resale fees">70% ARV - Repairs - $3.5k buffer</span>
                                             </div>
                                             <div class="flex justify-between">
                                                 <span class="text-gray-600">Timeline:</span>
-                                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">45-90 days</span>
+                                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">14-30 days</span>
                                             </div>
                                         </div>
                                     </div>
@@ -620,7 +618,7 @@
                                             </div>
                                             <div class="flex justify-between">
                                                 <span class="text-gray-600">Timeline:</span>
-                                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">60-120 days</span>
+                                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">14-30 days</span>
                                             </div>
                                         </div>
                                     </div>
@@ -1019,7 +1017,7 @@
                                     <div class="space-y-2 text-sm">
                                         <div class="flex justify-between">
                                             <span>Timeline:</span>
-                                            <span class="font-medium">30-60 days</span>
+                                            <span class="font-medium">14-30 days</span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span>Cash Required:</span>
@@ -3358,39 +3356,43 @@
             const percentDisplay = document.getElementById('max-profit-percent');
             const priceDisplay = document.getElementById('max-profit-flipper-price');
             
-            const percent = slider.value;
+            if (!slider || !percentDisplay || !priceDisplay) return;
+            
+            const percent = parseFloat(slider.value) || 60;
             percentDisplay.textContent = percent + '%';
             
             // Calculate price: (ARV × percent) - Repairs
-            const arv = parseFloat(document.getElementById('dispo-arv').value.replace(/,/g, '')) || 415000;
-            const repairs = parseFloat(document.getElementById('dispo-repairs').value.replace(/,/g, '')) || 30000;
+            const arv = parseFloat(document.getElementById('dispo-arv')?.value?.replace(/,/g, '')) || 415000;
+            const repairs = parseFloat(document.getElementById('dispo-repairs')?.value?.replace(/,/g, '')) || 30000;
             const price = (arv * (percent / 100)) - repairs;
             
-            priceDisplay.textContent = '$' + price.toLocaleString();
+            priceDisplay.textContent = '$' + Math.round(price).toLocaleString();
         }
         
         function recalculateAllDispositionStrategies() {
-            const arv = parseFloat(document.getElementById('dispo-arv').value.replace(/,/g, '')) || 415000;
-            const rent = parseFloat(document.getElementById('dispo-rent').value.replace(/,/g, '')) || 1325;
-            const repairs = parseFloat(document.getElementById('dispo-repairs').value.replace(/,/g, '')) || 30000;
-            const piti = parseFloat(document.getElementById('dispo-piti').value.replace(/,/g, '')) || 850;
-            const closingCosts = parseFloat(document.getElementById('dispo-closing-costs').value.replace(/,/g, '')) || 4200;
+            // Get values with fallbacks to prevent NaN
+            const arv = parseFloat(document.getElementById('dispo-arv')?.value?.replace(/,/g, '')) || 415000;
+            const rent = parseFloat(document.getElementById('dispo-rent')?.value?.replace(/,/g, '')) || 1325;
+            const repairs = parseFloat(document.getElementById('dispo-repairs')?.value?.replace(/,/g, '')) || 30000;
+            const piti = parseFloat(document.getElementById('dispo-piti')?.value?.replace(/,/g, '')) || 850;
+            const closingCosts = parseFloat(document.getElementById('dispo-closing-costs')?.value?.replace(/,/g, '')) || 3500;
+            
+            console.log('Recalculating with:', { arv, rent, repairs, piti, closingCosts });
             
             // Update 1% Rent Rule
             const rentRulePrice = rent / 0.01;
-            updateElementIfExists('rent-rule-price', '$' + rentRulePrice.toLocaleString());
+            updateElementIfExists('rent-rule-price', '$' + Math.round(rentRulePrice).toLocaleString());
             updateElementIfExists('rent-rule-ratio', ((rent / rentRulePrice) * 100).toFixed(1) + '%');
             
-            // Update Volume Flipper
-            const volumeFlipperProfit = parseFloat(document.getElementById('volume-flipper-profit').value.replace(/,/g, '')) || 30000;
-            const volumeFlipperPrice = arv - repairs - volumeFlipperProfit;
-            updateElementIfExists('volume-flipper-price', '$' + volumeFlipperPrice.toLocaleString());
+            // Update Volume Flipper - NEW FORMULA: (ARV × 0.70) − Repairs − $3,500 buffer
+            const volumeFlipperPrice = (arv * 0.70) - repairs - closingCosts;
+            updateElementIfExists('volume-flipper-price', '$' + Math.round(volumeFlipperPrice).toLocaleString());
             
             // Update BRRR Investor
             const brrrPrice = (arv * 0.70) - repairs;
             const brrrARV = arv * 0.70;
-            updateElementIfExists('brrr-investor-price', '$' + brrrPrice.toLocaleString());
-            updateElementIfExists('brrr-investor-arv', '$' + brrrARV.toLocaleString());
+            updateElementIfExists('brrr-investor-price', '$' + Math.round(brrrPrice).toLocaleString());
+            updateElementIfExists('brrr-investor-arv', '$' + Math.round(brrrARV).toLocaleString());
             
             // Update Max-Profit Flipper
             updateMaxProfitFlipperPrice();

@@ -1,0 +1,54 @@
+Add Exit-Strategy Tabs to Dispositions Panel
+Refactor the Dispositions section so that each exit strategy lives in its own tab, exactly like the Wholesale / Installment / Subject-To / Seller-Finance tabs in Acquisitions. Only one strategy’s details should be visible at a time; the “Compare All” tab stays for a side-by-side view.
+
+1️⃣ Tab Layout
+Tab Label	Contents
+Cash Sale	Wholesale buyer-persona matrix (4 cards) + timeline 14-30 days
+MLS / Novation	List-price calculator, commission sliders, net sheet
+Sub-To Wrap	Cash-to-Close builder, equity & cash-flow display
+Seller-Finance Wrap	Down-payment vs. interest configurator, wrap price, cash-flow/profit
+Compare All	Keeps current 4-card summary view (no change)
+
+Use icons & colors consistent with Acquisitions tabs.
+
+2️⃣ Behavior
+Clicking a tab shows only that strategy’s calculator and helper widgets.
+
+Global “Deal Variables” (Acquisition Cost, ARV, Repairs, Rent, PITI) remain pinned at top of Dispo panel.
+
+AI-assistant buttons (Generate Listing, Suggest Best Buyer, Objection Handler) appear inside each individual tab or in a shared toolbar—whichever is cleaner.
+
+3️⃣ Implementation Steps
+Create a new component wrapper, e.g. <DispoTabs> using the same Tab component as Acquisitions.
+
+Move existing strategy blocks into separate child components:
+
+CashSaleWholesale.jsx
+
+MlsNovation.jsx
+
+SubjectToWrap.jsx
+
+SellerFinanceWrap.jsx
+
+Register a fifth "Compare All" tab that renders the aggregated card view.
+
+Ensure the “Deal Variables” strip passes props/state down to whichever tab is active.
+
+Preserve timelines (now 14-30 days on wholesale personas) within each tab.
+
+4️⃣ Visual Tweaks
+Give each tab header its strategy color:
+
+Cash Sale 🟩 green • MLS 🟦 blue • Sub-To 🟧 orange • SF Wrap 🟪 purple
+
+Place a subtle divider between the pinned Deal Variables strip and the tab bar.
+
+5️⃣ QA Checklist
+Switching tabs does not lose edited inputs.
+
+“Compare All” still recalculates after edits in any strategy tab.
+
+AI buttons fetch correct data context from the currently active tab.
+
+Drop this prompt into Ghostwriter and let’s iterate once you have the new tabbed Dispositions UI!
