@@ -557,6 +557,37 @@
                         </div>
                     </div>
 
+                    <!-- AI Listing Generator -->
+                    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-6 mb-6">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-robot text-indigo-600 mr-2"></i>AI Listing Generator
+                        </h4>
+                        <p class="text-gray-600 mb-4">Generate professional investor listings using GPT-4o with market data and comparable sales.</p>
+                        
+                        <div class="flex flex-wrap gap-3 mb-4">
+                            <button onclick="generateInvestorListing('off_market')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                                <i class="fas fa-file-alt mr-2"></i>Generate Off-Market Listing
+                            </button>
+                            <button onclick="generateInvestorListing('mls')" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                                <i class="fas fa-home mr-2"></i>Generate MLS Listing
+                            </button>
+                            <button onclick="generateListingVariations()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                <i class="fas fa-copy mr-2"></i>A/B Test Variations
+                            </button>
+                        </div>
+                        
+                        <!-- Listing Output -->
+                        <div id="generated-listing" class="hidden mt-4 p-4 bg-white border border-gray-200 rounded-lg">
+                            <div class="flex justify-between items-center mb-3">
+                                <h5 class="font-semibold text-gray-800">Generated Listing</h5>
+                                <button onclick="copyListingToClipboard()" class="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded transition-colors">
+                                    <i class="fas fa-copy mr-1"></i>Copy
+                                </button>
+                            </div>
+                            <div id="listing-content" class="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap"></div>
+                        </div>
+                    </div>
+
                     <!-- Cash Sale Tab Content -->
                     <div id="cash-sale-content" class="disposition-tab-content">
                         <div class="bg-green-50 border border-green-200 rounded-lg p-6">
@@ -2479,36 +2510,7 @@
                             </div>
                         </div>
 
-                        <!-- AI Listing Generator -->
-                        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-6 mb-6">
-                            <h4 class="text-lg font-semibold text-gray-800 mb-4">
-                                <i class="fas fa-robot text-indigo-600 mr-2"></i>AI Listing Generator
-                            </h4>
-                            <p class="text-gray-600 mb-4">Generate professional investor listings using GPT-4o with market data and comparable sales.</p>
-                            
-                            <div class="flex flex-wrap gap-3 mb-4">
-                                <button onclick="generateInvestorListing('off_market')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
-                                    <i class="fas fa-file-alt mr-2"></i>Generate Off-Market Listing
-                                </button>
-                                <button onclick="generateInvestorListing('mls')" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-                                    <i class="fas fa-home mr-2"></i>Generate MLS Listing
-                                </button>
-                                <button onclick="generateListingVariations()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                                    <i class="fas fa-copy mr-2"></i>A/B Test Variations
-                                </button>
-                            </div>
-                            
-                            <!-- Listing Output -->
-                            <div id="generated-listing" class="hidden mt-4 p-4 bg-white border border-gray-200 rounded-lg">
-                                <div class="flex justify-between items-center mb-3">
-                                    <h5 class="font-semibold text-gray-800">Generated Listing</h5>
-                                    <button onclick="copyListingToClipboard()" class="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded transition-colors">
-                                        <i class="fas fa-copy mr-1"></i>Copy
-                                    </button>
-                                </div>
-                                <div id="listing-content" class="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap"></div>
-                            </div>
-                        </div>
+
 
                         <!-- Property Risk Heatmap -->
                         <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
