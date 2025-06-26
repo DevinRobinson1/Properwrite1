@@ -1111,28 +1111,7 @@
                             </div>
                         </div>
 
-                        <!-- Performance Metrics -->
-                        <div class="bg-white border border-gray-200 p-6 rounded-lg">
-                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Performance Analysis</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-green-600 mb-1"><span id="sub2-roi">18.5</span>%</div>
-                                    <div class="text-sm text-gray-700">Annual ROI</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-blue-600 mb-1"><span id="sub2-cap-rate">8.2</span>%</div>
-                                    <div class="text-sm text-gray-700">Cap Rate</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-purple-600 mb-1">High</div>
-                                    <div class="text-sm text-gray-700">Risk Level</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-indigo-600 mb-1">5-10yr</div>
-                                    <div class="text-sm text-gray-700">Hold Period</div>
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
 
                     <!-- Seller Finance Tab -->
@@ -1746,8 +1725,117 @@
                     <!-- Compare All Tab -->
                     <div id="compare-tab" class="tab-content">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6">Strategy Comparison Dashboard</h3>
-                        <div id="comparison-results" class="space-y-6">
-                            <!-- Comparison results will be populated here -->
+                        
+                        <!-- Strategy Comparison Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <!-- Wholesale Strategy Card -->
+                            <div class="bg-white border border-gray-200 p-6 rounded-lg shadow-sm">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-lg font-semibold text-gray-800">💰 Wholesale (MAO)</h4>
+                                    <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">Quick Exit</span>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Maximum Offer:</span>
+                                        <span class="font-bold text-green-600">$<span id="compare-wholesale-offer">269,750</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Net Profit:</span>
+                                        <span class="font-bold">$<span id="compare-wholesale-profit">15,000</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Timeline:</span>
+                                        <span class="text-sm text-gray-500">30-45 days</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Installment Strategy Card -->
+                            <div class="bg-white border border-gray-200 p-6 rounded-lg shadow-sm">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-lg font-semibold text-gray-800">🏗️ Installment (Novation)</h4>
+                                    <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">Medium Term</span>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Maximum Offer:</span>
+                                        <span class="font-bold text-green-600">$<span id="compare-installment-offer">269,750</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Net Profit:</span>
+                                        <span class="font-bold">$<span id="compare-installment-profit">15,000</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Timeline:</span>
+                                        <span class="text-sm text-gray-500">90-180 days</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Subject-To Strategy Card -->
+                            <div class="bg-white border border-gray-200 p-6 rounded-lg shadow-sm">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-lg font-semibold text-gray-800">🏠 Subject-To</h4>
+                                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">Cash Flow</span>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Cash Offer:</span>
+                                        <span class="font-bold text-green-600">$<span id="compare-subjectto-offer">24,000</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Monthly Cash Flow:</span>
+                                        <span class="font-bold">$<span id="compare-subjectto-cashflow">200</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Timeline:</span>
+                                        <span class="text-sm text-gray-500">Hold 5-10 years</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Seller Finance Strategy Card -->
+                            <div class="bg-white border border-gray-200 p-6 rounded-lg shadow-sm">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-lg font-semibold text-gray-800">📊 Seller Finance</h4>
+                                    <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">Long Term</span>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Purchase Price:</span>
+                                        <span class="font-bold text-green-600">$<span id="compare-sellerfinance-price">395,000</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Monthly Payment:</span>
+                                        <span class="font-bold">$<span id="compare-sellerfinance-payment">2,402</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Timeline:</span>
+                                        <span class="text-sm text-gray-500">30 years</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Strategy Recommendation -->
+                        <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-blue-800 mb-4">💡 Recommended Strategy</h4>
+                            <div id="strategy-recommendation" class="space-y-4">
+                                <div class="flex items-start">
+                                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold mr-4 mt-1">1</div>
+                                    <div>
+                                        <div class="font-semibold text-gray-800">Best Overall Strategy: <span id="recommended-strategy">Wholesale</span></div>
+                                        <div class="text-gray-600 text-sm mt-1" id="recommendation-reason">Provides quickest exit with lowest risk and guaranteed profit.</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold mr-4 mt-1">2</div>
+                                    <div>
+                                        <div class="font-semibold text-gray-800">Alternative Option: <span id="alternative-strategy">Subject-To</span></div>
+                                        <div class="text-gray-600 text-sm mt-1" id="alternative-reason">Consider for long-term cash flow if you can handle ongoing management.</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -2278,7 +2366,7 @@
                 recalculateSubjectTo();
                 calculateBalloonProjection(); // Calculate balloon projection before Seller Finance
                 recalculateSellerFinance();
-                if (typeof updateComparisonResults === 'function') updateComparisonResults();
+                updateComparisonResults();
             } catch (error) {
                 console.log('Calculation update in progress...');
             }
@@ -2344,6 +2432,36 @@
             
             // Calculate initial cash offer
             calculateCashOffer();
+        }
+        
+        function updateComparisonResults() {
+            // Update wholesale values
+            const wholesaleOffer = document.getElementById('wholesale-offer')?.textContent || '269,750';
+            const wholesaleProfit = document.getElementById('wholesale-assignment-fee')?.textContent || '15,000';
+            
+            updateElementIfExists('compare-wholesale-offer', wholesaleOffer);
+            updateElementIfExists('compare-wholesale-profit', wholesaleProfit);
+            
+            // Update installment values
+            const installmentOffer = document.getElementById('installment-mao')?.textContent || '269,750';
+            const installmentProfit = document.getElementById('installment-net-profit')?.textContent || '15,000';
+            
+            updateElementIfExists('compare-installment-offer', installmentOffer);
+            updateElementIfExists('compare-installment-profit', installmentProfit);
+            
+            // Update Subject-To values
+            const subjectToOffer = document.getElementById('cash-to-seller')?.value?.replace(/[^\d]/g, '') || '24,000';
+            const subjectToCashFlow = document.getElementById('subject-to-monthly-cashflow')?.textContent || '200';
+            
+            updateElementIfExists('compare-subjectto-offer', subjectToOffer);
+            updateElementIfExists('compare-subjectto-cashflow', subjectToCashFlow);
+            
+            // Update Seller Finance values
+            const sellerFinancePrice = document.getElementById('sf-purchase-price')?.value?.replace(/[^\d]/g, '') || '395,000';
+            const sellerFinancePayment = document.getElementById('sf-monthly-payment')?.textContent || '2,402';
+            
+            updateElementIfExists('compare-sellerfinance-price', sellerFinancePrice);
+            updateElementIfExists('compare-sellerfinance-payment', sellerFinancePayment);
         }
         
         function calculateBalloonProjection() {
