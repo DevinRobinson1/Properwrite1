@@ -4056,6 +4056,14 @@
             // Recalculate dispositions for the selected tab
             recalculateDispositions();
         }
+        
+        // Format and recalculate dispositions
+        function formatAndRecalculateDispositions(element) {
+            if (element) {
+                formatNumber(element);
+            }
+            recalculateDispositions();
+        }
 
         // Dynamic Fee Section Functions
         function toggleAdvancedFees() {
