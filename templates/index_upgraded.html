@@ -1145,11 +1145,11 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                                 <div>
                                     <label class="block text-sm font-medium text-green-700 mb-2">Current ARV</label>
-                                    <input type="text" id="sf-current-arv" class="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50" readonly>
+                                    <input type="text" id="sf-current-arv" class="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" oninput="formatNumber(this); calculateBalloonProjection();">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-green-700 mb-2">Fair Market Rent</label>
-                                    <input type="text" id="sf-fair-market-rent" class="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50" readonly>
+                                    <input type="text" id="sf-fair-market-rent" class="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" oninput="formatNumber(this); calculateBalloonProjection();">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-green-700 mb-2">Annual Appreciation (%)</label>
@@ -2347,8 +2347,12 @@
         }
         
         function calculateBalloonProjection() {
-            const currentARV = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 415000;
-            const currentRent = parseFloat(document.getElementById('rent')?.value?.replace(/[^\d]/g, '')) || 1325;
+            // Get values from Market Analysis inputs, fallback to header if empty
+            const arvInput = document.getElementById('sf-current-arv')?.value?.replace(/[^\d]/g, '');
+            const rentInput = document.getElementById('sf-fair-market-rent')?.value?.replace(/[^\d]/g, '');
+            
+            const currentARV = parseFloat(arvInput) || parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 415000;
+            const currentRent = parseFloat(rentInput) || parseFloat(document.getElementById('rent')?.value?.replace(/[^\d]/g, '')) || 1325;
             const appreciationRate = parseFloat(document.getElementById('sf-appreciation-rate')?.value || 3.5) / 100;
             const balloonYear = parseInt(document.getElementById('sf-balloon-year')?.value || 5);
             const purchasePrice = parseFloat(document.getElementById('sf-purchase-price')?.value?.replace(/[^\d]/g, '')) || 147250;
@@ -2356,9 +2360,16 @@
             const interestRate = parseFloat(document.getElementById('sf-interest-rate')?.value || 6.5) / 100;
             const timeline = parseFloat(document.getElementById('sf-timeline')?.value || 30);
             
-            // Populate readonly fields
-            updateElementIfExists('sf-current-arv', currentARV);
-            updateElementIfExists('sf-fair-market-rent', currentRent);
+            // Populate fields with formatted values if they're empty
+            const arvField = document.getElementById('sf-current-arv');
+            const rentField = document.getElementById('sf-fair-market-rent');
+            
+            if (!arvField.value || arvField.value === '$0') {
+                arvField.value = '$' + currentARV.toLocaleString();
+            }
+            if (!rentField.value || rentField.value === '$0') {
+                rentField.value = '$' + currentRent.toLocaleString();
+            }
             
             // Calculate future property value
             const futureValue = currentARV * Math.pow(1 + appreciationRate, balloonYear);
