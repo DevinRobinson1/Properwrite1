@@ -3971,41 +3971,7 @@
             }
         }
 
-        // Disposition Tab Functions
-        function showDispositionTab(tabName) {
-            // Hide all disposition tab content
-            const allTabs = ['cash-sale', 'mls-novation', 'subject-to-wrap', 'seller-finance-wrap', 'compare-all'];
-            allTabs.forEach(tab => {
-                const content = document.getElementById(tab + '-content');
-                const tabButton = document.getElementById(tab + '-tab');
-                if (content) content.classList.add('hidden');
-                if (tabButton) {
-                    tabButton.className = 'disposition-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
-                }
-            });
-            
-            // Show selected tab content
-            const selectedContent = document.getElementById(tabName + '-content');
-            const selectedTab = document.getElementById(tabName + '-tab');
-            if (selectedContent) selectedContent.classList.remove('hidden');
-            if (selectedTab) {
-                // Set active styling based on tab type
-                if (tabName === 'cash-sale') {
-                    selectedTab.className = 'disposition-tab border-green-500 text-green-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
-                } else if (tabName === 'mls-novation') {
-                    selectedTab.className = 'disposition-tab border-blue-500 text-blue-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
-                } else if (tabName === 'subject-to-wrap') {
-                    selectedTab.className = 'disposition-tab border-orange-500 text-orange-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
-                } else if (tabName === 'seller-finance-wrap') {
-                    selectedTab.className = 'disposition-tab border-purple-500 text-purple-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
-                } else {
-                    selectedTab.className = 'disposition-tab border-gray-500 text-gray-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
-                }
-            }
-            
-            // Recalculate dispositions for the selected tab
-            recalculateDispositions();
-        }
+        // [REMOVED DUPLICATE FUNCTION - using main implementation below]
         
         // Format and recalculate dispositions
         function formatAndRecalculateDispositions(element) {
@@ -4047,6 +4013,14 @@
             updateElementIfExists('buyer-commission-value', buyerCommission.toFixed(1) + '%');
             
             // Recalculate dispositions
+            recalculateDispositions();
+        }
+        
+        // Update max profit flipper price from slider
+        function updateMaxProfitFlipperPrice() {
+            const percent = parseFloat(document.getElementById('max-profit-slider')?.value) || 60;
+            updateElementIfExists('max-profit-percent', percent + '%');
+            updateElementIfExists('max-profit-percent-display', percent + '%');
             recalculateDispositions();
         }
         
@@ -4843,35 +4817,57 @@
         }
 
         function showDispositionTab(tabName) {
-            // Hide all disposition tab contents
-            document.querySelectorAll('.disposition-tab-content').forEach(content => {
-                content.classList.add('hidden');
-            });
+            console.log('Switching to disposition tab:', tabName);
             
-            // Remove active class from all tab buttons
-            document.querySelectorAll('.disposition-tab-button').forEach(button => {
-                button.classList.remove('active');
-                button.classList.remove('bg-purple-600', 'text-white');
-                button.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            // Define all tab names
+            const allTabs = ['cash-sale', 'mls-novation', 'subject-to-wrap', 'seller-finance-wrap', 'compare-all'];
+            
+            // Hide all tab contents and reset all tab buttons
+            allTabs.forEach(tab => {
+                const content = document.getElementById(tab + '-content');
+                const button = document.getElementById(tab + '-tab');
+                
+                if (content) {
+                    content.classList.add('hidden');
+                }
+                
+                if (button) {
+                    // Reset to default inactive styling
+                    button.className = 'disposition-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
+                }
             });
             
             // Show selected tab content
-            const targetTab = document.getElementById(tabName + '-tab');
-            if (targetTab) {
-                targetTab.classList.remove('hidden');
+            const selectedContent = document.getElementById(tabName + '-content');
+            if (selectedContent) {
+                selectedContent.classList.remove('hidden');
             }
             
-            // Add active class to clicked button
-            if (event && event.target) {
-                event.target.classList.add('active', 'bg-purple-600', 'text-white');
-                event.target.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-            }
-            
-            // Update disposition calculations
-            setTimeout(() => {
-                if (typeof updateAllDispositionCards === 'function') {
-                    updateAllDispositionCards();
+            // Set active styling for selected tab
+            const selectedButton = document.getElementById(tabName + '-tab');
+            if (selectedButton) {
+                switch(tabName) {
+                    case 'cash-sale':
+                        selectedButton.className = 'disposition-tab border-green-500 text-green-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
+                        break;
+                    case 'mls-novation':
+                        selectedButton.className = 'disposition-tab border-blue-500 text-blue-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
+                        break;
+                    case 'subject-to-wrap':
+                        selectedButton.className = 'disposition-tab border-orange-500 text-orange-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
+                        break;
+                    case 'seller-finance-wrap':
+                        selectedButton.className = 'disposition-tab border-purple-500 text-purple-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
+                        break;
+                    case 'compare-all':
+                        selectedButton.className = 'disposition-tab border-gray-500 text-gray-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
+                        break;
                 }
+            }
+            
+            // Initialize tab and recalculate values
+            setTimeout(() => {
+                recalculateDispositions();
             }, 100);
         }
 
@@ -4881,6 +4877,9 @@
                 updateAllDispositionCards();
             }
             formatAllNumbers();
+            
+            // Initialize default disposition tab (cash-sale)
+            showDispositionTab('cash-sale');
             
             // Show default tab (wholesale)
             const defaultTab = document.querySelector('.acquisition-tab-button.active');
