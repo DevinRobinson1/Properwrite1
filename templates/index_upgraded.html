@@ -668,63 +668,7 @@
 
 
 
-                        <!-- Installment Strategy Details -->
-                        <div class="bg-white border border-gray-200 p-6 rounded-lg mb-6">
-                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Timeline & Execution</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <h5 class="font-semibold text-gray-700 mb-3">Execution Timeline</h5>
-                                    <div class="space-y-3">
-                                        <div class="flex items-center">
-                                            <div class="w-4 h-4 bg-blue-500 rounded-full mr-3"></div>
-                                            <div class="text-sm">
-                                                <div class="font-medium">Month 1-2: Contract & Marketing</div>
-                                                <div class="text-gray-600">Execute contract, begin marketing</div>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <div class="w-4 h-4 bg-blue-500 rounded-full mr-3"></div>
-                                            <div class="text-sm">
-                                                <div class="font-medium">Month 3-8: Buyer Search</div>
-                                                <div class="text-gray-600">Find qualified end buyer</div>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <div class="w-4 h-4 bg-green-500 rounded-full mr-3"></div>
-                                            <div class="text-sm">
-                                                <div class="font-medium">Month 9-12: Closing</div>
-                                                <div class="text-gray-600">Complete sale, collect profit</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h5 class="font-semibold text-gray-700 mb-3">Key Advantages</h5>
-                                    <div class="space-y-2 text-sm">
-                                        <div class="flex items-start">
-                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
-                                            <span>Higher profit than wholesale</span>
-                                        </div>
-                                        <div class="flex items-start">
-                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
-                                            <span>Seller gets convenience + higher price</span>
-                                        </div>
-                                        <div class="flex items-start">
-                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
-                                            <span>Control over sale process</span>
-                                        </div>
-                                        <div class="flex items-start">
-                                            <div class="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-2"></div>
-                                            <span>Longer timeline than wholesale</span>
-                                        </div>
-                                        <div class="flex items-start">
-                                            <div class="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-2"></div>
-                                            <span>Market risk during holding period</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+
 
                         <!-- Dynamic Fee Section -->
                         <div class="bg-orange-50 border border-orange-200 rounded-lg p-6 mb-6">
@@ -958,6 +902,45 @@
                             </div>
                         </div>
                         
+                        <!-- Cash Offer Calculator -->
+                        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-purple-800 mb-4">💰 Cash Offer Calculator</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-purple-700 mb-2">Seller's Asking Price</label>
+                                    <input type="text" id="seller-asking-price" class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" value="$50,000" oninput="formatNumberInput(this); calculateCashOffer();">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-purple-700 mb-2">Property Equity</label>
+                                    <input type="text" id="property-equity" class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" value="$25,000" oninput="formatNumberInput(this); calculateCashOffer();">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-purple-700 mb-2">Needed Repairs</label>
+                                    <input type="text" id="subject-to-repairs" class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-purple-700 mb-2">Fair Market Rent</label>
+                                    <input type="text" id="subject-to-rent" class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50" readonly>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-white rounded-lg border border-purple-200">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <div class="text-sm text-purple-700 font-medium mb-2">Calculated Cash Offer to Seller</div>
+                                        <div class="text-3xl font-bold text-purple-900">$<span id="calculated-cash-offer">15,000</span></div>
+                                        <div class="text-xs text-gray-600 mt-1">Based on cash flow potential and equity</div>
+                                    </div>
+                                    <div class="text-xs text-gray-600 space-y-1">
+                                        <div><strong>Formula:</strong></div>
+                                        <div>• Consider monthly cash flow potential</div>
+                                        <div>• Factor in available equity</div>
+                                        <div>• Account for repair costs</div>
+                                        <div>• Balance seller motivation vs. deal viability</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Subject-To Deal Structure -->
                         <div class="bg-gray-50 p-6 rounded-lg mb-6">
                             <h4 class="text-lg font-semibold text-gray-800 mb-4">Deal Structure Inputs</h4>
@@ -2201,6 +2184,7 @@
             try {
                 recalculateWholesale();
                 recalculateInstallment();
+                calculateCashOffer(); // Calculate cash offer before Subject-To
                 recalculateSubjectTo();
                 recalculateSellerFinance();
                 if (typeof updateComparisonResults === 'function') updateComparisonResults();
@@ -2209,13 +2193,56 @@
             }
         }
 
+        function calculateCashOffer() {
+            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 415000;
+            const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/[^\d]/g, '')) || 50000;
+            const rent = parseFloat(document.getElementById('rent')?.value?.replace(/[^\d]/g, '')) || 1325;
+            const sellerAskingPrice = parseFloat(document.getElementById('seller-asking-price')?.value?.replace(/[^\d]/g, '')) || 50000;
+            const propertyEquity = parseFloat(document.getElementById('property-equity')?.value?.replace(/[^\d]/g, '')) || 25000;
+            
+            // Populate readonly fields from header
+            updateElementIfExists('subject-to-repairs', repairs);
+            updateElementIfExists('subject-to-rent', rent);
+            
+            // Calculate cash offer based on multiple factors
+            // Formula: Consider cash flow potential, equity percentage, and repair costs
+            const monthlyNetCashFlow = rent - 800 - 300 - 100; // Estimated PITI and reserves
+            const annualCashFlow = monthlyNetCashFlow * 12;
+            const cashFlowMultiplier = Math.max(3, Math.min(8, annualCashFlow / 1000)); // 3-8x annual cash flow
+            
+            // Base offer on equity percentage and cash flow potential
+            const equityBasedOffer = propertyEquity * 0.4; // 40% of available equity
+            const cashFlowBasedOffer = annualCashFlow * cashFlowMultiplier * 0.5; // 50% of cash flow value
+            const repairAdjustment = repairs * 0.1; // 10% of repair costs
+            
+            // Final calculation considering seller motivation
+            let calculatedOffer = Math.min(
+                sellerAskingPrice * 0.8, // Max 80% of asking price
+                Math.max(equityBasedOffer, cashFlowBasedOffer) - repairAdjustment
+            );
+            
+            // Ensure minimum viable offer
+            calculatedOffer = Math.max(5000, Math.min(50000, calculatedOffer));
+            
+            updateElementIfExists('calculated-cash-offer', Math.round(calculatedOffer));
+            
+            // Update the cash to seller field in deal structure
+            const cashToSellerInput = document.getElementById('sub2-cash-seller');
+            if (cashToSellerInput) {
+                cashToSellerInput.value = Math.round(calculatedOffer);
+            }
+            
+            // Trigger Subject-To recalculation
+            recalculateSubjectTo();
+        }
+        
         function recalculateSubjectTo() {
             const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 415000;
-            const existingLoanBalance = parseFloat(document.getElementById('existing-loan-balance')?.value?.replace(/[^\d]/g, '')) || 33900;
-            const cashToSeller = parseFloat(document.getElementById('cash-to-seller')?.value?.replace(/[^\d]/g, '')) || 1000;
+            const existingLoanBalance = parseFloat(document.getElementById('sub2-loan-balance')?.value?.replace(/[^\d]/g, '')) || 116250;
+            const cashToSeller = parseFloat(document.getElementById('sub2-cash-seller')?.value?.replace(/[^\d]/g, '')) || 15000;
             const rent = parseFloat(document.getElementById('rent')?.value?.replace(/[^\d]/g, '')) || 1325;
-            const monthlyPI = parseFloat(document.getElementById('monthly-pi')?.value?.replace(/[^\d]/g, '')) || 210;
-            const monthlyEscrow = parseFloat(document.getElementById('monthly-escrow')?.value?.replace(/[^\d]/g, '')) || 0;
+            const monthlyPI = parseFloat(document.getElementById('sub2-monthly-pi')?.value?.replace(/[^\d]/g, '')) || 800;
+            const monthlyEscrow = parseFloat(document.getElementById('sub2-monthly-escrow')?.value?.replace(/[^\d]/g, '')) || 300;
             
             const totalAcquisition = existingLoanBalance + cashToSeller;
             const totalPITI = monthlyPI + monthlyEscrow;
