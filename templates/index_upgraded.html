@@ -3909,58 +3909,7 @@
             updateElementIfExists('lease-option-target-c2c', '$' + targetCashToClose.toLocaleString());
         }
         
-        // Disposition Tab Management
-        function showDispositionTab(tabName) {
-            // Hide all tab contents
-            const contents = document.querySelectorAll('.disposition-tab-content');
-            contents.forEach(content => {
-                content.classList.add('hidden');
-            });
-            
-            // Remove active class from all tabs
-            const tabs = document.querySelectorAll('.disposition-tab');
-            tabs.forEach(tab => {
-                tab.classList.remove('active-disposition-tab', 'border-green-500', 'text-green-600', 'border-blue-500', 'text-blue-600', 'border-orange-500', 'text-orange-600', 'border-purple-500', 'text-purple-600', 'border-gray-500', 'text-gray-600');
-                tab.classList.add('border-transparent', 'text-gray-500');
-            });
-            
-            // Show selected tab content
-            const selectedContent = document.getElementById(tabName + '-content');
-            if (selectedContent) {
-                selectedContent.classList.remove('hidden');
-            }
-            
-            // Add active class to selected tab with appropriate color
-            const selectedTab = document.getElementById(tabName + '-tab');
-            if (selectedTab) {
-                selectedTab.classList.remove('border-transparent', 'text-gray-500');
-                selectedTab.classList.add('active-disposition-tab');
-                
-                // Set tab-specific colors
-                switch(tabName) {
-                    case 'cash-sale':
-                        selectedTab.classList.add('border-green-500', 'text-green-600');
-                        break;
-                    case 'mls-novation':
-                        selectedTab.classList.add('border-blue-500', 'text-blue-600');
-                        break;
-                    case 'subject-to-wrap':
-                        selectedTab.classList.add('border-orange-500', 'text-orange-600');
-                        break;
-                    case 'seller-finance-wrap':
-                        selectedTab.classList.add('border-purple-500', 'text-purple-600');
-                        break;
-                    case 'compare-all':
-                        selectedTab.classList.add('border-gray-500', 'text-gray-600');
-                        break;
-                }
-            }
-            
-            // Recalculate for the active tab
-            if (tabName !== 'compare-all') {
-                recalculateAllDispositionStrategies();
-            }
-        }
+        // [REMOVED DUPLICATE - keeping only the final version]
         
         // AI Assistant Functions
         function suggestBestBuyerPersona() {
