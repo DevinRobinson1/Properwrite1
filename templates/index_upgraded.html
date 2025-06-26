@@ -2002,6 +2002,57 @@
             updateComparisonFromTabs();
         }
 
+        function recalculateSellerFinance() {
+            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 155000;
+            const rent = parseFloat(document.getElementById('rent')?.value?.replace(/[^\d]/g, '')) || 1425;
+            const downPayment = parseFloat(document.getElementById('sf-down-payment')?.value?.replace(/[^\d]/g, '')) || 15000;
+            const interestRate = parseFloat(document.getElementById('sf-interest-rate')?.value || 5.5) / 100;
+            const loanTerm = parseFloat(document.getElementById('sf-loan-term')?.value || 30);
+            
+            const purchasePrice = arv + downPayment;
+            const loanAmount = purchasePrice - downPayment;
+            const monthlyRate = interestRate / 12;
+            const numPayments = loanTerm * 12;
+            
+            // Calculate monthly payment
+            const monthlyPayment = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
+                                  (Math.pow(1 + monthlyRate, numPayments) - 1);
+            
+            const totalInterest = (monthlyPayment * numPayments) - loanAmount;
+            const balloonPayment = loanAmount * 0.85; // 10-year balloon
+            const monthlyCashFlow = rent - monthlyPayment - 250 - 100; // taxes/insurance + maintenance
+            
+            // Update payment structure
+            updateElementIfExists('sf-monthly-payment', monthlyPayment);
+            updateElementIfExists('sf-total-interest', totalInterest);
+            updateElementIfExists('sf-balloon', balloonPayment);
+            
+            // Update cash flow analysis
+            updateElementIfExists('sf-rent', rent);
+            updateElementIfExists('sf-payment', monthlyPayment);
+            updateElementIfExists('sf-taxes-insurance', 250);
+            updateElementIfExists('sf-maintenance', 100);
+            updateElementIfExists('sf-cashflow', monthlyCashFlow);
+            
+            // Update financing options
+            updateElementIfExists('sf-30yr-payment', monthlyPayment);
+            updateElementIfExists('sf-25yr-payment', monthlyPayment * 1.08);
+            updateElementIfExists('sf-20yr-payment', monthlyPayment * 1.20);
+            updateElementIfExists('sf-io-payment', loanAmount * monthlyRate);
+            
+            // Update balloon options
+            updateElementIfExists('sf-5yr-balloon', loanAmount * 0.95);
+            updateElementIfExists('sf-7yr-balloon', loanAmount * 0.90);
+            updateElementIfExists('sf-10yr-balloon', balloonPayment);
+        }
+
+        function updateElementIfExists(id, value) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = Math.round(value).toLocaleString();
+            }
+        }
+
         function updateComparisonFromTabs() {
             // Get current values from tabs and update comparison
             const arv = parseFloat(document.getElementById('arv').value);
@@ -2090,8 +2141,53 @@
             }
         }
 
-        // Acquisition tab functionality
+        // Fixed showAcquisitionTab function for proper tab navigation
         function showAcquisitionTab(tabName) {
+            console.log('Switching to tab:', tabName);
+            
+            // Hide all acquisition tab contents
+            document.querySelectorAll('.acquisition-tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Remove active class from all acquisition tab buttons
+            document.querySelectorAll('.acquisition-tab-button').forEach(button => {
+                button.classList.remove('active', 'bg-blue-600', 'text-white');
+                button.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            });
+            
+            // Show selected tab content
+            const targetTab = document.getElementById(tabName + '-tab');
+            if (targetTab) {
+                targetTab.classList.remove('hidden');
+                console.log('Showed tab:', tabName + '-tab');
+            } else {
+                console.error('Tab not found:', tabName + '-tab');
+            }
+            
+            // Add active class to clicked button
+            if (event && event.target) {
+                event.target.classList.add('active', 'bg-blue-600', 'text-white');
+                event.target.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            }
+            
+            // Update calculations for the active tab
+            setTimeout(() => {
+                if (tabName === 'wholesale') recalculateWholesale();
+                if (tabName === 'installment') recalculateInstallment();
+                if (tabName === 'subject-to') recalculateSubjectTo();
+                if (tabName === 'seller-finance') recalculateSellerFinance();
+                if (tabName === 'compare') updateComparisonFromTabs();
+            }, 100);
+        }
+
+        // Legacy function for backward compatibility
+        function showTab(tabName) {
+            showAcquisitionTab(tabName);
+        }
+
+        // Keep old showAcquisitionTab function name for compatibility
+        function showAcquisitionTabOld(tabName) {
             // Hide all acquisition tab contents
             document.querySelectorAll('.acquisition-tab-content').forEach(content => {
                 content.classList.remove('active');
@@ -2456,12 +2552,105 @@
             document.body.appendChild(modal);
         }
 
+        // Tab navigation system
+        function showAcquisitionTab(tabName) {
+            // Hide all acquisition tab contents
+            document.querySelectorAll('.acquisition-tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.acquisition-tab-button').forEach(button => {
+                button.classList.remove('active');
+                button.classList.remove('bg-blue-600', 'text-white');
+                button.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            });
+            
+            // Show selected tab content
+            const targetTab = document.getElementById(tabName + '-tab');
+            if (targetTab) {
+                targetTab.classList.remove('hidden');
+            }
+            
+            // Add active class to clicked button
+            event.target.classList.add('active', 'bg-blue-600', 'text-white');
+            event.target.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            
+            // Update calculations for the active tab
+            setTimeout(() => {
+                if (tabName === 'wholesale') recalculateWholesale();
+                if (tabName === 'installment') recalculateInstallment();
+                if (tabName === 'subject-to') recalculateSubjectTo();
+                if (tabName === 'seller-finance') recalculateSellerFinance();
+                if (tabName === 'compare') updateComparisonResults();
+            }, 100);
+        }
+
+        function showDispositionTab(tabName) {
+            // Hide all disposition tab contents
+            document.querySelectorAll('.disposition-tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.disposition-tab-button').forEach(button => {
+                button.classList.remove('active');
+                button.classList.remove('bg-purple-600', 'text-white');
+                button.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            });
+            
+            // Show selected tab content
+            const targetTab = document.getElementById(tabName + '-tab');
+            if (targetTab) {
+                targetTab.classList.remove('hidden');
+            }
+            
+            // Add active class to clicked button
+            if (event && event.target) {
+                event.target.classList.add('active', 'bg-purple-600', 'text-white');
+                event.target.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            }
+            
+            // Update disposition calculations
+            setTimeout(() => {
+                if (typeof updateAllDispositionCards === 'function') {
+                    updateAllDispositionCards();
+                }
+            }, 100);
+        }
+
         // Initialize page when DOM loads
         document.addEventListener('DOMContentLoaded', function() {
             if (document.getElementById('acquisition-cost')) {
                 updateAllDispositionCards();
             }
             formatAllNumbers();
+            
+            // Show default tab (wholesale)
+            const defaultTab = document.querySelector('.acquisition-tab-button.active');
+            if (!defaultTab) {
+                // Make wholesale tab active by default
+                const wholesaleButton = document.querySelector('button[onclick*="wholesale"]');
+                if (wholesaleButton) {
+                    wholesaleButton.classList.add('active', 'bg-blue-600', 'text-white');
+                    wholesaleButton.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                }
+                
+                // Show wholesale tab content and hide others
+                document.querySelectorAll('.acquisition-tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+                
+                const wholesaleTab = document.getElementById('wholesale-tab');
+                if (wholesaleTab) {
+                    wholesaleTab.classList.remove('hidden');
+                }
+                
+                // Initialize calculations
+                setTimeout(() => {
+                    recalculateWholesale();
+                }, 200);
+            }
         });
 
         // Site-wide comma formatting
