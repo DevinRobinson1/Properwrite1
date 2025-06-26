@@ -656,9 +656,10 @@
                                         <div class="flex justify-between">
                                             <span>Listing Commission:</span>
                                             <div class="flex items-center">
-                                                <input type="range" min="1" max="4" step="0.5" value="2" id="listing-commission" 
-                                                       class="w-16 mr-2" onchange="updateNovationCalculation()">
-                                                <span id="listing-commission-value">2.0%</span>
+                                                <input type="text" id="mls-listing-commission" value="2.0" 
+                                                       class="w-16 px-2 py-1 border border-blue-300 rounded text-right mr-1"
+                                                       onchange="formatAndRecalculateDispositions(this)">
+                                                <span>%</span>
                                             </div>
                                         </div>
                                         <div class="flex justify-between">
@@ -4063,6 +4064,92 @@
                 formatNumber(element);
             }
             recalculateDispositions();
+        }
+        
+        // Update wrap configuration (for seller finance down payment slider)
+        function updateWrapConfiguration() {
+            const downPaymentPercent = parseFloat(document.getElementById('wrap-down-payment-percent')?.value) || 10;
+            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 415000;
+            
+            // Update display
+            updateElementIfExists('wrap-down-payment-display', downPaymentPercent + '%');
+            updateElementIfExists('wrap-down-payment-amount', (arv * downPaymentPercent / 100).toLocaleString());
+            
+            // Auto-calculate interest rate based on down payment
+            let interestRate = 9.0; // Base rate
+            if (downPaymentPercent >= 20) interestRate = 6.0;
+            else if (downPaymentPercent >= 15) interestRate = 6.5;
+            else if (downPaymentPercent >= 10) interestRate = 7.5;
+            else if (downPaymentPercent >= 5) interestRate = 8.5;
+            
+            updateElementIfExists('wrap-buyer-rate', interestRate.toFixed(1) + '%');
+            
+            // Recalculate dispositions
+            recalculateDispositions();
+        }
+        
+        // Update novation calculation (for commission sliders)
+        function updateNovationCalculation() {
+            const listingCommission = parseFloat(document.getElementById('listing-commission')?.value) || 2;
+            const buyerCommission = parseFloat(document.getElementById('buyer-commission')?.value) || 2;
+            
+            // Update display values
+            updateElementIfExists('listing-commission-value', listingCommission.toFixed(1) + '%');
+            updateElementIfExists('buyer-commission-value', buyerCommission.toFixed(1) + '%');
+            
+            // Recalculate dispositions
+            recalculateDispositions();
+        }
+        
+        // Main dispositions calculation function
+        function recalculateDispositions() {
+            try {
+                // Get base values
+                const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 415000;
+                const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/[^\d]/g, '')) || 30000;
+                const rent = parseFloat(document.getElementById('rent')?.value?.replace(/[^\d]/g, '')) || 1325;
+                const closingCosts = parseFloat(document.getElementById('dispo-closing-costs')?.value?.replace(/[^\d]/g, '')) || 3500;
+                
+                // Update 1% Rent Rule Investor
+                const rentRulePrice = rent / 0.01;
+                updateElementIfExists('rent-rule-price', '$' + Math.round(rentRulePrice).toLocaleString());
+                updateElementIfExists('rent-rule-ratio', ((rent / rentRulePrice) * 100).toFixed(1) + '%');
+                
+                // Update Volume Flipper - NEW FORMULA: (ARV × 0.70) − Repairs − $3,500 buffer
+                const volumeFlipperMinFlip = parseFloat(document.getElementById('volume-flipper-min-flip')?.value?.replace(/,/g, '')) || 25000;
+                const volumeFlipperPrice = (arv * 0.70) - repairs - closingCosts - volumeFlipperMinFlip;
+                updateElementIfExists('volume-flipper-price', '$' + Math.round(volumeFlipperPrice).toLocaleString());
+                
+                // Update BRRR Investor
+                const brrrPrice = (arv * 0.70) - repairs;
+                updateElementIfExists('brrr-price', '$' + Math.round(brrrPrice).toLocaleString());
+                
+                // Update Max-Profit Flipper
+                const maxProfitPercent = parseFloat(document.getElementById('max-profit-percent')?.value) || 60;
+                const maxProfitPrice = (arv * maxProfitPercent / 100) - repairs;
+                updateElementIfExists('max-profit-price', '$' + Math.round(maxProfitPrice).toLocaleString());
+                updateElementIfExists('max-profit-percent-display', maxProfitPercent + '%');
+                
+                // Update MLS/Novation calculations
+                const listPrice = Math.round(arv * 0.95); // 95% of ARV
+                updateElementIfExists('novation-list-price', '$' + listPrice.toLocaleString());
+                
+                const listingCommission = parseFloat(document.getElementById('mls-listing-commission')?.value || document.getElementById('listing-commission')?.value) || 2;
+                const buyerCommission = parseFloat(document.getElementById('buyer-commission')?.value) || 2;
+                const totalCommissions = listPrice * (listingCommission + buyerCommission) / 100;
+                const ourFee = 20475; // Default fee
+                const netToUs = listPrice - totalCommissions - ourFee;
+                
+                updateElementIfExists('novation-gross-sale', '$' + listPrice.toLocaleString());
+                updateElementIfExists('novation-commissions', '$' + Math.round(totalCommissions).toLocaleString());
+                updateElementIfExists('novation-our-fee', '$' + ourFee.toLocaleString());
+                updateElementIfExists('novation-net-to-us', '$' + Math.round(netToUs).toLocaleString());
+                
+                console.log("Dispositions calculation completed successfully");
+                
+            } catch (error) {
+                console.error("Error in recalculateDispositions:", error);
+            }
         }
 
         // Dynamic Fee Section Functions
