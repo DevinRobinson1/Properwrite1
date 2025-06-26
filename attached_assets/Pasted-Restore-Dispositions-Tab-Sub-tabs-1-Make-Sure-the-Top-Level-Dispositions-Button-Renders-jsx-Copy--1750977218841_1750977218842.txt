@@ -1,0 +1,85 @@
+Restore Dispositions Tab & Sub-tabs
+1. Make Sure the Top-Level Dispositions Button Renders
+jsx
+Copy
+Edit
+/* TopNav.jsx (or wherever the phase-switch lives) */
+const [activePhase, setActivePhase] = useState("ACQ");
+
+<button
+  className={activePhase === "ACQ" ? "active" : ""}
+  onClick={() => setActivePhase("ACQ")}
+>
+  💼 Acquisitions
+</button>
+
+<button
+  className={activePhase === "DISPO" ? "active" : ""}
+  onClick={() => setActivePhase("DISPO")}
+>
+  📈 Dispositions
+</button>
+
+{activePhase === "ACQ"  && <AcquisitionsPanel />}
+{activePhase === "DISPO" && <DispositionsPanel />}
+2. Re-mount DispositionsPanel
+Confirm the component is still exported:
+
+bash
+Copy
+Edit
+/src/dispositions/DispositionsPanel.jsx
+and imported at the top of the page:
+
+jsx
+Copy
+Edit
+import DispositionsPanel from "./dispositions/DispositionsPanel";
+3. Inside DispositionsPanel — Restore Inner-Tab Router
+jsx
+Copy
+Edit
+const [dispoTab, setDispoTab] = useState("CASH");
+
+const DISPO_MAP = {
+  CASH:    <CashSaleWholesale />,           // 💰 Wholesale Exit
+  MLS:     <MlsNovation />,                 // 🏠 Novation / MLS
+  SUB2:    <SubjectToWrap />,               // 🏦 Sub-To Cash-to-Close
+  WRAP:    <SellerFinanceWrap />,           // 💜 SF Wrap & Lease-Option
+  COMPARE: <CompareExitCards />             // 🗂 Compare All
+};
+
+return (
+  <>
+    <ul className="dispo-tabs">
+      <li onClick={() => setDispoTab("CASH")}>Cash Sale</li>
+      <li onClick={() => setDispoTab("MLS")}>MLS / Novation</li>
+      <li onClick={() => setDispoTab("SUB2")}>Sub-To Wrap</li>
+      <li onClick={() => setDispoTab("WRAP")}>SF Wrap / Lease-Option</li>
+      <li onClick={() => setDispoTab("COMPARE")}>Compare All</li>
+    </ul>
+
+    <div className="dispo-body">{DISPO_MAP[dispoTab]}</div>
+  </>
+);
+4. Verify Component Imports
+jsx
+Copy
+Edit
+import CashSaleWholesale   from "./CashSaleWholesale";
+import MlsNovation         from "./MlsNovation";
+import SubjectToWrap       from "./SubjectToWrap";
+import SellerFinanceWrap   from "./SellerFinanceWrap";
+import CompareExitCards    from "./CompareExitCards";
+If any file was renamed or deleted, restore it from Git history.
+
+5. Quick QA
+Click Dispositions top-level button → DispositionsPanel shows.
+
+Default inner-tab = Cash Sale (Wholesale matrix visible).
+
+Switch to MLS / Novation → only that card shows.
+
+Switch to Sub-To Wrap, SF Wrap / Lease-Option, Compare All → each renders its single component.
+
+No console errors.

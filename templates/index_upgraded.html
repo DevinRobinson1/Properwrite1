@@ -1010,7 +1010,7 @@
         </div>
 
         <!-- Acquisitions Section -->
-        <div id="acquisitions-section" class="hidden">
+        <div id="acquisitions-section" class="block">
             <div class="bg-blue-50 min-h-screen">
                 <div class="container mx-auto px-4 py-8">
                     
@@ -1370,14 +1370,26 @@
             // Update toggle buttons
             const buttons = document.querySelectorAll('.section-toggle-btn');
             buttons.forEach(btn => {
-                btn.classList.remove('bg-blue-600', 'text-white');
-                btn.classList.add('bg-gray-200', 'text-gray-700');
+                btn.classList.remove('bg-blue-600', 'text-white', 'bg-purple-600');
+                btn.classList.add('bg-gray-300', 'text-gray-700');
             });
             
-            // Highlight active button
-            event.target.classList.remove('bg-gray-200', 'text-gray-700');
-            event.target.classList.add('bg-blue-600', 'text-white');
+            // Highlight active button based on section
+            const activeBtn = document.getElementById(sectionName + '-section-btn');
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-gray-300', 'text-gray-700');
+                if (sectionName === 'acquisitions') {
+                    activeBtn.classList.add('bg-blue-600', 'text-white');
+                } else {
+                    activeBtn.classList.add('bg-purple-600', 'text-white');
+                }
+            }
         }
+        
+        // Initialize page - show Acquisitions by default
+        document.addEventListener('DOMContentLoaded', function() {
+            showSection('acquisitions');
+        });
 
         // Disposition tab switching
         function showDispositionTab(tabName) {
