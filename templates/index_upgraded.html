@@ -1139,6 +1139,64 @@
                     <div id="seller-finance-tab" class="acquisition-tab-content hidden">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6">Seller Finance Strategy</h3>
                         
+                        <!-- Market Analysis & Balloon Projection -->
+                        <div class="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-green-800 mb-4">📊 Market Analysis & Balloon Exit Strategy</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-green-700 mb-2">Current ARV</label>
+                                    <input type="text" id="sf-current-arv" class="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-green-700 mb-2">Fair Market Rent</label>
+                                    <input type="text" id="sf-fair-market-rent" class="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50" readonly>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-green-700 mb-2">Annual Appreciation (%)</label>
+                                    <input type="number" id="sf-appreciation-rate" class="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" value="3.5" step="0.1" min="0" max="15" oninput="calculateBalloonProjection();">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-green-700 mb-2">Balloon Year</label>
+                                    <select id="sf-balloon-year" class="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" onchange="calculateBalloonProjection();">
+                                        <option value="3">3 Years</option>
+                                        <option value="5" selected>5 Years</option>
+                                        <option value="7">7 Years</option>
+                                        <option value="10">10 Years</option>
+                                        <option value="15">15 Years</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Balloon Exit Analysis -->
+                            <div class="bg-white p-4 rounded-lg border border-green-200">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="text-center">
+                                        <div class="text-sm text-green-700 font-medium mb-2">Projected Property Value at Balloon</div>
+                                        <div class="text-3xl font-bold text-green-900">$<span id="sf-balloon-value">478,250</span></div>
+                                        <div class="text-xs text-gray-600 mt-1">Based on <span id="sf-appreciation-years">5</span> years at <span id="sf-appreciation-display">3.5</span>% annual</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-sm text-blue-700 font-medium mb-2">Remaining Loan Balance</div>
+                                        <div class="text-3xl font-bold text-blue-900">$<span id="sf-balloon-balance">125,850</span></div>
+                                        <div class="text-xs text-gray-600 mt-1">Principal remaining at balloon</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-sm text-purple-700 font-medium mb-2">Available Equity for Refinance</div>
+                                        <div class="text-3xl font-bold text-purple-900">$<span id="sf-refinance-equity">352,400</span></div>
+                                        <div class="text-xs text-gray-600 mt-1"><span id="sf-ltv-ratio">74</span>% LTV at refinance</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Refinance Viability Assessment -->
+                                <div class="mt-4 p-3 rounded-lg" id="sf-refinance-assessment">
+                                    <div class="text-center">
+                                        <div class="text-sm font-medium mb-1" id="sf-refinance-status">✅ Excellent Refinance Position</div>
+                                        <div class="text-xs" id="sf-refinance-details">Strong equity position allows cash-out refinance with comfortable LTV ratio</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Three Key Offer Components -->
                         <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg mb-6">
                             <h4 class="text-lg font-semibold text-blue-800 mb-4">🎯 Three Key Offer Components</h4>
@@ -2178,6 +2236,9 @@
             updateElementIfExists('total-non-refundable', nonRefundableCosts);
             updateElementIfExists('total-equitable-deposit', totalEquitableDeposit);
             
+            // Get total combined fees from the installment fee calculator
+            const totalCombinedFees = recalculateInstallmentFees();
+            
             // Calculate Maximum Allowable Offer using proper formula
             // ARV - Repairs - Discount to Sell Fast - Closing Fees - Minimum Profit = MAO
             const maxAllowableOffer = arv - repairs - discountToSellFast - totalCombinedFees - ourMinimumProfit - nonRefundableCosts;
@@ -2215,6 +2276,7 @@
                 recalculateInstallment();
                 calculateCashOffer(); // Calculate cash offer before Subject-To
                 recalculateSubjectTo();
+                calculateBalloonProjection(); // Calculate balloon projection before Seller Finance
                 recalculateSellerFinance();
                 if (typeof updateComparisonResults === 'function') updateComparisonResults();
             } catch (error) {
@@ -2282,6 +2344,71 @@
             
             // Calculate initial cash offer
             calculateCashOffer();
+        }
+        
+        function calculateBalloonProjection() {
+            const currentARV = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 415000;
+            const currentRent = parseFloat(document.getElementById('rent')?.value?.replace(/[^\d]/g, '')) || 1325;
+            const appreciationRate = parseFloat(document.getElementById('sf-appreciation-rate')?.value || 3.5) / 100;
+            const balloonYear = parseInt(document.getElementById('sf-balloon-year')?.value || 5);
+            const purchasePrice = parseFloat(document.getElementById('sf-purchase-price')?.value?.replace(/[^\d]/g, '')) || 147250;
+            const downPayment = parseFloat(document.getElementById('sf-down-payment')?.value?.replace(/[^\d]/g, '')) || 15000;
+            const interestRate = parseFloat(document.getElementById('sf-interest-rate')?.value || 6.5) / 100;
+            const timeline = parseFloat(document.getElementById('sf-timeline')?.value || 30);
+            
+            // Populate readonly fields
+            updateElementIfExists('sf-current-arv', currentARV);
+            updateElementIfExists('sf-fair-market-rent', currentRent);
+            
+            // Calculate future property value
+            const futureValue = currentARV * Math.pow(1 + appreciationRate, balloonYear);
+            
+            // Calculate remaining loan balance at balloon payment
+            const loanAmount = purchasePrice - downPayment;
+            const monthlyRate = interestRate / 12;
+            const totalPayments = timeline * 12;
+            const balloonPayments = balloonYear * 12;
+            
+            const monthlyPayment = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) / 
+                                 (Math.pow(1 + monthlyRate, totalPayments) - 1);
+            
+            const remainingBalance = loanAmount * Math.pow(1 + monthlyRate, balloonPayments) - 
+                                   monthlyPayment * ((Math.pow(1 + monthlyRate, balloonPayments) - 1) / monthlyRate);
+            
+            // Calculate refinance equity
+            const refinanceEquity = futureValue - remainingBalance;
+            const ltvRatio = (remainingBalance / futureValue) * 100;
+            
+            // Update display elements
+            updateElementIfExists('sf-balloon-value', Math.round(futureValue));
+            updateElementIfExists('sf-balloon-balance', Math.round(remainingBalance));
+            updateElementIfExists('sf-refinance-equity', Math.round(refinanceEquity));
+            updateElementIfExists('sf-ltv-ratio', Math.round(ltvRatio));
+            updateElementIfExists('sf-appreciation-years', balloonYear);
+            updateElementIfExists('sf-appreciation-display', (appreciationRate * 100).toFixed(1));
+            
+            // Assess refinance viability
+            const statusElement = document.getElementById('sf-refinance-status');
+            const detailsElement = document.getElementById('sf-refinance-details');
+            const assessmentElement = document.getElementById('sf-refinance-assessment');
+            
+            if (ltvRatio <= 75) {
+                statusElement.textContent = '✅ Excellent Refinance Position';
+                detailsElement.textContent = 'Strong equity position allows cash-out refinance with comfortable LTV ratio';
+                assessmentElement.className = 'mt-4 p-3 rounded-lg bg-green-100 border border-green-300';
+            } else if (ltvRatio <= 80) {
+                statusElement.textContent = '✅ Good Refinance Position';
+                detailsElement.textContent = 'Adequate equity for refinancing, though less cash-out potential';
+                assessmentElement.className = 'mt-4 p-3 rounded-lg bg-yellow-100 border border-yellow-300';
+            } else if (ltvRatio <= 90) {
+                statusElement.textContent = '⚠️ Marginal Refinance Position';
+                detailsElement.textContent = 'Limited equity may require additional down payment for refinancing';
+                assessmentElement.className = 'mt-4 p-3 rounded-lg bg-orange-100 border border-orange-300';
+            } else {
+                statusElement.textContent = '❌ Poor Refinance Position';
+                detailsElement.textContent = 'Insufficient equity for refinancing - may need to sell or renegotiate';
+                assessmentElement.className = 'mt-4 p-3 rounded-lg bg-red-100 border border-red-300';
+            }
         }
         
         function recalculateSubjectTo() {
