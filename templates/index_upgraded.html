@@ -2456,67 +2456,7 @@
                             </div>
                         </div>
 
-                        <!-- MLS / Novation Tab Content -->
-                        <div id="mls-novation-content" class="disposition-tab-content hidden">
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                                <h3 class="text-lg font-semibold text-blue-800 mb-4">🏠 Novation/Installment (MLS Listing)</h3>
-                                <div class="text-sm text-blue-700 mb-4">Calculate net proceeds after MLS listing and commission costs:</div>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <!-- Commission Structure -->
-                                    <div class="bg-white border border-blue-200 p-4 rounded-lg">
-                                        <h4 class="font-semibold text-blue-800 mb-3">Commission Structure</h4>
-                                        <div class="space-y-4">
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                    Listing Agent Commission: <span id="listing-commission-display">3.0%</span>
-                                                </label>
-                                                <input type="range" min="2" max="4" value="3" step="0.5" id="listing-commission-slider" 
-                                                       class="w-full" onchange="updateCommissionDisplay('listing-commission', this.value); recalculateMLSNovation()">
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                    Buyer Agent Commission: <span id="buyer-commission-display">3.0%</span>
-                                                </label>
-                                                <input type="range" min="2" max="4" value="3" step="0.5" id="buyer-commission-slider" 
-                                                       class="w-full" onchange="updateCommissionDisplay('buyer-commission', this.value); recalculateMLSNovation()">
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <!-- Net Proceeds Analysis -->
-                                    <div class="bg-white border border-blue-200 p-4 rounded-lg">
-                                        <h4 class="font-semibold text-blue-800 mb-3">Net Proceeds Analysis</h4>
-                                        <div class="space-y-3 text-sm">
-                                            <div class="flex justify-between">
-                                                <span class="text-gray-600">List Price (95% ARV):</span>
-                                                <span class="font-bold text-blue-600" id="mls-list-price">$393,750</span>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <span class="text-gray-600">Total Commissions:</span>
-                                                <span class="text-red-600" id="total-commissions">-$23,625</span>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <span class="text-gray-600">Closing Costs:</span>
-                                                <span class="text-red-600" id="mls-closing-costs">-$3,500</span>
-                                            </div>
-                                            <div class="border-t pt-2 flex justify-between">
-                                                <span class="text-gray-700 font-medium">Net Proceeds:</span>
-                                                <span class="font-bold text-blue-600" id="mls-net-proceeds">$366,625</span>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <span class="text-gray-600">Less Acquisition:</span>
-                                                <span class="text-red-600" id="mls-acquisition-cost">-$140,000</span>
-                                            </div>
-                                            <div class="border-t pt-2 flex justify-between">
-                                                <span class="text-gray-700 font-medium">Total Profit:</span>
-                                                <span class="font-bold text-green-600" id="mls-total-profit">$226,625</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
 
 
