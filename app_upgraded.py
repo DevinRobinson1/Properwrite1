@@ -28,6 +28,11 @@ def index():
     """Enhanced property input form with external data integration"""
     return render_template('index_upgraded.html')
 
+@app.route('/test')
+def test():
+    """Simple test page to verify server is working"""
+    return render_template('test.html')
+
 @app.route('/api/analyze-property', methods=['POST'])
 def analyze_property():
     """
