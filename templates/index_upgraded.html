@@ -1297,22 +1297,30 @@
                         <!-- Ackerman Offers -->
                         <div class="bg-blue-50 p-6 rounded-lg mb-6">
                             <h4 class="text-lg font-semibold text-blue-800 mb-4">Ackerman Method Offers</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="ackerman-offers">
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="ackerman-offers">
                                 <div class="bg-white p-4 rounded-lg border border-blue-200">
-                                    <div class="text-sm text-blue-600 font-medium">Offer #1 (65%)</div>
+                                    <div class="text-sm text-blue-600 font-medium">1st Offer (65%)</div>
                                     <div class="text-2xl font-bold text-blue-800">$<span id="ackerman-1">41,275</span></div>
-                                    <div class="text-xs text-gray-600 mt-1">Aggressive opening</div>
+                                    <div class="text-xs text-gray-600 mt-1">Conservative entry point</div>
                                 </div>
                                 <div class="bg-white p-4 rounded-lg border border-blue-200">
-                                    <div class="text-sm text-blue-600 font-medium">Offer #2 (85%)</div>
+                                    <div class="text-sm text-blue-600 font-medium">2nd Offer (85%)</div>
                                     <div class="text-2xl font-bold text-blue-800">$<span id="ackerman-2">53,975</span></div>
-                                    <div class="text-xs text-gray-600 mt-1">Negotiation point</div>
+                                    <div class="text-xs text-gray-600 mt-1">Moderate position</div>
                                 </div>
                                 <div class="bg-white p-4 rounded-lg border border-blue-200">
-                                    <div class="text-sm text-blue-600 font-medium">Offer #3 (95%)</div>
+                                    <div class="text-sm text-blue-600 font-medium">3rd Offer (95%)</div>
                                     <div class="text-2xl font-bold text-blue-800">$<span id="ackerman-3">60,325</span></div>
-                                    <div class="text-xs text-gray-600 mt-1">Final offer</div>
+                                    <div class="text-xs text-gray-600 mt-1">Competitive offer</div>
                                 </div>
+                                <div class="bg-white p-4 rounded-lg border border-blue-200">
+                                    <div class="text-sm text-blue-600 font-medium">4th Offer (100%)</div>
+                                    <div class="text-2xl font-bold text-blue-800">$<span id="ackerman-4">63,500</span></div>
+                                    <div class="text-xs text-gray-600 mt-1">Maximum Allowable Offer</div>
+                                </div>
+                            </div>
+                            <div class="mt-4 text-center">
+                                <div class="text-xs text-gray-600">Offers based on Maximum Allowable Offer, not ARV</div>
                             </div>
                         </div>
 
@@ -1481,7 +1489,7 @@
                             </div>
                             <div class="mt-4 text-center">
                                 <div class="text-sm text-yellow-700 font-medium">Timeframe: 30-120 days between offers</div>
-                                <div class="text-xs text-gray-600 mt-1">Offers based on Maximum Allowable Offer (ARV - Repairs - Discount - Fees - Profit)</div>
+                                <div class="text-xs text-gray-600 mt-1">Offers based on Maximum Allowable Offer, not ARV</div>
                             </div>
                         </div>
 
@@ -2920,10 +2928,11 @@
             updateElementIfExists('mao-assignment', assignmentFee);
             updateElementIfExists('wholesale-mao-result', mao);
             
-            // Update Ackerman offers based on MAO
+            // Update Ackerman offers based on MAO (Maximum Allowable Offer)
             updateElementIfExists('ackerman-1', (mao * 0.65));
             updateElementIfExists('ackerman-2', (mao * 0.85));
             updateElementIfExists('ackerman-3', (mao * 0.95));
+            updateElementIfExists('ackerman-4', (mao * 1.00)); // 100% of MAO
             
             // Update profit analysis
             updateElementIfExists('total-investment', (mao + repairs));
@@ -2953,6 +2962,9 @@
             
             // Get total combined fees from the installment fee calculator
             const totalCombinedFees = recalculateInstallmentFees();
+            
+            // Use global minimum acceptable profit
+            const ourMinimumProfit = window.globalMinAcceptableProfit || 15000;
             
             // Calculate Maximum Allowable Offer using proper formula
             // ARV - Repairs - Discount to Sell Fast - Closing Fees - Minimum Profit = MAO
