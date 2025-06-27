@@ -3770,9 +3770,10 @@
             updateElementIfExists('rent-rule-price', '$' + Math.round(rentRulePrice).toLocaleString());
             updateElementIfExists('rent-rule-ratio', ((rent / rentRulePrice) * 100).toFixed(1) + '%');
             
-            // Update Volume Flipper - NEW FORMULA: (ARV × 0.70) − Repairs − $3,500 buffer
+            // Update Volume Flipper - NEW FORMULA: (ARV × 0.70) − Repairs − $3,500 buffer − Min Flip Amount
             const volumeFlipperMinFlip = parseFloat(document.getElementById('volume-flipper-min-flip')?.value?.replace(/,/g, '')) || 25000;
             const volumeFlipperPrice = (arv * 0.70) - repairs - closingCosts - volumeFlipperMinFlip;
+            console.log('Volume Flipper calculation:', { arv, repairs, closingCosts, volumeFlipperMinFlip, volumeFlipperPrice });
             updateElementIfExists('volume-flipper-price', '$' + Math.round(volumeFlipperPrice).toLocaleString());
             
             // Update BRRR Investor
@@ -4048,9 +4049,10 @@
                 updateElementIfExists('rent-rule-price', '$' + Math.round(rentRulePrice).toLocaleString());
                 updateElementIfExists('rent-rule-ratio', ((rent / rentRulePrice) * 100).toFixed(1) + '%');
                 
-                // Update Volume Flipper - NEW FORMULA: (ARV × 0.70) − Repairs − $3,500 buffer
+                // Update Volume Flipper - NEW FORMULA: (ARV × 0.70) − Repairs − $3,500 buffer − Min Flip Amount
                 const volumeFlipperMinFlip = parseFloat(document.getElementById('volume-flipper-min-flip')?.value?.replace(/,/g, '')) || 25000;
                 const volumeFlipperPrice = (arv * 0.70) - repairs - closingCosts - volumeFlipperMinFlip;
+                console.log('Volume Flipper calculation (second instance):', { arv, repairs, closingCosts, volumeFlipperMinFlip, volumeFlipperPrice });
                 updateElementIfExists('volume-flipper-price', '$' + Math.round(volumeFlipperPrice).toLocaleString());
                 
                 // Update BRRR Investor
