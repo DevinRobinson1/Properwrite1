@@ -33,6 +33,11 @@ def test():
     """Simple test page to verify server is working"""
     return render_template('test.html')
 
+@app.route('/calculator')
+def calculator():
+    """Full calculator interface"""
+    return render_template('index_upgraded.html')
+
 @app.route('/api/analyze-property', methods=['POST'])
 def analyze_property():
     """
