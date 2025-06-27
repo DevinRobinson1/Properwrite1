@@ -1130,26 +1130,7 @@
                                 </div>
                             </div>
 
-                            <!-- AI Assistant Buttons for SF Wrap -->
-                            <div class="mt-6 pt-4 border-t border-purple-200">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <button onclick="draftBuyerFacingPitch()" 
-                                            class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
-                                        <i class="fas fa-edit mr-2"></i>
-                                        <span class="text-sm">📋 Generate SF Pitch</span>
-                                    </button>
-                                    <button onclick="suggestBestBuyerPersona()" 
-                                            class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
-                                        <i class="fas fa-chart-bar mr-2"></i>
-                                        <span class="text-sm">📊 Rate Comparison</span>
-                                    </button>
-                                    <button onclick="openBuyerObjectionHandler()" 
-                                            class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
-                                        <i class="fas fa-question-circle mr-2"></i>
-                                        <span class="text-sm">❓ Financing Concerns</span>
-                                    </button>
-                                </div>
-                            </div>
+
                         </div>
                     </div>
 
@@ -3853,40 +3834,55 @@
         }
         
         function updateWrapConfiguration() {
-            const arv = parseFloat(document.getElementById('dispo-arv').value.replace(/,/g, '')) || 415000;
-            const downPaymentPercent = parseFloat(document.getElementById('wrap-down-payment-percent').value) || 10;
-            const term = parseFloat(document.getElementById('wrap-term').value) || 30;
-            const piti = parseFloat(document.getElementById('dispo-piti').value.replace(/,/g, '')) || 850;
+            // Get values from either ID format for compatibility
+            const arv = parseFloat(document.getElementById('dispo-arv')?.value?.replace(/,/g, '')) || 415000;
+            const downPaymentPercent = parseFloat(document.getElementById('wrap-down-payment-percent')?.value) || 
+                                     parseFloat(document.getElementById('wrap-down-slider')?.value) || 10;
+            const term = parseFloat(document.getElementById('wrap-term')?.value) || 
+                        parseFloat(document.getElementById('wrap-term-select')?.value) || 30;
+            const piti = parseFloat(document.getElementById('dispo-piti')?.value?.replace(/,/g, '')) || 850;
+            const acquisitionCost = parseFloat(document.getElementById('dispo-acquisition-cost')?.value?.replace(/,/g, '')) || 140000;
             
             // Auto-calculate interest rate based on down payment
             let buyerRate;
-            if (downPaymentPercent >= 15) {
+            if (downPaymentPercent >= 20) {
                 buyerRate = 6.0;
-            } else if (downPaymentPercent < 10) {
-                buyerRate = 9.0;
-            } else {
+            } else if (downPaymentPercent >= 15) {
+                buyerRate = 6.5;
+            } else if (downPaymentPercent >= 10) {
                 buyerRate = 7.5;
+            } else {
+                buyerRate = 9.0;
             }
             
             const priceToBuyer = arv * 1.10; // ARV + 10%
             const downPaymentAmount = priceToBuyer * (downPaymentPercent / 100);
             const loanAmount = priceToBuyer - downPaymentAmount;
             
-            // Simple monthly payment calculation
+            // Calculate monthly payment using amortization formula
             const monthlyRate = buyerRate / 100 / 12;
             const numPayments = term * 12;
-            const buyerPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
+            let buyerPayment = 0;
+            
+            if (monthlyRate > 0) {
+                buyerPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
+            } else {
+                buyerPayment = loanAmount / numPayments; // For 0% interest
+            }
             
             const monthlyCashFlow = buyerPayment - piti;
-            const frontEndProfit = downPaymentAmount - 140000; // Assuming acquisition cost
+            const frontEndProfit = downPaymentAmount - acquisitionCost;
             
+            // Update all possible element IDs for compatibility
             updateElementIfExists('wrap-down-payment-display', downPaymentPercent + '%');
-            updateElementIfExists('wrap-down-payment-amount', downPaymentAmount.toLocaleString());
+            updateElementIfExists('wrap-down-display', downPaymentPercent + '%');
+            updateElementIfExists('wrap-down-payment-amount', '$' + Math.round(downPaymentAmount).toLocaleString());
             updateElementIfExists('wrap-buyer-rate', buyerRate.toFixed(1) + '%');
-            updateElementIfExists('wrap-price-to-buyer', '$' + priceToBuyer.toLocaleString());
-            updateElementIfExists('wrap-buyer-payment', '$' + buyerPayment.toLocaleString());
-            updateElementIfExists('wrap-monthly-cash-flow', '$' + monthlyCashFlow.toLocaleString());
-            updateElementIfExists('wrap-front-end-profit', '$' + frontEndProfit.toLocaleString());
+            updateElementIfExists('wrap-price-to-buyer', '$' + Math.round(priceToBuyer).toLocaleString());
+            updateElementIfExists('wrap-buyer-payment', '$' + Math.round(buyerPayment).toLocaleString());
+            updateElementIfExists('wrap-monthly-cash-flow', '$' + Math.round(monthlyCashFlow).toLocaleString());
+            updateElementIfExists('wrap-front-end-profit', '$' + Math.round(frontEndProfit).toLocaleString());
+            updateElementIfExists('wrap-total-profit', '$' + Math.round(frontEndProfit).toLocaleString());
         }
         
         function formatAndRecalculateLeaseOption(input) {
