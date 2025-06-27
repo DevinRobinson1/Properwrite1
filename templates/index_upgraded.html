@@ -752,6 +752,1342 @@
 
 
 
+                    <!-- Subject-To Wrap Tab Content -->
+                    <div id="subject-to-wrap-content" class="disposition-tab-content hidden">
+                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-orange-800 mb-4">🏦 Subject-To "Cash-to-Close" Builder</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-orange-700 mb-1">Cash to Seller</label>
+                                        <input type="text" id="subject-to-cash-seller" value="5,000" 
+                                               class="w-full px-3 py-2 border border-orange-300 rounded focus:ring-2 focus:ring-orange-500"
+                                               onchange="formatAndRecalculateSubjectTo(this)">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-orange-700 mb-1">Assignment Fee</label>
+                                        <input type="text" id="subject-to-assignment-fee" value="15,000" 
+                                               class="w-full px-3 py-2 border border-orange-300 rounded focus:ring-2 focus:ring-orange-500"
+                                               onchange="formatAndRecalculateSubjectTo(this)">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-orange-700 mb-1">Arrears/Liens</label>
+                                        <input type="text" id="subject-to-arrears" value="2,500" 
+                                               class="w-full px-3 py-2 border border-orange-300 rounded focus:ring-2 focus:ring-orange-500"
+                                               onchange="formatAndRecalculateSubjectTo(this)">
+                                    </div>
+                                </div>
+                                <div class="bg-white p-4 rounded border">
+                                    <h4 class="font-semibold text-orange-800 mb-3">Deal Summary</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between">
+                                            <span>Cash-to-Close:</span>
+                                            <span class="font-bold text-orange-600" id="subject-to-cash-close">$26,700</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Equity in Deal:</span>
+                                            <span class="font-bold" id="subject-to-equity">$172,000</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Monthly Cash Flow:</span>
+                                            <span class="font-bold" id="subject-to-cash-flow">$475</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 p-2 rounded" id="subject-to-cash-flow-status">
+                                        <div class="text-xs font-medium text-center">Cash Flow Status</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- End of Subject-To Component -->
+                        </div>
+                    </div>
+
+                    <!-- SF Wrap / Lease-Option Tab Content -->
+                    <div id="seller-finance-wrap-content" class="disposition-tab-content hidden">
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-purple-800 mb-4">💰 Seller Finance Wrap & Lease-Option</h3>
+                            
+                            <!-- Seller Finance Wrap Configurator -->
+                            <div class="mb-6">
+                                <h4 class="text-md font-semibold text-purple-700 mb-3">Seller Finance Wrap Configurator</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-purple-700 mb-1">Down Payment</label>
+                                            <div class="flex items-center">
+                                                <input type="range" min="5" max="25" value="10" id="wrap-down-payment-percent" 
+                                                       class="flex-1 mr-3" onchange="updateWrapConfiguration()">
+                                                <span class="text-sm font-medium w-12" id="wrap-down-payment-display">10%</span>
+                                            </div>
+                                            <div class="text-sm text-gray-600 mt-1">
+                                                Amount: $<span id="wrap-down-payment-amount">41,500</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-purple-700 mb-1">Buyer Interest Rate</label>
+                                            <div class="flex items-center">
+                                                <span class="text-lg font-bold text-purple-600" id="wrap-buyer-rate">7.5%</span>
+                                                <span class="text-xs text-gray-500 ml-2">Auto-calculated</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-purple-700 mb-1">Wrap Term</label>
+                                            <select id="wrap-term" class="w-full px-3 py-2 border border-purple-300 rounded focus:ring-2 focus:ring-purple-500"
+                                                    onchange="updateWrapConfiguration()">
+                                                <option value="5">5 years</option>
+                                                <option value="10">10 years</option>
+                                                <option value="30" selected>30 years</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white p-4 rounded border">
+                                        <h5 class="font-semibold text-purple-800 mb-3">Wrap Analysis</h5>
+                                        <div class="space-y-2 text-sm">
+                                            <div class="flex justify-between">
+                                                <span>Price to End-Buyer:</span>
+                                                <span class="font-bold text-purple-600" id="wrap-price-to-buyer">$456,500</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Buyer Monthly Payment:</span>
+                                                <span class="font-bold" id="wrap-buyer-payment">$2,890</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Monthly Cash Flow:</span>
+                                                <span class="font-bold text-green-600" id="wrap-monthly-cash-flow">$2,040</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Front-End Profit:</span>
+                                                <span class="font-bold text-purple-600" id="wrap-front-end-profit">-$98,500</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Lease-Option Calculator -->
+                            <div class="mb-6">
+                                <h4 class="text-md font-semibold text-purple-700 mb-3">Lease-Option (Sub-Buyer)</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-purple-700 mb-1">Equity Available</label>
+                                            <input type="text" id="lease-option-equity" value="172,000" 
+                                                   class="w-full px-3 py-2 border border-purple-300 rounded focus:ring-2 focus:ring-purple-500"
+                                                   onchange="formatAndRecalculateLeaseOption(this)">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-purple-700 mb-1">Repairs Needed</label>
+                                            <select id="lease-option-repairs" class="w-full px-3 py-2 border border-purple-300 rounded focus:ring-2 focus:ring-purple-500"
+                                                    onchange="updateLeaseOptionCalculation()">
+                                                <option value="none">None</option>
+                                                <option value="some" selected>Some</option>
+                                                <option value="heavy">Heavy</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-purple-700 mb-1">Desired Cash Flow</label>
+                                            <input type="text" id="lease-option-cash-flow" value="475" 
+                                                   class="w-full px-3 py-2 border border-purple-300 rounded focus:ring-2 focus:ring-purple-500"
+                                                   onchange="formatAndRecalculateLeaseOption(this)">
+                                        </div>
+                                    </div>
+                                    <div class="bg-white p-4 rounded border">
+                                        <h5 class="font-semibold text-purple-800 mb-3">Lease-Option Target</h5>
+                                        <div class="space-y-2 text-sm">
+                                            <div class="flex justify-between">
+                                                <span>Base Cash-to-Close:</span>
+                                                <span class="font-bold" id="lease-option-base-c2c">$33,200</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Cash Flow Bonus:</span>
+                                                <span class="font-bold text-green-600" id="lease-option-cf-bonus">$5,000</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Equity Bonus:</span>
+                                                <span class="font-bold text-green-600" id="lease-option-equity-bonus">$5,000</span>
+                                            </div>
+                                            <hr class="my-2">
+                                            <div class="flex justify-between font-bold">
+                                                <span>Target Cash-to-Close:</span>
+                                                <span class="text-purple-600" id="lease-option-target-c2c">$43,200</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Timeline:</span>
+                                                <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">30-45 days</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- AI Assistant Buttons for SF Wrap -->
+                            <div class="mt-6 pt-4 border-t border-purple-200">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <button onclick="draftBuyerFacingPitch()" 
+                                            class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                                        <i class="fas fa-edit mr-2"></i>
+                                        <span class="text-sm">📋 Generate SF Pitch</span>
+                                    </button>
+                                    <button onclick="suggestBestBuyerPersona()" 
+                                            class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                                        <i class="fas fa-chart-bar mr-2"></i>
+                                        <span class="text-sm">📊 Rate Comparison</span>
+                                    </button>
+                                    <button onclick="openBuyerObjectionHandler()" 
+                                            class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                                        <i class="fas fa-question-circle mr-2"></i>
+                                        <span class="text-sm">❓ Financing Concerns</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Compare All Tab Content -->
+                    <div id="compare-all-content" class="disposition-tab-content hidden">
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">📊 Compare All Exit Strategies</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <!-- Cash Sale Summary -->
+                                <div class="bg-green-50 border border-green-200 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-green-800 mb-2">💰 Cash Sale</h4>
+                                    <div class="text-sm space-y-1">
+                                        <div class="flex justify-between">
+                                            <span>Best Price:</span>
+                                            <span class="font-bold" id="compare-cash-price">$355,000</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Timeline:</span>
+                                            <span>14-30 days</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Effort:</span>
+                                            <span class="text-green-600">Low</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- MLS Summary -->
+                                <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-blue-800 mb-2">🏠 MLS Listing</h4>
+                                    <div class="text-sm space-y-1">
+                                        <div class="flex justify-between">
+                                            <span>Net Proceeds:</span>
+                                            <span class="font-bold" id="compare-mls-net">$329,925</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Timeline:</span>
+                                            <span>45-90 days</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Effort:</span>
+                                            <span class="text-yellow-600">Medium</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Subject-To Summary -->
+                                <div class="bg-orange-50 border border-orange-200 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-orange-800 mb-2">🏦 Subject-To</h4>
+                                    <div class="text-sm space-y-1">
+                                        <div class="flex justify-between">
+                                            <span>Cash-to-Close:</span>
+                                            <span class="font-bold" id="compare-subto-cash">$26,700</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Monthly Flow:</span>
+                                            <span class="font-bold" id="compare-subto-flow">$475</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Effort:</span>
+                                            <span class="text-red-600">High</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- SF Wrap Summary -->
+                                <div class="bg-purple-50 border border-purple-200 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-purple-800 mb-2">💰 SF Wrap</h4>
+                                    <div class="text-sm space-y-1">
+                                        <div class="flex justify-between">
+                                            <span>Down Payment:</span>
+                                            <span class="font-bold" id="compare-wrap-down">$41,500</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Monthly Flow:</span>
+                                            <span class="font-bold" id="compare-wrap-flow">$2,040</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Effort:</span>
+                                            <span class="text-yellow-600">Medium</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- AI Recommendation -->
+                            <div class="mt-6 pt-4 border-t border-gray-200">
+                                <button onclick="suggestBestExitStrategy()" 
+                                        class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                                    <i class="fas fa-robot mr-2"></i>
+                                    <span>🤖 AI: Suggest Best Exit Strategy</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+
+
+
+                </div>
+
+                <!-- Acquisitions Tab Content -->
+                <div id="acquisitions-tab-content" class="p-8 bg-blue-50 border-l-4 border-blue-500">
+                    
+                    <!-- Wholesale Tab -->
+                    <div id="wholesale-tab" class="acquisition-tab-content active">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Wholesale Strategy (Cash Offer with Ackerman Method)</h3>
+                        
+                        <!-- Wholesale Assumptions -->
+                        <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Offer Assumptions</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">ARV Percentage (%)</label>
+                                    <input type="range" min="60" max="80" value="70" id="wholesale-arv-percent" class="w-full" onchange="updateWholesalePercent()">
+                                    <div class="text-center mt-1">
+                                        <span id="wholesale-arv-display" class="font-bold">70%</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Assignment Fee ($)</label>
+                                    <input type="text" value="10,000" id="wholesale-assignment-fee" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="formatCurrencyInput(this); recalculateWholesale()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MAO Calculation -->
+                        <div class="bg-white border border-gray-200 p-6 rounded-lg mb-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-lg font-semibold text-gray-800">Maximum Allowable Offer (MAO) Breakdown</h4>
+                                <button onclick="openOfferDeepDive('wholesale')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                                    <i class="fas fa-search-plus mr-2"></i>Deep Dive Analysis
+                                </button>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span>ARV:</span>
+                                    <span class="font-bold">$<span id="mao-arv">155,000</span></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span>× Wholesale Percentage (<span id="mao-percent">70</span>%):</span>
+                                    <span class="font-bold">$<span id="mao-arv-calc">108,500</span></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span>- Estimated Repairs:</span>
+                                    <span class="font-bold text-red-600">-$<span id="mao-repairs">30,000</span></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span>- Assignment Profit:</span>
+                                    <span class="font-bold text-red-600">-$<span id="mao-assignment">15,000</span></span>
+                                </div>
+                                <hr class="border-gray-300">
+                                <div class="flex justify-between items-center text-lg font-bold">
+                                    <span>Maximum Allowable Offer:</span>
+                                    <span class="text-green-600">$<span id="wholesale-mao-result">63,500</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ackerman Offers -->
+                        <div class="bg-blue-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-blue-800 mb-4">Ackerman Method Offers</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="ackerman-offers">
+                                <div class="bg-white p-4 rounded-lg border border-blue-200">
+                                    <div class="text-sm text-blue-600 font-medium">Offer #1 (65%)</div>
+                                    <div class="text-2xl font-bold text-blue-800">$<span id="ackerman-1">41,275</span></div>
+                                    <div class="text-xs text-gray-600 mt-1">Aggressive opening</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border border-blue-200">
+                                    <div class="text-sm text-blue-600 font-medium">Offer #2 (85%)</div>
+                                    <div class="text-2xl font-bold text-blue-800">$<span id="ackerman-2">53,975</span></div>
+                                    <div class="text-xs text-gray-600 mt-1">Negotiation point</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border border-blue-200">
+                                    <div class="text-sm text-blue-600 font-medium">Offer #3 (95%)</div>
+                                    <div class="text-2xl font-bold text-blue-800">$<span id="ackerman-3">60,325</span></div>
+                                    <div class="text-xs text-gray-600 mt-1">Final offer</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profit Analysis -->
+                        <div class="bg-green-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-green-800 mb-4">Profit Analysis</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <div class="text-sm text-green-700 mb-2">Total Investment</div>
+                                    <div class="text-xl font-bold text-green-800">$<span id="total-investment">108,500</span></div>
+                                    <div class="text-xs text-gray-600">Purchase + Repairs + Costs</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-green-700 mb-2">Assignment Profit</div>
+                                    <div class="text-xl font-bold text-green-800">$<span id="assignment-profit">15,000</span></div>
+                                    <div class="text-xs text-gray-600">Quick cash exit</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wholesale Strategy Details -->
+                        <div class="bg-white border border-gray-200 p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Strategy Analysis</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h5 class="font-semibold text-gray-700 mb-3">Key Metrics</h5>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between">
+                                            <span>Timeline:</span>
+                                            <span class="font-medium">14-30 days</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Cash Required:</span>
+                                            <span class="font-medium">$<span id="wholesale-cash-required">5,000</span></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Risk Level:</span>
+                                            <span class="font-medium text-green-600">Low</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Exit Strategy:</span>
+                                            <span class="font-medium">Assignment</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h5 class="font-semibold text-gray-700 mb-3">Pros & Cons</h5>
+                                    <div class="text-sm">
+                                        <div class="mb-2">
+                                            <span class="text-green-600 font-medium">Pros:</span>
+                                            <ul class="list-disc list-inside text-gray-600 mt-1">
+                                                <li>Quick cash turnaround</li>
+                                                <li>Low capital requirements</li>
+                                                <li>No renovation needed</li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <span class="text-red-600 font-medium">Cons:</span>
+                                            <ul class="list-disc list-inside text-gray-600 mt-1">
+                                                <li>Lower profit margins</li>
+                                                <li>Market dependent</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Installment Tab -->
+                    <div id="installment-tab" class="acquisition-tab-content hidden">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Installments/Novations Strategy</h3>
+                        
+
+
+                        <!-- Installment Equitable Deposit Structure -->
+                        <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-blue-800 mb-4">💰 Installment Equitable Deposit Structure</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Refundable Consideration -->
+                                <div class="bg-white p-4 rounded-lg border border-green-200">
+                                    <h5 class="font-semibold text-green-700 mb-3">✅ Refundable Consideration</h5>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Amount at First Closing ($)</label>
+                                    <input type="text" value="1,000" id="refundable-consideration" class="w-full px-3 py-2 border border-green-300 rounded-lg font-semibold" onchange="formatAndRecalculateInstallment(this)" oninput="formatNumber(this)">
+                                    <div class="text-xs text-green-600 mt-2">Credited back to us at final closing</div>
+                                </div>
+                                
+                                <!-- Non-Refundable Costs -->
+                                <div class="bg-white p-4 rounded-lg border border-red-200">
+                                    <h5 class="font-semibold text-red-700 mb-3">❌ Non-Refundable Costs</h5>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">State-Specific Closing Costs ($)</label>
+                                    <select id="non-refundable-costs" class="w-full px-3 py-2 border border-red-300 rounded-lg font-semibold" onchange="recalculateInstallment()">
+                                        <option value="1500">South Carolina - $1,500</option>
+                                        <option value="3500" selected>North Carolina - $3,500</option>
+                                        <option value="2000">Other State - $2,000</option>
+                                    </select>
+                                    <div class="text-xs text-red-600 mt-2">Costs we don't get back</div>
+                                </div>
+                                
+                                <!-- Total Equitable Deposit -->
+                                <div class="bg-white p-4 rounded-lg border border-blue-200">
+                                    <h5 class="font-semibold text-blue-700 mb-3">📊 Total Deposit Calculation</h5>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between">
+                                            <span>Refundable:</span>
+                                            <span class="font-medium text-green-600">+$<span id="total-refundable">1,000</span></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Non-Refundable:</span>
+                                            <span class="font-medium text-red-600">+$<span id="total-non-refundable">3,500</span></span>
+                                        </div>
+                                        <hr class="border-gray-300">
+                                        <div class="flex justify-between font-bold">
+                                            <span>Total Deposit:</span>
+                                            <span class="text-blue-600">$<span id="total-equitable-deposit">4,500</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Additional Settings -->
+                            <div class="mt-4 bg-white p-4 rounded-lg border border-gray-200">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Discount to Sell Fast ($)</label>
+                                        <input type="text" value="10,000" id="installment-discount" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="formatAndRecalculateInstallment(this)" oninput="formatNumber(this)">
+                                        <div class="text-xs text-gray-500 mt-1">Price reduction for quicker sale</div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Acceptable Profit ($)</label>
+                                        <input type="text" value="15,000" id="installment-min-profit" class="w-full px-3 py-2 border border-gray-300 rounded-lg font-semibold" onchange="formatAndRecalculateInstallment(this)" oninput="formatNumber(this)">
+                                        <div class="text-xs text-gray-500 mt-1">Minimum profit required for deal</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ackerman Offers Structure -->
+                        <div class="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-yellow-800 mb-4">🎯 Ackerman Offers Structure</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div class="bg-yellow-100 p-4 rounded-lg border border-yellow-300 text-center">
+                                    <div class="text-sm font-medium text-yellow-700 mb-2">1st Offer (Lowest)</div>
+                                    <div class="text-2xl font-bold text-yellow-800 mb-1">65%</div>
+                                    <div class="text-lg font-semibold text-gray-800">$<span id="ackerman-1st">269,750</span></div>
+                                    <div class="text-xs text-gray-600 mt-1">Conservative entry point</div>
+                                </div>
+                                <div class="bg-orange-100 p-4 rounded-lg border border-orange-300 text-center">
+                                    <div class="text-sm font-medium text-orange-700 mb-2">2nd Offer</div>
+                                    <div class="text-2xl font-bold text-orange-800 mb-1">85%</div>
+                                    <div class="text-lg font-semibold text-gray-800">$<span id="ackerman-2nd">352,750</span></div>
+                                    <div class="text-xs text-gray-600 mt-1">Moderate position</div>
+                                </div>
+                                <div class="bg-red-100 p-4 rounded-lg border border-red-300 text-center">
+                                    <div class="text-sm font-medium text-red-700 mb-2">3rd Offer</div>
+                                    <div class="text-2xl font-bold text-red-800 mb-1">95%</div>
+                                    <div class="text-lg font-semibold text-gray-800">$<span id="ackerman-3rd">394,250</span></div>
+                                    <div class="text-xs text-gray-600 mt-1">Competitive offer</div>
+                                </div>
+                                <div class="bg-green-100 p-4 rounded-lg border border-green-300 text-center">
+                                    <div class="text-sm font-medium text-green-700 mb-2">4th Offer (Max)</div>
+                                    <div class="text-2xl font-bold text-green-800 mb-1">100%</div>
+                                    <div class="text-lg font-semibold text-gray-800">$<span id="ackerman-4th">415,000</span></div>
+                                    <div class="text-xs text-gray-600 mt-1">Maximum Allowable Offer</div>
+                                </div>
+                            </div>
+                            <div class="mt-4 text-center">
+                                <div class="text-sm text-yellow-700 font-medium">Timeframe: 30-120 days between offers</div>
+                                <div class="text-xs text-gray-600 mt-1">Offers based on Maximum Allowable Offer (ARV - Repairs - Discount - Fees - Profit)</div>
+                            </div>
+                        </div>
+
+
+
+
+
+
+
+                        <!-- Dynamic Fee Section -->
+                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-6 mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-lg font-semibold text-orange-800">📥 Installment Closing Costs & Out-of-Pocket Concessions</h4>
+                                <button onclick="toggleAdvancedFees()" class="text-sm bg-orange-200 hover:bg-orange-300 px-3 py-1 rounded text-orange-800">
+                                    <i class="fas fa-cogs mr-1"></i>Advanced Settings
+                                </button>
+                            </div>
+                            
+                            <!-- Closing Costs Section -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div class="bg-white p-4 rounded-lg">
+                                    <h5 class="font-semibold text-orange-700 mb-3">🏢 Closing Costs</h5>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Flat Fee Listing Service</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="flat-fee-listing" value="500" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $500">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Listing Agent Commission (%)</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="listing-commission" value="2" step="0.1" class="w-16 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: 2% of List Price">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Buyer's Agent Commission (%)</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="buyer-commission" value="2" step="0.1" class="w-16 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: 2% of List Price">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Title & Escrow Fees (%)</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="title-fees-percent" value="1" step="0.1" class="w-16 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: 1% of List Price">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Loan Concessions to Buyer</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="loan-concessions" value="400" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $400 or 0.25%">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Home Warranty</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="home-warranty" value="650" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $650">ℹ️</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white p-4 rounded-lg">
+                                    <h5 class="font-semibold text-orange-700 mb-3">💰 Out-of-Pocket Costs</h5>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Professional Staging</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="staging-fee" value="2500" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $2,500">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Make-Ready Cleaning</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="cleaning-fee" value="750" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $750">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Photography</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="photography-fee" value="350" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $350">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Matterport</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="matterport-fee" value="250" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $250">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Inspection Fee</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="inspection-fee" value="1000" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $1,000">ℹ️</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <label class="text-sm text-gray-700">Max Repairs Prior to Closing</label>
+                                            <div class="flex items-center">
+                                                <input type="number" id="max-repairs" value="3000" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <span class="text-sm text-gray-500 ml-1" title="Default: $3,000 or 10% of repair budget">ℹ️</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Advanced Settings (Hidden by Default) -->
+                            <div id="advanced-fees-section" class="hidden">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                                    <div class="bg-white p-4 rounded-lg">
+                                        <h5 class="font-semibold text-orange-700 mb-3">🏘️ Additional Fees</h5>
+                                        <div class="space-y-3">
+                                            <div class="flex justify-between items-center">
+                                                <label class="text-sm text-gray-700">HOA Resale Certificate</label>
+                                                <input type="number" id="hoa-resale" value="500" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <label class="text-sm text-gray-700">HOA Transfer Fee</label>
+                                                <input type="number" id="hoa-transfer" value="350" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <label class="text-sm text-gray-700">Survey Fee</label>
+                                                <input type="number" id="survey-fee" value="650" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-white p-4 rounded-lg">
+                                        <h5 class="font-semibold text-orange-700 mb-3">📝 Optional Line Items</h5>
+                                        <div class="space-y-3">
+                                            <div class="flex justify-between items-center">
+                                                <input type="text" id="other-1-label" placeholder="Other Fee 1" class="w-32 px-2 py-1 border border-gray-300 rounded text-sm">
+                                                <input type="number" id="other-1-amount" value="0" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <input type="text" id="other-2-label" placeholder="Other Fee 2" class="w-32 px-2 py-1 border border-gray-300 rounded text-sm">
+                                                <input type="number" id="other-2-amount" value="0" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <input type="text" id="other-3-label" placeholder="Other Fee 3" class="w-32 px-2 py-1 border border-gray-300 rounded text-sm">
+                                                <input type="number" id="other-3-amount" value="0" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Fee Totals -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+                                <div class="bg-gray-100 p-4 rounded-lg">
+                                    <div class="text-sm text-gray-700 mb-1">Total Closing Costs</div>
+                                    <div class="text-xl font-bold text-gray-800">$<span id="total-closing-costs-fee">18,400</span></div>
+                                    <div class="text-xs text-gray-500">Do not edit</div>
+                                </div>
+                                <div class="bg-gray-100 p-4 rounded-lg">
+                                    <div class="text-sm text-gray-700 mb-1">Total Out-of-Pocket</div>
+                                    <div class="text-xl font-bold text-gray-800">$<span id="total-oop-costs">7,850</span></div>
+                                    <div class="text-xs text-gray-500">Do not edit</div>
+                                </div>
+                                <div class="bg-orange-100 p-4 rounded-lg">
+                                    <div class="text-sm text-orange-700 mb-1">Total Combined Fees</div>
+                                    <div class="text-xl font-bold text-orange-800">$<span id="total-installment-fees">26,250</span></div>
+                                    <div class="text-xs text-orange-600">Auto-calculated</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Recalculate Button -->
+                            <div class="text-center">
+                                <button onclick="recalculateNovationMAO()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-semibold">
+                                    🧮 Recalculate Novation MAO
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Risk Analysis -->
+                        <div class="bg-orange-50 p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-orange-800 mb-4">Risk Assessment</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-orange-600 mb-1">Medium</div>
+                                    <div class="text-sm text-orange-700">Overall Risk</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-green-600 mb-1">6-12mo</div>
+                                    <div class="text-sm text-gray-700">Typical Timeline</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-blue-600 mb-1">$<span id="installment-cash-needed">15,000</span></div>
+                                    <div class="text-sm text-gray-700">Cash Required</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subject-To Tab -->
+                    <div id="subject-to-tab" class="acquisition-tab-content hidden">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Subject-To Strategy</h3>
+                        
+                        <!-- Buying Guide -->
+                        <div class="bg-purple-50 border border-purple-200 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-purple-800 mb-4">Subject-To Buying Guide</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <div class="text-sm text-purple-700 mb-2">Target Purchase</div>
+                                    <div class="text-2xl font-bold text-purple-600">8-10% ARV</div>
+                                    <div class="text-xs text-gray-600">Below market entry</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <div class="text-sm text-purple-700 mb-2">Target Resale</div>
+                                    <div class="text-2xl font-bold text-purple-600">12-15% ARV</div>
+                                    <div class="text-xs text-gray-600">Quick exit strategy</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <div class="text-sm text-purple-700 mb-2">Minimum Cash Flow</div>
+                                    <div class="text-2xl font-bold text-green-600">$200/mo</div>
+                                    <div class="text-xs text-gray-600">Premium if $500+</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Cash Offer Calculator -->
+                        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 p-6 rounded-lg mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-lg font-semibold text-purple-800">💰 Cash Offer Calculator</h4>
+                                <div class="relative group">
+                                    <button class="w-6 h-6 bg-purple-100 hover:bg-purple-200 rounded-full flex items-center justify-center text-purple-600 text-sm font-bold cursor-help">
+                                        ?
+                                    </button>
+                                    <div class="absolute right-0 top-8 w-80 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                        <div class="font-semibold text-gray-800 mb-3">Formula Breakdown:</div>
+                                        <div class="space-y-2 text-gray-700">
+                                            <div><strong>1. Cash Flow Analysis:</strong></div>
+                                            <div class="pl-4">• Monthly Cash Flow = Rent - PITI - Repairs Reserve</div>
+                                            <div class="pl-4">• Annual Cash Flow = Monthly × 12</div>
+                                            <div class="pl-4">• Cash Flow Multiplier = 3-8x (based on strength)</div>
+                                            
+                                            <div class="mt-3"><strong>2. Equity & Repair Factors:</strong></div>
+                                            <div class="pl-4">• Equity-Based Offer = Property Equity × 40%</div>
+                                            <div class="pl-4">• Cash Flow-Based Offer = Annual Cash Flow × Multiplier × 50%</div>
+                                            <div class="pl-4">• Repair Adjustment = Needed Repairs × 10%</div>
+                                            
+                                            <div class="mt-3"><strong>3. Final Calculation:</strong></div>
+                                            <div class="pl-4">• Base Offer = Max(Equity-Based, Cash Flow-Based) - Repair Adjustment</div>
+                                            <div class="pl-4">• Final Offer = Min(Base Offer, Asking Price × 80%)</div>
+                                            
+                                            <div class="mt-3 p-2 bg-purple-50 rounded text-xs">
+                                                <strong>Strategy:</strong> Balances cash flow potential with equity availability while ensuring seller motivation through competitive pricing.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-purple-700 mb-2">Seller's Asking Price</label>
+                                    <input type="text" id="seller-asking-price" class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" value="$50,000" oninput="formatNumberInput(this); calculateCashOffer();">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-purple-700 mb-2">Property Equity</label>
+                                    <input type="text" id="property-equity" class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" value="$25,000" oninput="formatNumberInput(this); calculateCashOffer();">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-purple-700 mb-2">Needed Repairs</label>
+                                    <input type="text" id="subject-to-repairs" class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" value="$50,000" oninput="formatNumberInput(this); calculateCashOffer();">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-purple-700 mb-2">Fair Market Rent</label>
+                                    <input type="text" id="subject-to-rent" class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" value="$1,325" oninput="formatNumberInput(this); calculateCashOffer();">
+                                </div>
+                            </div>
+                            <div class="p-4 bg-white rounded-lg border border-purple-200">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <div class="text-sm text-purple-700 font-medium mb-2">Calculated Cash Offer to Seller</div>
+                                        <div class="text-3xl font-bold text-purple-900">$<span id="calculated-cash-offer">15,000</span></div>
+                                        <div class="text-xs text-gray-600 mt-1">Based on cash flow potential and equity</div>
+                                    </div>
+                                    <div class="text-xs text-gray-600 space-y-1">
+                                        <div><strong>Formula:</strong></div>
+                                        <div>• Consider monthly cash flow potential</div>
+                                        <div>• Factor in available equity</div>
+                                        <div>• Account for repair costs</div>
+                                        <div>• Balance seller motivation vs. deal viability</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subject-To Deal Structure -->
+                        <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Deal Structure Inputs</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Existing Loan Balance ($)</label>
+                                    <input type="number" value="116250" id="sub2-loan-balance" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Cash to Seller ($)</label>
+                                    <input type="number" value="4000" id="sub2-cash-seller" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Arrears/Liens ($)</label>
+                                    <input type="number" value="2500" id="sub2-arrears" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Monthly P&I ($)</label>
+                                    <input type="number" value="800" id="sub2-monthly-pi" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Escrow (TI) ($)</label>
+                                    <input type="number" value="300" id="sub2-monthly-escrow" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Interest Rate (%)</label>
+                                    <input type="number" step="0.1" value="4.5" id="sub2-interest-rate" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSubjectTo()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Monthly Cash Flow Analysis -->
+                        <div class="bg-green-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-green-800 mb-4">Monthly Cash Flow Calculation</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span>Monthly Rent Income:</span>
+                                        <span class="font-bold text-green-600">+$<span id="sub2-rent">1,425</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Monthly P&I Payment:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sub2-pi">800</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Monthly Escrow (TI):</span>
+                                        <span class="font-bold text-red-600">-$<span id="sub2-escrow">300</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Repairs Reserve:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sub2-repairs-reserve">100</span></span>
+                                    </div>
+                                    <hr class="border-gray-300">
+                                    <div class="flex justify-between text-lg font-bold">
+                                        <span>Net Monthly Cash Flow:</span>
+                                        <span class="text-green-600" id="sub2-monthly-cashflow">+$225</span>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="text-center">
+                                        <div class="text-3xl font-bold text-green-600 mb-2" id="sub2-annual-cashflow">$2,700</div>
+                                        <div class="text-sm text-gray-600">Annual Cash Flow</div>
+                                        <div class="mt-3 text-xs text-gray-500">
+                                            <span id="sub2-cashflow-status" class="px-2 py-1 bg-green-100 text-green-800 rounded">Good Cash Flow</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cash Flow Timeline -->
+                        <div class="bg-blue-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-blue-800 mb-4">Monthly Cash Flow</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span>Monthly Rent Income:</span>
+                                        <span class="font-bold text-green-600">+$<span id="sub2-rent">1,425</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Monthly P&I Payment:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sub2-pi">800</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Monthly Escrow:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sub2-escrow">300</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Maintenance Reserve:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sub2-maintenance">100</span></span>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="text-center">
+                                        <div class="text-sm text-blue-700 mb-2">Monthly Cash Flow</div>
+                                        <div class="text-3xl font-bold text-green-600">+$<span id="sub2-cashflow">225</span></div>
+                                        <div class="text-sm text-gray-600 mt-1">Per month</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subject-To Objection Handling -->
+                        <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-blue-800 mb-4">Common Questions & Objections</h4>
+                            <div class="space-y-4">
+                                <div class="bg-white p-4 rounded border">
+                                    <div class="font-semibold text-blue-800 mb-2">Q: "How long until we can close?"</div>
+                                    <div class="text-blue-700">A: We can generally close in about 15 days. Depending on the title and everything being clean, the average timeframe is 30-45 days at the longest.</div>
+                                </div>
+                                <div class="bg-white p-4 rounded border">
+                                    <div class="font-semibold text-blue-800 mb-2">Q: "Do I continue to make my mortgage payments?"</div>
+                                    <div class="text-blue-700">A: No, we take over the mortgage and that's why we call it a "sub2". We take over the property, subject to the existing mortgage in place and relieve you of those mortgages, taxes, insurance, etc. You really don't have any responsibility for the property anymore.</div>
+                                </div>
+                                <div class="bg-white p-4 rounded border">
+                                    <div class="font-semibold text-blue-800 mb-2">Q: "When do I get my money?"</div>
+                                    <div class="text-blue-700">A: We pay you once the deed is transferred over to us. Your entire profit will be paid directly at the closing once you sign all the closing docs.</div>
+                                </div>
+                                <div class="bg-white p-4 rounded border">
+                                    <div class="font-semibold text-blue-800 mb-2">Q: "What happens if you stop making payments?"</div>
+                                    <div class="text-blue-700">A: I will be sending two documents: the contract and an addendum that protects both of us. In there, it states that if we were to miss two payments in a row, you could report it and have the property deeded back to you if we don't pay the balance within 30 days. This has never happened before, but you are fully protected.</div>
+                                </div>
+                                <div class="bg-white p-4 rounded border">
+                                    <div class="font-semibold text-blue-800 mb-2">Q: "Why do I need to stay on the mortgage?"</div>
+                                    <div class="text-blue-700">A: We won't have to go to the bank and take out a loan with an extremely high interest rate, or pay fees to start the loan. This keeps costs down and allows us to offer you more money.</div>
+                                </div>
+                                <div class="bg-white p-4 rounded border">
+                                    <div class="font-semibold text-blue-800 mb-2">Q: "Can I stay in the house?"</div>
+                                    <div class="text-blue-700">A: You would have to qualify with: 2 months of previous bank statements, proof of occupation, 3 pay stubs. We charge market rent with a 3-month lease term. If you miss 1 month, you can't stay. We'll extend to 12 months if you make all payments.</div>
+                                </div>
+                            </div>
+                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Due-on-sale clause risk</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <!-- Seller Finance Tab -->
+                    <div id="seller-finance-tab" class="acquisition-tab-content hidden">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Seller Finance Strategy</h3>
+                        
+                        <!-- Market Analysis & Balloon Projection -->
+                        <div class="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-green-800 mb-4 mt-6">📊 Market Analysis & Balloon Exit Strategy</h4>
+                            <div class="grid grid-cols-4 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-green-700 mb-2">Current ARV</label>
+                                    <input type="text" id="sf-current-arv" class="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" oninput="formatNumber(this); calculateBalloonProjection();">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-green-700 mb-2">Fair Market Rent</label>
+                                    <input type="text" id="sf-fair-market-rent" class="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" oninput="formatNumber(this); calculateBalloonProjection();">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-green-700 mb-2">Annual Appreciation (%)</label>
+                                    <input type="number" id="sf-appreciation-rate" class="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" value="3.5" step="0.1" min="0" max="15" oninput="calculateBalloonProjection();">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-green-700 mb-2">Balloon Year</label>
+                                    <select id="sf-balloon-year" class="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" onchange="calculateBalloonProjection();">
+                                        <option value="3">3 Years</option>
+                                        <option value="5" selected>5 Years</option>
+                                        <option value="7">7 Years</option>
+                                        <option value="10">10 Years</option>
+                                        <option value="15">15 Years</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Balloon Exit Analysis -->
+                            <div class="bg-white p-4 rounded-lg border border-green-200">
+                                <div class="flex flex-wrap gap-8 justify-center" style="gap: 2rem;">
+                                    <div class="text-center" style="min-width: 280px;">
+                                        <div class="text-sm text-green-700 font-medium mb-2">Projected Property Value at Balloon</div>
+                                        <div class="text-3xl font-bold text-green-900">$<span id="sf-balloon-value">478,250</span></div>
+                                        <div class="text-xs text-gray-600 mt-1">Based on <span id="sf-appreciation-years">5</span> years at <span id="sf-appreciation-display">3.5</span>% annual</div>
+                                    </div>
+                                    <div class="text-center" style="min-width: 280px;">
+                                        <div class="text-sm text-blue-700 font-medium mb-2">Remaining Loan Balance</div>
+                                        <div class="text-3xl font-bold text-blue-900">$<span id="sf-balloon-balance">125,850</span></div>
+                                        <div class="text-xs text-gray-600 mt-1">Principal remaining at balloon</div>
+                                    </div>
+                                    <div class="text-center" style="min-width: 280px;">
+                                        <div class="text-sm text-purple-700 font-medium mb-2">Available Equity for Refinance</div>
+                                        <div class="text-3xl font-bold text-purple-900">$<span id="sf-refinance-equity">352,400</span></div>
+                                        <div class="text-xs text-gray-600 mt-1"><span id="sf-ltv-ratio">74</span>% LTV at refinance</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Refinance Viability Assessment -->
+                                <div class="mt-4 p-3 rounded-lg" id="sf-refinance-assessment">
+                                    <div class="text-center">
+                                        <div class="text-sm font-medium mb-1" id="sf-refinance-status">✅ Excellent Refinance Position</div>
+                                        <div class="text-xs" id="sf-refinance-details">Strong equity position allows cash-out refinance with comfortable LTV ratio</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Three Key Offer Components -->
+                        <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-blue-800 mb-4">🎯 Three Key Offer Components</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div class="bg-white p-4 rounded-lg border border-blue-200">
+                                    <label class="block text-sm font-medium text-blue-700 mb-2">💰 Purchase Price</label>
+                                    <input type="text" value="147,250" id="sf-purchase-price" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold" onchange="formatAndRecalculateSellerFinance(this)" oninput="formatNumber(this); calculateBalloonProjection();">
+                                    <div class="text-xs text-blue-600 mt-1">Primary negotiation point</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border border-blue-200">
+                                    <label class="block text-sm font-medium text-blue-700 mb-2">📅 Timeline (Years)</label>
+                                    <select id="sf-timeline" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold" onchange="calculateBalloonProjection(); recalculateSellerFinance();">
+                                        <option value="5">5 Years</option>
+                                        <option value="10">10 Years</option>
+                                        <option value="15">15 Years</option>
+                                        <option value="20">20 Years</option>
+                                        <option value="25">25 Years</option>
+                                        <option value="30" selected>30 Years</option>
+                                    </select>
+                                    <div class="text-xs text-blue-600 mt-1">Loan amortization period</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border border-blue-200">
+                                    <label class="block text-sm font-medium text-blue-700 mb-2">💳 Monthly Payment Override</label>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" id="sf-custom-payment-enabled" class="rounded" onchange="toggleCustomPayment()">
+                                        <span class="text-sm">Use Custom Amount</span>
+                                    </div>
+                                    <input type="text" value="876" id="sf-custom-monthly-payment" class="w-full px-3 py-2 border border-blue-300 rounded-lg text-lg font-bold mt-2 bg-gray-100" disabled onchange="formatAndRecalculateSellerFinance(this)" oninput="formatNumber(this)">
+                                    <div class="text-xs text-blue-600 mt-1">Override calculated payment</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Optional Terms (Collapsed by Default) -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg mb-6">
+                            <button class="w-full px-6 py-4 text-left font-semibold text-gray-800 hover:bg-gray-100 transition-colors flex items-center justify-between" onclick="toggleOptionalTerms()">
+                                <span>⚙️ Optional Terms (Interest Rate, Down Payment, Balloon)</span>
+                                <i class="fas fa-chevron-down transform transition-transform" id="optional-terms-icon"></i>
+                            </button>
+                            <div id="optional-terms-section" class="hidden px-6 pb-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Interest Rate (%)</label>
+                                        <input type="number" step="0.1" value="6.5" id="sf-interest-rate" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="calculateBalloonProjection(); recalculateSellerFinance();">
+                                        <div class="text-xs text-gray-500 mt-1">Market rate reference</div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Down Payment ($)</label>
+                                        <input type="text" value="15,000" id="sf-down-payment" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="formatAndRecalculateSellerFinance(this)" oninput="formatNumber(this)">
+                                        <div class="text-xs text-gray-500 mt-1">Cash at closing</div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Balloon Payment (Years)</label>
+                                        <select id="sf-balloon-years" class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateSellerFinance()">
+                                            <option value="0">No Balloon</option>
+                                            <option value="5">5 Year Balloon</option>
+                                            <option value="7">7 Year Balloon</option>
+                                            <option value="10" selected>10 Year Balloon</option>
+                                            <option value="15">15 Year Balloon</option>
+                                        </select>
+                                        <div class="text-xs text-gray-500 mt-1">Early payoff requirement</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Structure -->
+                        <div class="bg-blue-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-blue-800 mb-4">Payment Structure</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="text-sm text-blue-700 mb-2">Monthly Payment</div>
+                                    <div class="text-2xl font-bold">$<span id="sf-monthly-payment">876</span></div>
+                                    <div class="text-xs text-gray-600">P&I Only</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="text-sm text-blue-700 mb-2">Total Interest</div>
+                                    <div class="text-2xl font-bold">$<span id="sf-total-interest">183,360</span></div>
+                                    <div class="text-xs text-gray-600">Over loan term</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="text-sm text-blue-700 mb-2">Balloon (10yr)</div>
+                                    <div class="text-2xl font-bold">$<span id="sf-balloon">118,450</span></div>
+                                    <div class="text-xs text-gray-600">If balloon term</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cash Flow Analysis -->
+                        <div class="bg-green-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-green-800 mb-4">Cash Flow Analysis</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span>Monthly Rent:</span>
+                                        <span class="font-bold text-green-600">+$<span id="sf-rent">1,425</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Monthly Payment:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sf-payment">876</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Taxes & Insurance:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sf-taxes-insurance">250</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Maintenance/CapEx:</span>
+                                        <span class="font-bold text-red-600">-$<span id="sf-maintenance">100</span></span>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg">
+                                    <div class="text-center">
+                                        <div class="text-sm text-green-700 mb-2">Monthly Cash Flow</div>
+                                        <div class="text-3xl font-bold text-green-600">+$<span id="sf-cashflow">199</span></div>
+                                        <div class="text-sm text-gray-600 mt-1">Per month</div>
+                                        <div class="text-xs text-green-600 mt-2">14% Cash-on-Cash Return</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Seller Finance Objection Handling -->
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg mb-6">
+                            <button class="w-full px-6 py-4 text-left font-semibold text-purple-800 hover:bg-purple-100 transition-colors flex items-center justify-between" onclick="toggleObjectionSection('seller-finance-objections')">
+                                <span>🏦 Seller Finance Objection Handling</span>
+                                <i class="fas fa-chevron-down transform transition-transform" id="seller-finance-objections-icon"></i>
+                            </button>
+                            <div id="seller-finance-objections-section" class="hidden px-6 pb-4">
+                                <div class="space-y-4 text-sm">
+                                    <div class="bg-white p-4 rounded border">
+                                        <div class="font-semibold text-purple-800 mb-2">Q: "What about a down payment?"</div>
+                                        <div class="text-purple-700">A: We don't do down payments. Instead of giving you a down payment, we simply add more to the purchase price. You'll walk away with more money at the end of the day.</div>
+                                    </div>
+                                    <div class="bg-white p-4 rounded border">
+                                        <div class="font-semibold text-purple-800 mb-2">Q: "What if you don't pay?"</div>
+                                        <div class="text-purple-700">A: You maintain ownership until the loan is paid in full. If we default, you get the property back plus all payments made - you're in a better position than when you started.</div>
+                                    </div>
+                                    <div class="bg-white p-4 rounded border">
+                                        <div class="font-semibold text-purple-800 mb-2">Q: "How do I know you're qualified?"</div>
+                                        <div class="text-purple-700">A: We can provide financial statements, references from other sellers, and proof of insurance. We're professional investors with a track record of successful transactions.</div>
+                                    </div>
+                                    <div class="bg-white p-4 rounded border">
+                                        <div class="font-semibold text-purple-800 mb-2">Q: "What about taxes and insurance?"</div>
+                                        <div class="text-purple-700">A: We handle all taxes, insurance, and maintenance. You receive your monthly payment without any ongoing responsibilities or expenses.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Amortization & Balloon Options -->
+                        <div class="bg-blue-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-blue-800 mb-4">Financing Structure Options</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h5 class="font-semibold text-blue-700 mb-3">Amortization Options</h5>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between items-center p-2 bg-white rounded">
+                                            <span>30-Year Amortization:</span>
+                                            <span class="font-medium">$<span id="sf-30yr-payment">876</span>/mo</span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-2 bg-white rounded">
+                                            <span>25-Year Amortization:</span>
+                                            <span class="font-medium">$<span id="sf-25yr-payment">950</span>/mo</span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-2 bg-white rounded">
+                                            <span>20-Year Amortization:</span>
+                                            <span class="font-medium">$<span id="sf-20yr-payment">1,050</span>/mo</span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-2 bg-white rounded">
+                                            <span>Interest Only:</span>
+                                            <span class="font-medium">$<span id="sf-io-payment">715</span>/mo</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h5 class="font-semibold text-blue-700 mb-3">Balloon Term Options</h5>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between items-center p-2 bg-white rounded">
+                                            <span>5-Year Balloon:</span>
+                                            <span class="font-medium">$<span id="sf-5yr-balloon">125,500</span></span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-2 bg-white rounded">
+                                            <span>7-Year Balloon:</span>
+                                            <span class="font-medium">$<span id="sf-7yr-balloon">120,200</span></span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-2 bg-white rounded">
+                                            <span>10-Year Balloon:</span>
+                                            <span class="font-medium">$<span id="sf-10yr-balloon">110,800</span></span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-2 bg-white rounded">
+                                            <span>No Balloon:</span>
+                                            <span class="font-medium">Full Amortization</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Long-Term Projections -->
+                        <div class="bg-indigo-50 p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold text-indigo-800 mb-4">10-Year Financial Projections</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div class="bg-white p-4 rounded-lg text-center">
+                                    <div class="text-sm text-indigo-600 mb-1">Year 5 Equity</div>
+                                    <div class="text-xl font-bold">$<span id="sf-5yr-equity">25,400</span></div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg text-center">
+                                    <div class="text-sm text-indigo-600 mb-1">Year 10 Equity</div>
+                                    <div class="text-xl font-bold">$<span id="sf-10yr-equity">58,200</span></div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg text-center">
+                                    <div class="text-sm text-indigo-600 mb-1">Total Cash Flow (10yr)</div>
+                                    <div class="text-xl font-bold text-green-600">$<span id="sf-10yr-cashflow">23,880</span></div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg text-center">
+                                    <div class="text-sm text-indigo-600 mb-1">Appreciation (3%)</div>
+                                    <div class="text-xl font-bold text-blue-600">$<span id="sf-appreciation">43,500</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Strategy Advantages -->
+                        <div class="bg-white border border-gray-200 p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Seller Finance Advantages</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h5 class="font-semibold text-gray-700 mb-3">For Investor</h5>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Low down payment requirement</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
+                                            <span>No bank qualification needed</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Flexible terms negotiation</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Faster closing process</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Positive cash flow from day one</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h5 class="font-semibold text-gray-700 mb-3">For Seller</h5>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Higher sale price achieved</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Monthly income stream</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Tax advantages on installment sale</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Security of real estate backing</span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <div class="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-2"></div>
+                                            <span>Risk of buyer default</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
                 <!-- Dispositions Tab Content -->
                 <div id="dispositions-tab-content" class="hidden p-8 bg-gradient-to-r from-purple-50 to-green-50 border-l-4 border-purple-500">
                     
