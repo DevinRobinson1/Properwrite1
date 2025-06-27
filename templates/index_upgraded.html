@@ -3852,14 +3852,13 @@
         }
         
         function updateWrapConfiguration() {
-            // Get values from either ID format for compatibility
-            const arv = parseFloat(document.getElementById('dispo-arv')?.value?.replace(/,/g, '')) || 415000;
-            const downPaymentPercent = parseFloat(document.getElementById('wrap-down-payment-percent')?.value) || 
-                                     parseFloat(document.getElementById('wrap-down-slider')?.value) || 10;
-            const term = parseFloat(document.getElementById('wrap-term')?.value) || 
-                        parseFloat(document.getElementById('wrap-term-select')?.value) || 30;
-            const piti = parseFloat(document.getElementById('dispo-piti')?.value?.replace(/,/g, '')) || 850;
-            const acquisitionCost = parseFloat(document.getElementById('dispo-acquisition-cost')?.value?.replace(/,/g, '')) || 140000;
+            // Get values using correct element IDs
+            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/,/g, '')) || 415000;
+            const downPaymentPercent = parseFloat(document.getElementById('wrap-down-payment-percent')?.value) || 10;
+            const term = parseFloat(document.getElementById('wrap-term')?.value) || 30;
+            const rent = parseFloat(document.getElementById('rent')?.value?.replace(/,/g, '')) || 1325;
+            const piti = parseFloat(document.getElementById('dispositions-piti')?.value?.replace(/,/g, '')) || 1100;
+            const acquisitionCost = parseFloat(document.getElementById('dispositions-acquisition-price')?.value?.replace(/,/g, '')) || 140000;
             
             // Auto-calculate interest rate based on down payment
             let buyerRate;
@@ -3909,10 +3908,10 @@
         }
         
         function updateLeaseOptionCalculation() {
-            const arv = parseFloat(document.getElementById('dispo-arv').value.replace(/,/g, '')) || 415000;
-            const equity = parseFloat(document.getElementById('lease-option-equity').value.replace(/,/g, '')) || 172000;
-            const repairs = document.getElementById('lease-option-repairs').value;
-            const desiredCashFlow = parseFloat(document.getElementById('lease-option-cash-flow').value.replace(/,/g, '')) || 475;
+            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/,/g, '')) || 415000;
+            const equity = parseFloat(document.getElementById('lease-option-equity')?.value?.replace(/,/g, '')) || 172000;
+            const repairs = document.getElementById('lease-option-repairs')?.value || 'some';
+            const desiredCashFlow = parseFloat(document.getElementById('lease-option-cash-flow')?.value?.replace(/,/g, '')) || 475;
             
             // Base Cash-to-Close = 8% of ARV
             let baseCashToClose = arv * 0.08;
@@ -4007,26 +4006,7 @@
         }
         
         // Update wrap configuration (for seller finance down payment slider)
-        function updateWrapConfiguration() {
-            const downPaymentPercent = parseFloat(document.getElementById('wrap-down-payment-percent')?.value) || 10;
-            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 415000;
-            
-            // Update display
-            updateElementIfExists('wrap-down-payment-display', downPaymentPercent + '%');
-            updateElementIfExists('wrap-down-payment-amount', (arv * downPaymentPercent / 100).toLocaleString());
-            
-            // Auto-calculate interest rate based on down payment
-            let interestRate = 9.0; // Base rate
-            if (downPaymentPercent >= 20) interestRate = 6.0;
-            else if (downPaymentPercent >= 15) interestRate = 6.5;
-            else if (downPaymentPercent >= 10) interestRate = 7.5;
-            else if (downPaymentPercent >= 5) interestRate = 8.5;
-            
-            updateElementIfExists('wrap-buyer-rate', interestRate.toFixed(1) + '%');
-            
-            // Recalculate dispositions
-            recalculateDispositions();
-        }
+
         
         // Update novation calculation (for commission sliders)
         function updateNovationCalculation() {
