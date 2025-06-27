@@ -3006,6 +3006,9 @@
                 calculateBalloonProjection(); // Calculate balloon projection before Seller Finance
                 recalculateSellerFinance();
                 updateComparisonResults();
+                
+                // Update dispositions when property values change
+                recalculateAllDispositionStrategies();
             } catch (error) {
                 console.log('Calculation update in progress...');
             }
@@ -3985,13 +3988,6 @@
                 } else {
                     element.textContent = value;
                 }
-            }
-        }
-
-        function updateElementIfExists(id, value) {
-            const element = document.getElementById(id);
-            if (element) {
-                element.textContent = Math.round(value).toLocaleString();
             }
         }
 
