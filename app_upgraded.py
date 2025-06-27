@@ -26,16 +26,6 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-2024")
 @app.route('/')
 def index():
     """Enhanced property input form with external data integration"""
-    return render_template('index_simple.html')
-
-@app.route('/test')
-def test():
-    """Simple test page to verify server is working"""
-    return render_template('test.html')
-
-@app.route('/calculator')
-def calculator():
-    """Full calculator interface"""
     return render_template('index_upgraded.html')
 
 @app.route('/api/analyze-property', methods=['POST'])
