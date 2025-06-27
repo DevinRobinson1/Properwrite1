@@ -3768,6 +3768,7 @@
                 
                 // Update 1% Rent Rule
                 const rentRulePrice = rent / 0.01;
+                console.log('Updating rent rule price:', rentRulePrice);
                 updateElementIfExists('rent-rule-price', '$' + Math.round(rentRulePrice).toLocaleString());
                 updateElementIfExists('rent-rule-ratio', ((rent / rentRulePrice) * 100).toFixed(1) + '%');
                 
@@ -3775,6 +3776,7 @@
                 const volumeFlipperMinFlip = parseFloat(document.getElementById('volume-flipper-min-flip')?.value?.replace(/,/g, '')) || 25000;
                 const volumeFlipperPrice = (arv * 0.70) - repairs - closingCosts - volumeFlipperMinFlip;
                 console.log('Volume Flipper calculation:', { arv, repairs, closingCosts, volumeFlipperMinFlip, volumeFlipperPrice });
+                console.log('Updating volume flipper price to:', '$' + Math.round(volumeFlipperPrice).toLocaleString());
                 updateElementIfExists('volume-flipper-price', '$' + Math.round(volumeFlipperPrice).toLocaleString());
                 
                 // Update BRRR Investor
@@ -3996,12 +3998,20 @@
 
         function updateElementIfExists(id, value) {
             const element = document.getElementById(id);
+            console.log('updateElementIfExists:', id, 'element found:', !!element, 'value:', value);
             if (element) {
-                if (typeof value === 'number') {
-                    element.textContent = Math.round(value).toLocaleString();
-                } else {
-                    element.textContent = value;
+                try {
+                    if (typeof value === 'number') {
+                        element.textContent = Math.round(value).toLocaleString();
+                    } else {
+                        element.textContent = value;
+                    }
+                    console.log('Successfully updated element:', id);
+                } catch (error) {
+                    console.error('Error updating element:', id, error);
                 }
+            } else {
+                console.warn('Element not found:', id);
             }
         }
 
