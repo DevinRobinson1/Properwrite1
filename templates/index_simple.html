@@ -110,8 +110,8 @@
                     document.getElementById('success-message').textContent = 'Property analyzed successfully!';
                     document.getElementById('success-message').classList.add('show');
                     
-                    // Display the results
-                    displayResults(result.data);
+                    // Display the results - the result object itself contains the data
+                    displayResults(result);
                 } else {
                     throw new Error(result.error || 'Analysis failed');
                 }
@@ -140,25 +140,29 @@
                             <p><strong>City:</strong> ${data.city || 'N/A'}</p>
                             <p><strong>State:</strong> ${data.state || 'N/A'}</p>
                             <p><strong>ZIP:</strong> ${data.zip || 'N/A'}</p>
+                            <p><strong>Property Type:</strong> ${data.property_type || 'N/A'}</p>
+                            <p><strong>Year Built:</strong> ${data.year_built || 'N/A'}</p>
                             <p><strong>Bedrooms:</strong> ${data.bedrooms || 'N/A'}</p>
                             <p><strong>Bathrooms:</strong> ${data.bathrooms || 'N/A'}</p>
-                            <p><strong>Square Feet:</strong> ${data.square_feet || 'N/A'}</p>
+                            <p><strong>Square Feet:</strong> ${data.square_feet ? data.square_feet.toLocaleString() : 'N/A'}</p>
                         </div>
                         
                         <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; border: 2px solid #bbf7d0;">
                             <h3 style="color: #166534; margin-bottom: 15px;">Property Values</h3>
-                            <p><strong>Current Value:</strong> $${data.current_value ? data.current_value.toLocaleString() : 'N/A'}</p>
-                            <p><strong>ARV (After Repair Value):</strong> $${data.arv ? data.arv.toLocaleString() : 'N/A'}</p>
-                            <p><strong>Estimated Repairs:</strong> $${data.estimated_repairs ? data.estimated_repairs.toLocaleString() : 'N/A'}</p>
-                            <p><strong>Monthly Rent:</strong> $${data.monthly_rent ? data.monthly_rent.toLocaleString() : 'N/A'}</p>
+                            <p><strong>Current Value:</strong> $${data.estimated_value ? data.estimated_value.toLocaleString() : 'N/A'}</p>
+                            <p><strong>Monthly Rent Estimate:</strong> $${data.rent_estimate ? data.rent_estimate.toLocaleString() : 'N/A'}</p>
+                            <p><strong>Data Source:</strong> ${data.data_source || 'N/A'}</p>
+                            <p><strong>Data Quality:</strong> ${data.data_quality || 'N/A'}</p>
+                            <p><strong>Comparable Sales:</strong> ${data.comps_count || 0} found</p>
                         </div>
                     </div>
                     
                     <div style="background: #fef3c7; padding: 20px; border-radius: 8px; border: 2px solid #fcd34d; margin-bottom: 20px;">
-                        <h3 style="color: #92400e; margin-bottom: 15px;">Investment Analysis</h3>
-                        <p><strong>Investment Potential:</strong> ${data.investment_potential || 'N/A'}</p>
-                        <p><strong>Market Conditions:</strong> ${data.market_conditions || 'N/A'}</p>
-                        <p><strong>Risk Assessment:</strong> ${data.risk_level || 'N/A'}</p>
+                        <h3 style="color: #92400e; margin-bottom: 15px;">Market Analysis</h3>
+                        <p><strong>Average Price per Sq Ft:</strong> $${data.market_analysis?.avg_price_per_sqft || 'N/A'}</p>
+                        <p><strong>Sales Count:</strong> ${data.market_analysis?.sales_count || 0}</p>
+                        <p><strong>Price Range:</strong> $${data.market_analysis?.price_range?.min?.toLocaleString() || 'N/A'} - $${data.market_analysis?.price_range?.max?.toLocaleString() || 'N/A'}</p>
+                        <p><strong>Last Updated:</strong> ${data.last_updated ? new Date(data.last_updated).toLocaleString() : 'N/A'}</p>
                     </div>
                     
                     <div style="text-align: center;">
