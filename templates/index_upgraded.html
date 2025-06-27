@@ -3151,6 +3151,11 @@
             } catch (dispositionError) {
                 console.log('Dispositions calculation in progress...');
             }
+            
+            // Update compare offers cards if function exists
+            if (typeof updateCompareOffersCards === 'function') {
+                updateCompareOffersCards();
+            }
         }
 
         function calculateCashOffer() {
@@ -3409,6 +3414,11 @@
             updateElementIfExists('sf-5yr-balloon', loanAmount * 0.95);
             updateElementIfExists('sf-7yr-balloon', loanAmount * 0.90);
             updateElementIfExists('sf-10yr-balloon', balloonPayment);
+            
+            // Update compare offers cards if function exists
+            if (typeof updateCompareOffersCards === 'function') {
+                updateCompareOffersCards();
+            }
         }
 
         function toggleCustomPayment() {
@@ -4360,6 +4370,11 @@
             if (statusElement) {
                 statusElement.textContent = cashFlowStatus;
                 statusElement.className = 'px-2 py-1 rounded ' + statusClass;
+            }
+            
+            // Update compare offers cards if function exists
+            if (typeof updateCompareOffersCards === 'function') {
+                updateCompareOffersCards();
             }
         }
 
