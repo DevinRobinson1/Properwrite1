@@ -5337,8 +5337,9 @@
                 }
                 
                 if (button) {
-                    // Reset to default inactive styling
-                    button.className = 'disposition-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
+                    // Remove active class and add inactive styling
+                    button.classList.remove('active');
+                    button.className = 'disposition-tab-button px-6 py-4 font-semibold transition-all duration-300';
                 }
             });
             
@@ -5351,23 +5352,7 @@
             // Set active styling for selected tab
             const selectedButton = document.getElementById(tabName + '-tab');
             if (selectedButton) {
-                switch(tabName) {
-                    case 'cash-sale':
-                        selectedButton.className = 'disposition-tab border-green-500 text-green-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
-                        break;
-                    case 'mls-novation':
-                        selectedButton.className = 'disposition-tab border-blue-500 text-blue-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
-                        break;
-                    case 'subject-to-wrap':
-                        selectedButton.className = 'disposition-tab border-orange-500 text-orange-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
-                        break;
-                    case 'seller-finance-wrap':
-                        selectedButton.className = 'disposition-tab border-purple-500 text-purple-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
-                        break;
-                    case 'compare-all':
-                        selectedButton.className = 'disposition-tab border-gray-500 text-gray-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50';
-                        break;
-                }
+                selectedButton.classList.add('active');
             }
             
             // Initialize tab and recalculate values
