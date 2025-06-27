@@ -2314,17 +2314,17 @@
                                         <div class="space-y-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                    Listing Agent Commission: <span id="listing-commission-display">3.0%</span>
+                                                    Listing Agent Commission (%)
                                                 </label>
-                                                <input type="range" min="2" max="4" value="3" step="0.5" id="listing-commission-slider" 
-                                                       class="w-full" onchange="updateCommissionDisplay('listing-commission', this.value); recalculateMLSNovation()">
+                                                <input type="number" min="1" max="5" value="3.0" step="0.1" id="listing-commission-slider" 
+                                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateMLSNovation()">
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                    Buyer Agent Commission: <span id="buyer-commission-display">3.0%</span>
+                                                    Buyer Agent Commission (%)
                                                 </label>
-                                                <input type="range" min="2" max="4" value="3" step="0.5" id="buyer-commission-slider" 
-                                                       class="w-full" onchange="updateCommissionDisplay('buyer-commission', this.value); recalculateMLSNovation()">
+                                                <input type="number" min="1" max="5" value="3.0" step="0.1" id="buyer-commission-slider" 
+                                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateMLSNovation()">
                                             </div>
                                         </div>
                                     </div>
@@ -3813,16 +3813,22 @@
         function formatAndRecalculateSubjectTo(input) {
             if (input) formatNumber(input);
             
-            const cashToSeller = parseFloat(document.getElementById('subject-to-cash-seller').value.replace(/,/g, '')) || 5000;
-            const assignmentFee = parseFloat(document.getElementById('subject-to-assignment-fee').value.replace(/,/g, '')) || 15000;
-            const arrears = parseFloat(document.getElementById('subject-to-arrears').value.replace(/,/g, '')) || 2500;
-            const closingCosts = parseFloat(document.getElementById('dispo-closing-costs').value.replace(/,/g, '')) || 4200;
-            const rent = parseFloat(document.getElementById('dispo-rent').value.replace(/,/g, '')) || 1325;
-            const piti = parseFloat(document.getElementById('dispo-piti').value.replace(/,/g, '')) || 850;
-            const arv = parseFloat(document.getElementById('dispo-arv').value.replace(/,/g, '')) || 415000;
+            const cashToSeller = parseFloat(document.getElementById('subject-to-cash-seller')?.value?.replace(/,/g, '')) || 5000;
+            const assignmentFee = parseFloat(document.getElementById('subject-to-assignment-fee')?.value?.replace(/,/g, '')) || 15000;
+            const arrears = parseFloat(document.getElementById('subject-to-arrears')?.value?.replace(/,/g, '')) || 2500;
+            
+            // Use correct element IDs from Deal Variables section
+            const closingCosts = parseFloat(document.getElementById('dispositions-closing-costs')?.value?.replace(/,/g, '')) || 3500;
+            const rent = parseFloat(document.getElementById('rent')?.value?.replace(/,/g, '')) || 1325;
+            const piti = parseFloat(document.getElementById('dispositions-piti')?.value?.replace(/,/g, '')) || 1100;
+            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/,/g, '')) || 415000;
+            
+            // Calculate loan balance from acquisitions price as approximation
+            const acquisitionPrice = parseFloat(document.getElementById('dispositions-acquisition-price')?.value?.replace(/,/g, '')) || 140000;
+            const loanBalance = acquisitionPrice * 0.8; // Estimate 80% LTV
             
             const cashToClose = cashToSeller + assignmentFee + arrears + closingCosts;
-            const equity = arv - 243000; // Assuming loan balance
+            const equity = arv - loanBalance;
             const monthlyCashFlow = rent - piti;
             
             updateElementIfExists('subject-to-cash-close', '$' + cashToClose.toLocaleString());
@@ -4158,6 +4164,35 @@
             window.currentInstallmentFees = totalCombinedFees;
 
             return totalCombinedFees;
+        }
+
+        function recalculateMLSNovation() {
+            // Calculate MLS/Novation listing analysis
+            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 415000;
+            const acquisitionPrice = parseFloat(document.getElementById('global-acquisitions-price-header')?.value?.replace(/[^\d]/g, '')) || 140000;
+            const closingCosts = parseFloat(document.getElementById('dispositions-closing-costs')?.value?.replace(/[^\d]/g, '')) || 3500;
+            
+            // Get commission values from inputs
+            const listingCommission = parseFloat(document.getElementById('listing-commission-slider')?.value) || 3.0;
+            const buyerCommission = parseFloat(document.getElementById('buyer-commission-slider')?.value) || 3.0;
+            
+            // Calculate MLS listing (95% of ARV)
+            const listPrice = arv * 0.95;
+            const totalCommissionPercent = listingCommission + buyerCommission;
+            const totalCommissions = listPrice * (totalCommissionPercent / 100);
+            const netProceeds = listPrice - totalCommissions - closingCosts;
+            const totalProfit = netProceeds - acquisitionPrice;
+            
+            // Update display elements
+            updateElementIfExists('mls-list-price', '$' + Math.round(listPrice).toLocaleString());
+            updateElementIfExists('total-commissions', '-$' + Math.round(totalCommissions).toLocaleString());
+            updateElementIfExists('mls-closing-costs', '-$' + Math.round(closingCosts).toLocaleString());
+            updateElementIfExists('mls-net-proceeds', '$' + Math.round(netProceeds).toLocaleString());
+            updateElementIfExists('mls-acquisition-cost', '-$' + Math.round(acquisitionPrice).toLocaleString());
+            updateElementIfExists('mls-total-profit', '$' + Math.round(totalProfit).toLocaleString());
+            
+            // Update commission displays if they exist
+            updateElementIfExists('listing-commission-display', listingCommission.toFixed(1) + '%');
         }
 
         function recalculateNovationMAO() {
