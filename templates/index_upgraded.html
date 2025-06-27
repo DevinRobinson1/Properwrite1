@@ -3738,21 +3738,11 @@
         }
         
         function updateMaxProfitFlipperPrice() {
-            const slider = document.getElementById('max-profit-slider');
-            const percentDisplay = document.getElementById('max-profit-percent');
-            const priceDisplay = document.getElementById('max-profit-flipper-price');
+            const percent = parseFloat(document.getElementById('max-profit-slider')?.value) || 60;
+            updateElementIfExists('max-profit-percent', percent + '%');
             
-            if (!slider || !percentDisplay || !priceDisplay) return;
-            
-            const percent = parseFloat(slider.value) || 60;
-            percentDisplay.textContent = percent + '%';
-            
-            // Calculate price: (ARV × percent) - Repairs - get values from property header
-            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/,/g, '')) || 415000;
-            const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/,/g, '')) || 30000;
-            const price = (arv * (percent / 100)) - repairs;
-            
-            priceDisplay.textContent = '$' + Math.round(price).toLocaleString();
+            // Trigger full dispositions recalculation to update all connected values
+            recalculateAllDispositionStrategies();
         }
         
         function recalculateAllDispositionStrategies() {
@@ -3998,7 +3988,6 @@
 
         function updateElementIfExists(id, value) {
             const element = document.getElementById(id);
-            console.log('updateElementIfExists:', id, 'element found:', !!element, 'value:', value);
             if (element) {
                 try {
                     if (typeof value === 'number') {
@@ -4006,48 +3995,33 @@
                     } else {
                         element.textContent = value;
                     }
-                    console.log('Successfully updated element:', id);
                 } catch (error) {
                     console.error('Error updating element:', id, error);
                 }
-            } else {
-                console.warn('Element not found:', id);
             }
         }
 
         // [REMOVED DUPLICATE FUNCTION - using main implementation below]
         
-        // Format and recalculate dispositions
-        function formatAndRecalculateDispositions(element) {
-            if (element) {
-                formatNumber(element);
-            }
-            recalculateDispositions();
-        }
+        // Removed duplicate function - using main implementation above
         
         // Update wrap configuration (for seller finance down payment slider)
 
         
         // Update novation calculation (for commission sliders)
         function updateNovationCalculation() {
-            const listingCommission = parseFloat(document.getElementById('listing-commission')?.value) || 2;
+            const listingCommission = parseFloat(document.getElementById('mls-listing-commission')?.value || document.getElementById('listing-commission')?.value) || 2;
             const buyerCommission = parseFloat(document.getElementById('buyer-commission')?.value) || 2;
             
             // Update display values
             updateElementIfExists('listing-commission-value', listingCommission.toFixed(1) + '%');
             updateElementIfExists('buyer-commission-value', buyerCommission.toFixed(1) + '%');
             
-            // Recalculate dispositions
-            recalculateDispositions();
+            // Trigger full dispositions recalculation
+            recalculateAllDispositionStrategies();
         }
         
-        // Update max profit flipper price from slider
-        function updateMaxProfitFlipperPrice() {
-            const percent = parseFloat(document.getElementById('max-profit-slider')?.value) || 60;
-            updateElementIfExists('max-profit-percent', percent + '%');
-            updateElementIfExists('max-profit-percent-display', percent + '%');
-            recalculateDispositions();
-        }
+        // Removed duplicate function - using main implementation above
         
         // Wrapper function for backward compatibility  
         function recalculateDispositions() {
