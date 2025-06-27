@@ -3740,21 +3740,21 @@
             const percent = parseFloat(slider.value) || 60;
             percentDisplay.textContent = percent + '%';
             
-            // Calculate price: (ARV × percent) - Repairs
-            const arv = parseFloat(document.getElementById('dispo-arv')?.value?.replace(/,/g, '')) || 415000;
-            const repairs = parseFloat(document.getElementById('dispo-repairs')?.value?.replace(/,/g, '')) || 30000;
+            // Calculate price: (ARV × percent) - Repairs - get values from property header
+            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/,/g, '')) || 415000;
+            const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/,/g, '')) || 30000;
             const price = (arv * (percent / 100)) - repairs;
             
             priceDisplay.textContent = '$' + Math.round(price).toLocaleString();
         }
         
         function recalculateAllDispositionStrategies() {
-            // Get values with fallbacks to prevent NaN
-            const arv = parseFloat(document.getElementById('dispo-arv')?.value?.replace(/,/g, '')) || 415000;
-            const rent = parseFloat(document.getElementById('dispo-rent')?.value?.replace(/,/g, '')) || 1325;
-            const repairs = parseFloat(document.getElementById('dispo-repairs')?.value?.replace(/,/g, '')) || 30000;
-            const piti = parseFloat(document.getElementById('dispo-piti')?.value?.replace(/,/g, '')) || 850;
-            const closingCosts = parseFloat(document.getElementById('dispo-closing-costs')?.value?.replace(/,/g, '')) || 3500;
+            // Get values from property header and Deal Variables sections
+            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/,/g, '')) || 415000;
+            const rent = parseFloat(document.getElementById('rent')?.value?.replace(/,/g, '')) || 1325;
+            const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/,/g, '')) || 30000;
+            const piti = parseFloat(document.getElementById('dispositions-piti')?.value?.replace(/,/g, '')) || 1100;
+            const closingCosts = parseFloat(document.getElementById('dispositions-closing-costs')?.value?.replace(/,/g, '')) || 3500;
             
             console.log('Recalculating with:', { arv, rent, repairs, piti, closingCosts });
             
@@ -3786,8 +3786,8 @@
         }
         
         function updateNovationCalculation() {
-            const arv = parseFloat(document.getElementById('dispo-arv').value.replace(/,/g, '')) || 415000;
-            const repairs = parseFloat(document.getElementById('dispo-repairs').value.replace(/,/g, '')) || 30000;
+            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/,/g, '')) || 415000;
+            const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/,/g, '')) || 30000;
             
             // List Price = (ARV - Repairs) - MAX(10% of (ARV-Repairs), 20000)
             const afterRepairs = arv - repairs;

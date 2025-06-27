@@ -1,0 +1,548 @@
+{
+  "title": "Real Estate Investment Analyzer - Formula Binding Map",
+  "description": "Complete mapping of input fields to state variables and consuming formulas across all pages and tabs",
+  "last_updated": "2025-06-27",
+  "sections": {
+    "global_inputs": {
+      "property_header": [
+        {
+          "page": "Global",
+          "section": "Property Header",
+          "input_field": "#bedrooms (Bedrooms)",
+          "dom_id": "bedrooms",
+          "central_state_key": "deal.bedrooms",
+          "consuming_formulas": ["propertyDescription", "comparableSales", "rentEstimate"],
+          "update_functions": ["updateAllTabCalculations()"]
+        },
+        {
+          "page": "Global",
+          "section": "Property Header", 
+          "input_field": "#bathrooms (Bathrooms)",
+          "dom_id": "bathrooms",
+          "central_state_key": "deal.bathrooms",
+          "consuming_formulas": ["propertyDescription", "comparableSales", "rentEstimate"],
+          "update_functions": ["updateAllTabCalculations()"]
+        },
+        {
+          "page": "Global",
+          "section": "Property Header",
+          "input_field": "#square-feet (Square Feet)",
+          "dom_id": "square-feet",
+          "central_state_key": "deal.squareFeet",
+          "consuming_formulas": ["propertyDescription", "comparableSales", "rentEstimate"],
+          "update_functions": ["updateAllTabCalculations()"]
+        },
+        {
+          "page": "Global",
+          "section": "Property Header",
+          "input_field": "#arv (ARV)",
+          "dom_id": "arv",
+          "central_state_key": "deal.arv",
+          "consuming_formulas": ["wholesaleMAO", "installmentMAO", "subjectToOffers", "sellerFinancePrice", "ackermanOffers", "compareAll", "dispositionsAll"],
+          "update_functions": ["updateAllTabCalculations()", "recalculateWholesale()", "recalculateInstallment()", "recalculateSubjectTo()", "recalculateSellerFinance()", "recalculateDispositions()"]
+        },
+        {
+          "page": "Global",
+          "section": "Property Header",
+          "input_field": "#repairs (Repairs)",
+          "dom_id": "repairs",
+          "central_state_key": "deal.repairs",
+          "consuming_formulas": ["wholesaleMAO", "installmentMAO", "subjectToOffers", "sellerFinancePrice", "ackermanOffers", "compareAll", "dispositionsAll"],
+          "update_functions": ["updateAllTabCalculations()", "recalculateWholesale()", "recalculateInstallment()", "recalculateSubjectTo()", "recalculateSellerFinance()", "recalculateDispositions()"]
+        },
+        {
+          "page": "Global",
+          "section": "Property Header",
+          "input_field": "#rent (Monthly Rent)",
+          "dom_id": "rent",
+          "central_state_key": "deal.rent",
+          "consuming_formulas": ["cashFlow", "sellerFinanceCashFlow", "subjectToCashFlow", "compareAll", "dispositionsAll"],
+          "update_functions": ["updateAllTabCalculations()", "recalculateSubjectTo()", "recalculateSellerFinance()", "recalculateDispositions()"]
+        },
+        {
+          "page": "Global",
+          "section": "Property Header",
+          "input_field": "#acquisitions-price (Acquisitions Price)",
+          "dom_id": "acquisitions-price",
+          "central_state_key": "deal.acquisitionsPrice",
+          "consuming_formulas": ["globalAcquisitionsPrice", "compareAll"],
+          "update_functions": ["updateGlobalAcquisitionsPriceFromHeader()", "updateAllTabCalculations()"]
+        }
+      ]
+    },
+    "acquisitions": {
+      "wholesale": [
+        {
+          "page": "Acq → Wholesale",
+          "section": "Offer Assumptions",
+          "input_field": "#wholesale-arv-percent (ARV %)",
+          "dom_id": "wholesale-arv-percent",
+          "central_state_key": "wholesale.arvPercent",
+          "consuming_formulas": ["wholesaleMAO", "ackermanOffers", "compareAll"],
+          "update_functions": ["recalculateWholesale()", "updateComparisonResults()"]
+        },
+        {
+          "page": "Acq → Wholesale",
+          "section": "Offer Assumptions",
+          "input_field": "#assignment-fee (Assignment Fee)",
+          "dom_id": "assignment-fee",
+          "central_state_key": "wholesale.assignmentFee",
+          "consuming_formulas": ["wholesaleProfit", "ackermanOffers", "compareAll"],
+          "update_functions": ["recalculateWholesale()", "updateComparisonResults()"]
+        },
+        {
+          "page": "Acq → Wholesale",
+          "section": "Ackerman Offers",
+          "input_field": "Dynamic calculation based on MAO",
+          "dom_id": "ackerman-offers",
+          "central_state_key": "wholesale.ackermanOffers",
+          "consuming_formulas": ["ackerman65", "ackerman85", "ackerman95", "ackerman100"],
+          "update_functions": ["calculateAckermanOffers()"]
+        }
+      ],
+      "installment": [
+        {
+          "page": "Acq → Installment",
+          "section": "Equitable Deposit Structure",
+          "input_field": "#refundable-consideration (Refundable Consideration)",
+          "dom_id": "refundable-consideration",
+          "central_state_key": "installment.refundableConsideration",
+          "consuming_formulas": ["totalDeposit", "compareAll"],
+          "update_functions": ["recalculateInstallment()"]
+        },
+        {
+          "page": "Acq → Installment",
+          "section": "Equitable Deposit Structure",
+          "input_field": "#non-refundable-costs (Non-Refundable Costs)",
+          "dom_id": "non-refundable-costs",
+          "central_state_key": "installment.nonRefundableCosts",
+          "consuming_formulas": ["totalDeposit", "netProfit", "compareAll"],
+          "update_functions": ["recalculateInstallment()"]
+        },
+        {
+          "page": "Acq → Installment",
+          "section": "Local Control",
+          "input_field": "#minimum-acceptable-profit-local (Minimum Acceptable Profit)",
+          "dom_id": "minimum-acceptable-profit-local",
+          "central_state_key": "installment.minimumAcceptableProfit",
+          "consuming_formulas": ["installmentMAO", "netProfit", "compareAll"],
+          "update_functions": ["recalculateInstallment()"]
+        },
+        {
+          "page": "Acq → Installment",
+          "section": "Dynamic Fee Calculator",
+          "input_field": "16 fee inputs (listing-commission, title-fee, etc.)",
+          "dom_id": "various-fee-inputs",
+          "central_state_key": "installment.fees",
+          "consuming_formulas": ["totalInstallmentFees", "installmentMAO", "netToUs"],
+          "update_functions": ["recalculateInstallment()", "recalculateNovationMAO()"]
+        }
+      ],
+      "subject_to": [
+        {
+          "page": "Acq → Subject-To",
+          "section": "Acquisition Inputs",
+          "input_field": "#existing-loan-balance (Existing Loan Balance)",
+          "dom_id": "existing-loan-balance",
+          "central_state_key": "subjectTo.existingLoanBalance",
+          "consuming_formulas": ["equityPosition", "cashFlow", "compareAll"],
+          "update_functions": ["recalculateSubjectTo()"]
+        },
+        {
+          "page": "Acq → Subject-To",
+          "section": "Acquisition Inputs",
+          "input_field": "#cash-to-seller (Cash to Seller)",
+          "dom_id": "cash-to-seller",
+          "central_state_key": "subjectTo.cashToSeller",
+          "consuming_formulas": ["cashToClose", "totalInvestment", "compareAll"],
+          "update_functions": ["recalculateSubjectTo()"]
+        },
+        {
+          "page": "Acq → Subject-To",
+          "section": "Acquisition Inputs",
+          "input_field": "#arrears-liens (Arrears/Liens)",
+          "dom_id": "arrears-liens",
+          "central_state_key": "subjectTo.arrearsLiens",
+          "consuming_formulas": ["cashToClose", "totalInvestment", "compareAll"],
+          "update_functions": ["recalculateSubjectTo()"]
+        },
+        {
+          "page": "Acq → Subject-To",
+          "section": "Acquisition Inputs",
+          "input_field": "#monthly-pi (Monthly PI)",
+          "dom_id": "monthly-pi",
+          "central_state_key": "subjectTo.monthlyPI",
+          "consuming_formulas": ["monthlyCashFlow", "annualCashFlow", "compareAll"],
+          "update_functions": ["recalculateSubjectTo()"]
+        },
+        {
+          "page": "Acq → Subject-To",
+          "section": "Acquisition Inputs",
+          "input_field": "#monthly-escrow (Monthly Escrow TI)",
+          "dom_id": "monthly-escrow",
+          "central_state_key": "subjectTo.monthlyEscrow",
+          "consuming_formulas": ["monthlyCashFlow", "totalPITI", "compareAll"],
+          "update_functions": ["recalculateSubjectTo()"]
+        },
+        {
+          "page": "Acq → Subject-To",
+          "section": "Acquisition Inputs",
+          "input_field": "#interest-rate (Interest Rate)",
+          "dom_id": "interest-rate",
+          "central_state_key": "subjectTo.interestRate",
+          "consuming_formulas": ["paymentCalculation", "compareAll"],
+          "update_functions": ["recalculateSubjectTo()"]
+        },
+        {
+          "page": "Acq → Subject-To",
+          "section": "Cash Offer Calculator",
+          "input_field": "Auto-calculated based on equity and cash flow",
+          "dom_id": "calculated-cash-offer",
+          "central_state_key": "subjectTo.calculatedCashOffer",
+          "consuming_formulas": ["cashOfferFormula", "equityBased", "cashFlowBased"],
+          "update_functions": ["calculateCashOffer()"]
+        }
+      ],
+      "seller_finance": [
+        {
+          "page": "Acq → Seller Finance",
+          "section": "Three Key Offer Components",
+          "input_field": "#sf-purchase-price (Purchase Price)",
+          "dom_id": "sf-purchase-price",
+          "central_state_key": "sellerFinance.purchasePrice",
+          "consuming_formulas": ["loanAmount", "monthlyPayment", "compareAll"],
+          "update_functions": ["recalculateSellerFinance()"]
+        },
+        {
+          "page": "Acq → Seller Finance",
+          "section": "Three Key Offer Components",
+          "input_field": "#sf-timeline (Timeline Years)",
+          "dom_id": "sf-timeline",
+          "central_state_key": "sellerFinance.timelineYears",
+          "consuming_formulas": ["monthlyPayment", "balloonPayment", "compareAll"],
+          "update_functions": ["recalculateSellerFinance()"]
+        },
+        {
+          "page": "Acq → Seller Finance",
+          "section": "Three Key Offer Components",
+          "input_field": "#custom-monthly-payment (Custom Monthly Payment)",
+          "dom_id": "custom-monthly-payment",
+          "central_state_key": "sellerFinance.customMonthlyPayment",
+          "consuming_formulas": ["cashFlow", "balloonCalculation", "compareAll"],
+          "update_functions": ["recalculateSellerFinance()"]
+        },
+        {
+          "page": "Acq → Seller Finance",
+          "section": "Optional Terms",
+          "input_field": "#sf-interest-rate (Interest Rate)",
+          "dom_id": "sf-interest-rate",
+          "central_state_key": "sellerFinance.interestRate",
+          "consuming_formulas": ["monthlyPayment", "balloonCalculation"],
+          "update_functions": ["recalculateSellerFinance()"]
+        },
+        {
+          "page": "Acq → Seller Finance",
+          "section": "Optional Terms",
+          "input_field": "#sf-down-payment (Down Payment)",
+          "dom_id": "sf-down-payment",
+          "central_state_key": "sellerFinance.downPayment",
+          "consuming_formulas": ["loanAmount", "monthlyPayment"],
+          "update_functions": ["recalculateSellerFinance()"]
+        },
+        {
+          "page": "Acq → Seller Finance",
+          "section": "Market Analysis",
+          "input_field": "#appreciation-rate (Appreciation Rate)",
+          "dom_id": "appreciation-rate",
+          "central_state_key": "sellerFinance.appreciationRate",
+          "consuming_formulas": ["projectedPropertyValue", "balloonAnalysis"],
+          "update_functions": ["updateMarketAnalysis()"]
+        },
+        {
+          "page": "Acq → Seller Finance",
+          "section": "Market Analysis",
+          "input_field": "#balloon-year (Balloon Year)",
+          "dom_id": "balloon-year",
+          "central_state_key": "sellerFinance.balloonYear",
+          "consuming_formulas": ["projectedPropertyValue", "remainingBalance"],
+          "update_functions": ["updateMarketAnalysis()"]
+        }
+      ]
+    },
+    "dispositions": {
+      "global_deal_variables": [
+        {
+          "page": "Dispo → Global",
+          "section": "Deal Variables",
+          "input_field": "#dispositions-acquisition-price (Acquisition Cost)",
+          "dom_id": "dispositions-acquisition-price",
+          "central_state_key": "dispositions.acquisitionCost",
+          "consuming_formulas": ["allExitStrategies", "profitCalculations", "compareAll"],
+          "update_functions": ["recalculateDispositions()"]
+        },
+        {
+          "page": "Dispo → Global",
+          "section": "Deal Variables",
+          "input_field": "#dispositions-repairs (Repairs)",
+          "dom_id": "dispositions-repairs",
+          "central_state_key": "dispositions.repairs",
+          "consuming_formulas": ["allExitStrategies", "profitCalculations", "compareAll"],
+          "update_functions": ["recalculateDispositions()"]
+        },
+        {
+          "page": "Dispo → Global",
+          "section": "Deal Variables",
+          "input_field": "#dispositions-piti (PITI)",
+          "dom_id": "dispositions-piti",
+          "central_state_key": "dispositions.piti",
+          "consuming_formulas": ["cashFlow", "subjectToWrap", "sellerFinanceWrap"],
+          "update_functions": ["recalculateDispositions()"]
+        },
+        {
+          "page": "Dispo → Global",
+          "section": "Deal Variables",
+          "input_field": "#dispositions-closing-costs (Closing Costs)",
+          "dom_id": "dispositions-closing-costs",
+          "central_state_key": "dispositions.closingCosts",
+          "consuming_formulas": ["netProceeds", "profitCalculations"],
+          "update_functions": ["recalculateDispositions()"]
+        }
+      ],
+      "cash_sale": [
+        {
+          "page": "Dispo → Cash Sale",
+          "section": "Wholesale Exit Buyer Persona Matrix",
+          "input_field": "#rent-rule-investor (1% Rent Rule Target Price)",
+          "dom_id": "rent-rule-target-price",
+          "central_state_key": "dispositions.rentRulePrice",
+          "consuming_formulas": ["rentRuleFormula: rent / 0.01"],
+          "update_functions": ["updateWholesaleBuyerMatrix()"]
+        },
+        {
+          "page": "Dispo → Cash Sale",
+          "section": "Wholesale Exit Buyer Persona Matrix",
+          "input_field": "#volume-flipper (Volume Flipper Target Price)",
+          "dom_id": "volume-flipper-target-price",
+          "central_state_key": "dispositions.volumeFlipperPrice",
+          "consuming_formulas": ["volumeFlipperFormula: (ARV × 0.70) − Repairs − $3,500"],
+          "update_functions": ["updateWholesaleBuyerMatrix()"]
+        },
+        {
+          "page": "Dispo → Cash Sale",
+          "section": "Wholesale Exit Buyer Persona Matrix",
+          "input_field": "#brrr-investor (BRRR Investor Target Price)",
+          "dom_id": "brrr-target-price",
+          "central_state_key": "dispositions.brrrPrice",
+          "consuming_formulas": ["brrrFormula: 70% ARV - Repairs"],
+          "update_functions": ["updateWholesaleBuyerMatrix()"]
+        },
+        {
+          "page": "Dispo → Cash Sale",
+          "section": "Wholesale Exit Buyer Persona Matrix",
+          "input_field": "#max-profit-flipper-slider (Max-Profit Flipper Slider)",
+          "dom_id": "max-profit-flipper-slider",
+          "central_state_key": "dispositions.maxProfitPercent",
+          "consuming_formulas": ["maxProfitFormula: ARV × sliderPercent - Repairs"],
+          "update_functions": ["updateWholesaleBuyerMatrix()"]
+        }
+      ],
+      "mls_novation": [
+        {
+          "page": "Dispo → MLS/Novation",
+          "section": "Commission Sliders",
+          "input_field": "#listing-commission (Listing Commission %)",
+          "dom_id": "listing-commission",
+          "central_state_key": "dispositions.listingCommission",
+          "consuming_formulas": ["netProceeds", "totalCommissions", "compareAll"],
+          "update_functions": ["updateNovationCalculation()"]
+        },
+        {
+          "page": "Dispo → MLS/Novation",
+          "section": "Commission Sliders",
+          "input_field": "#buyer-agent-commission (Buyer Agent Commission %)",
+          "dom_id": "buyer-agent-commission",
+          "central_state_key": "dispositions.buyerAgentCommission",
+          "consuming_formulas": ["netProceeds", "totalCommissions", "compareAll"],
+          "update_functions": ["updateNovationCalculation()"]
+        },
+        {
+          "page": "Dispo → MLS/Novation",
+          "section": "Analysis",
+          "input_field": "#list-price (List Price)",
+          "dom_id": "list-price",
+          "central_state_key": "dispositions.listPrice",
+          "consuming_formulas": ["netProceeds", "profitCalculations"],
+          "update_functions": ["updateNovationCalculation()"]
+        }
+      ],
+      "subject_to_wrap": [
+        {
+          "page": "Dispo → Sub-To Wrap",
+          "section": "Cash-to-Close Builder",
+          "input_field": "#cash-to-seller-dispo (Cash to Seller)",
+          "dom_id": "cash-to-seller-dispo",
+          "central_state_key": "dispositions.subTo.cashToSeller",
+          "consuming_formulas": ["cashToClose", "totalInvestment"],
+          "update_functions": ["formatAndRecalculateSubjectTo()"]
+        },
+        {
+          "page": "Dispo → Sub-To Wrap",
+          "section": "Cash-to-Close Builder",
+          "input_field": "#assignment-fee-dispo (Assignment Fee)",
+          "dom_id": "assignment-fee-dispo",
+          "central_state_key": "dispositions.subTo.assignmentFee",
+          "consuming_formulas": ["totalFees", "profit"],
+          "update_functions": ["formatAndRecalculateSubjectTo()"]
+        },
+        {
+          "page": "Dispo → Sub-To Wrap",
+          "section": "Cash-to-Close Builder",
+          "input_field": "#arrears-liens-dispo (Arrears/Liens)",
+          "dom_id": "arrears-liens-dispo",
+          "central_state_key": "dispositions.subTo.arrearsLiens",
+          "consuming_formulas": ["cashToClose", "totalInvestment"],
+          "update_functions": ["formatAndRecalculateSubjectTo()"]
+        }
+      ],
+      "sf_wrap_lease_option": [
+        {
+          "page": "Dispo → SF Wrap/Lease-Option",
+          "section": "Seller Finance Wrap Configurator",
+          "input_field": "#wrap-down-payment-percent (Down Payment %)",
+          "dom_id": "wrap-down-payment-percent",
+          "central_state_key": "dispositions.wrap.downPaymentPercent",
+          "consuming_formulas": ["downPaymentAmount", "loanAmount", "buyerPayment"],
+          "update_functions": ["updateWrapConfiguration()"]
+        },
+        {
+          "page": "Dispo → SF Wrap/Lease-Option",
+          "section": "Seller Finance Wrap Configurator",
+          "input_field": "#wrap-term (Wrap Term Years)",
+          "dom_id": "wrap-term",
+          "central_state_key": "dispositions.wrap.termYears",
+          "consuming_formulas": ["buyerPayment", "amortization"],
+          "update_functions": ["updateWrapConfiguration()"]
+        },
+        {
+          "page": "Dispo → SF Wrap/Lease-Option",
+          "section": "Lease-Option Sub-Buyer",
+          "input_field": "#lease-option-equity (Equity Available)",
+          "dom_id": "lease-option-equity",
+          "central_state_key": "dispositions.leaseOption.equityAvailable",
+          "consuming_formulas": ["equityBonus", "targetCashToClose"],
+          "update_functions": ["formatAndRecalculateLeaseOption()"]
+        },
+        {
+          "page": "Dispo → SF Wrap/Lease-Option",
+          "section": "Lease-Option Sub-Buyer",
+          "input_field": "#lease-option-repairs (Repairs Needed)",
+          "dom_id": "lease-option-repairs",
+          "central_state_key": "dispositions.leaseOption.repairsNeeded",
+          "consuming_formulas": ["repairAdjustment", "targetCashToClose"],
+          "update_functions": ["formatAndRecalculateLeaseOption()"]
+        },
+        {
+          "page": "Dispo → SF Wrap/Lease-Option",
+          "section": "Lease-Option Sub-Buyer",
+          "input_field": "#lease-option-cash-flow (Desired Cash Flow)",
+          "dom_id": "lease-option-cash-flow",
+          "central_state_key": "dispositions.leaseOption.desiredCashFlow",
+          "consuming_formulas": ["cashFlowBonus", "targetCashToClose"],
+          "update_functions": ["formatAndRecalculateLeaseOption()"]
+        }
+      ],
+      "compare_all": [
+        {
+          "page": "Dispo → Compare All",
+          "section": "Strategy Comparison",
+          "input_field": "All previous inputs feed into comparison",
+          "dom_id": "compare-all-results",
+          "central_state_key": "dispositions.compareAll",
+          "consuming_formulas": ["cashSaleProfit", "mlsNetProceeds", "subToProfit", "wrapProfit"],
+          "update_functions": ["updateCompareAllStrategies()"]
+        }
+      ]
+    },
+    "ai_control_center": [
+      {
+        "page": "AI Control Center",
+        "section": "Objection Handler",
+        "input_field": "#objection-text (Seller Objection)",
+        "dom_id": "objection-text",
+        "central_state_key": "ai.objectionText",
+        "consuming_formulas": ["GPT-4o processing"],
+        "update_functions": ["generateObjectionResponse()"]
+      },
+      {
+        "page": "AI Control Center",
+        "section": "Deal Analysis",
+        "input_field": "Uses all deal data for analysis",
+        "dom_id": "deal-analysis",
+        "central_state_key": "ai.dealAnalysis",
+        "consuming_formulas": ["GPT-4o deal evaluation"],
+        "update_functions": ["generateDealAnalysis()"]
+      },
+      {
+        "page": "AI Control Center",
+        "section": "Listing Generator",
+        "input_field": "Uses property data for listing creation",
+        "dom_id": "listing-generator",
+        "central_state_key": "ai.listingGeneration",
+        "consuming_formulas": ["GPT-4o listing creation"],
+        "update_functions": ["generateInvestorListing()"]
+      }
+    ]
+  },
+  "calculation_dependencies": {
+    "primary_calculations": {
+      "wholesaleMAO": ["deal.arv", "deal.repairs", "wholesale.arvPercent", "wholesale.assignmentFee"],
+      "installmentMAO": ["deal.arv", "deal.repairs", "installment.fees", "installment.minimumAcceptableProfit"],
+      "subjectToCashFlow": ["deal.rent", "subjectTo.monthlyPI", "subjectTo.monthlyEscrow"],
+      "sellerFinancePayment": ["sellerFinance.purchasePrice", "sellerFinance.interestRate", "sellerFinance.timelineYears"],
+      "ackermanOffers": ["wholesaleMAO", "installmentMAO", "subjectToMAO", "sellerFinanceMAO"],
+      "compareAllResults": ["wholesaleMAO", "installmentMAO", "subjectToOffers", "sellerFinanceOffers"],
+      "dispositionsProfit": ["dispositions.acquisitionCost", "dispositions.repairs", "dispositions.closingCosts"]
+    },
+    "update_triggers": {
+      "property_header_change": ["updateAllTabCalculations()", "recalculateDispositions()"],
+      "wholesale_input_change": ["recalculateWholesale()", "updateComparisonResults()"],
+      "installment_input_change": ["recalculateInstallment()", "recalculateNovationMAO()"],
+      "subject_to_input_change": ["recalculateSubjectTo()", "calculateCashOffer()"],
+      "seller_finance_input_change": ["recalculateSellerFinance()", "updateMarketAnalysis()"],
+      "dispositions_input_change": ["recalculateDispositions()", "updateCompareAllStrategies()"]
+    }
+  },
+  "state_management": {
+    "global_variables": [
+      "window.globalAcquisitionsPrice",
+      "window.globalMinAcceptableProfit"
+    ],
+    "session_storage": [
+      "propertyData",
+      "calculationResults",
+      "userPreferences"
+    ],
+    "dom_state": [
+      "Tab active states",
+      "Input field values",
+      "Calculated result displays"
+    ]
+  },
+  "testing_checklist": {
+    "manual_qa": [
+      "Change ARV → All MAO calculations update",
+      "Change Repairs → All profit calculations update",
+      "Change Rent → All cash flow calculations update",
+      "Change commission sliders → Net proceeds update",
+      "Change down payment → Wrap calculations update",
+      "Switch tabs → Values persist correctly",
+      "Refresh page → Last values restore"
+    ],
+    "console_validation": [
+      "No JavaScript errors on input change",
+      "Functions called in correct sequence",
+      "Values formatted correctly",
+      "Cross-tab synchronization working"
+    ]
+  }
+}
