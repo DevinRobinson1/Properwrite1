@@ -2655,12 +2655,12 @@
 
         async function calculateStrategies() {
             const strategyData = {
-                arv: parseFloat(document.getElementById('arv').value),
-                repairs: parseFloat(document.getElementById('repairs').value),
+                arv: parseFloat(document.getElementById('arv').value.replace(/,/g, '')),
+                repairs: parseFloat(document.getElementById('repairs').value.replace(/,/g, '')),
                 bedrooms: parseInt(document.getElementById('bedrooms').value),
                 bathrooms: parseFloat(document.getElementById('bathrooms').value),
-                square_feet: parseInt(document.getElementById('square_feet').value),
-                rent: parseFloat(document.getElementById('rent').value)
+                square_feet: parseInt(document.getElementById('square_feet').value.replace(/,/g, '')),
+                rent: parseFloat(document.getElementById('rent').value.replace(/,/g, ''))
             };
             
             try {
@@ -3006,11 +3006,15 @@
                 calculateBalloonProjection(); // Calculate balloon projection before Seller Finance
                 recalculateSellerFinance();
                 updateComparisonResults();
-                
-                // Update dispositions when property values change
-                recalculateAllDispositionStrategies();
             } catch (error) {
                 console.log('Calculation update in progress...');
+            }
+            
+            // Update dispositions separately (client-side only, no API calls)
+            try {
+                recalculateAllDispositionStrategies();
+            } catch (dispositionError) {
+                console.log('Dispositions calculation in progress...');
             }
         }
 
