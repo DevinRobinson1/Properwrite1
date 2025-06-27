@@ -2122,8 +2122,8 @@
                         
                         <!-- Market Analysis & Balloon Projection -->
                         <div class="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 p-6 rounded-lg mb-6">
-                            <h4 class="text-lg font-semibold text-green-800 mb-4">📊 Market Analysis & Balloon Exit Strategy</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                            <h4 class="text-lg font-semibold text-green-800 mb-4 mt-6">📊 Market Analysis & Balloon Exit Strategy</h4>
+                            <div class="grid grid-cols-4 gap-4 mb-4">
                                 <div>
                                     <label class="block text-sm font-medium text-green-700 mb-2">Current ARV</label>
                                     <input type="text" id="sf-current-arv" class="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" oninput="formatNumber(this); calculateBalloonProjection();">
@@ -2150,18 +2150,18 @@
                             
                             <!-- Balloon Exit Analysis -->
                             <div class="bg-white p-4 rounded-lg border border-green-200">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div class="text-center">
+                                <div class="flex flex-wrap gap-8 justify-center" style="gap: 2rem;">
+                                    <div class="text-center" style="min-width: 280px;">
                                         <div class="text-sm text-green-700 font-medium mb-2">Projected Property Value at Balloon</div>
                                         <div class="text-3xl font-bold text-green-900">$<span id="sf-balloon-value">478,250</span></div>
                                         <div class="text-xs text-gray-600 mt-1">Based on <span id="sf-appreciation-years">5</span> years at <span id="sf-appreciation-display">3.5</span>% annual</div>
                                     </div>
-                                    <div class="text-center">
+                                    <div class="text-center" style="min-width: 280px;">
                                         <div class="text-sm text-blue-700 font-medium mb-2">Remaining Loan Balance</div>
                                         <div class="text-3xl font-bold text-blue-900">$<span id="sf-balloon-balance">125,850</span></div>
                                         <div class="text-xs text-gray-600 mt-1">Principal remaining at balloon</div>
                                     </div>
-                                    <div class="text-center">
+                                    <div class="text-center" style="min-width: 280px;">
                                         <div class="text-sm text-purple-700 font-medium mb-2">Available Equity for Refinance</div>
                                         <div class="text-3xl font-bold text-purple-900">$<span id="sf-refinance-equity">352,400</span></div>
                                         <div class="text-xs text-gray-600 mt-1"><span id="sf-ltv-ratio">74</span>% LTV at refinance</div>
@@ -2861,123 +2861,7 @@
                             </div>
                         </div>
 
-                        <!-- Compare All Tab Content -->
-                        <div id="compare-all-content" class="disposition-tab-content hidden">
-                            <div id="compare-tab" class="tab-content">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Strategy Comparison Dashboard</h3>
-                        
-                        <!-- Strategy Comparison Cards -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                            <!-- Wholesale Strategy Card -->
-                            <div class="bg-white border border-gray-200 p-6 rounded-lg shadow-sm">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h4 class="text-lg font-semibold text-gray-800">💰 Wholesale (MAO)</h4>
-                                    <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">Quick Exit</span>
-                                </div>
-                                <div class="space-y-3">
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Maximum Offer:</span>
-                                        <span class="font-bold text-green-600">$<span id="compare-wholesale-offer">269,750</span></span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Net Profit:</span>
-                                        <span class="font-bold">$<span id="compare-wholesale-profit">15,000</span></span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Timeline:</span>
-                                        <span class="text-sm text-gray-500">30-45 days</span>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <!-- Installment Strategy Card -->
-                            <div class="bg-white border border-gray-200 p-6 rounded-lg shadow-sm">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h4 class="text-lg font-semibold text-gray-800">🏗️ Installment (Novation)</h4>
-                                    <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">Medium Term</span>
-                                </div>
-                                <div class="space-y-3">
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Maximum Offer:</span>
-                                        <span class="font-bold text-green-600">$<span id="compare-installment-offer">269,750</span></span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Net Profit:</span>
-                                        <span class="font-bold">$<span id="compare-installment-profit">15,000</span></span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Timeline:</span>
-                                        <span class="text-sm text-gray-500">90-180 days</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Subject-To Strategy Card -->
-                            <div class="bg-white border border-gray-200 p-6 rounded-lg shadow-sm">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h4 class="text-lg font-semibold text-gray-800">🏠 Subject-To</h4>
-                                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">Cash Flow</span>
-                                </div>
-                                <div class="space-y-3">
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Cash Offer:</span>
-                                        <span class="font-bold text-green-600">$<span id="compare-subjectto-offer">24,000</span></span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Monthly Cash Flow:</span>
-                                        <span class="font-bold">$<span id="compare-subjectto-cashflow">200</span></span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Timeline:</span>
-                                        <span class="text-sm text-gray-500">Hold 5-10 years</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Seller Finance Strategy Card -->
-                            <div class="bg-white border border-gray-200 p-6 rounded-lg shadow-sm">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h4 class="text-lg font-semibold text-gray-800">📊 Seller Finance</h4>
-                                    <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">Long Term</span>
-                                </div>
-                                <div class="space-y-3">
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Purchase Price:</span>
-                                        <span class="font-bold text-green-600">$<span id="compare-sellerfinance-price">395,000</span></span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Monthly Payment:</span>
-                                        <span class="font-bold">$<span id="compare-sellerfinance-payment">2,402</span></span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">Timeline:</span>
-                                        <span class="text-sm text-gray-500">30 years</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Strategy Recommendation -->
-                        <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg">
-                            <h4 class="text-lg font-semibold text-blue-800 mb-4">💡 Recommended Strategy</h4>
-                            <div id="strategy-recommendation" class="space-y-4">
-                                <div class="flex items-start">
-                                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold mr-4 mt-1">1</div>
-                                    <div>
-                                        <div class="font-semibold text-gray-800">Best Overall Strategy: <span id="recommended-strategy">Wholesale</span></div>
-                                        <div class="text-gray-600 text-sm mt-1" id="recommendation-reason">Provides quickest exit with lowest risk and guaranteed profit.</div>
-                                    </div>
-                                </div>
-                                <div class="flex items-start">
-                                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold mr-4 mt-1">2</div>
-                                    <div>
-                                        <div class="font-semibold text-gray-800">Alternative Option: <span id="alternative-strategy">Subject-To</span></div>
-                                        <div class="text-gray-600 text-sm mt-1" id="alternative-reason">Consider for long-term cash flow if you can handle ongoing management.</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                 </div>
             </div>
