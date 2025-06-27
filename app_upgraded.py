@@ -26,7 +26,7 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-2024")
 @app.route('/')
 def index():
     """Enhanced property input form with external data integration"""
-    return render_template('index_upgraded.html')
+    return render_template('index_simple.html')
 
 @app.route('/test')
 def test():
