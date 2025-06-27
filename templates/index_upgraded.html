@@ -3752,14 +3752,15 @@
         }
         
         function recalculateAllDispositionStrategies() {
-            // Get values from property header and Deal Variables sections
-            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/,/g, '')) || 415000;
-            const rent = parseFloat(document.getElementById('rent')?.value?.replace(/,/g, '')) || 1325;
-            const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/,/g, '')) || 30000;
-            const piti = parseFloat(document.getElementById('dispositions-piti')?.value?.replace(/,/g, '')) || 1100;
-            const closingCosts = parseFloat(document.getElementById('dispositions-closing-costs')?.value?.replace(/,/g, '')) || 3500;
-            
-            console.log('Recalculating with:', { arv, rent, repairs, piti, closingCosts });
+            try {
+                // Get values from property header and Deal Variables sections
+                const arv = parseFloat(document.getElementById('arv')?.value?.replace(/,/g, '')) || 415000;
+                const rent = parseFloat(document.getElementById('rent')?.value?.replace(/,/g, '')) || 1325;
+                const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/,/g, '')) || 30000;
+                const piti = parseFloat(document.getElementById('dispositions-piti')?.value?.replace(/,/g, '')) || 1100;
+                const closingCosts = parseFloat(document.getElementById('dispositions-closing-costs')?.value?.replace(/,/g, '')) || 3500;
+                
+                console.log('Recalculating with:', { arv, rent, repairs, piti, closingCosts });
             
             // Update 1% Rent Rule
             const rentRulePrice = rent / 0.01;
@@ -3781,11 +3782,20 @@
             // Update Max-Profit Flipper
             updateMaxProfitFlipperPrice();
             
-            // Update other strategies
-            updateNovationCalculation();
-            formatAndRecalculateSubjectTo(null);
-            updateWrapConfiguration();
-            updateLeaseOptionCalculation();
+                // Update other strategies
+                updateNovationCalculation();
+                formatAndRecalculateSubjectTo(null);
+                updateWrapConfiguration();
+                updateLeaseOptionCalculation();
+            } catch (error) {
+                console.error('Error in recalculateAllDispositionStrategies:', error);
+                console.log('Available elements check:');
+                console.log('arv element:', document.getElementById('arv'));
+                console.log('rent element:', document.getElementById('rent'));
+                console.log('repairs element:', document.getElementById('repairs'));
+                console.log('volume-flipper-min-flip element:', document.getElementById('volume-flipper-min-flip'));
+                console.log('rent-rule-price element:', document.getElementById('rent-rule-price'));
+            }
         }
         
         function updateNovationCalculation() {
