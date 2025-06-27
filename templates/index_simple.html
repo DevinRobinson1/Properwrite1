@@ -110,7 +110,8 @@
                     document.getElementById('success-message').textContent = 'Property analyzed successfully!';
                     document.getElementById('success-message').classList.add('show');
                     
-                    // Display the results - the result object itself contains the data
+                    // Store property data globally and display results
+                    window.currentPropertyData = result;
                     displayResults(result);
                 } else {
                     throw new Error(result.error || 'Analysis failed');
@@ -166,8 +167,8 @@
                     </div>
                     
                     <div style="text-align: center;">
-                        <button class="btn" onclick="loadFullCalculator()" style="background: #059669;">
-                            Load Full Investment Calculator
+                        <button class="btn" onclick="showCalculators()" style="background: #059669;">
+                            Show Investment Calculators
                         </button>
                     </div>
                 </div>
@@ -176,10 +177,209 @@
             resultsContainer.style.display = 'block';
         }
 
-        function loadFullCalculator() {
-            // Switch to the full calculator interface
-            window.location.href = '/calculator';
+        function showCalculators() {
+            const calculatorsContainer = document.createElement('div');
+            calculatorsContainer.innerHTML = `
+                <div class="card">
+                    <h2 style="margin-bottom: 20px; color: #374151;">Investment Strategy Calculators</h2>
+                    
+                    <!-- Calculator Tabs -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb;">
+                        <button class="calc-tab active" onclick="showCalculatorTab('wholesale')" style="padding: 10px 20px; border: none; background: #3b82f6; color: white; border-radius: 8px 8px 0 0; cursor: pointer;">
+                            Wholesale
+                        </button>
+                        <button class="calc-tab" onclick="showCalculatorTab('installment')" style="padding: 10px 20px; border: none; background: #e5e7eb; color: #374151; border-radius: 8px 8px 0 0; cursor: pointer;">
+                            Installment
+                        </button>
+                        <button class="calc-tab" onclick="showCalculatorTab('subject-to')" style="padding: 10px 20px; border: none; background: #e5e7eb; color: #374151; border-radius: 8px 8px 0 0; cursor: pointer;">
+                            Subject-To
+                        </button>
+                        <button class="calc-tab" onclick="showCalculatorTab('seller-finance')" style="padding: 10px 20px; border: none; background: #e5e7eb; color: #374151; border-radius: 8px 8px 0 0; cursor: pointer;">
+                            Seller Finance
+                        </button>
+                    </div>
+                    
+                    <!-- Wholesale Calculator -->
+                    <div id="wholesale-calc" class="calc-content">
+                        <h3 style="color: #059669; margin-bottom: 15px;">Wholesale Calculator</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                            <div class="form-group">
+                                <label>ARV (After Repair Value)</label>
+                                <input type="number" id="wholesale-arv" placeholder="415000" onchange="calculateWholesale()">
+                            </div>
+                            <div class="form-group">
+                                <label>Estimated Repairs</label>
+                                <input type="number" id="wholesale-repairs" placeholder="25000" onchange="calculateWholesale()">
+                            </div>
+                            <div class="form-group">
+                                <label>Assignment Fee</label>
+                                <input type="number" id="wholesale-fee" placeholder="15000" onchange="calculateWholesale()">
+                            </div>
+                        </div>
+                        <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; border: 2px solid #bbf7d0;">
+                            <h4 style="color: #166534;">Maximum Allowable Offer (MAO)</h4>
+                            <div style="font-size: 24px; font-weight: bold; color: #059669;" id="wholesale-mao">$0</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Installment Calculator -->
+                    <div id="installment-calc" class="calc-content" style="display: none;">
+                        <h3 style="color: #2563eb; margin-bottom: 15px;">Installment Calculator</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                            <div class="form-group">
+                                <label>Final Sales Price</label>
+                                <input type="number" id="installment-price" placeholder="415000" onchange="calculateInstallment()">
+                            </div>
+                            <div class="form-group">
+                                <label>Total Fees</label>
+                                <input type="number" id="installment-fees" placeholder="35000" onchange="calculateInstallment()">
+                            </div>
+                            <div class="form-group">
+                                <label>Minimum Profit</label>
+                                <input type="number" id="installment-profit" placeholder="15000" onchange="calculateInstallment()">
+                            </div>
+                        </div>
+                        <div style="background: #eff6ff; padding: 20px; border-radius: 8px; border: 2px solid #93c5fd;">
+                            <h4 style="color: #1d4ed8;">Maximum Allowable Offer</h4>
+                            <div style="font-size: 24px; font-weight: bold; color: #2563eb;" id="installment-mao">$0</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Subject-To Calculator -->
+                    <div id="subject-to-calc" class="calc-content" style="display: none;">
+                        <h3 style="color: #dc2626; margin-bottom: 15px;">Subject-To Calculator</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                            <div class="form-group">
+                                <label>Existing Loan Balance</label>
+                                <input type="number" id="subto-balance" placeholder="350000" onchange="calculateSubjectTo()">
+                            </div>
+                            <div class="form-group">
+                                <label>Monthly Rent</label>
+                                <input type="number" id="subto-rent" placeholder="1325" onchange="calculateSubjectTo()">
+                            </div>
+                            <div class="form-group">
+                                <label>Monthly PITI</label>
+                                <input type="number" id="subto-piti" placeholder="2100" onchange="calculateSubjectTo()">
+                            </div>
+                        </div>
+                        <div style="background: #fef2f2; padding: 20px; border-radius: 8px; border: 2px solid #fca5a5;">
+                            <h4 style="color: #991b1b;">Monthly Cash Flow</h4>
+                            <div style="font-size: 24px; font-weight: bold; color: #dc2626;" id="subto-cashflow">$0</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Seller Finance Calculator -->
+                    <div id="seller-finance-calc" class="calc-content" style="display: none;">
+                        <h3 style="color: #7c3aed; margin-bottom: 15px;">Seller Finance Calculator</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                            <div class="form-group">
+                                <label>Purchase Price</label>
+                                <input type="number" id="sf-price" placeholder="400000" onchange="calculateSellerFinance()">
+                            </div>
+                            <div class="form-group">
+                                <label>Down Payment</label>
+                                <input type="number" id="sf-down" placeholder="40000" onchange="calculateSellerFinance()">
+                            </div>
+                            <div class="form-group">
+                                <label>Interest Rate (%)</label>
+                                <input type="number" id="sf-rate" placeholder="6" step="0.1" onchange="calculateSellerFinance()">
+                            </div>
+                            <div class="form-group">
+                                <label>Term (Years)</label>
+                                <input type="number" id="sf-term" placeholder="30" onchange="calculateSellerFinance()">
+                            </div>
+                        </div>
+                        <div style="background: #faf5ff; padding: 20px; border-radius: 8px; border: 2px solid #c4b5fd;">
+                            <h4 style="color: #6b21a8;">Monthly Payment</h4>
+                            <div style="font-size: 24px; font-weight: bold; color: #7c3aed;" id="sf-payment">$0</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('results-container').appendChild(calculatorsContainer);
+            
+            // Pre-fill with property data
+            const propertyData = window.currentPropertyData || {};
+            if (propertyData.estimated_value) {
+                document.getElementById('wholesale-arv').value = propertyData.estimated_value;
+                document.getElementById('installment-price').value = propertyData.estimated_value;
+                document.getElementById('sf-price').value = propertyData.estimated_value;
+                calculateWholesale();
+                calculateInstallment();
+                calculateSellerFinance();
+            }
+            if (propertyData.rent_estimate) {
+                document.getElementById('subto-rent').value = propertyData.rent_estimate;
+                calculateSubjectTo();
+            }
         }
+
+        // Calculator functions
+        function showCalculatorTab(tabName) {
+            // Hide all calculator contents
+            const contents = document.querySelectorAll('.calc-content');
+            contents.forEach(content => content.style.display = 'none');
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.calc-tab');
+            tabs.forEach(tab => {
+                tab.style.background = '#e5e7eb';
+                tab.style.color = '#374151';
+            });
+            
+            // Show selected content and activate tab
+            document.getElementById(tabName + '-calc').style.display = 'block';
+            event.target.style.background = '#3b82f6';
+            event.target.style.color = 'white';
+        }
+
+        function calculateWholesale() {
+            const arv = parseFloat(document.getElementById('wholesale-arv').value) || 0;
+            const repairs = parseFloat(document.getElementById('wholesale-repairs').value) || 0;
+            const fee = parseFloat(document.getElementById('wholesale-fee').value) || 0;
+            
+            const mao = (arv * 0.7) - repairs - fee;
+            document.getElementById('wholesale-mao').textContent = '$' + Math.max(0, mao).toLocaleString();
+        }
+
+        function calculateInstallment() {
+            const price = parseFloat(document.getElementById('installment-price').value) || 0;
+            const fees = parseFloat(document.getElementById('installment-fees').value) || 0;
+            const profit = parseFloat(document.getElementById('installment-profit').value) || 0;
+            
+            const mao = price - fees - profit;
+            document.getElementById('installment-mao').textContent = '$' + Math.max(0, mao).toLocaleString();
+        }
+
+        function calculateSubjectTo() {
+            const rent = parseFloat(document.getElementById('subto-rent').value) || 0;
+            const piti = parseFloat(document.getElementById('subto-piti').value) || 0;
+            
+            const cashflow = rent - piti;
+            document.getElementById('subto-cashflow').textContent = '$' + cashflow.toLocaleString();
+        }
+
+        function calculateSellerFinance() {
+            const price = parseFloat(document.getElementById('sf-price').value) || 0;
+            const down = parseFloat(document.getElementById('sf-down').value) || 0;
+            const rate = parseFloat(document.getElementById('sf-rate').value) || 0;
+            const term = parseFloat(document.getElementById('sf-term').value) || 0;
+            
+            if (price && rate && term) {
+                const principal = price - down;
+                const monthlyRate = rate / 100 / 12;
+                const numPayments = term * 12;
+                
+                const payment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
+                document.getElementById('sf-payment').textContent = '$' + payment.toLocaleString();
+            } else {
+                document.getElementById('sf-payment').textContent = '$0';
+            }
+        }
+
+        // Update displayResults to store data globally
+        window.currentPropertyData = {};
 
         // Test server connection on load
         fetch('/test')
