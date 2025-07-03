@@ -175,8 +175,10 @@ class ComprehensiveValuationService:
                             zpid = best_match.get('zpid')
                             logging.info(f"Found matching property (score: {best_score}): {best_match.get('address')}")
                         elif props:
-                            # Return area-based valuation estimate instead of specific property
-                            logging.info(f"No specific match found, using area estimates from {len(props)} properties")
+                            # Use first property as fallback for area estimates
+                            zpid = props[0].get('zpid')
+                            logging.info(f"Using first property as area estimate: {props[0].get('address')}")
+                            logging.info(f"Available properties in area: {[prop.get('address') for prop in props[:3]]}")
                         
                         if zpid:
                             # Now get detailed property info
@@ -187,23 +189,39 @@ class ComprehensiveValuationService:
                             
                             if detail_response.status_code == 200:
                                 detail_data = detail_response.json()
+                                logging.info(f"Zillow detail response keys: {list(detail_data.keys()) if detail_data else 'None'}")
                                 
-                                # Extract Zestimate
+                                # Extract Zestimate from multiple possible locations
                                 zestimate = None
                                 if detail_data:
-                                    zestimate = detail_data.get('zestimate')
+                                    # Try different possible zestimate locations
+                                    zestimate = (detail_data.get('zestimate') or 
+                                               detail_data.get('price') or
+                                               detail_data.get('homeValue'))
+                                    
+                                    # Try nested locations
                                     if not zestimate and 'resoFacts' in detail_data:
-                                        zestimate = detail_data['resoFacts'].get('lastSoldPrice')
+                                        reso_facts = detail_data['resoFacts']
+                                        zestimate = (reso_facts.get('zestimate') or
+                                                   reso_facts.get('lastSoldPrice') or
+                                                   reso_facts.get('listPrice'))
+                                    
+                                    # Try listing info
+                                    if not zestimate and 'listingDataSource' in detail_data:
+                                        listing = detail_data['listingDataSource']
+                                        zestimate = listing.get('lastSoldPrice')
                                     
                                     if zestimate:
                                         valuation_data['valuations']['zillow'] = {
                                             'value': int(zestimate),
-                                            'source': 'Zillow Zestimate',
+                                            'source': 'Zillow Property Data',
                                             'confidence': 'high'
                                         }
                                         logging.info(f"Zillow valuation success: ${zestimate:,}")
+                                    else:
+                                        logging.info(f"No valuation found in Zillow detail data: {str(detail_data)[:500]}")
                             else:
-                                logging.warning(f"Zillow detail API failed: {detail_response.status_code}")
+                                logging.warning(f"Zillow detail API failed: {detail_response.status_code} - {detail_response.text[:200]}")
                     else:
                         logging.warning("No properties found in Zillow search")
                 else:

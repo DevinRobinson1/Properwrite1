@@ -53,6 +53,42 @@ def test_zillow_with_specific_address():
         if response2.status_code == 200:
             data2 = response2.json()
             print(f"Simple search found {len(data2.get('props', []))} properties")
+            
+            # Test property details call with first property
+            if data2.get('props'):
+                first_prop = data2['props'][0]
+                zpid = first_prop.get('zpid')
+                print(f"\n--- Testing property details for zpid: {zpid} ---")
+                print(f"Property address: {first_prop.get('address')}")
+                
+                detail_url = "https://zillow-com1.p.rapidapi.com/property"
+                detail_params = {"zpid": zpid}
+                
+                detail_response = requests.get(detail_url, headers=headers, params=detail_params, timeout=10)
+                print(f"Details API status: {detail_response.status_code}")
+                
+                if detail_response.status_code == 200:
+                    detail_data = detail_response.json()
+                    print(f"Detail response keys: {list(detail_data.keys()) if detail_data else 'None'}")
+                    
+                    # Check for possible zestimate fields
+                    zestimate_fields = ['zestimate', 'price', 'homeValue', 'listPrice']
+                    for field in zestimate_fields:
+                        value = detail_data.get(field)
+                        if value:
+                            print(f"Found {field}: {value}")
+                    
+                    # Check nested structures
+                    if 'resoFacts' in detail_data:
+                        reso = detail_data['resoFacts']
+                        print(f"ResoFacts keys: {list(reso.keys())}")
+                        for field in zestimate_fields + ['lastSoldPrice']:
+                            value = reso.get(field)
+                            if value:
+                                print(f"ResoFacts.{field}: {value}")
+                                
+                else:
+                    print(f"Details API error: {detail_response.text[:300]}")
         else:
             print(f"Simple search error: {response2.text[:200]}")
             
