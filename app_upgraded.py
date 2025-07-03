@@ -54,11 +54,30 @@ def analyze_property():
         state = data.get('state', '').strip()
         zip_code = data.get('zip', '').strip()
         
+        # Check for Google Places canonical data
+        place_id = data.get('place_id', '')
+        formatted_address = data.get('formatted_address', '')
+        
         if not all([address, city, state, zip_code]):
             return jsonify({
                 'success': False,
                 'error': 'Please provide complete address information'
             }), 400
+        
+        # Store canonical address data for property analysis
+        canonical_address = {
+            'place_id': place_id,
+            'formatted_address': formatted_address or f"{address}, {city}, {state} {zip_code}",
+            'street': address,
+            'city': city,
+            'state': state,
+            'zip': zip_code,
+            'latitude': data.get('latitude'),
+            'longitude': data.get('longitude'),
+            'source': 'google_places' if place_id else 'manual'
+        }
+        
+        logging.info(f"Analyzing property with canonical address: {canonical_address['formatted_address']}")
         
         # Initialize property data with defaults
         property_data = {
@@ -684,7 +703,27 @@ def validate_address():
         state = data.get('state', '')
         zip_code = data.get('zip_code', '')
         
-        # Use enhanced validation with geocoding fallback
+        # Check if this is already a Google Places selection with place_id
+        place_id = data.get('place_id')
+        if place_id:
+            # Already validated by Google Places, just confirm the data
+            return jsonify({
+                'success': True,
+                'address': {
+                    'formatted_address': data.get('formatted_address', address),
+                    'place_id': place_id,
+                    'street': data.get('street', ''),
+                    'city': data.get('city', city),
+                    'state': data.get('state', state),
+                    'zip': data.get('zip', zip_code),
+                    'latitude': data.get('latitude'),
+                    'longitude': data.get('longitude'),
+                    'confidence': 'high',
+                    'source': 'google_places'
+                }
+            })
+        
+        # Use enhanced validation with geocoding fallback for manual entries
         result = address_validator.geocode_loose(address, city, state, zip_code)
         
         if result:
@@ -844,7 +883,8 @@ def analyze_property_risk():
 @app.route('/jv-submit')
 def jv_submit_page():
     """JV Deal Submit page"""
-    return render_template('jv_submit.html')
+    return render_template('jv_submit.html', 
+                         google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY'))
 
 @app.route('/api/jv-submit', methods=['POST'])
 def jv_submit_deal():

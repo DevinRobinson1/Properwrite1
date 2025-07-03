@@ -38,7 +38,7 @@ class EnhancedAddressInput {
     initializeGooglePlaces() {
         console.log('Initializing Google Places Autocomplete');
         
-        // Initialize autocomplete
+        // Initialize autocomplete with address types only
         this.autocomplete = new google.maps.places.Autocomplete(this.input, {
             types: ['address'],
             componentRestrictions: { country: 'us' },
@@ -51,6 +51,14 @@ class EnhancedAddressInput {
         // Initialize services for additional lookups
         this.autocompleteService = new google.maps.places.AutocompleteService();
         this.placesService = new google.maps.places.PlacesService(document.createElement('div'));
+        
+        // Prevent form submission on Enter key in autocomplete dropdown
+        this.input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && document.querySelector('.pac-container:not([style*="display: none"])')) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
     }
     
     initializeFallbackMode() {
@@ -66,21 +74,79 @@ class EnhancedAddressInput {
             return;
         }
         
+        // Parse address components using Google's canonical format
+        const components = place.address_components;
+        const getComponent = (type) => {
+            const component = components.find(c => c.types.includes(type));
+            return component ? component.long_name : '';
+        };
+        
+        const getShortComponent = (type) => {
+            const component = components.find(c => c.types.includes(type));
+            return component ? component.short_name : '';
+        };
+        
+        // Build canonical address parts
+        const streetNumber = getComponent('street_number');
+        const route = getComponent('route');
+        const street = `${streetNumber} ${route}`.trim();
+        const city = getComponent('locality') || getComponent('postal_town') || getComponent('sublocality');
+        const state = getShortComponent('administrative_area_level_1'); // Use short name for state abbreviation
+        const zip = getComponent('postal_code');
+        
         this.selectedAddress = {
             placeId: place.place_id,
             formattedAddress: place.formatted_address,
+            street: street,
+            city: city,
+            state: state,
+            zip: zip,
+            latitude: place.geometry?.location?.lat(),
+            longitude: place.geometry?.location?.lng(),
             addressComponents: place.address_components,
             geometry: place.geometry,
-            source: 'autocomplete'
+            source: 'google_autocomplete'
         };
         
-        console.log('Address selected via autocomplete:', this.selectedAddress);
+        console.log('Address selected via Google Autocomplete:', this.selectedAddress);
+        
+        // Auto-populate other form fields immediately
+        this.autoPopulateFields();
         
         if (this.options.showConfirmationBanner) {
             this.showConfirmationBanner();
         } else {
             this.confirmAddress();
         }
+    }
+    
+    autoPopulateFields() {
+        // Auto-populate city, state, and zip fields if they exist
+        const cityField = document.getElementById('city');
+        const stateField = document.getElementById('state');
+        const zipField = document.getElementById('zip');
+        
+        if (cityField && this.selectedAddress.city) {
+            cityField.value = this.selectedAddress.city;
+            // Trigger change event for any listeners
+            cityField.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        
+        if (stateField && this.selectedAddress.state) {
+            stateField.value = this.selectedAddress.state;
+            stateField.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        
+        if (zipField && this.selectedAddress.zip) {
+            zipField.value = this.selectedAddress.zip;
+            zipField.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        
+        console.log('Auto-populated fields:', {
+            city: this.selectedAddress.city,
+            state: this.selectedAddress.state,
+            zip: this.selectedAddress.zip
+        });
     }
     
     handleInputBlur() {

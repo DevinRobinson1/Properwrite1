@@ -5271,35 +5271,79 @@
         document.addEventListener('DOMContentLoaded', function() {
             const addressInput = document.getElementById('address');
             if (addressInput) {
-                new EnhancedAddressInput(addressInput, {
+                window.addressInputHandler = new EnhancedAddressInput(addressInput, {
                     onAddressSelected: function(address) {
-                        console.log('Address selected:', address);
-                        
-                        // Auto-populate city, state, and zip if available
-                        if (address.city && document.getElementById('city')) {
-                            document.getElementById('city').value = address.city;
-                        }
-                        if (address.state && document.getElementById('state')) {
-                            document.getElementById('state').value = address.state;
-                        }
-                        if (address.zip && document.getElementById('zip')) {
-                            document.getElementById('zip').value = address.zip;
-                        }
+                        console.log('Google Places address selected:', address);
                         
                         // Store selected address data for property analysis
                         window.selectedAddressData = address;
+                        
+                        // Update form validation status
+                        addressInput.setAttribute('data-validated', 'true');
+                        addressInput.setAttribute('data-place-id', address.placeId || '');
                     },
                     onValidationComplete: function(result) {
                         console.log('Address validation complete:', result);
                         if (result.success) {
-                            // Enable the analyze button
-                            const analyzeButton = document.querySelector('button[type="submit"]');
-                            if (analyzeButton) {
-                                analyzeButton.disabled = false;
-                                analyzeButton.classList.remove('opacity-50');
-                            }
+                            // Store validated address data
+                            window.selectedAddressData = result.address;
+                            addressInput.setAttribute('data-validated', 'true');
+                            addressInput.setAttribute('data-place-id', result.address.place_id || '');
                         }
+                    },
+                    showConfirmationBanner: false // Auto-confirm for smoother UX
+                });
+            }
+            
+            // Enhanced form submission with Google Places data
+            const propertyForm = document.getElementById('property-form');
+            if (propertyForm) {
+                propertyForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    const data = {
+                        address: formData.get('address'),
+                        city: formData.get('city'),
+                        state: formData.get('state'),
+                        zip: formData.get('zip')
+                    };
+                    
+                    // Include Google Places canonical data if available
+                    if (window.selectedAddressData) {
+                        data.place_id = window.selectedAddressData.placeId;
+                        data.formatted_address = window.selectedAddressData.formattedAddress;
+                        data.latitude = window.selectedAddressData.latitude;
+                        data.longitude = window.selectedAddressData.longitude;
+                        console.log('Submitting with Google Places data:', window.selectedAddressData);
                     }
+                    
+                    // Show loading state
+                    showLoadingState();
+                    
+                    // Submit to enhanced analysis endpoint
+                    fetch('/api/analyze-property', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            // Display analysis results
+                            displayPropertyAnalysis(result.property_data);
+                            hideLoadingState();
+                        } else {
+                            throw new Error(result.error || 'Analysis failed');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Property analysis error:', error);
+                        hideLoadingState();
+                        alert('Analysis failed: ' + error.message);
+                    });
                 });
             }
         });
