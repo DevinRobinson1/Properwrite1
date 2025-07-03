@@ -25,10 +25,9 @@ class RapidAPIPropertyService:
         # API endpoint configurations
         self.apis = {
             'zillow': {
-                'host': 'zillow-com4.p.rapidapi.com',
+                'host': 'zillow-com1.p.rapidapi.com',
                 'endpoints': {
-                    'property_extended_search': '/propertyExtendedSearch',
-                    'property_search': '/propertyExtendedSearch'
+                    'property_extended_search': '/propertyExtendedSearch'
                 }
             },
             'realtor': {
@@ -93,6 +92,7 @@ class RapidAPIPropertyService:
             
             params = {
                 'location': full_address,
+                'status_type': 'ForSale',
                 'home_type': 'Houses'
             }
             
@@ -189,19 +189,25 @@ class RapidAPIPropertyService:
                 logging.warning(f"No good address match found for {target_address}")
                 return None
             
-            # Extract data from the best matching property
+            # Extract data from the best matching property using correct Zillow API structure
             result = {
-                'estimate': best_match.get('price', best_match.get('zestimate', 0)),
+                'estimate': best_match.get('price', 0),
                 'property_details': {
-                    'bedrooms': best_match.get('bedrooms', best_match.get('beds')),
-                    'bathrooms': best_match.get('bathrooms', best_match.get('baths')),
-                    'square_feet': best_match.get('livingArea', best_match.get('sqft')),
+                    'bedrooms': best_match.get('bedrooms'),
+                    'bathrooms': best_match.get('bathrooms'), 
+                    'square_feet': best_match.get('livingArea'),
                     'lot_size': best_match.get('lotAreaValue'),
-                    'year_built': best_match.get('yearBuilt'),
-                    'property_type': best_match.get('propertyType', best_match.get('homeType'))
+                    'property_type': best_match.get('propertyType'),
+                    'listing_status': best_match.get('listingStatus'),
+                    'days_on_zillow': best_match.get('daysOnZillow'),
+                    'zpid': best_match.get('zpid')
                 },
-                'images': best_match.get('imgSrc', []),
-                'url': best_match.get('detailUrl', ''),
+                'images': [best_match.get('imgSrc')] if best_match.get('imgSrc') else [],
+                'location': {
+                    'latitude': best_match.get('latitude'),
+                    'longitude': best_match.get('longitude'),
+                    'address': best_match.get('address')
+                },
                 'confidence': best_score
             }
             

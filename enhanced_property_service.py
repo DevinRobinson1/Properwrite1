@@ -309,6 +309,80 @@ class EnhancedPropertyService:
                      'lot_size_sqft', 'property_type', 'rent_estimate', 'image_url']:
             if main_data.get(field) is None and source_data.get(field) is not None:
                 main_data[field] = source_data[field]
+    
+    def _retrieve_rapidapi_data(self, property_data: Dict, address: str, city: str, state: str, zip_code: str):
+        """
+        Retrieve property data from RapidAPI sources (Zillow, Realtor.com)
+        """
+        try:
+            logging.info(f"Attempting RapidAPI data retrieval for {address}")
+            
+            # Get comprehensive data from RapidAPI
+            rapidapi_result = rapidapi_service.get_property_data(address, city, state, zip_code)
+            
+            if rapidapi_result and rapidapi_result.get('success'):
+                sources = rapidapi_result.get('sources', {})
+                
+                # Process Zillow data from RapidAPI
+                if 'zillow' in sources and sources['zillow']:
+                    zillow_data = sources['zillow']
+                    if zillow_data.get('estimate'):
+                        property_data['zillow_estimate'] = zillow_data['estimate']
+                        property_data['confidence_scores']['zillow'] = zillow_data.get('confidence', 0.8)
+                        
+                        # Update property details from Zillow
+                        if zillow_data.get('property_details'):
+                            details = zillow_data['property_details']
+                            if details.get('bedrooms') and not property_data.get('bedrooms'):
+                                property_data['bedrooms'] = details['bedrooms']
+                            if details.get('bathrooms') and not property_data.get('bathrooms'):
+                                property_data['bathrooms'] = details['bathrooms']
+                            if details.get('square_feet') and not property_data.get('square_feet'):
+                                property_data['square_feet'] = details['square_feet']
+                        
+                        # Add images if available
+                        if zillow_data.get('images') and not property_data.get('image_url'):
+                            images = zillow_data['images']
+                            if images and len(images) > 0:
+                                property_data['image_url'] = images[0]
+                        
+                        logging.info(f"RapidAPI Zillow data: ${zillow_data['estimate']:,}")
+                
+                # Process Realtor.com data from RapidAPI
+                if 'realtor' in sources and sources['realtor']:
+                    realtor_data = sources['realtor']
+                    if realtor_data.get('estimate'):
+                        property_data['realtor_estimate'] = realtor_data['estimate']
+                        property_data['confidence_scores']['realtor'] = realtor_data.get('confidence', 0.8)
+                        
+                        logging.info(f"RapidAPI Realtor data: ${realtor_data['estimate']:,}")
+                
+                # Add data source indicators
+                if not property_data.get('data_sources'):
+                    property_data['data_sources'] = []
+                
+                if 'zillow' in sources and sources['zillow']:
+                    property_data['data_sources'].append({
+                        'name': 'Zillow (RapidAPI)',
+                        'estimate': sources['zillow'].get('estimate'),
+                        'confidence': sources['zillow'].get('confidence', 0.8),
+                        'color': 'blue'
+                    })
+                
+                if 'realtor' in sources and sources['realtor']:
+                    property_data['data_sources'].append({
+                        'name': 'Realtor.com (RapidAPI)',
+                        'estimate': sources['realtor'].get('estimate'),
+                        'confidence': sources['realtor'].get('confidence', 0.8),
+                        'color': 'red'
+                    })
+                    
+            else:
+                logging.info("RapidAPI data retrieval returned no results")
+                
+        except Exception as e:
+            logging.error(f"Error retrieving RapidAPI data: {e}")
+            # Continue without RapidAPI data - not critical
 
 # Create global instance
 enhanced_property_service = EnhancedPropertyService()
