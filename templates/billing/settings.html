@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing Settings - Fund Flow OS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-bold text-gray-900">Billing Settings</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-gray-700">{{ user.name }}</span>
+                        <a href="/" class="text-indigo-600 hover:text-indigo-500">← Back to App</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <!-- Current Plan -->
+            <div class="bg-white overflow-hidden shadow rounded-lg mb-6">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Current Plan</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center p-4 bg-blue-50 rounded-lg">
+                            <h4 class="font-semibold text-blue-900 capitalize">{{ team.tier }}</h4>
+                            <p class="text-sm text-blue-700 mt-1">Current Plan</p>
+                        </div>
+                        <div class="text-center p-4 bg-green-50 rounded-lg">
+                            <h4 class="font-semibold text-green-900">{{ team.credit_balance }}</h4>
+                            <p class="text-sm text-green-700 mt-1">Credits Remaining</p>
+                        </div>
+                        <div class="text-center p-4 bg-purple-50 rounded-lg">
+                            <h4 class="font-semibold text-purple-900"><span id="seats-used">0</span>/{{ team.seats_max }}</h4>
+                            <p class="text-sm text-purple-700 mt-1">Team Seats</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subscription Plans -->
+            <div class="bg-white overflow-hidden shadow rounded-lg mb-6">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Subscription Plans</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- Starter Plan -->
+                        <div class="border border-gray-200 rounded-lg p-6 {% if team.tier == 'starter' %}ring-2 ring-blue-500{% endif %}">
+                            <h4 class="text-lg font-semibold">Starter</h4>
+                            <p class="text-3xl font-bold mt-2">$39<span class="text-sm font-normal">/mo</span></p>
+                            <ul class="mt-4 space-y-2 text-sm">
+                                <li>• 1 team seat</li>
+                                <li>• 50 monthly credits</li>
+                                <li>• Basic support</li>
+                            </ul>
+                            {% if team.tier != 'starter' %}
+                            <button onclick="upgradePlan('starter_m', 1)" 
+                                    class="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                                Select Plan
+                            </button>
+                            {% else %}
+                            <button class="mt-4 w-full bg-gray-400 text-white py-2 px-4 rounded cursor-not-allowed">
+                                Current Plan
+                            </button>
+                            {% endif %}
+                        </div>
+
+                        <!-- Pro Plan -->
+                        <div class="border border-gray-200 rounded-lg p-6 {% if team.tier == 'pro' %}ring-2 ring-blue-500{% endif %}">
+                            <h4 class="text-lg font-semibold">Pro</h4>
+                            <p class="text-3xl font-bold mt-2">$79<span class="text-sm font-normal">/mo</span></p>
+                            <ul class="mt-4 space-y-2 text-sm">
+                                <li>• 1 team seat</li>
+                                <li>• 150 monthly credits</li>
+                                <li>• Priority support</li>
+                            </ul>
+                            {% if team.tier != 'pro' %}
+                            <button onclick="upgradePlan('pro_m', 1)" 
+                                    class="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                                Select Plan
+                            </button>
+                            {% else %}
+                            <button class="mt-4 w-full bg-gray-400 text-white py-2 px-4 rounded cursor-not-allowed">
+                                Current Plan
+                            </button>
+                            {% endif %}
+                        </div>
+
+                        <!-- Team 5 Plan -->
+                        <div class="border border-gray-200 rounded-lg p-6 {% if team.tier == 'team5' %}ring-2 ring-blue-500{% endif %}">
+                            <h4 class="text-lg font-semibold">Team 5</h4>
+                            <p class="text-3xl font-bold mt-2">$199<span class="text-sm font-normal">/mo</span></p>
+                            <ul class="mt-4 space-y-2 text-sm">
+                                <li>• 5 team seats</li>
+                                <li>• 450 monthly credits</li>
+                                <li>• Team management</li>
+                            </ul>
+                            {% if team.tier != 'team5' %}
+                            <button onclick="upgradePlan('team5_m', 1)" 
+                                    class="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                                Select Plan
+                            </button>
+                            {% else %}
+                            <button class="mt-4 w-full bg-gray-400 text-white py-2 px-4 rounded cursor-not-allowed">
+                                Current Plan
+                            </button>
+                            {% endif %}
+                        </div>
+
+                        <!-- Growth 10 Plan -->
+                        <div class="border border-gray-200 rounded-lg p-6 {% if team.tier == 'growth10' %}ring-2 ring-blue-500{% endif %}">
+                            <h4 class="text-lg font-semibold">Growth 10</h4>
+                            <p class="text-3xl font-bold mt-2">$399<span class="text-sm font-normal">/mo</span></p>
+                            <ul class="mt-4 space-y-2 text-sm">
+                                <li>• 10 team seats</li>
+                                <li>• 1000 monthly credits</li>
+                                <li>• Advanced features</li>
+                            </ul>
+                            {% if team.tier != 'growth10' %}
+                            <button onclick="upgradePlan('growth10_m', 1)" 
+                                    class="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                                Select Plan
+                            </button>
+                            {% else %}
+                            <button class="mt-4 w-full bg-gray-400 text-white py-2 px-4 rounded cursor-not-allowed">
+                                Current Plan
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credit Packs -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Buy More Credits</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- 100 Credits -->
+                        <div class="border border-gray-200 rounded-lg p-6">
+                            <h4 class="text-lg font-semibold">Small Pack</h4>
+                            <p class="text-3xl font-bold mt-2">$15</p>
+                            <p class="text-gray-600 mt-1">100 credits</p>
+                            <button onclick="buyCreditPack('credit_pack_100')" 
+                                    class="mt-4 w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                                Buy Credits
+                            </button>
+                        </div>
+
+                        <!-- 500 Credits -->
+                        <div class="border border-gray-200 rounded-lg p-6">
+                            <h4 class="text-lg font-semibold">Standard Pack</h4>
+                            <p class="text-3xl font-bold mt-2">$60</p>
+                            <p class="text-gray-600 mt-1">500 credits</p>
+                            <button onclick="buyCreditPack('credit_pack_500')" 
+                                    class="mt-4 w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                                Buy Credits
+                            </button>
+                        </div>
+
+                        <!-- 1000 Credits -->
+                        <div class="border border-gray-200 rounded-lg p-6">
+                            <h4 class="text-lg font-semibold">Large Pack</h4>
+                            <p class="text-3xl font-bold mt-2">$99</p>
+                            <p class="text-gray-600 mt-1">1000 credits</p>
+                            <button onclick="buyCreditPack('credit_pack_1000')" 
+                                    class="mt-4 w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                                Buy Credits
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Load team stats on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTeamStats();
+        });
+
+        function loadTeamStats() {
+            fetch('/api/team/stats')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.team) {
+                        document.getElementById('seats-used').textContent = data.team.seats_used;
+                    }
+                })
+                .catch(error => console.error('Error loading team stats:', error));
+        }
+
+        function upgradePlan(lookupKey, quantity) {
+            createCheckoutSession(lookupKey, quantity);
+        }
+
+        function buyCreditPack(lookupKey) {
+            createCheckoutSession(lookupKey, 1);
+        }
+
+        function createCheckoutSession(lookupKey, quantity) {
+            fetch('/api/billing/create-checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    lookup_key: lookupKey,
+                    quantity: quantity
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirect to Stripe Checkout
+                    window.location.href = data.url;
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to create checkout session');
+            });
+        }
+    </script>
+</body>
+</html>

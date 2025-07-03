@@ -7,7 +7,7 @@ import logging
 import json
 import uuid
 from datetime import datetime
-from flask import Flask, render_template, request, jsonify, session, redirect
+from flask import Flask, render_template, request, jsonify, session, redirect, g
 from property_data_service import property_service
 from comprehensive_valuation_service import comprehensive_valuation_service
 from ai_strategy_assistant import ai_strategy_assistant
@@ -20,6 +20,8 @@ from installment_calculator import calculate_installment_offers
 from subject_to_calculator import calculate_subject_to_offer
 from seller_finance_calculator import calculate_seller_finance_offer
 from jv_auto_underwrite import auto_underwrite_deal
+from billing_service import BillingService
+from auth_middleware import require_auth, require_seat, require_role, require_credits
 
 # Load environment variables from .env file
 if os.path.exists('.env'):
@@ -34,6 +36,9 @@ logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-2024")
+
+# Initialize billing service
+billing_service = BillingService()
 
 @app.route('/')
 def index():
@@ -1142,6 +1147,182 @@ def jv_admin_update_deal_status(deal_id):
     except Exception as e:
         logging.error(f"Error updating deal status: {e}")
         return jsonify({'success': False, 'error': 'Internal server error'}), 500
+
+# ==================== BILLING & SUBSCRIPTION ENDPOINTS ====================
+
+@app.route('/api/billing/create-checkout', methods=['POST'])
+@require_auth
+def create_checkout():
+    """Create Stripe checkout session for subscription or credit purchase"""
+    try:
+        data = request.get_json()
+        lookup_key = data.get('lookup_key')
+        quantity = data.get('quantity', 1)
+        
+        if not lookup_key:
+            return jsonify({'error': 'lookup_key is required'}), 400
+        
+        # Create checkout session
+        result = billing_service.create_checkout_session(
+            lookup_key=lookup_key,
+            quantity=quantity,
+            customer_email=g.current_user['email'],
+            team_id=g.current_user['team_id'],
+            success_url=request.url_root + 'billing/success',
+            cancel_url=request.url_root + 'billing/cancel'
+        )
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logging.error(f"Error creating checkout: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/billing/webhook', methods=['POST'])
+def billing_webhook():
+    """Handle Stripe webhook events"""
+    try:
+        payload = request.data
+        signature = request.headers.get('Stripe-Signature')
+        
+        result = billing_service.handle_webhook(payload.decode('utf-8'), signature)
+        return jsonify(result)
+        
+    except Exception as e:
+        logging.error(f"Webhook error: {e}")
+        return jsonify({'error': 'Webhook processing failed'}), 400
+
+@app.route('/api/team/stats')
+@require_auth
+def get_team_stats():
+    """Get team statistics and billing information"""
+    try:
+        stats = billing_service.get_team_stats(g.current_user['team_id'])
+        return jsonify(stats)
+        
+    except Exception as e:
+        logging.error(f"Error getting team stats: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/team/invite', methods=['POST'])
+@require_role('manager')
+def create_team_invite():
+    """Create team invitation (managers and owners only)"""
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        role = data.get('role', 'analyst')
+        
+        if not email:
+            return jsonify({'error': 'Email is required'}), 400
+        
+        if role not in ['analyst', 'manager']:
+            return jsonify({'error': 'Invalid role'}), 400
+        
+        result = billing_service.create_team_invite(
+            team_id=g.current_user['team_id'],
+            email=email,
+            role=role
+        )
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logging.error(f"Error creating team invite: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/settings/billing')
+@require_auth
+def billing_settings():
+    """Billing settings page (owner only)"""
+    if g.current_user['role'] != 'owner':
+        return redirect('/')
+    
+    return render_template('billing/settings.html', 
+                         user=g.current_user, 
+                         team=g.current_team)
+
+@app.route('/settings/team')
+@require_auth
+def team_settings():
+    """Team management page"""
+    return render_template('billing/team.html', 
+                         user=g.current_user, 
+                         team=g.current_team)
+
+# Override existing analyze-property endpoint to require credits
+@app.route('/api/analyze-property', methods=['POST'])
+@require_seat
+@require_credits
+def analyze_property_with_billing():
+    """
+    Analyze property with credit consumption and seat enforcement
+    """
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        if not data.get('address') or not data.get('city') or not data.get('state'):
+            return jsonify({
+                'success': False,
+                'error': 'Address, city, and state are required'
+            }), 400
+        
+        # Extract address components
+        place_id = data.get('place_id', '')
+        formatted_address = data.get('formatted_address', '')
+        address = data.get('address', '')
+        city = data.get('city', '')
+        state = data.get('state', '')
+        zip_code = data.get('zip', '')
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        
+        logging.info(f"Analyzing property with canonical address: {formatted_address or address}, {city}, {state} {zip_code}")
+        
+        # Get comprehensive property valuation
+        valuation_data = comprehensive_valuation_service.get_comprehensive_valuation(
+            place_id, address, city, state, zip_code
+        )
+        
+        # Create property data structure
+        property_data = {
+            'address': formatted_address or address,
+            'city': city,
+            'state': state,
+            'zip': zip_code,
+            'latitude': latitude,
+            'longitude': longitude,
+            'place_id': place_id,
+            'analysis_complete': True,
+            'data_sources': valuation_data.get('sources_tried', []),
+            'investment_potential': _assess_investment_potential(valuation_data),
+            'market_conditions': _assess_market_conditions(valuation_data),
+            'risk_level': _assess_risk_level(valuation_data),
+            'credit_consumed': True,
+            'remaining_credits': g.remaining_credits
+        }
+        
+        # Add valuation data to the response
+        if 'valuations' in valuation_data:
+            property_data['valuations'] = valuation_data['valuations']
+            property_data['valuation_sources'] = list(valuation_data['valuations'].keys())
+            property_data['sources_tried'] = valuation_data.get('sources_tried', [])
+        
+        session['current_property'] = property_data
+        
+        return jsonify({
+            'success': True,
+            'remaining_credits': g.remaining_credits,
+            **property_data
+        })
+        
+    except Exception as e:
+        logging.error(f"Property analysis error: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to analyze property. Please check the address and try again.'
+        }), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

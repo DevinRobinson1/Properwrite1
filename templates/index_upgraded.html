@@ -5360,6 +5360,62 @@
             }
         });
         
+        function showLoadingState() {
+            // Show loading indicators for property valuations
+            const loadingElements = document.querySelectorAll('[id$="-loading"]');
+            loadingElements.forEach(el => el.classList.remove('hidden'));
+            
+            // Hide estimate and error states
+            const estimateElements = document.querySelectorAll('[id$="-estimate"]');
+            estimateElements.forEach(el => el.classList.add('hidden'));
+            
+            const errorElements = document.querySelectorAll('[id$="-error"]');
+            errorElements.forEach(el => el.classList.add('hidden'));
+            
+            // Show main property info loading
+            const propertyInfo = document.getElementById('property-info');
+            if (propertyInfo) {
+                propertyInfo.innerHTML = '<div class="text-center py-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div><p class="mt-2 text-gray-600">Analyzing property...</p></div>';
+            }
+        }
+        
+        function hideLoadingState() {
+            // Hide all loading indicators
+            const loadingElements = document.querySelectorAll('[id$="-loading"]');
+            loadingElements.forEach(el => el.classList.add('hidden'));
+        }
+        
+        function displayPropertyAnalysis(propertyData) {
+            // Update property information display
+            const propertyInfo = document.getElementById('property-info');
+            if (propertyInfo && propertyData) {
+                // Show property details
+                propertyInfo.innerHTML = `
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-bold mb-4">Property Analysis Complete</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-gray-600">Address:</p>
+                                <p class="font-semibold">${propertyData.address || 'Not available'}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">City, State:</p>
+                                <p class="font-semibold">${propertyData.city || 'Not available'}, ${propertyData.state || 'Not available'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Update comprehensive valuations if available
+            if (propertyData.valuations || propertyData.valuation_sources) {
+                updateComprehensiveValuations(propertyData);
+            }
+            
+            // Update all calculations
+            updateAllTabCalculations();
+        }
+        
         function updateComprehensiveValuations(data) {
             // Extract valuation data from comprehensive service
             const valuations = data.valuation_sources || [];

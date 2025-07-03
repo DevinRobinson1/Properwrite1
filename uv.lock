@@ -815,6 +815,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pyjwt"
+version = "2.10.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e7/46/bd74733ff231675599650d3e47f361794b22ef3e3770998dda30d3b63726/pyjwt-2.10.1.tar.gz", hash = "sha256:3cc5772eb20009233caf06e9d8a0577824723b44e6648ee0a2aedb6cf9381953", size = 87785 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/61/ad/689f02752eeec26aed679477e80e632ef1b682313be70793d798c1d5fc8f/PyJWT-2.10.1-py3-none-any.whl", hash = "sha256:dcdd193e30abefd5debf142f9adfcdd2b58004e644f25406ffaebd50bd98dacb", size = 22997 },
+]
+
+[[package]]
 name = "pyppeteer"
 version = "0.0.25"
 source = { registry = "https://pypi.org/simple" }
@@ -936,9 +945,12 @@ dependencies = [
     { name = "lxml" },
     { name = "openai" },
     { name = "psycopg2-binary" },
+    { name = "pyjwt" },
     { name = "requests" },
     { name = "requests-html" },
     { name = "selenium" },
+    { name = "sqlalchemy" },
+    { name = "stripe" },
     { name = "trafilatura" },
 ]
 
@@ -952,9 +964,12 @@ requires-dist = [
     { name = "lxml", specifier = ">=5.4.0" },
     { name = "openai", specifier = ">=1.91.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
+    { name = "pyjwt", specifier = ">=2.10.1" },
     { name = "requests", specifier = ">=2.32.4" },
     { name = "requests-html", specifier = ">=0.10.0" },
     { name = "selenium", specifier = ">=4.33.0" },
+    { name = "sqlalchemy", specifier = ">=2.0.41" },
+    { name = "stripe", specifier = ">=12.3.0" },
     { name = "trafilatura", specifier = ">=2.0.0" },
 ]
 
@@ -1079,6 +1094,19 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/fa/2e/677c17c5d6a004c3c45334ab1dbe7b7deb834430b282b8a0f75ae220c8eb/sqlalchemy-2.0.41-cp313-cp313-win32.whl", hash = "sha256:bfc9064f6658a3d1cadeaa0ba07570b83ce6801a1314985bf98ec9b95d74e15f", size = 2082420 },
     { url = "https://files.pythonhosted.org/packages/e9/61/e8c1b9b6307c57157d328dd8b8348ddc4c47ffdf1279365a13b2b98b8049/sqlalchemy-2.0.41-cp313-cp313-win_amd64.whl", hash = "sha256:82ca366a844eb551daff9d2e6e7a9e5e76d2612c8564f58db6c19a726869c1df", size = 2108329 },
     { url = "https://files.pythonhosted.org/packages/1c/fc/9ba22f01b5cdacc8f5ed0d22304718d2c758fce3fd49a5372b886a86f37c/sqlalchemy-2.0.41-py3-none-any.whl", hash = "sha256:57df5dc6fdb5ed1a88a1ed2195fd31927e705cad62dedd86b46972752a80f576", size = 1911224 },
+]
+
+[[package]]
+name = "stripe"
+version = "12.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5b/d1/294e4b3081cf6deff32c230511f07546fc2bf256ebdf7a90dc2d70a6154b/stripe-12.3.0.tar.gz", hash = "sha256:ad8afdab8acdbd75fc098b0fefdfee698f68334a3f6e787633e8d290da89932b", size = 1407878 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5c/d5/aa5147e38a75d999a16ef20ba8a55e80935372780650026b83cbdc816afe/stripe-12.3.0-py2.py3-none-any.whl", hash = "sha256:f53daf37253cef0323613aa298b66d2d2081d37d0f2e4d9f8639824bf67185b9", size = 1647774 },
 ]
 
 [[package]]

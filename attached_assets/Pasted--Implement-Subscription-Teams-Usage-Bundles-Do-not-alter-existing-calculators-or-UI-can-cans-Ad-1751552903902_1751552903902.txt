@@ -1,0 +1,115 @@
+ Implement Subscription, Teams & Usage Bundles
+Do not alter existing calculators or UI can- cans.
+Add a complete billing + team engine that supports the launch-phase pricing above and credit top-ups.
+
+1. Stripe Catalog
+text
+Copy
+Edit
+Products
+  ├─ starter-monthly        $39  (lookup_key: starter_m)
+  ├─ pro-monthly            $79  (lookup_key: pro_m)
+  ├─ team5-monthly          $199 (lookup_key: team5_m)
+  ├─ growth10-monthly       $399 (lookup_key: growth10_m)
+  ├─ credit-pack-100        $15  one-time
+  ├─ credit-pack-500        $60  one-time
+  └─ credit-pack-1000       $99  one-time
+Quantity on the subscription = number of seats.
+Store price_id constants in config/billing.ts.
+
+2. Data Models (PostgreSQL)
+sql
+Copy
+Edit
+TABLE users (
+  id             uuid  pk,
+  email          text unique,
+  name           text,
+  team_id        uuid fk -> teams.id,
+  role           text  -- owner | manager | analyst
+);
+
+TABLE teams (
+  id             uuid pk,
+  name           text,
+  stripe_cust    text,
+  tier           text,
+  seats_max      int,
+  credit_balance int,
+  created_at     timestamptz
+);
+
+TABLE credit_logs (
+  id uuid pk,
+  team_id uuid,
+  delta int,          -- +100 on purchase, -1 on analyze
+  reason text,        -- "pack-500", "analysis", etc.
+  created_at timestamptz
+);
+3. Signup / Upgrade Flow
+Choose plan → Stripe Checkout (pass seat quantity).
+
+Webhook checkout.session.completed →
+If new team: create teams row, owner user row.
+If existing: update tier, seats_max.
+
+Webhook invoice.paid: refresh credit_balance = included credits.
+
+Webhook payment_intent.succeeded (one-time packs): credit_logs + credit_balance += packSize.
+
+4. Team Management UI
+/settings/billing (Owner only)
+
+Current tier, seats used / max.
+
+“Invite User” (send magic-link email).
+
+“Buy More Credits” (opens Credit Pack modal → Stripe Checkout).
+
+/settings/team
+
+Table of members, role dropdown, “Remove”.
+
+Invites use single-use JWT in query string → sets password & joins team.
+
+5. Meter Deal Credits
+In analyzeDeal() backend endpoint:
+
+ts
+Copy
+Edit
+if (team.credit_balance <= 0) throw 402;
+await db.tx(async t => {
+  await t.insert('credit_logs', { team_id, delta: -1, reason: 'analysis' });
+  await t.update('teams', { credit_balance: sql`credit_balance-1` }).where({id:team.id});
+});
+Return remaining credits to frontend to display in navbar.
+
+6. Enforcement Middleware
+ts
+Copy
+Edit
+function requireSeat(req,res,next){
+  const { team } = req.user;
+  if(team.members.count > team.seats_max) return res.status(402).json({err:'Seat limit'});
+  next();
+}
+Apply to all analysis + listing routes.
+
+7. Cron: Low-Credit Alert
+Nightly job: if credit_balance < 20 → send owner email “Credits low – auto-top-up?”.
+
+8. QA Checklist
+New owner picks Team 5, quantity=5 → team row seats_max=5, credit_balance=450.
+
+Owner invites 4 analysts → 5 / 5 seats; 6th invite blocked.
+
+Analyst runs 3 analyses → credit_balance decrements.
+
+Owner buys “Standard Pack” → +500 credits recorded.
+
+Downgrade to Starter auto-fails if seats > 1.
+
+Access revoked when Stripe subscription cancels.
+
+Build exactly these backend / billing pieces; front-end pages reuse existing Tailwind cards and buttons—no design overhaul required.
