@@ -12,7 +12,7 @@ import time
 from datetime import datetime
 from address_validation_service import address_validator
 from property_cache_service import property_cache
-from rentcast_service import rentcast_service
+# Removed Rentcast integration
 from rapidapi_property_service import rapidapi_service
 
 class EnhancedPropertyService:
@@ -73,6 +73,14 @@ class EnhancedPropertyService:
         
         # Try RapidAPI sources for additional data
         self._retrieve_rapidapi_data(property_data, address, city, state, zip_code)
+        
+        # Set status for UI display
+        property_data['status'] = 'success'
+        
+        # If no estimates found from any source, provide helpful feedback
+        if not any([property_data['zillow_estimate'], property_data['redfin_estimate'], property_data['realtor_estimate']]):
+            property_data['data_errors'].append("Property not found in major real estate databases. This may be a new construction, private sale, or unlisted property.")
+            property_data['data_quality'] = 'unavailable'
         
         # Calculate average estimate if multiple sources available
         estimates = [est for est in [property_data['zillow_estimate'], 
