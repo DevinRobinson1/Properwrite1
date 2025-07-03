@@ -1,0 +1,79 @@
+Prompt for Replit Ghostwriter – Add “JV Deal Submit” Page
+
+⸻
+
+1. Route & Page Shell
+	•	URL /jv-submit (React-Router or Flask route).
+	•	Navigation link: “JV Deal Submit” in the main navbar – opens in new tab so current analysis isn’t disturbed.
+
+⸻
+
+2. Input Form (“Submit a Deal to Partner Up”)
+
+Field	Type	Notes
+Property Address	Google-Places autocomplete	Street, city, state, ZIP saved individually
+Deal Type	Radio (Wholesale / Creative Finance / MLS Help)	Required
+Purchase Price	Currency	Required for Wholesale; optional otherwise
+Seller Asking Price	Currency	always required
+ARV	Currency	required
+Rehab Needed?	Toggle yes/no	When “yes”, show next two inputs
+  • Estimated Rehab Cost	Currency	show only if Rehab = Yes
+Property Description	Multiline textarea	300 chars max
+Link to Photos / Drive Folder	URL	validate begins with http
+Current Property Status	Select: Vacant / Tenant-Occupied / Owner-Occupied / Listed	required
+Expected Closing Date	Date picker	min = today
+Additional Notes / Questions	Multiline (optional)	
+
+Submit button disabled until required fields valid.
+
+⸻
+
+3. Auto-Underwrite Logic (runs on submit)
+
+Place logic in utils/jvAutoUnderwrite.ts.
+
+	1.	Wholesale
+
+mao = arv*0.70 - rehabCost  
+autoApprove if purchasePrice ≤ mao  
+
+
+	2.	Creative Finance (Seller-Finance / Sub-2)
+
+minCashFlow = 200/mo  
+monthlyPITI from inputs; estRent = 1% ARV / 12  
+if (estRent - monthlyPITI) ≥ minCashFlow  → autoApprove  
+else autoDeny
+
+
+	3.	MLS Help
+Approve if arv - rehabCost ≥ 90 % of askingPrice.
+
+Return { status: "auto-approved" | "auto-denied", mao, reasons[] }
+
+⸻
+
+4. Result Card
+
+After submit, show a colored card:
+	•	Green ✅ Auto-Approved → “Pending Final PFP Review”
+	•	Red ❌ Auto-Denied → list reasons (e.g., “Purchase price exceeds MAO by $14,000”)
+
+Store submission + underwriting result to replitdb collection jvDeals.
+
+⸻
+
+5. Admin Review (Phase 2 – placeholder)
+
+Table view /jv-admin (protected) listing deals with Approve / Deny buttons.
+
+⸻
+
+6. No Existing UX Changes
+
+– Do not modify current Acquisitions or Dispositions pages.
+– Style new page with existing Tailwind palette & card components.
+
+⸻
+
+Implement exactly as above; produce one new page, form, util, and DB save.

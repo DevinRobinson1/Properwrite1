@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JV Admin - Deal Review</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-gray-800">🏘️ JV Deal Admin</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/jv-submit" class="text-blue-600 hover:text-blue-800 font-medium">
+                        <i class="fas fa-plus mr-2"></i>New Submission
+                    </a>
+                    <a href="/" class="text-blue-600 hover:text-blue-800 font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Analyzer
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">JV Deal Submissions</h2>
+            <p class="text-gray-600">Review and manage joint venture deal submissions.</p>
+        </div>
+
+        {% if error %}
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-circle text-red-600 mr-2"></i>
+                <span class="text-red-800">Error: {{ error }}</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Deals Table -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            {% if deals %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Submission
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Property
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Deal Type
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Date
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for deal in deals %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ deal.submission_id }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ deal.property_address }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900 capitalize">
+                                    {{ deal.deal_type.replace('_', ' ') }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if deal.status == 'pending_review' %}
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                    Auto-Approved
+                                </span>
+                                {% elif deal.status == 'auto_denied' %}
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                    Auto-Denied
+                                </span>
+                                {% else %}
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                    {{ deal.status.replace('_', ' ').title() }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ deal.submitted_at[:10] }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button onclick="viewDeal('{{ deal.submission_id }}')" 
+                                        class="text-blue-600 hover:text-blue-900 mr-3">
+                                    View
+                                </button>
+                                {% if deal.status == 'pending_review' %}
+                                <button onclick="approveDeal('{{ deal.submission_id }}')" 
+                                        class="text-green-600 hover:text-green-900 mr-3">
+                                    Approve
+                                </button>
+                                <button onclick="denyDeal('{{ deal.submission_id }}')" 
+                                        class="text-red-600 hover:text-red-900">
+                                    Deny
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <i class="fas fa-folder-open text-gray-400 text-6xl mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No submissions yet</h3>
+                <p class="text-gray-500 mb-6">JV deal submissions will appear here for review.</p>
+                <a href="/jv-submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                    <i class="fas fa-plus mr-2"></i>
+                    Submit First Deal
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Deal Detail Modal (placeholder for Phase 2) -->
+    <div id="deal-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Deal Details</h3>
+                    <button onclick="closeDealModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="deal-content">
+                    <!-- Deal details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Placeholder functions for Phase 2 implementation
+        function viewDeal(submissionId) {
+            alert(`Phase 2: View deal details for ${submissionId}`);
+        }
+
+        function approveDeal(submissionId) {
+            if (confirm('Approve this deal?')) {
+                alert(`Phase 2: Approve deal ${submissionId}`);
+            }
+        }
+
+        function denyDeal(submissionId) {
+            if (confirm('Deny this deal?')) {
+                alert(`Phase 2: Deny deal ${submissionId}`);
+            }
+        }
+
+        function closeDealModal() {
+            document.getElementById('deal-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

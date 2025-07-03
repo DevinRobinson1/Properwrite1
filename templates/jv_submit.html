@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JV Deal Submit - Real Estate Investment Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places" async defer></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-gray-800">🏘️ JV Deal Submit</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-blue-600 hover:text-blue-800 font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Analyzer
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Submit a Deal to Partner Up</h2>
+            <p class="text-gray-600">Share your real estate opportunity for joint venture partnership evaluation.</p>
+        </div>
+
+        <!-- Form Container -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <form id="jv-deal-form">
+                <!-- Property Address -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Property Address *
+                    </label>
+                    <input type="text" id="property-address" name="property_address" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="Enter full property address"
+                           required>
+                    <p class="text-xs text-gray-500 mt-1">Street, city, state, and ZIP will be saved individually</p>
+                </div>
+
+                <!-- Deal Type -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Deal Type *</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="radio" name="deal_type" value="wholesale" class="mr-2" required onchange="updateFormFields()">
+                            <span class="text-gray-700">Wholesale</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="deal_type" value="creative_finance" class="mr-2" required onchange="updateFormFields()">
+                            <span class="text-gray-700">Creative Finance</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="deal_type" value="mls_help" class="mr-2" required onchange="updateFormFields()">
+                            <span class="text-gray-700">MLS Help</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Price Fields -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- Purchase Price (conditional) -->
+                    <div id="purchase-price-field" class="hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Purchase Price *
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-gray-500">$</span>
+                            <input type="text" id="purchase-price" name="purchase_price" 
+                                   class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="0"
+                                   onchange="formatCurrency(this)">
+                        </div>
+                    </div>
+
+                    <!-- Seller Asking Price -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Seller Asking Price *
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-gray-500">$</span>
+                            <input type="text" id="seller-asking-price" name="seller_asking_price" 
+                                   class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="0"
+                                   required
+                                   onchange="formatCurrency(this)">
+                        </div>
+                    </div>
+
+                    <!-- ARV -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            ARV (After Repair Value) *
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-gray-500">$</span>
+                            <input type="text" id="arv" name="arv" 
+                                   class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="0"
+                                   required
+                                   onchange="formatCurrency(this)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rehab Section -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Rehab Needed? *</label>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="radio" name="rehab_needed" value="yes" class="mr-2" required onchange="toggleRehabFields()">
+                            <span class="text-gray-700">Yes</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="rehab_needed" value="no" class="mr-2" required onchange="toggleRehabFields()">
+                            <span class="text-gray-700">No</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Estimated Rehab Cost (conditional) -->
+                <div id="rehab-cost-field" class="mb-6 hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Estimated Rehab Cost *
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-gray-500">$</span>
+                        <input type="text" id="rehab-cost" name="rehab_cost" 
+                               class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="0"
+                               onchange="formatCurrency(this)">
+                    </div>
+                </div>
+
+                <!-- Property Description -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Property Description
+                    </label>
+                    <textarea id="property-description" name="property_description" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              rows="3"
+                              maxlength="300"
+                              placeholder="Brief description of the property..."></textarea>
+                    <p class="text-xs text-gray-500 mt-1">Maximum 300 characters</p>
+                </div>
+
+                <!-- Photo Link -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Link to Photos / Drive Folder
+                    </label>
+                    <input type="url" id="photos-link" name="photos_link" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="https://drive.google.com/..."
+                           pattern="https?://.*">
+                </div>
+
+                <!-- Property Status -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Current Property Status *
+                    </label>
+                    <select id="property-status" name="property_status" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required>
+                        <option value="">Select status...</option>
+                        <option value="vacant">Vacant</option>
+                        <option value="tenant_occupied">Tenant-Occupied</option>
+                        <option value="owner_occupied">Owner-Occupied</option>
+                        <option value="listed">Listed</option>
+                    </select>
+                </div>
+
+                <!-- Expected Closing Date -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Expected Closing Date *
+                    </label>
+                    <input type="date" id="closing-date" name="closing_date" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           required>
+                </div>
+
+                <!-- Additional Notes -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Additional Notes / Questions
+                    </label>
+                    <textarea id="additional-notes" name="additional_notes" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              rows="4"
+                              placeholder="Any additional details or questions..."></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-4">
+                    <button type="submit" id="submit-btn" 
+                            class="w-full bg-blue-600 text-white py-3 px-6 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            disabled>
+                        Submit Deal for Review
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Result Card (hidden initially) -->
+        <div id="result-card" class="mt-8 hidden">
+        </div>
+    </div>
+
+    <script>
+        // Set minimum date to today
+        document.getElementById('closing-date').min = new Date().toISOString().split('T')[0];
+
+        // Format currency inputs
+        function formatCurrency(input) {
+            let value = input.value.replace(/[^\d]/g, '');
+            if (value) {
+                value = parseInt(value).toLocaleString();
+                input.value = value;
+            }
+            validateForm();
+        }
+
+        // Update form fields based on deal type
+        function updateFormFields() {
+            const dealType = document.querySelector('input[name="deal_type"]:checked')?.value;
+            const purchasePriceField = document.getElementById('purchase-price-field');
+            const purchasePriceInput = document.getElementById('purchase-price');
+            
+            if (dealType === 'wholesale') {
+                purchasePriceField.classList.remove('hidden');
+                purchasePriceInput.required = true;
+            } else {
+                purchasePriceField.classList.add('hidden');
+                purchasePriceInput.required = false;
+                purchasePriceInput.value = '';
+            }
+            validateForm();
+        }
+
+        // Toggle rehab fields
+        function toggleRehabFields() {
+            const rehabNeeded = document.querySelector('input[name="rehab_needed"]:checked')?.value;
+            const rehabCostField = document.getElementById('rehab-cost-field');
+            const rehabCostInput = document.getElementById('rehab-cost');
+            
+            if (rehabNeeded === 'yes') {
+                rehabCostField.classList.remove('hidden');
+                rehabCostInput.required = true;
+            } else {
+                rehabCostField.classList.add('hidden');
+                rehabCostInput.required = false;
+                rehabCostInput.value = '';
+            }
+            validateForm();
+        }
+
+        // Validate form and enable/disable submit button
+        function validateForm() {
+            const form = document.getElementById('jv-deal-form');
+            const submitBtn = document.getElementById('submit-btn');
+            const requiredFields = form.querySelectorAll('[required]');
+            
+            let isValid = true;
+            for (let field of requiredFields) {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    break;
+                }
+            }
+            
+            submitBtn.disabled = !isValid;
+        }
+
+        // Add event listeners for form validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('jv-deal-form');
+            const inputs = form.querySelectorAll('input, select, textarea');
+            
+            inputs.forEach(input => {
+                input.addEventListener('change', validateForm);
+                input.addEventListener('input', validateForm);
+            });
+
+            // Form submission
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(form);
+                const data = {};
+                
+                // Convert FormData to object
+                for (let [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+                
+                // Parse address
+                const fullAddress = data.property_address;
+                const addressParts = fullAddress.split(',').map(part => part.trim());
+                data.street = addressParts[0] || '';
+                data.city = addressParts[1] || '';
+                data.state = addressParts[2] || '';
+                data.zip = addressParts[3] || '';
+                
+                // Clean currency values
+                ['purchase_price', 'seller_asking_price', 'arv', 'rehab_cost'].forEach(field => {
+                    if (data[field]) {
+                        data[field] = data[field].replace(/[^\d]/g, '');
+                    }
+                });
+                
+                try {
+                    const response = await fetch('/api/jv-submit', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        showResultCard(result);
+                        form.reset();
+                        document.getElementById('submit-btn').disabled = true;
+                    } else {
+                        alert('Error: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('Submission failed. Please try again.');
+                    console.error('Submission error:', error);
+                }
+            });
+        });
+
+        // Show result card
+        function showResultCard(result) {
+            const resultCard = document.getElementById('result-card');
+            const isApproved = result.underwrite_result.status === 'auto-approved';
+            
+            const cardClass = isApproved ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
+            const iconClass = isApproved ? 'text-green-600 fa-check-circle' : 'text-red-600 fa-times-circle';
+            const titleClass = isApproved ? 'text-green-800' : 'text-red-800';
+            const title = isApproved ? 'Auto-Approved ✅' : 'Auto-Denied ❌';
+            const subtitle = isApproved ? 'Pending Final PFP Review' : 'Deal Does Not Meet Criteria';
+            
+            let reasonsHtml = '';
+            if (result.underwrite_result.reasons && result.underwrite_result.reasons.length > 0) {
+                reasonsHtml = `
+                    <div class="mt-4">
+                        <h4 class="font-medium ${titleClass} mb-2">Analysis:</h4>
+                        <ul class="space-y-1">
+                            ${result.underwrite_result.reasons.map(reason => `
+                                <li class="text-sm ${titleClass.replace('800', '700')} flex items-start">
+                                    <span class="mr-2">•</span>
+                                    <span>${reason}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            let maoHtml = '';
+            if (result.underwrite_result.mao > 0) {
+                maoHtml = `
+                    <div class="mt-3 p-3 bg-white rounded border">
+                        <div class="text-sm font-medium text-gray-600">Maximum Allowable Offer (MAO)</div>
+                        <div class="text-lg font-bold text-gray-800">$${result.underwrite_result.mao.toLocaleString()}</div>
+                    </div>
+                `;
+            }
+            
+            resultCard.innerHTML = `
+                <div class="rounded-lg border-2 ${cardClass} p-6">
+                    <div class="flex items-center mb-4">
+                        <i class="fas ${iconClass} text-2xl mr-3"></i>
+                        <div>
+                            <h3 class="text-xl font-bold ${titleClass}">${title}</h3>
+                            <p class="text-sm ${titleClass.replace('800', '600')}">${subtitle}</p>
+                        </div>
+                    </div>
+                    ${maoHtml}
+                    ${reasonsHtml}
+                    <div class="mt-4 p-3 bg-white rounded border">
+                        <div class="text-sm text-gray-600">
+                            <strong>Submission ID:</strong> ${result.submission_id}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            resultCard.classList.remove('hidden');
+            resultCard.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

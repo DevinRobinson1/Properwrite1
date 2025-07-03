@@ -4,6 +4,9 @@ Enhanced with external data pulling, cleaner UI, and comprehensive strategy comp
 """
 import os
 import logging
+import json
+import uuid
+from datetime import datetime
 from flask import Flask, render_template, request, jsonify, session
 from property_data_service import property_service
 from rentcast_property_service import rentcast_property_service
@@ -16,6 +19,7 @@ from wholesale_calculator import calculate_wholesale_offers
 from installment_calculator import calculate_installment_offers
 from subject_to_calculator import calculate_subject_to_offer
 from seller_finance_calculator import calculate_seller_finance_offer
+from jv_auto_underwrite import auto_underwrite_deal
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -773,6 +777,146 @@ def analyze_property_risk():
             'status': 'error',
             'error': str(e)
         })
+
+# ===============================
+# JV Deal Submit Routes
+# ===============================
+
+@app.route('/jv-submit')
+def jv_submit_page():
+    """JV Deal Submit page"""
+    return render_template('jv_submit.html')
+
+@app.route('/api/jv-submit', methods=['POST'])
+def jv_submit_deal():
+    """
+    Submit and auto-underwrite JV deal
+    """
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['property_address', 'deal_type', 'seller_asking_price', 'arv', 'rehab_needed', 'property_status', 'closing_date']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({
+                    'success': False,
+                    'error': f'Missing required field: {field}'
+                }), 400
+        
+        # Additional validation for wholesale deals
+        if data.get('deal_type') == 'wholesale' and not data.get('purchase_price'):
+            return jsonify({
+                'success': False,
+                'error': 'Purchase price is required for wholesale deals'
+            }), 400
+        
+        # Additional validation for rehab cost
+        if data.get('rehab_needed') == 'yes' and not data.get('rehab_cost'):
+            return jsonify({
+                'success': False,
+                'error': 'Rehab cost is required when rehab is needed'
+            }), 400
+        
+        # Generate submission ID
+        submission_id = str(uuid.uuid4())[:8].upper()
+        
+        # Auto-underwrite the deal
+        underwrite_result = auto_underwrite_deal(data)
+        
+        # Prepare deal data for storage
+        deal_data = {
+            'submission_id': submission_id,
+            'submitted_at': datetime.now().isoformat(),
+            'property_address': data.get('property_address'),
+            'street': data.get('street', ''),
+            'city': data.get('city', ''),
+            'state': data.get('state', ''),
+            'zip': data.get('zip', ''),
+            'deal_type': data.get('deal_type'),
+            'purchase_price': data.get('purchase_price'),
+            'seller_asking_price': data.get('seller_asking_price'),
+            'arv': data.get('arv'),
+            'rehab_needed': data.get('rehab_needed'),
+            'rehab_cost': data.get('rehab_cost'),
+            'property_description': data.get('property_description', ''),
+            'photos_link': data.get('photos_link', ''),
+            'property_status': data.get('property_status'),
+            'closing_date': data.get('closing_date'),
+            'additional_notes': data.get('additional_notes', ''),
+            'underwrite_result': underwrite_result,
+            'status': 'pending_review' if underwrite_result['status'] == 'auto-approved' else 'auto_denied'
+        }
+        
+        # Store in simple file-based storage (Replit DB alternative)
+        try:
+            # Create deals directory if it doesn't exist
+            os.makedirs('jv_deals', exist_ok=True)
+            
+            # Save deal to file
+            deal_file = f'jv_deals/{submission_id}.json'
+            with open(deal_file, 'w') as f:
+                json.dump(deal_data, f, indent=2)
+                
+            # Also maintain an index file for admin view
+            index_file = 'jv_deals/index.json'
+            try:
+                with open(index_file, 'r') as f:
+                    index = json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                index = []
+            
+            index.append({
+                'submission_id': submission_id,
+                'submitted_at': deal_data['submitted_at'],
+                'property_address': deal_data['property_address'],
+                'deal_type': deal_data['deal_type'],
+                'status': deal_data['status']
+            })
+            
+            with open(index_file, 'w') as f:
+                json.dump(index, f, indent=2)
+                
+        except Exception as storage_error:
+            logging.error(f"Failed to store deal: {storage_error}")
+            # Continue anyway, just log the error
+        
+        return jsonify({
+            'success': True,
+            'submission_id': submission_id,
+            'underwrite_result': underwrite_result,
+            'status': deal_data['status']
+        })
+        
+    except Exception as e:
+        logging.error(f"Error submitting JV deal: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Internal server error'
+        }), 500
+
+@app.route('/jv-admin')
+def jv_admin_page():
+    """
+    Admin view for JV deals (placeholder for Phase 2)
+    """
+    try:
+        # Load deal index
+        index_file = 'jv_deals/index.json'
+        try:
+            with open(index_file, 'r') as f:
+                deals = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            deals = []
+        
+        # Sort by submission date, newest first
+        deals.sort(key=lambda x: x['submitted_at'], reverse=True)
+        
+        return render_template('jv_admin.html', deals=deals)
+        
+    except Exception as e:
+        logging.error(f"Error loading admin page: {e}")
+        return render_template('jv_admin.html', deals=[], error=str(e))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
