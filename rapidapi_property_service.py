@@ -68,8 +68,8 @@ class RapidAPIPropertyService:
                 results['sources']['realtor'] = realtor_data
                 results['success'] = True
                 
-            # Merge and normalize data
-            self._merge_property_data(results)
+            # Merge and normalize data - no longer needed as data is structured during parsing
+            pass
             
             return results
             
@@ -91,8 +91,9 @@ class RapidAPIPropertyService:
             
             url = f"https://{self.apis['zillow']['host']}{self.apis['zillow']['endpoints']['property_extended_search']}"
             
+            # First try specific address, then try area search
             params = {
-                'location': full_address,
+                'location': f"{city}, {state} {zip_code}",
                 'status_type': 'ForSale',
                 'home_type': 'Houses'
             }
@@ -229,17 +230,44 @@ class RapidAPIPropertyService:
     
     def _calculate_address_similarity(self, addr1: str, addr2: str) -> float:
         """
-        Calculate similarity score between two addresses
+        Calculate similarity score between two addresses with enhanced matching
         """
         try:
-            # Simple scoring based on common words
-            words1 = set(addr1.lower().split())
-            words2 = set(addr2.lower().split())
+            # Normalize addresses for comparison
+            addr1_norm = addr1.lower().replace('drive', 'dr').replace('street', 'st').replace('avenue', 'ave').replace('road', 'rd')
+            addr2_norm = addr2.lower().replace('drive', 'dr').replace('street', 'st').replace('avenue', 'ave').replace('road', 'rd')
+            
+            # Extract just the street number and name for better matching
+            import re
+            pattern = r'(\d+)\s+([^,]+)'
+            
+            match1 = re.search(pattern, addr1_norm)
+            match2 = re.search(pattern, addr2_norm)
+            
+            if match1 and match2:
+                # Compare street numbers
+                num1, street1 = match1.groups()
+                num2, street2 = match2.groups()
+                
+                # If street numbers match, compare street names
+                if num1 == num2:
+                    street_words1 = set(street1.strip().split())
+                    street_words2 = set(street2.strip().split())
+                    
+                    # High score if street numbers match and street names are similar
+                    intersection = street_words1.intersection(street_words2)
+                    union = street_words1.union(street_words2)
+                    
+                    street_similarity = len(intersection) / len(union) if union else 0.0
+                    return 0.8 + (0.2 * street_similarity)  # Base score of 0.8 for matching street number
+            
+            # Fallback to word-based similarity
+            words1 = set(addr1_norm.split())
+            words2 = set(addr2_norm.split())
             
             if not words1 or not words2:
                 return 0.0
             
-            # Calculate Jaccard similarity
             intersection = words1.intersection(words2)
             union = words1.union(words2)
             

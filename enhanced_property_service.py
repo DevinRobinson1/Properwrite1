@@ -319,6 +319,7 @@ class EnhancedPropertyService:
             
             # Get comprehensive data from RapidAPI
             rapidapi_result = rapidapi_service.get_property_data(address, city, state, zip_code)
+            logging.info(f"RapidAPI result: {rapidapi_result}")
             
             if rapidapi_result and rapidapi_result.get('success'):
                 sources = rapidapi_result.get('sources', {})
