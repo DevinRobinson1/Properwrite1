@@ -27,10 +27,8 @@ class RapidAPIPropertyService:
             'zillow': {
                 'host': 'zillow-com4.p.rapidapi.com',
                 'endpoints': {
-                    # Will be populated once you provide the endpoints
-                    'property_details': '',
-                    'search': '',
-                    'property_history': ''
+                    'property_extended_search': '/propertyExtendedSearch',
+                    'property_search': '/propertyExtendedSearch'
                 }
             },
             'realtor': {
@@ -88,19 +86,29 @@ class RapidAPIPropertyService:
             headers = self.base_headers.copy()
             headers['X-RapidAPI-Host'] = self.apis['zillow']['host']
             
-            # TODO: Replace with actual endpoints once provided
-            # Example endpoint structure:
-            # url = f"https://{self.apis['zillow']['host']}/property-details"
-            # params = {
-            #     'address': address,
-            #     'city': city,
-            #     'state': state,
-            #     'zip': zip_code
-            # }
+            # Construct the full address for search
+            full_address = f"{address}, {city}, {state} {zip_code}"
             
-            # For now, return placeholder structure
-            logging.info("Zillow API integration ready - awaiting endpoints")
-            return None
+            url = f"https://{self.apis['zillow']['host']}{self.apis['zillow']['endpoints']['property_extended_search']}"
+            
+            params = {
+                'location': full_address,
+                'home_type': 'Houses'
+            }
+            
+            logging.info(f"Calling Zillow API for: {full_address}")
+            
+            response = self.session.get(url, headers=headers, params=params, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                logging.info(f"Zillow API response received for {address}")
+                
+                # Extract property data from response
+                return self._parse_zillow_response(data, address)
+            else:
+                logging.error(f"Zillow API error: {response.status_code} - {response.text}")
+                return None
             
         except Exception as e:
             logging.error(f"Error getting Zillow data: {e}")
@@ -141,6 +149,89 @@ class RapidAPIPropertyService:
                     results['property_details']['bathrooms'] = details['bathrooms']
                 if not results['property_details'].get('square_feet') and details.get('square_feet'):
                     results['property_details']['square_feet'] = details['square_feet']
+    
+    def _parse_zillow_response(self, data: Dict, target_address: str) -> Optional[Dict]:
+        """
+        Parse Zillow API response and extract property data
+        """
+        try:
+            # Look for properties in the response
+            properties = data.get('props', [])
+            if not properties:
+                properties = data.get('results', [])
+            
+            if not properties:
+                logging.warning("No properties found in Zillow response")
+                return None
+            
+            # Find the best matching property
+            best_match = None
+            best_score = 0
+            
+            for prop in properties:
+                # Check if this property matches our target address
+                prop_address = prop.get('address', {})
+                if isinstance(prop_address, str):
+                    prop_full_address = prop_address
+                else:
+                    street = prop_address.get('streetAddress', '')
+                    city = prop_address.get('city', '')
+                    state = prop_address.get('state', '')
+                    prop_full_address = f"{street}, {city}, {state}"
+                
+                # Simple scoring based on address similarity
+                score = self._calculate_address_similarity(target_address, prop_full_address)
+                if score > best_score:
+                    best_score = score
+                    best_match = prop
+            
+            if not best_match or best_score < 0.5:  # Minimum similarity threshold
+                logging.warning(f"No good address match found for {target_address}")
+                return None
+            
+            # Extract data from the best matching property
+            result = {
+                'estimate': best_match.get('price', best_match.get('zestimate', 0)),
+                'property_details': {
+                    'bedrooms': best_match.get('bedrooms', best_match.get('beds')),
+                    'bathrooms': best_match.get('bathrooms', best_match.get('baths')),
+                    'square_feet': best_match.get('livingArea', best_match.get('sqft')),
+                    'lot_size': best_match.get('lotAreaValue'),
+                    'year_built': best_match.get('yearBuilt'),
+                    'property_type': best_match.get('propertyType', best_match.get('homeType'))
+                },
+                'images': best_match.get('imgSrc', []),
+                'url': best_match.get('detailUrl', ''),
+                'confidence': best_score
+            }
+            
+            logging.info(f"Parsed Zillow data for {target_address}: ${result['estimate']:,}")
+            return result
+            
+        except Exception as e:
+            logging.error(f"Error parsing Zillow response: {e}")
+            return None
+    
+    def _calculate_address_similarity(self, addr1: str, addr2: str) -> float:
+        """
+        Calculate similarity score between two addresses
+        """
+        try:
+            # Simple scoring based on common words
+            words1 = set(addr1.lower().split())
+            words2 = set(addr2.lower().split())
+            
+            if not words1 or not words2:
+                return 0.0
+            
+            # Calculate Jaccard similarity
+            intersection = words1.intersection(words2)
+            union = words1.union(words2)
+            
+            return len(intersection) / len(union) if union else 0.0
+            
+        except Exception:
+            return 0.0
     
     def test_api_connection(self) -> Dict:
         """

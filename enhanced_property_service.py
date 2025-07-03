@@ -13,6 +13,7 @@ from datetime import datetime
 from address_validation_service import address_validator
 from property_cache_service import property_cache
 from rentcast_service import rentcast_service
+from rapidapi_property_service import rapidapi_service
 
 class EnhancedPropertyService:
     def __init__(self):
@@ -69,6 +70,9 @@ class EnhancedPropertyService:
         
         # Attempt data retrieval from each platform with validation
         self._retrieve_platform_data(property_data, validated_address, search_variations)
+        
+        # Try RapidAPI sources for additional data
+        self._retrieve_rapidapi_data(property_data, address, city, state, zip_code)
         
         # Calculate average estimate if multiple sources available
         estimates = [est for est in [property_data['zillow_estimate'], 
