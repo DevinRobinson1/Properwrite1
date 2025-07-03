@@ -94,48 +94,50 @@ def analyze_property():
             'images': []
         }
         
-        # Get comprehensive property data from Rentcast API
+        # Get comprehensive property valuation from multiple sources
         try:
-            rentcast_data = rentcast_property_service.get_comprehensive_property_data(address, city, state, zip_code)
+            valuation_data = comprehensive_valuation_service.get_comprehensive_valuation(
+                place_id=canonical_address['place_id'],
+                address=canonical_address['street'],
+                city=canonical_address['city'],
+                state=canonical_address['state'],
+                zip_code=canonical_address['zip']
+            )
             
-            if rentcast_data and rentcast_data.get('status') in ['success', 'partial']:
-                # Use Rentcast data as primary source
+            # Extract best property estimate from comprehensive valuation
+            best_estimate = comprehensive_valuation_service.get_best_estimate(valuation_data)
+            
+            if best_estimate:
+                # Use comprehensive valuation data
                 property_data.update({
-                    'bedrooms': rentcast_data.get('bedrooms', 3),
-                    'bathrooms': rentcast_data.get('bathrooms', 2.0),
-                    'square_feet': rentcast_data.get('square_feet', 1200),
-                    'year_built': rentcast_data.get('year_built', 1990),
-                    'property_type': rentcast_data.get('property_type', 'Single Family Home'),
-                    'estimated_value': rentcast_data.get('estimate', 0),
-                    'rent_estimate': rentcast_data.get('rent_estimate', 0),
-                    'data_source': 'Rentcast API',
-                    'data_quality': rentcast_data.get('data_quality', 'medium'),
-                    'comparable_sales': rentcast_data.get('comparable_sales', []),
-                    'market_analysis': rentcast_data.get('market_analysis', {}),
-                    'last_updated': rentcast_data.get('data_retrieved_at'),
-                    'comps_count': rentcast_data.get('comps_count', 0)
+                    'estimated_value': best_estimate['estimate'],
+                    'data_source': best_estimate['source'],
+                    'data_quality': best_estimate['confidence'],
+                    'valuation_sources': list(valuation_data.get('valuations', {}).keys()),
+                    'sources_tried': valuation_data.get('sources_tried', []),
+                    'last_updated': valuation_data.get('fetch_timestamp')
                 })
-                logging.info(f"Retrieved Rentcast data: Estimate ${rentcast_data.get('estimate', 0):,}, {rentcast_data.get('comps_count', 0)} comps")
+                logging.info(f"Retrieved property valuation: ${best_estimate['estimate']:,} from {best_estimate['source']}")
             else:
-                # Fall back to location-based estimates only if external fails
-                fallback_data = property_service.get_property_data(address, city, state, zip_code)
-                if fallback_data:
-                    for key, value in fallback_data.items():
-                        if value is not None and value != '':
-                            property_data[key] = value
-                logging.warning("Using location-based estimates - Rentcast API unavailable")
+                # All valuation sources failed
+                error_msg = comprehensive_valuation_service.format_error_message(valuation_data)
+                property_data.update({
+                    'estimated_value': 0,
+                    'data_source': 'None Available',
+                    'data_quality': 'low',
+                    'valuation_error': error_msg,
+                    'sources_tried': valuation_data.get('sources_tried', [])
+                })
+                logging.warning(f"All valuation sources failed: {error_msg}")
                 
         except Exception as e:
-            logging.error(f"Rentcast data retrieval failed: {e}")
-            # Use location-based fallback
-            try:
-                fallback_data = property_service.get_property_data(address, city, state, zip_code)
-                if fallback_data:
-                    for key, value in fallback_data.items():
-                        if value is not None and value != '':
-                            property_data[key] = value
-            except Exception as fallback_error:
-                logging.error(f"Fallback data service also failed: {fallback_error}")
+            logging.error(f"Comprehensive valuation failed: {e}")
+            property_data.update({
+                'estimated_value': 0,
+                'data_source': 'Error',
+                'data_quality': 'low',
+                'valuation_error': str(e)
+            })
         
         # Generate estimates for missing values
         if not property_data.get('estimated_value'):
@@ -155,6 +157,12 @@ def analyze_property():
             )
         
         # Store in session for later use
+        # Add valuation data to the response
+        if 'valuations' in valuation_data:
+            property_data['valuations'] = valuation_data['valuations']
+            property_data['valuation_sources'] = list(valuation_data['valuations'].keys())
+            property_data['sources_tried'] = valuation_data.get('sources_tried', [])
+        
         session['current_property'] = property_data
         
         return jsonify({

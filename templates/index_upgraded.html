@@ -2591,8 +2591,8 @@
                 });
             }
             
-            // Update property valuations with platform estimates
-            updatePropertyValuations(data);
+            // Update property valuations with comprehensive valuation data
+            updateComprehensiveValuations(data);
             
             // Update average estimate
             if (data.average_estimate) {
@@ -5359,6 +5359,73 @@
                 });
             }
         });
+        
+        function updateComprehensiveValuations(data) {
+            // Extract valuation data from comprehensive service
+            const valuations = data.valuation_sources || [];
+            const sourcesData = data.valuations || {};
+            const sourcesTried = data.sources_tried || [];
+            
+            // Update Zillow
+            if (sourcesData.zillow) {
+                showValuation('zillow', sourcesData.zillow.value, sourcesData.zillow.source);
+            } else if (sourcesTried.includes('Zillow')) {
+                showValuationError('zillow', 'Not available (Tried: Zillow)');
+            } else {
+                showValuationError('zillow', 'Not available');
+            }
+            
+            // Update Redfin
+            if (sourcesData.redfin) {
+                showValuation('redfin', sourcesData.redfin.value, sourcesData.redfin.source);
+            } else if (sourcesTried.includes('Redfin')) {
+                showValuationError('redfin', 'Not available (Tried: Redfin)');
+            } else {
+                showValuationError('redfin', 'Not available');
+            }
+            
+            // Update Realtor
+            if (sourcesData.realtor) {
+                showValuation('realtor', sourcesData.realtor.value, sourcesData.realtor.source);
+            } else if (sourcesTried.includes('Realtor.com')) {
+                showValuationError('realtor', 'Not available (Tried: Realtor.com)');
+            } else {
+                showValuationError('realtor', 'Not available');
+            }
+            
+            // Calculate and show average
+            const availableValues = Object.values(sourcesData).map(v => v.value).filter(v => v > 0);
+            if (availableValues.length > 0) {
+                const average = Math.round(availableValues.reduce((a, b) => a + b, 0) / availableValues.length);
+                document.getElementById('average-estimate').textContent = '$' + average.toLocaleString();
+                document.getElementById('estimate-count').textContent = availableValues.length + ' sources';
+            } else {
+                document.getElementById('average-estimate').textContent = 'Not available';
+                document.getElementById('estimate-count').textContent = 'All sources failed';
+            }
+        }
+        
+        function showValuation(platform, value, source) {
+            // Hide loading and error states
+            document.getElementById(`${platform}-loading`).classList.add('hidden');
+            document.getElementById(`${platform}-error`).classList.add('hidden');
+            
+            // Show estimate
+            document.getElementById(`${platform}-estimate`).classList.remove('hidden');
+            document.getElementById(`${platform}-value`).value = value.toLocaleString();
+            document.getElementById(`${platform}-updated`).textContent = `Source: ${source}`;
+        }
+        
+        function showValuationError(platform, message) {
+            // Hide loading and estimate states
+            document.getElementById(`${platform}-loading`).classList.add('hidden');
+            document.getElementById(`${platform}-estimate`).classList.add('hidden');
+            
+            // Show error with custom message
+            const errorDiv = document.getElementById(`${platform}-error`);
+            errorDiv.classList.remove('hidden');
+            errorDiv.querySelector('div:last-child div').textContent = message;
+        }
     </script>
 </body>
 </html>
