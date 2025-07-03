@@ -25,7 +25,7 @@ class ComprehensiveValuationService:
             'attom_avm': 'attom-property-api.p.rapidapi.com'
         }
         
-    def get_comprehensive_valuation(self, place_id: str, address: str, city: str, state: str, zip_code: str) -> Dict:
+    def get_comprehensive_valuation(self, place_id: str, address: str, city: str, state: str, zip_code: str, latitude: float = None, longitude: float = None) -> Dict:
         """
         Get property valuation using comprehensive fallback chain
         Returns valuation data with source attribution
@@ -37,8 +37,11 @@ class ComprehensiveValuationService:
                 logging.info(f"Using cached valuation for: {address}")
                 return self.cache[cache_key]['data']
             
-            # Step 1: Get precise coordinates from place_id
-            coordinates = self._get_coordinates_from_place_id(place_id)
+            # Step 1: Use provided coordinates or get from place_id
+            if latitude and longitude:
+                coordinates = {'latitude': latitude, 'longitude': longitude}
+            else:
+                coordinates = self._get_coordinates_from_place_id(place_id)
             
             # Step 2: Run primary valuation calls in parallel
             valuation_data = {

@@ -110,6 +110,21 @@ class EnhancedAddressInput {
         
         console.log('Address selected via Google Autocomplete:', this.selectedAddress);
         
+        // Store globally for form submission
+        window.selectedAddressData = this.selectedAddress;
+        
+        // Also store in the format expected by form submission
+        window.lastGoogleAutocompleteData = {
+            placeId: this.selectedAddress.placeId,
+            formattedAddress: this.selectedAddress.formattedAddress,
+            addressComponents: {
+                street: this.selectedAddress.street,
+                city: this.selectedAddress.city,
+                state: this.selectedAddress.state,
+                zip: this.selectedAddress.zip
+            }
+        };
+        
         // Auto-populate other form fields immediately
         this.autoPopulateFields();
         

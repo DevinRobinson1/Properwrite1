@@ -111,7 +111,9 @@ def analyze_property():
                 address=canonical_address['street'],
                 city=canonical_address['city'],
                 state=canonical_address['state'],
-                zip_code=canonical_address['zip']
+                zip_code=canonical_address['zip'],
+                latitude=latitude,
+                longitude=longitude
             )
             
             # Extract best property estimate from comprehensive valuation

@@ -2550,6 +2550,14 @@
                     console.log('Submitting with Google Autocomplete data:', window.lastGoogleAutocompleteData);
                 }
                 
+                // Also check for selectedAddressData from enhanced-address-input.js
+                if (window.selectedAddressData && window.selectedAddressData.latitude) {
+                    payload.latitude = window.selectedAddressData.latitude;
+                    payload.longitude = window.selectedAddressData.longitude;
+                    payload.formattedAddress = window.selectedAddressData.formattedAddress || payload.formattedAddress;
+                    console.log('Adding coordinates from selectedAddressData:', window.selectedAddressData);
+                }
+                
                 // Analyze property with external data
                 const response = await fetch('/api/analyze-property', {
                     method: 'POST',

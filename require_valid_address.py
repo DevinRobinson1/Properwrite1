@@ -87,20 +87,25 @@ def require_valid_address(f):
                 
                 # Proceed without hard validation when API is not enabled
                 # Store basic address data for downstream processing  
-                if hasattr(request, 'validated_address'):
-                    request.validated_address = {
-                        'isValid': True,
-                        'formattedAddress': f"{street}, {city}, {state} {zip_code}",
-                        'latitude': None,
-                        'longitude': None,
-                        'components': {
-                            'street': street,
-                            'city': city,
-                            'state': state,
-                            'zip': zip_code
-                        },
-                        'source': 'basic_validation'
-                    }
+                
+                # Check if coordinates were provided in the request
+                latitude = data.get('latitude')
+                longitude = data.get('longitude')
+                formatted_address = data.get('formattedAddress') or f"{street}, {city}, {state} {zip_code}"
+                
+                request.validated_address = {
+                    'isValid': True,
+                    'formattedAddress': formatted_address,
+                    'latitude': latitude,
+                    'longitude': longitude,
+                    'components': {
+                        'street': street,
+                        'city': city,
+                        'state': state,
+                        'zip': zip_code
+                    },
+                    'source': 'basic_validation'
+                }
                 
                 return f(*args, **kwargs)
             
