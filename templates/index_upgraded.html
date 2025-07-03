@@ -5284,68 +5284,12 @@
 
     </script>
 
-    <!-- Google Maps API for Enhanced Address Input -->
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places"></script>
-    
-    <!-- Enhanced Address Input JavaScript -->
-    <script src="{{ url_for('static', filename='js/enhanced-google-autocomplete.js') }}"></script>
+    <!-- Google Autocomplete (New) API Integration -->
+    <script src="{{ url_for('static', filename='js/google-autocomplete-new.js') }}"></script>
     
     <script>
-        // Initialize enhanced address input with property form integration
+        // Enhanced form submission with Google Autocomplete (New) data
         document.addEventListener('DOMContentLoaded', function() {
-            const addressInput = document.getElementById('address');
-            if (addressInput) {
-                window.addressInputHandler = new EnhancedAddressInput(addressInput, {
-                    onAddressSelected: function(address) {
-                        console.log('Google Places address selected:', address);
-                        
-                        // Store selected address data for property analysis
-                        window.selectedAddressData = address;
-                        
-                        // Update form validation status
-                        addressInput.setAttribute('data-validated', 'true');
-                        addressInput.setAttribute('data-place-id', address.placeId || '');
-                        
-                        // Debug: Force auto-populate fields manually if needed
-                        console.log('Manually filling fields with:', {
-                            city: address.city,
-                            state: address.state,
-                            zip: address.zip
-                        });
-                        
-                        const cityField = document.getElementById('city');
-                        const stateField = document.getElementById('state');
-                        const zipField = document.getElementById('zip');
-                        
-                        if (cityField && address.city) {
-                            cityField.value = address.city;
-                            cityField.dispatchEvent(new Event('change', { bubbles: true }));
-                        }
-                        
-                        if (stateField && address.state) {
-                            stateField.value = address.state;
-                            stateField.dispatchEvent(new Event('change', { bubbles: true }));
-                        }
-                        
-                        if (zipField && address.zip) {
-                            zipField.value = address.zip;
-                            zipField.dispatchEvent(new Event('change', { bubbles: true }));
-                        }
-                    },
-                    onValidationComplete: function(result) {
-                        console.log('Address validation complete:', result);
-                        if (result.success) {
-                            // Store validated address data
-                            window.selectedAddressData = result.address;
-                            addressInput.setAttribute('data-validated', 'true');
-                            addressInput.setAttribute('data-place-id', result.address.place_id || '');
-                        }
-                    },
-                    showConfirmationBanner: false // Auto-confirm for smoother UX
-                });
-            }
-            
-            // Enhanced form submission with Google Places data
             const propertyForm = document.getElementById('property-form');
             if (propertyForm) {
                 propertyForm.addEventListener('submit', function(e) {
@@ -5353,19 +5297,17 @@
                     
                     const formData = new FormData(this);
                     const data = {
-                        address: formData.get('address'),
+                        street_address: formData.get('address'),
                         city: formData.get('city'),
                         state: formData.get('state'),
-                        zip: formData.get('zip')
+                        zip_code: formData.get('zip')
                     };
                     
                     // Include Google Places canonical data if available
                     if (window.selectedAddressData) {
                         data.place_id = window.selectedAddressData.placeId;
                         data.formatted_address = window.selectedAddressData.formattedAddress;
-                        data.latitude = window.selectedAddressData.latitude;
-                        data.longitude = window.selectedAddressData.longitude;
-                        console.log('Submitting with Google Places data:', window.selectedAddressData);
+                        console.log('Submitting with Google Autocomplete (New) data:', window.selectedAddressData);
                     }
                     
                     // Show loading state
@@ -5383,7 +5325,7 @@
                     .then(result => {
                         if (result.success) {
                             // Display analysis results
-                            displayPropertyAnalysis(result.property_data);
+                            displayPropertyAnalysis(result);
                             hideLoadingState();
                         } else {
                             throw new Error(result.error || 'Analysis failed');
@@ -5392,7 +5334,7 @@
                     .catch(error => {
                         console.error('Property analysis error:', error);
                         hideLoadingState();
-                        alert('Analysis failed: ' + error.message);
+                        showToast('Analysis failed: ' + error.message, 'error');
                     });
                 });
             }

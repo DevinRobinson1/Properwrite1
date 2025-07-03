@@ -853,6 +853,115 @@ def require_complete_address(data):
     
     return None
 
+@app.route('/api/autocomplete', methods=['POST'])
+def autocomplete():
+    """
+    Google Places Autocomplete (New) API proxy endpoint
+    """
+    try:
+        data = request.get_json()
+        
+        # Extract required fields
+        input_text = data.get('input', '')
+        language_code = data.get('languageCode', 'en')
+        include_query_predictions = data.get('includeQueryPredictions', False)
+        session_token = data.get('sessionToken', '')
+        
+        if not input_text:
+            return jsonify({'suggestions': []})
+        
+        # Call Google Places Autocomplete API
+        import requests
+        import os
+        
+        api_key = os.environ.get('GMAPS_API_KEY')
+        if not api_key:
+            return jsonify({'error': 'Google Maps API key not configured'}), 500
+        
+        url = 'https://places.googleapis.com/v1/places:autocomplete'
+        headers = {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': api_key,
+            'X-Goog-FieldMask': 'suggestions.placePrediction.placeId,suggestions.placePrediction.text'
+        }
+        
+        payload = {
+            'input': input_text,
+            'languageCode': language_code,
+            'includeQueryPredictions': include_query_predictions,
+            'sessionToken': session_token
+        }
+        
+        response = requests.post(url, json=payload, headers=headers)
+        
+        if response.status_code == 200:
+            return jsonify(response.json())
+        elif response.status_code == 400 and "API key not valid" in response.text:
+            logging.warning("Google Places API (New) not enabled - using fallback")
+            return jsonify({
+                'error': 'API_NOT_ENABLED',
+                'message': 'Google Places API (New) requires activation in Google Cloud Console',
+                'suggestions': []
+            })
+        else:
+            logging.error(f"Google Autocomplete API error: {response.status_code} - {response.text}")
+            return jsonify({'suggestions': []})
+            
+    except Exception as e:
+        logging.error(f"Autocomplete error: {e}")
+        return jsonify({'suggestions': []})
+
+
+@app.route('/api/place-details', methods=['POST'])
+def place_details():
+    """
+    Google Places Details (New) API proxy endpoint
+    """
+    try:
+        data = request.get_json()
+        place_id = data.get('placeId')
+        session_token = data.get('sessionToken', '')
+        
+        if not place_id:
+            return jsonify({'error': 'placeId is required'}), 400
+        
+        # Call Google Places Details API
+        import requests
+        import os
+        
+        api_key = os.environ.get('GMAPS_API_KEY')
+        if not api_key:
+            return jsonify({'error': 'Google Maps API key not configured'}), 500
+        
+        url = f'https://places.googleapis.com/v1/places/{place_id}'
+        headers = {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': api_key,
+            'X-Goog-FieldMask': 'id,formattedAddress,addressComponents'
+        }
+        
+        if session_token:
+            headers['X-Goog-Maps-Session-Token'] = session_token
+        
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code == 200:
+            return jsonify(response.json())
+        elif response.status_code == 400 and "API key not valid" in response.text:
+            logging.warning("Google Places API (New) not enabled for place details")
+            return jsonify({
+                'error': 'API_NOT_ENABLED',
+                'message': 'Google Places API (New) requires activation in Google Cloud Console'
+            }), 400
+        else:
+            logging.error(f"Google Place Details API error: {response.status_code} - {response.text}")
+            return jsonify({'error': 'Failed to get place details'}), 500
+            
+    except Exception as e:
+        logging.error(f"Place details error: {e}")
+        return jsonify({'error': 'Failed to get place details'}), 500
+
+
 @app.route('/api/places/details', methods=['POST'])
 def get_place_details():
     """
