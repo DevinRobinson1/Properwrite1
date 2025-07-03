@@ -53,10 +53,11 @@ class ComprehensiveValuationService:
                 'fetch_timestamp': datetime.now().isoformat()
             }
             
-            # Primary sources
+            # Primary sources (based on available RapidAPI subscriptions)
             self._try_zillow_valuation(valuation_data, address, city, state, zip_code)
             self._try_redfin_valuation(valuation_data, address, city, state)
-            self._try_realtor_valuation(valuation_data, address, city, state)
+            # Note: Realtor.com API requires separate subscription
+            self._add_subscription_note(valuation_data, 'Realtor.com')
             
             # Fallback sources if primary failed
             if not self._has_primary_valuation(valuation_data):
@@ -238,26 +239,28 @@ class ComprehensiveValuationService:
             return
             
         try:
-            # First get region info for the city
+            # Use the working Redfin.com Data API 
             search_url = "https://redfin-com-data.p.rapidapi.com/properties/search-sale"
             headers = {
                 "X-RapidAPI-Key": self.rapidapi_key,
                 "X-RapidAPI-Host": "redfin-com-data.p.rapidapi.com"
             }
             
-            # Map common cities to region IDs
+            # Map cities to Redfin region IDs (required parameter)
             region_map = {
                 'charlotte': '11997',
+                'kannapolis': '11997',  # Near Charlotte
                 'raleigh': '41593',
+                'durham': '41593',
                 'atlanta': '30756',
                 'nashville': '39593'
             }
             
-            region_id = region_map.get(city.lower(), '11997')  # Default to Charlotte
+            city_key = city.lower()
+            region_id = region_map.get(city_key, '11997')  # Default to Charlotte
             
             search_params = {
                 "regionId": region_id,
-                "sortBy": "relevance",
                 "limit": 20
             }
             
@@ -266,7 +269,9 @@ class ComprehensiveValuationService:
             
             if search_response.status_code == 200:
                 search_data = search_response.json()
-                if search_data and isinstance(search_data, dict) and 'data' in search_data:
+                logging.info(f"Redfin API response: {search_data}")
+                
+                if search_data and search_data.get('status') and search_data.get('data'):
                     properties = search_data['data']
                     
                     # Find best address match
@@ -281,44 +286,32 @@ class ComprehensiveValuationService:
                                 best_score = score
                                 best_match = prop
                     
-                    # If we found a good match, get property details
-                    if best_match and best_score > 10 and 'propertyId' in best_match:
-                        property_id = best_match['propertyId']
-                        logging.info(f"Found Redfin property match (score: {best_score}): {best_match.get('address')}")
+                    # If we found a good match, extract valuation
+                    if best_match and best_score > 30:
+                        logging.info(f"Found Redfin property match (score: {best_score}): {best_match.get('address', 'N/A')}")
                         
-                        # Get property details
-                        details_url = "https://redfin-com-data.p.rapidapi.com/properties/details"
-                        details_params = {"propertyId": property_id}
+                        # Extract valuation from property data
+                        estimate = None
+                        if 'price' in best_match:
+                            estimate = best_match['price']
+                        elif 'homeValue' in best_match:
+                            estimate = best_match['homeValue']
+                        elif 'listPrice' in best_match:
+                            estimate = best_match['listPrice']
                         
-                        details_response = requests.get(details_url, headers=headers, params=details_params, timeout=5)
-                        
-                        if details_response.status_code == 200:
-                            details_data = details_response.json()
-                            logging.info(f"Redfin detail response keys: {list(details_data.keys()) if details_data else 'None'}")
-                            
-                            # Extract valuation from details
-                            estimate = None
-                            if details_data:
-                                estimate = (details_data.get('homeValue') or
-                                          details_data.get('price') or
-                                          details_data.get('listPrice') or
-                                          details_data.get('redfin_estimate'))
-                            
-                            if estimate:
-                                valuation_data['valuations']['redfin'] = {
-                                    'value': int(estimate),
-                                    'source': 'Redfin Property Data',
-                                    'confidence': 'high'
-                                }
-                                logging.info(f"Redfin valuation success: ${estimate:,}")
-                            else:
-                                logging.info(f"No valuation found in Redfin details: {str(details_data)[:300] if details_data else 'None'}")
+                        if estimate:
+                            valuation_data['valuations']['redfin'] = {
+                                'value': int(estimate),
+                                'source': 'Redfin Property Data',
+                                'confidence': 'high'
+                            }
+                            logging.info(f"Redfin valuation success: ${estimate:,}")
                         else:
-                            logging.warning(f"Redfin details API failed: {details_response.status_code}")
+                            logging.info(f"No price found in Redfin property data")
                     else:
                         logging.info(f"No good Redfin match found. Best score: {best_score}")
                 else:
-                    logging.warning("Invalid Redfin search response format")
+                    logging.warning(f"Redfin API error: {search_data.get('message', 'No data returned')}")
             else:
                 logging.warning(f"Redfin search API failed: {search_response.status_code}")
         
@@ -326,96 +319,8 @@ class ComprehensiveValuationService:
             logging.warning(f"Redfin valuation failed: {e}")
     
     def _try_realtor_valuation(self, valuation_data: Dict, address: str, city: str, state: str):
-        """Try Realtor.com valuation via RapidAPI using search -> details approach"""
-        if not self.rapidapi_key:
-            return
-            
-        try:
-            # First search for properties
-            search_url = "https://realtor-search.p.rapidapi.com/properties/search"
-            headers = {
-                "X-RapidAPI-Key": self.rapidapi_key,
-                "X-RapidAPI-Host": "realtor-search.p.rapidapi.com"
-            }
-            
-            search_params = {
-                "location": f"{city}, {state}",
-                "limit": 50
-            }
-            
-            search_response = requests.get(search_url, headers=headers, params=search_params, timeout=5)
-            valuation_data['sources_tried'].append('Realtor.com')
-            
-            if search_response.status_code == 200:
-                search_data = search_response.json()
-                
-                if search_data and 'data' in search_data and 'listings' in search_data['data']:
-                    listings = search_data['data']['listings']
-                    
-                    # Find best address match
-                    best_match = None
-                    best_score = 0
-                    
-                    for listing in listings:
-                        if 'address' in listing:
-                            listing_address = listing['address'].get('line', '')
-                            full_address = f"{listing_address}, {listing['address'].get('city', '')}, {listing['address'].get('state_code', '')}"
-                            score = self._calculate_address_similarity(address, full_address)
-                            if score > best_score:
-                                best_score = score
-                                best_match = listing
-                    
-                    # If we found a good match, get property details
-                    if best_match and best_score > 10 and 'property_id' in best_match:
-                        property_id = best_match['property_id']
-                        logging.info(f"Found Realtor.com property match (score: {best_score}): {best_match['address'].get('line', '')}")
-                        
-                        # Get property details
-                        details_url = "https://realtor-search.p.rapidapi.com/properties/detail"
-                        details_params = {"property_id": property_id}
-                        
-                        details_response = requests.get(details_url, headers=headers, params=details_params, timeout=5)
-                        
-                        if details_response.status_code == 200:
-                            details_data = details_response.json()
-                            logging.info(f"Realtor.com detail response keys: {list(details_data.keys()) if details_data else 'None'}")
-                            
-                            # Extract valuation from details
-                            estimate = None
-                            if details_data:
-                                # Try different possible estimate locations
-                                estimate = (details_data.get('estimate') or
-                                          details_data.get('list_price') or
-                                          details_data.get('price') or
-                                          details_data.get('home_value'))
-                                
-                                # Try nested property data
-                                if not estimate and 'property' in details_data:
-                                    prop = details_data['property']
-                                    estimate = (prop.get('estimate') or
-                                              prop.get('list_price') or
-                                              prop.get('price'))
-                            
-                            if estimate:
-                                valuation_data['valuations']['realtor'] = {
-                                    'value': int(estimate),
-                                    'source': 'Realtor.com Property Data',
-                                    'confidence': 'high'
-                                }
-                                logging.info(f"Realtor.com valuation success: ${estimate:,}")
-                            else:
-                                logging.info(f"No valuation found in Realtor.com details: {str(details_data)[:300] if details_data else 'None'}")
-                        else:
-                            logging.warning(f"Realtor.com details API failed: {details_response.status_code}")
-                    else:
-                        logging.info(f"No good Realtor.com match found. Best score: {best_score}")
-                else:
-                    logging.warning("Invalid Realtor.com search response format")
-            else:
-                logging.warning(f"Realtor.com search API failed: {search_response.status_code}")
-        
-        except Exception as e:
-            logging.warning(f"Realtor.com valuation failed: {e}")
+        """Realtor.com API requires separate RapidAPI subscription"""
+        self._add_subscription_note(valuation_data, 'Realtor.com')
     
     def _calculate_address_similarity(self, target_address: str, comparison_address: str) -> float:
         """Calculate similarity score between two addresses"""
@@ -444,6 +349,11 @@ class ComprehensiveValuationService:
         similarity = (overlap / total) * 100 if total > 0 else 0
         
         return similarity
+    
+    def _add_subscription_note(self, valuation_data: Dict, source: str):
+        """Add note about subscription requirement for API source"""
+        valuation_data['sources_tried'].append(f'{source} (subscription required)')
+        logging.info(f"{source} API requires separate RapidAPI subscription")
     
     def _try_attom_valuation(self, valuation_data: Dict, address: str, city: str, state: str, zip_code: str):
         """Try ATTOM AVM as fallback"""
