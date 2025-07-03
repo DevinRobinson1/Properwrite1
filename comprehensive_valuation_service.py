@@ -60,8 +60,10 @@ class ComprehensiveValuationService:
             
             # Fallback sources if primary failed
             if not self._has_primary_valuation(valuation_data):
-                self._try_attom_valuation(valuation_data, address, city, state, zip_code)
-                self._try_estated_valuation(valuation_data, address, city, state, zip_code)
+                # ATTOM requires separate API key, skipping for now
+                # self._try_attom_valuation(valuation_data, address, city, state, zip_code)
+                # self._try_estated_valuation(valuation_data, address, city, state, zip_code)
+                pass
             
             # Cache result for 24 hours
             self._cache_valuation(cache_key, valuation_data)
@@ -110,38 +112,76 @@ class ComprehensiveValuationService:
             return
             
         try:
-            url = "https://zillow57.p.rapidapi.com/property"
             headers = {
                 "X-RapidAPI-Key": self.rapidapi_key,
-                "X-RapidAPI-Host": "zillow57.p.rapidapi.com"
+                "X-RapidAPI-Host": "zillow-com1.p.rapidapi.com"
             }
-            params = {
-                "address": address,
-                "zip": zip_code
+            # First, search for property to get zpid
+            search_url = "https://zillow-com1.p.rapidapi.com/propertyExtendedSearch"
+            search_params = {
+                "location": f"{address}, {zip_code}",
+                "status_type": "RecentlySold,ForSale",
+                "home_type": "Houses,Townhomes,Condos"
             }
             
-            response = requests.get(url, headers=headers, params=params, timeout=4)
+            search_response = requests.get(search_url, headers=headers, params=search_params, timeout=5)
             valuation_data['sources_tried'].append('Zillow')
             
-            if response.status_code == 200:
-                data = response.json()
-                if data and isinstance(data, dict):
-                    # Extract Zestimate
-                    zestimate = None
-                    if 'zestimate' in data:
-                        zestimate = data['zestimate']
-                    elif 'price' in data:
-                        zestimate = data['price']
-                    elif 'homeValue' in data:
-                        zestimate = data['homeValue']
-                    
-                    if zestimate:
-                        valuation_data['valuations']['zillow'] = {
-                            'value': int(zestimate),
-                            'source': 'Zillow Zestimate',
-                            'confidence': 'high'
-                        }
-                        logging.info(f"Zillow valuation success: ${zestimate:,}")
+            if search_response.status_code == 200:
+                search_data = search_response.json()
+                
+                # Find the property in search results
+                if search_data and 'props' in search_data:
+                    props = search_data['props']
+                    if props and len(props) > 0:
+                        # Try to find exact match by address
+                        zpid = None
+                        target_address_lower = address.lower().strip()
+                        
+                        for prop in props:
+                            prop_address = prop.get('address', '').lower().strip()
+                            if target_address_lower in prop_address or prop_address in target_address_lower:
+                                zpid = prop.get('zpid')
+                                logging.info(f"Found matching property: {prop.get('address')}")
+                                break
+                        
+                        # If no exact match, use first property as fallback
+                        if not zpid and props:
+                            zpid = props[0].get('zpid')
+                            logging.info(f"Using first property as fallback: {props[0].get('address')}")
+                        
+                        if zpid:
+                            # Now get detailed property info
+                            detail_url = "https://zillow-com1.p.rapidapi.com/property"
+                            detail_params = {"zpid": zpid}
+                            
+                            detail_response = requests.get(detail_url, headers=headers, params=detail_params, timeout=5)
+                            
+                            if detail_response.status_code == 200:
+                                detail_data = detail_response.json()
+                                
+                                # Extract Zestimate
+                                zestimate = None
+                                if detail_data:
+                                    zestimate = detail_data.get('zestimate')
+                                    if not zestimate and 'resoFacts' in detail_data:
+                                        zestimate = detail_data['resoFacts'].get('lastSoldPrice')
+                                    
+                                    if zestimate:
+                                        valuation_data['valuations']['zillow'] = {
+                                            'value': int(zestimate),
+                                            'source': 'Zillow Zestimate',
+                                            'confidence': 'high'
+                                        }
+                                        logging.info(f"Zillow valuation success: ${zestimate:,}")
+                            else:
+                                logging.warning(f"Zillow detail API failed: {detail_response.status_code}")
+                    else:
+                        logging.warning("No properties found in Zillow search")
+                else:
+                    logging.warning("Invalid Zillow search response format")
+            else:
+                logging.warning(f"Zillow search API failed: {search_response.status_code}")
         
         except Exception as e:
             logging.warning(f"Zillow valuation failed: {e}")
@@ -152,16 +192,27 @@ class ComprehensiveValuationService:
             return
             
         try:
-            # First get region info
-            search_url = "https://redfin-com-data.p.rapidapi.com/properties/search"
+            # First get region info for the city
+            search_url = "https://redfin-com-data.p.rapidapi.com/properties/search-sale"
             headers = {
                 "X-RapidAPI-Key": self.rapidapi_key,
                 "X-RapidAPI-Host": "redfin-com-data.p.rapidapi.com"
             }
             
+            # Map common cities to region IDs
+            region_map = {
+                'charlotte': '11997',
+                'raleigh': '41593',
+                'atlanta': '30756',
+                'nashville': '39593'
+            }
+            
+            region_id = region_map.get(city.lower(), '11997')  # Default to Charlotte
+            
             search_params = {
-                "query": f"{address}, {city}, {state}",
-                "limit": 1
+                "regionId": region_id,
+                "sortBy": "relevance",
+                "limit": 20
             }
             
             response = requests.get(search_url, headers=headers, params=search_params, timeout=4)
