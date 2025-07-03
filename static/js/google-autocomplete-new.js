@@ -5,6 +5,7 @@
 
 class GoogleAutocompleteNew {
     constructor(inputElement, options = {}) {
+        console.log('GoogleAutocompleteNew constructor called');
         this.input = inputElement;
         this.options = {
             onSelect: options.onSelect || (() => {}),
@@ -17,6 +18,7 @@ class GoogleAutocompleteNew {
         this.suggestionsContainer = null;
         this.currentController = null;
         this.suggestions = [];
+        this.apiNotEnabled = false;
         
         this.init();
     }
@@ -68,6 +70,7 @@ class GoogleAutocompleteNew {
     
     async handleInput(e) {
         const query = e.target.value.trim();
+        console.log('handleInput called with query:', query);
         
         if (!query) {
             this.hideSuggestions();
@@ -76,6 +79,7 @@ class GoogleAutocompleteNew {
         
         // Skip API calls if not enabled
         if (this.apiNotEnabled) {
+            console.log('API not enabled, skipping autocomplete');
             return;
         }
         
@@ -303,7 +307,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const zipInput = document.getElementById('zip');
     
     if (streetAddressInput) {
-        new GoogleAutocompleteNew(streetAddressInput, {
+        console.log('Initializing Google Autocomplete (New) on address input');
+        const autocompleteInstance = new GoogleAutocompleteNew(streetAddressInput, {
             onSelect: function(data) {
                 console.log('Address selected:', data);
                 
@@ -330,6 +335,11 @@ document.addEventListener('DOMContentLoaded', function() {
             onError: function(error) {
                 console.error('Google Autocomplete error:', error);
                 showToast('Error getting address suggestions. Please try again.', 'error');
+            },
+            
+            onAPINotEnabled: function() {
+                console.log('Google Places API (New) not enabled - falling back to basic input');
+                showToast('Google Places API setup needed. Using basic address validation.', 'warning');
             }
         });
     }
