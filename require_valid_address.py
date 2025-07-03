@@ -28,10 +28,10 @@ def require_valid_address(f):
             data = request.get_json() if request.is_json else request.form
             
             # Extract address components with fallbacks
-            street = data.get('street_address') or data.get('address', '').strip()
-            city = data.get('city', '').strip()
-            state = data.get('state', '').strip()
-            zip_code = data.get('zip_code', '').strip()
+            street = (data.get('street_address') or data.get('address') or '').strip()
+            city = (data.get('city') or '').strip()
+            state = (data.get('state') or '').strip()
+            zip_code = (data.get('zip_code') or '').strip()
             
             # Check if all required components are present
             if not all([street, city, state, zip_code]):
