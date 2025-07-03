@@ -339,6 +339,19 @@ class EnhancedPropertyService:
                                 property_data['bathrooms'] = details['bathrooms']
                             if details.get('square_feet') and not property_data.get('square_feet'):
                                 property_data['square_feet'] = details['square_feet']
+                            if details.get('lot_size') and not property_data.get('lot_size_sqft'):
+                                property_data['lot_size_sqft'] = details['lot_size']
+                            if details.get('property_type') and not property_data.get('property_type'):
+                                property_data['property_type'] = details['property_type']
+                        
+                        # Add detailed information if available
+                        if zillow_data.get('detailed_info'):
+                            property_data['zillow_detailed_info'] = zillow_data['detailed_info']
+                        
+                        # Use Zestimate if available and no current estimate
+                        if zillow_data.get('zestimate') and zillow_data['zestimate'] > 0:
+                            if not property_data.get('zillow_estimate') or property_data['zillow_estimate'] == 0:
+                                property_data['zillow_estimate'] = zillow_data['zestimate']
                         
                         # Add images if available
                         if zillow_data.get('images') and not property_data.get('image_url'):

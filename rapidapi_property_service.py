@@ -27,7 +27,8 @@ class RapidAPIPropertyService:
             'zillow': {
                 'host': 'zillow-com1.p.rapidapi.com',
                 'endpoints': {
-                    'property_extended_search': '/propertyExtendedSearch'
+                    'property_extended_search': '/propertyExtendedSearch',
+                    'property_details': '/property'
                 }
             },
             'realtor': {
@@ -211,6 +212,14 @@ class RapidAPIPropertyService:
                 'confidence': best_score
             }
             
+            # Get detailed property information if ZPID is available
+            if result.get('property_details', {}).get('zpid'):
+                zpid = result['property_details']['zpid']
+                detailed_result = self._get_property_details(zpid)
+                if detailed_result:
+                    # Merge detailed information with search result
+                    result = self._merge_property_data(result, detailed_result)
+            
             logging.info(f"Parsed Zillow data for {target_address}: ${result['estimate']:,}")
             return result
             
@@ -238,6 +247,119 @@ class RapidAPIPropertyService:
             
         except Exception:
             return 0.0
+    
+    def _get_property_details(self, zpid: str) -> Dict:
+        """
+        Get detailed property information using Zillow Property Details API
+        """
+        try:
+            url = f"https://{self.apis['zillow']['host']}{self.apis['zillow']['endpoints']['property_details']}"
+            
+            params = {
+                'zpid': zpid
+            }
+            
+            headers = self.base_headers.copy()
+            headers['X-RapidAPI-Host'] = self.apis['zillow']['host']
+            
+            response = requests.get(url, headers=headers, params=params, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                return self._parse_property_details(data)
+            else:
+                logging.warning(f"Property details API returned status {response.status_code}")
+                return None
+                
+        except Exception as e:
+            logging.error(f"Error fetching property details for ZPID {zpid}: {e}")
+            return None
+    
+    def _parse_property_details(self, data: Dict) -> Dict:
+        """
+        Parse detailed property information from Zillow Property Details API
+        """
+        try:
+            result = {
+                'detailed_info': {
+                    'zestimate': data.get('zestimate'),
+                    'property_tax_rate': data.get('propertyTaxRate'),
+                    'time_on_zillow': data.get('timeOnZillow'),
+                    'year_built': data.get('resoFacts', {}).get('yearBuilt'),
+                    'hoa_fee': data.get('resoFacts', {}).get('associationFee'),
+                    'lot_size': data.get('resoFacts', {}).get('lotSize'),
+                    'property_type': data.get('propertyTypeDimension'),
+                    'heating': data.get('resoFacts', {}).get('heating'),
+                    'cooling': data.get('resoFacts', {}).get('cooling'),
+                    'parking': data.get('resoFacts', {}).get('parkingFeatures'),
+                    'appliances': data.get('resoFacts', {}).get('appliances', []),
+                    'interior_features': data.get('resoFacts', {}).get('interiorFeatures', []),
+                    'exterior_features': data.get('resoFacts', {}).get('exteriorFeatures', {}),
+                    'construction_materials': data.get('resoFacts', {}).get('constructionMaterials', []),
+                    'roof_type': data.get('resoFacts', {}).get('roofType'),
+                    'flooring': data.get('resoFacts', {}).get('flooring', []),
+                    'water_source': data.get('resoFacts', {}).get('waterSource', []),
+                    'sewer': data.get('resoFacts', {}).get('sewer', []),
+                    'has_fireplace': data.get('resoFacts', {}).get('hasFireplace'),
+                    'has_garage': data.get('resoFacts', {}).get('hasGarage'),
+                    'garage_spaces': data.get('resoFacts', {}).get('garageSpaces'),
+                    'bedrooms': data.get('resoFacts', {}).get('bedrooms'),
+                    'bathrooms_full': data.get('resoFacts', {}).get('bathroomsFull'),
+                    'bathrooms_half': data.get('resoFacts', {}).get('bathroomsHalf'),
+                    'living_area': data.get('livingAreaValue'),
+                    'at_a_glance_facts': data.get('resoFacts', {}).get('atAGlanceFacts', [])
+                }
+            }
+            
+            # Extract key financial information
+            if data.get('zestimate'):
+                result['zestimate'] = data['zestimate']
+            
+            # Extract enhanced property details
+            if data.get('resoFacts'):
+                facts = data['resoFacts']
+                if facts.get('bedrooms'):
+                    result['bedrooms'] = facts['bedrooms']
+                if facts.get('bathroomsFull'):
+                    result['bathrooms'] = facts['bathroomsFull']
+                if data.get('livingAreaValue'):
+                    result['square_feet'] = data['livingAreaValue']
+            
+            return result
+            
+        except Exception as e:
+            logging.error(f"Error parsing property details: {e}")
+            return None
+    
+    def _merge_property_data(self, base_result: Dict, detailed_result: Dict) -> Dict:
+        """
+        Merge detailed property information with search results
+        """
+        try:
+            # Add detailed information to base result
+            if detailed_result.get('detailed_info'):
+                base_result['detailed_info'] = detailed_result['detailed_info']
+            
+            # Update estimate with Zestimate if available and higher confidence
+            if detailed_result.get('zestimate') and detailed_result['zestimate'] > 0:
+                base_result['zestimate'] = detailed_result['zestimate']
+                # Use Zestimate as primary estimate if it exists
+                if not base_result.get('estimate') or base_result['estimate'] == 0:
+                    base_result['estimate'] = detailed_result['zestimate']
+            
+            # Update property details with more accurate information
+            if detailed_result.get('bedrooms'):
+                base_result['property_details']['bedrooms'] = detailed_result['bedrooms']
+            if detailed_result.get('bathrooms'):
+                base_result['property_details']['bathrooms'] = detailed_result['bathrooms']
+            if detailed_result.get('square_feet'):
+                base_result['property_details']['square_feet'] = detailed_result['square_feet']
+            
+            return base_result
+            
+        except Exception as e:
+            logging.error(f"Error merging property data: {e}")
+            return base_result
     
     def test_api_connection(self) -> Dict:
         """
