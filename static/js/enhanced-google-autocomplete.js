@@ -142,6 +142,16 @@ class EnhancedGoogleAutocomplete {
         
         // Store for later use
         window.selectedAddressData = addressData;
+        window.lastGoogleAutocompleteData = {
+            placeId: addressData.place_id,
+            formattedAddress: addressData.formatted_address,
+            addressComponents: {
+                street: addressData.street,
+                city: addressData.city,
+                state: addressData.state,
+                zip: addressData.zip
+            }
+        };
     }
 
     parseAddressComponents(components) {

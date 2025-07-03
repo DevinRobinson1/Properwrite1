@@ -2534,11 +2534,27 @@
             document.getElementById('analysis-results').classList.add('hidden');
             
             try {
+                // Prepare payload with Google Autocomplete data if available
+                let payload = {
+                    street_address: address,
+                    city: city,
+                    state: state,
+                    zip_code: zip
+                };
+                
+                // Add Google Autocomplete data if available from recent selection
+                if (window.lastGoogleAutocompleteData) {
+                    payload.placeId = window.lastGoogleAutocompleteData.placeId;
+                    payload.formattedAddress = window.lastGoogleAutocompleteData.formattedAddress;
+                    payload.addressComponents = window.lastGoogleAutocompleteData.addressComponents;
+                    console.log('Submitting with Google Autocomplete data:', window.lastGoogleAutocompleteData);
+                }
+                
                 // Analyze property with external data
                 const response = await fetch('/api/analyze-property', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ address, city, state, zip })
+                    body: JSON.stringify(payload)
                 });
                 
                 const data = await response.json();
