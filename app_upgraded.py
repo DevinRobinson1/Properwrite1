@@ -22,6 +22,8 @@ from seller_finance_calculator import calculate_seller_finance_offer
 from jv_auto_underwrite import auto_underwrite_deal
 from billing_service import BillingService
 from auth_middleware import require_auth, require_seat, require_role, require_credits
+from google_places_service import google_places_service, AddressNotFoundError, GooglePlacesAPIError, AddressValidationError
+from require_valid_address import require_valid_address, extract_validated_address_data
 
 # Load environment variables from .env file
 if os.path.exists('.env'):
@@ -47,49 +49,39 @@ def index():
                          google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY'))
 
 @app.route('/api/analyze-property', methods=['POST'])
+@require_valid_address
 def analyze_property():
     """
     Analyze property with external data enrichment from multiple sources
     Pulls data from Zillow, Redfin, Realtor.com and other sources
     """
     try:
+        # Extract validated address data from middleware
+        validated_address_data = extract_validated_address_data(request)
+        
+        # Get form data
         data = request.get_json()
-        address = (data.get('address') or '').strip()
-        city = (data.get('city') or '').strip()
-        state = (data.get('state') or '').strip()
-        zip_code = (data.get('zip') or '').strip()
         
-        # Check for Google Places canonical data
-        place_id = data.get('place_id', '')
-        formatted_address = data.get('formatted_address', '')
+        # Use validated address components
+        address = validated_address_data['street_address']
+        city = validated_address_data['city']
+        state = validated_address_data['state']
+        zip_code = validated_address_data['zip_code']
+        formatted_address = validated_address_data['formatted_address']
+        latitude = validated_address_data['latitude']
+        longitude = validated_address_data['longitude']
         
-        # Enhanced address validation using middleware
-        address_validation_error = require_complete_address({
-            'street': address,
-            'city': city,
-            'state': state,
-            'zip': zip_code
-        })
-        
-        if address_validation_error:
-            return jsonify({
-                'success': False,
-                'error': address_validation_error['error'],
-                'message': address_validation_error['message'],
-                'missing_fields': address_validation_error['missing_fields']
-            }), 400
-        
-        # Store canonical address data for property analysis
+        # Store canonical address data for property analysis (now validated)
         canonical_address = {
-            'place_id': place_id,
-            'formatted_address': formatted_address or f"{address}, {city}, {state} {zip_code}",
+            'place_id': data.get('place_id', ''),  # May be empty for basic validation
+            'formatted_address': formatted_address,
             'street': address,
             'city': city,
             'state': state,
             'zip': zip_code,
-            'latitude': data.get('latitude'),
-            'longitude': data.get('longitude'),
-            'source': 'google_places' if place_id else 'manual'
+            'latitude': latitude,
+            'longitude': longitude,
+            'source': 'google_validated'
         }
         
         logging.info(f"Analyzing property with canonical address: {canonical_address['formatted_address']}")
@@ -109,10 +101,13 @@ def analyze_property():
             'images': []
         }
         
+        # Initialize valuation_data to avoid unbound variable error
+        valuation_data = {}
+        
         # Get comprehensive property valuation from multiple sources
         try:
             valuation_data = comprehensive_valuation_service.get_comprehensive_valuation(
-                place_id=canonical_address['place_id'],
+                place_id=canonical_address.get('place_id', ''),
                 address=canonical_address['street'],
                 city=canonical_address['city'],
                 state=canonical_address['state'],
@@ -147,6 +142,7 @@ def analyze_property():
                 
         except Exception as e:
             logging.error(f"Comprehensive valuation failed: {e}")
+            valuation_data = {}  # Ensure valuation_data is defined for later use
             property_data.update({
                 'estimated_value': 0,
                 'data_source': 'Error',
@@ -863,7 +859,6 @@ def get_place_details():
     Get canonical address using Google Places "Place Details (New)" API
     """
     try:
-        from google_places_service import google_places_service, AddressNotFoundError, GooglePlacesAPIError
         
         data = request.get_json()
         place_id = data.get('place_id', '').strip()
