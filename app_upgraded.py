@@ -21,6 +21,14 @@ from subject_to_calculator import calculate_subject_to_offer
 from seller_finance_calculator import calculate_seller_finance_offer
 from jv_auto_underwrite import auto_underwrite_deal
 
+# Load environment variables from .env file
+if os.path.exists('.env'):
+    with open('.env', 'r') as f:
+        for line in f:
+            if '=' in line and not line.strip().startswith('#'):
+                key, value = line.strip().split('=', 1)
+                os.environ[key] = value
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
@@ -30,7 +38,8 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-2024")
 @app.route('/')
 def index():
     """Enhanced property input form with external data integration"""
-    return render_template('index_upgraded.html')
+    return render_template('index_upgraded.html', 
+                         google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY'))
 
 @app.route('/api/analyze-property', methods=['POST'])
 def analyze_property():
@@ -656,6 +665,56 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/validate-address', methods=['POST'])
+def validate_address():
+    """
+    Layer 2: Server-side address validation using Google Geocoding API
+    """
+    try:
+        data = request.json
+        if not data or not data.get('address'):
+            return jsonify({'success': False, 'error': 'Address is required'})
+        
+        from address_validation_service import address_validator
+        
+        # Extract address components if provided
+        address = data['address']
+        city = data.get('city', '')
+        state = data.get('state', '')
+        zip_code = data.get('zip_code', '')
+        
+        # Use enhanced validation with geocoding fallback
+        result = address_validator.geocode_loose(address, city, state, zip_code)
+        
+        if result:
+            return jsonify({
+                'success': True,
+                'address': {
+                    'formatted_address': result['formatted_address'],
+                    'place_id': result.get('place_id'),
+                    'street': result.get('street', ''),
+                    'city': result.get('city', ''),
+                    'state': result.get('state', ''),
+                    'zip': result.get('zip', ''),
+                    'latitude': result.get('latitude'),
+                    'longitude': result.get('longitude'),
+                    'confidence': result.get('confidence', 'medium'),
+                    'source': result.get('source', 'geocoding')
+                }
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Address could not be validated. Please check the address and try again.'
+            })
+            
+    except Exception as e:
+        logging.error(f"Address validation error: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Address validation service temporarily unavailable'
+        })
 
 @app.route('/api/objection_handler', methods=['POST'])
 def objection_handler():

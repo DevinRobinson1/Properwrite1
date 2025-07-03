@@ -1,0 +1,102 @@
+Upgrade “Street Address” Input to True Google-Places Autocomplete
+
+No layout or styling changes; just make sure the address comes back in the exact, canonical format Google Maps APIs expect and pre-populates the City, State, and ZIP boxes automatically.
+
+1. Install Helper
+bash
+Copy
+Edit
+npm i @react-google-maps/api
+Add GMAPS_KEY to the Replit Secrets.
+
+2. Reusable Autocomplete Component
+tsx
+Copy
+Edit
+// components/GoogleAddressInput.tsx
+import { usePlacesWidget } from "react-google-autocomplete";
+
+export default function GoogleAddressInput({
+  onSelect,
+  defaultValue = ""
+}) {
+  const { ref } = usePlacesWidget({
+    apiKey: process.env.GMAPS_KEY,
+    onPlaceSelected: place => {
+      const addr = place.address_components;
+      const get = (type: string) =>
+        addr.find(c => c.types.includes(type))?.long_name || "";
+
+      onSelect({
+        placeId: place.place_id,
+        formatted: place.formatted_address,          // full Google format
+        street: `${get("street_number")} ${get("route")}`,
+        city: get("locality") || get("postal_town"),
+        state: get("administrative_area_level_1"),
+        zip: get("postal_code")
+      });
+    },
+    types: ["address"],
+    componentRestrictions: { country: "us" }
+  });
+
+  return (
+    <input
+      ref={ref}
+      defaultValue={defaultValue}
+      placeholder="Start typing address…"
+      className="input input-bordered w-full"
+      autoComplete="off"
+    />
+  );
+}
+3. Integrate in Property Analysis + JV Submit
+tsx
+Copy
+Edit
+import GoogleAddressInput from "../components/GoogleAddressInput";
+import { useState } from "react";
+
+const [addr, setAddr] = useState({...});
+
+<GoogleAddressInput
+  defaultValue={addr.formatted}
+  onSelect={data => {
+    setAddr(data);
+    setCity(data.city);
+    setStateAbbr(data.state);
+    setZip(data.zip);
+  }}
+/>
+
+<input value={city}  onChange={e=>setCity(e.target.value)}  .../>
+<input value={state} onChange={e=>setStateAbbr(e.target.value)} .../>
+<input value={zip}   onChange={e=>setZip(e.target.value)}   .../>
+City, State, ZIP now auto-fill the moment a user picks an autocomplete suggestion.
+
+4. Server-Side Safety Net
+If the user pastes an address and never chooses a suggestion:
+
+ts
+Copy
+Edit
+if (!payload.placeId) {
+  const g = await geocodeLoose(payload.street+" "+payload.city+" "+payload.state);
+  if (g) { /* hydrate placeId, lat, lng, formatted_address */ }
+}
+5. Storage / API Calls
+Save:
+
+json
+Copy
+Edit
+{
+  "place_id": "...",
+  "formatted_address": "...",   // e.g. "14303 Evening Flight Ln, Charlotte, NC 28262, USA"
+  "lat": 35.2881,
+  "lng": -80.7833
+}
+Use place_id for any subsequent Google Maps or Places look-ups.
+
+Result:
+Users can only pick valid Google-recognized addresses, the form stores the exact canonical string Google expects, and City/State/ZIP are auto-generated while still editable.

@@ -41,11 +41,20 @@ class AddressValidationService:
     
     def validate_and_normalize_address(self, raw_address: str, city: str = "", state: str = "", zip_code: str = "") -> Dict:
         """
-        Validate and normalize address using Google Places API with fallback normalization
+        5-Layer Defense: Validate and normalize address using multiple fallback strategies
         """
         logging.info(f"Validating address: {raw_address}")
         
-        # Step 1: Clean and normalize input
+        # Layer 1: Google Places API with autocomplete data
+        if hasattr(self, '_autocomplete_data') and self._autocomplete_data:
+            return self._process_autocomplete_selection(self._autocomplete_data)
+        
+        # Layer 2: Google Geocoding API fallback
+        geocoded_result = self.geocode_loose(raw_address, city, state, zip_code)
+        if geocoded_result:
+            return geocoded_result
+        
+        # Layer 3: Manual normalization with enhanced fuzzy matching
         normalized_input = self._normalize_address_input(raw_address, city, state, zip_code)
         
         # Step 2: Try Google Places API validation
@@ -276,6 +285,158 @@ class AddressValidationService:
             score += 0.1
         
         return min(score, 1.0)
+
+    def geocode_loose(self, address: str, city: str = "", state: str = "", zip_code: str = "") -> Optional[Dict]:
+        """
+        Layer 2: Google Geocoding API fallback for loose address matching
+        """
+        if not self.google_api_key:
+            logging.warning("Google Maps API key not available for geocoding")
+            return None
+            
+        try:
+            # Construct full address for geocoding
+            full_address = f"{address}"
+            if city:
+                full_address += f", {city}"
+            if state:
+                full_address += f", {state}"
+            if zip_code:
+                full_address += f" {zip_code}"
+            
+            # Call Google Geocoding API
+            url = f"https://maps.googleapis.com/maps/api/geocode/json"
+            params = {
+                'address': full_address,
+                'key': self.google_api_key,
+                'components': 'country:US'
+            }
+            
+            response = self.session.get(url, params=params, timeout=10)
+            response.raise_for_status()
+            
+            data = response.json()
+            
+            if data.get('status') == 'OK' and data.get('results'):
+                result = data['results'][0]
+                
+                # Extract address components
+                components = self._parse_google_geocoding_components(result['address_components'])
+                
+                return {
+                    'status': 'geocoded',
+                    'source': 'Google Geocoding API',
+                    'place_id': result.get('place_id'),
+                    'formatted_address': result['formatted_address'],
+                    'street': components.get('street_number', '') + ' ' + components.get('route', ''),
+                    'city': components.get('locality') or components.get('sublocality'),
+                    'state': components.get('administrative_area_level_1'),
+                    'zip': components.get('postal_code'),
+                    'full_address': result['formatted_address'],
+                    'latitude': result['geometry']['location']['lat'],
+                    'longitude': result['geometry']['location']['lng'],
+                    'confidence': 'high' if result['geometry']['location_type'] == 'ROOFTOP' else 'medium'
+                }
+            else:
+                logging.warning(f"Google Geocoding failed: {data.get('status', 'Unknown error')}")
+                return None
+                
+        except Exception as e:
+            logging.error(f"Error in Google Geocoding: {e}")
+            return None
+    
+    def _parse_google_geocoding_components(self, components: List[Dict]) -> Dict:
+        """
+        Parse Google Geocoding API address components
+        """
+        parsed = {}
+        
+        for component in components:
+            types = component['types']
+            long_name = component['long_name']
+            short_name = component['short_name']
+            
+            if 'street_number' in types:
+                parsed['street_number'] = long_name
+            elif 'route' in types:
+                parsed['route'] = long_name
+            elif 'locality' in types:
+                parsed['locality'] = long_name
+            elif 'sublocality' in types:
+                parsed['sublocality'] = long_name
+            elif 'administrative_area_level_1' in types:
+                parsed['administrative_area_level_1'] = short_name
+            elif 'postal_code' in types:
+                parsed['postal_code'] = long_name
+                
+        return parsed
+    
+    def _process_autocomplete_selection(self, autocomplete_data: Dict) -> Dict:
+        """
+        Layer 1: Process Google Places Autocomplete selection
+        """
+        return {
+            'status': 'autocomplete',
+            'source': 'Google Places Autocomplete',
+            'place_id': autocomplete_data.get('place_id'),
+            'formatted_address': autocomplete_data.get('formatted_address'),
+            'confidence': 'high'
+        }
+    
+    def set_autocomplete_data(self, place_id: str, formatted_address: str):
+        """
+        Set autocomplete data from frontend selection
+        """
+        self._autocomplete_data = {
+            'place_id': place_id,
+            'formatted_address': formatted_address
+        }
+    
+    def calculate_fuzzy_similarity(self, addr1: str, addr2: str) -> float:
+        """
+        Layer 4: Calculate fuzzy similarity between addresses for database matching
+        """
+        # Normalize both addresses
+        norm1 = self._normalize_address_for_comparison(addr1.lower())
+        norm2 = self._normalize_address_for_comparison(addr2.lower())
+        
+        # Simple character-based similarity
+        if norm1 == norm2:
+            return 1.0
+        
+        # Calculate Jaccard similarity on words
+        words1 = set(norm1.split())
+        words2 = set(norm2.split())
+        
+        if not words1 and not words2:
+            return 1.0
+        if not words1 or not words2:
+            return 0.0
+            
+        intersection = len(words1.intersection(words2))
+        union = len(words1.union(words2))
+        
+        return intersection / union if union > 0 else 0.0
+    
+    def _normalize_address_for_comparison(self, address: str) -> str:
+        """
+        Normalize address for fuzzy comparison
+        """
+        # Remove common punctuation
+        address = re.sub(r'[,\.\-#]', ' ', address)
+        
+        # Normalize street abbreviations
+        words = address.split()
+        normalized_words = []
+        
+        for word in words:
+            # Remove trailing periods and normalize
+            clean_word = word.strip('.')
+            normalized_word = self.abbreviation_map.get(clean_word, clean_word)
+            normalized_words.append(normalized_word)
+        
+        # Remove extra spaces
+        return ' '.join(normalized_words).strip()
 
 # Create global instance
 address_validator = AddressValidationService()

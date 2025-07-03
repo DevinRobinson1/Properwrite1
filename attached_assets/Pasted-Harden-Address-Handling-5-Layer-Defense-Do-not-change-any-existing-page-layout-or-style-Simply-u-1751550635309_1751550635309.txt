@@ -1,0 +1,99 @@
+Harden Address Handling (5-Layer Defense)
+
+Do not change any existing page layout or style.
+Simply upgrade the single address field used in /jv-submit, /analyze-property, and any internal fetchers so that bad or partial addresses no longer break the flow.
+
+1. Replace Plain Text Field with Google Places Autocomplete
+bash
+Copy
+Edit
+npm i @react-google-maps/api
+jsx
+Copy
+Edit
+/* components/AddressInput.jsx */
+import { usePlacesWidget } from "react-google-autocomplete";
+export default function AddressInput({ value, onSelect }) {
+  const { ref } = usePlacesWidget({
+    apiKey: process.env.GMAPS_KEY,
+    onPlaceSelected: place => {
+      onSelect({
+        placeId: place.place_id,
+        formatted: place.formatted_address
+      });
+    },
+    types: ["address"],
+    componentRestrictions: { country: "us" }
+  });
+  return <input ref={ref} defaultValue={value} placeholder="Street Address" />;
+}
+Drop-in replacement for every address box.
+
+2. Server-Side Geocoding Fallback
+js
+Copy
+Edit
+// server/geocode.js
+export async function geocodeLoose(text){
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(text)}&key=${GMAPS_KEY}`;
+  const { results } = await fetch(url).then(r=>r.json());
+  return results[0] ?? null;
+}
+If placeId missing, call geocodeLoose after POST, store highest-confidence result.
+
+3. USPS / Smarty Normalization
+js
+Copy
+Edit
+import SmartyStreets from "@smartystreets/sdk";
+const client = SmartyStreets.buildClient(...);
+
+export async function normalizeAddress(addr){
+  const [c] = await client.send({ street: addr, candidates:1 });
+  return c ? c.deliveryLine1 + ", " + c.lastLine : null;
+}
+Save canonical_usps column; if null, flag submission for manual review.
+
+4. Fuzzy Matching When Pulling Comps
+sql
+Copy
+Edit
+-- enable once in migrations
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- example query
+SELECT *
+FROM comps
+WHERE similarity(address, $1) > 0.8
+ORDER BY similarity(address,$1) DESC
+LIMIT 10;
+(If comps are pulled via JS, use string-similarity before map.)
+
+5. User Confirmation Banner
+jsx
+Copy
+Edit
+// components/ConfirmAddressToast.jsx
+if (autoAddr && !confirmed) {
+  return (
+    <Toast>
+      We’ll analyze: <strong>{autoAddr}</strong>. Correct?
+      <Button onClick={confirm}>Yes</Button>
+      <Button variant="outline" onClick={reset}>Edit</Button>
+    </Toast>
+  );
+}
+Show immediately after autocomplete selection or after geocode fallback.
+
+Integration Checklist
+Autocomplete rendered in Analyze Property and JV Submit pages.
+
+If user free-types and skips dropdown → server performs geocodeLoose → returns canonical; banner asks for confirmation.
+
+After acceptance:
+
+Save place_id, formatted_address, lat, lng, and canonical_usps.
+
+When fetching comps, use fuzzy SQL match to tolerate “St” vs “Street”.
+
+No UI displacement—inputs keep same width and placement.

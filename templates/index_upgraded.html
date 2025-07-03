@@ -107,11 +107,13 @@
             
             <form id="property-form" class="space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div>
+                    <div class="address-input-container">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Street Address *</label>
                         <input type="text" id="address" required
+                               data-enhanced-address="true"
+                               data-auto-submit="false"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="123 Main St">
+                               placeholder="Start typing an address...">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">City *</label>
@@ -5256,6 +5258,51 @@
             });
         }
 
+    </script>
+
+    <!-- Google Maps API for Enhanced Address Input -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places"></script>
+    
+    <!-- Enhanced Address Input JavaScript -->
+    <script src="{{ url_for('static', filename='js/enhanced-address-input.js') }}"></script>
+    
+    <script>
+        // Initialize enhanced address input with property form integration
+        document.addEventListener('DOMContentLoaded', function() {
+            const addressInput = document.getElementById('address');
+            if (addressInput) {
+                new EnhancedAddressInput(addressInput, {
+                    onAddressSelected: function(address) {
+                        console.log('Address selected:', address);
+                        
+                        // Auto-populate city, state, and zip if available
+                        if (address.city && document.getElementById('city')) {
+                            document.getElementById('city').value = address.city;
+                        }
+                        if (address.state && document.getElementById('state')) {
+                            document.getElementById('state').value = address.state;
+                        }
+                        if (address.zip && document.getElementById('zip')) {
+                            document.getElementById('zip').value = address.zip;
+                        }
+                        
+                        // Store selected address data for property analysis
+                        window.selectedAddressData = address;
+                    },
+                    onValidationComplete: function(result) {
+                        console.log('Address validation complete:', result);
+                        if (result.success) {
+                            // Enable the analyze button
+                            const analyzeButton = document.querySelector('button[type="submit"]');
+                            if (analyzeButton) {
+                                analyzeButton.disabled = false;
+                                analyzeButton.classList.remove('opacity-50');
+                            }
+                        }
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
