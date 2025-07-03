@@ -2694,13 +2694,20 @@
         }
 
         async function calculateStrategies() {
+            // Helper function to safely get element value
+            function getElementValue(id, defaultValue = 0) {
+                const element = document.getElementById(id);
+                if (!element || !element.value) return defaultValue;
+                return element.value.replace(/,/g, '') || defaultValue;
+            }
+            
             const strategyData = {
-                arv: parseFloat(document.getElementById('arv').value.replace(/,/g, '')),
-                repairs: parseFloat(document.getElementById('repairs').value.replace(/,/g, '')),
-                bedrooms: parseInt(document.getElementById('bedrooms').value),
-                bathrooms: parseFloat(document.getElementById('bathrooms').value),
-                square_feet: parseInt(document.getElementById('square_feet').value.replace(/,/g, '')),
-                rent: parseFloat(document.getElementById('rent').value.replace(/,/g, ''))
+                arv: parseFloat(getElementValue('arv', '415000')),
+                repairs: parseFloat(getElementValue('repairs', '35000')),
+                bedrooms: parseInt(getElementValue('bedrooms', '3')),
+                bathrooms: parseFloat(getElementValue('bathrooms', '2')),
+                square_feet: parseInt(getElementValue('square_feet', '1450')),
+                rent: parseFloat(getElementValue('rent', '1325'))
             };
             
             try {
@@ -2744,6 +2751,7 @@
 
         function populateWholesaleResults(data) {
             const container = document.getElementById('wholesale-results');
+            if (!container) return;
             container.innerHTML = `
                 <div class="bg-green-50 p-6 rounded-lg">
                     <h4 class="font-bold text-lg text-green-800 mb-2">Maximum Allowable Offer</h4>
@@ -2762,6 +2770,7 @@
 
         function populateInstallmentResults(data) {
             const container = document.getElementById('installment-results');
+            if (!container) return;
             container.innerHTML = `
                 <div class="bg-indigo-50 p-6 rounded-lg">
                     <h4 class="font-bold text-lg text-indigo-800 mb-2">Installment MAO</h4>
@@ -2780,6 +2789,7 @@
 
         function populateSubjectToResults(data) {
             const container = document.getElementById('subject-to-results');
+            if (!container) return;
             container.innerHTML = `
                 <div class="bg-red-50 p-6 rounded-lg">
                     <h4 class="font-bold text-lg text-red-800 mb-2">Equity Position</h4>
@@ -2798,6 +2808,7 @@
 
         function populateSellerFinanceResults(data) {
             const container = document.getElementById('seller-finance-results');
+            if (!container) return;
             container.innerHTML = `
                 <div class="bg-gray-50 p-6 rounded-lg">
                     <h4 class="font-bold text-lg text-gray-800 mb-2">Purchase Price</h4>
@@ -2816,6 +2827,7 @@
 
         function populateComparisonResults(results) {
             const container = document.getElementById('comparison-results');
+            if (!container) return;
             container.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div class="bg-gradient-to-br from-green-400 to-green-600 text-white p-6 rounded-lg card-hover transition-all duration-300">
