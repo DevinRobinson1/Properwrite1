@@ -150,10 +150,14 @@ class EnhancedAddressInput {
     }
     
     handleInputBlur() {
-        // If user typed manually without selecting from dropdown
-        if (!this.selectedAddress && this.input.value.trim()) {
-            console.log('Manual address entry detected, performing server-side validation');
-            this.validateAddressServerSide();
+        // Only validate if user hasn't used Google Places autocomplete
+        if (!this.selectedAddress && this.input.value.trim() && !this.input.getAttribute('data-validated')) {
+            // Only validate if it looks like a complete address
+            const addressValue = this.input.value.trim();
+            if (addressValue.includes(',') || addressValue.split(' ').length >= 3) {
+                console.log('Manual address entry detected, performing server-side validation');
+                this.validateAddressServerSide();
+            }
         }
     }
     
