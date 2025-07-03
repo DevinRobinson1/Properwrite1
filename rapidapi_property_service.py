@@ -34,8 +34,7 @@ class RapidAPIPropertyService:
             'realtor': {
                 'host': 'realtor-search.p.rapidapi.com',
                 'endpoints': {
-                    'property_detail': '/properties/detail',
-                    'property_search': '/properties/list-for-sale'
+                    'property_search': '/properties/search-url'
                 }
             }
         }
@@ -118,26 +117,25 @@ class RapidAPIPropertyService:
     
     def _get_realtor_data(self, address: str, city: str, state: str, zip_code: str) -> Optional[Dict]:
         """
-        Get property data from Realtor.com via RapidAPI
+        Get property data from Realtor.com via RapidAPI using search-url endpoint
         """
         try:
             logging.info(f"Calling Realtor.com API for: {address}")
             
-            # Search for properties in the area to find matching property
-            search_url = f"https://{self.apis['realtor']['host']}{self.apis['realtor']['endpoints']['property_search']}"
+            # Build Realtor.com search URL
+            realtor_search_url = f"https://www.realtor.com/realestateandhomes-search/{city}_{state}"
+            
+            # Call the search-url endpoint
+            api_url = f"https://{self.apis['realtor']['host']}{self.apis['realtor']['endpoints']['property_search']}"
             
             search_params = {
-                'city': city,
-                'state_code': state,
-                'limit': 50,
-                'offset': 0,
-                'status': 'for_sale'
+                'url': realtor_search_url
             }
             
             headers = self.base_headers.copy()
             headers['X-RapidAPI-Host'] = self.apis['realtor']['host']
             
-            response = requests.get(search_url, headers=headers, params=search_params, timeout=10)
+            response = requests.get(api_url, headers=headers, params=search_params, timeout=10)
             
             if response.status_code == 200:
                 search_data = response.json()
@@ -146,12 +144,8 @@ class RapidAPIPropertyService:
                 matching_property = self._find_realtor_matching_property(search_data, address)
                 
                 if matching_property:
-                    # Get detailed property information
-                    property_id = matching_property.get('property_id')
-                    listing_id = matching_property.get('listing_id')
-                    
-                    if property_id and listing_id:
-                        return self._get_realtor_property_details(property_id, listing_id)
+                    # Parse property data directly from search results
+                    return self._parse_realtor_search_result(matching_property)
                         
                 logging.info("No matching property found in Realtor.com search results")
                 return None
@@ -425,7 +419,7 @@ class RapidAPIPropertyService:
         Find matching property in Realtor.com search results
         """
         try:
-            properties = search_data.get('data', {}).get('results', [])
+            properties = search_data.get('data', {}).get('properties', [])
             
             if not properties:
                 return None
@@ -456,88 +450,57 @@ class RapidAPIPropertyService:
             logging.error(f"Error finding matching Realtor.com property: {e}")
             return None
     
-    def _get_realtor_property_details(self, property_id: str, listing_id: str) -> Dict:
+    def _parse_realtor_search_result(self, property_data: Dict) -> Dict:
         """
-        Get detailed property information from Realtor.com
-        """
-        try:
-            detail_url = f"https://{self.apis['realtor']['host']}{self.apis['realtor']['endpoints']['property_detail']}"
-            
-            params = {
-                'propertyId': property_id,
-                'listingId': listing_id
-            }
-            
-            headers = self.base_headers.copy()
-            headers['X-RapidAPI-Host'] = self.apis['realtor']['host']
-            
-            response = requests.get(detail_url, headers=headers, params=params, timeout=10)
-            
-            if response.status_code == 200:
-                data = response.json()
-                return self._parse_realtor_property_details(data)
-            else:
-                logging.warning(f"Realtor.com details API returned status {response.status_code}")
-                return None
-                
-        except Exception as e:
-            logging.error(f"Error getting Realtor.com property details: {e}")
-            return None
-    
-    def _parse_realtor_property_details(self, data: Dict) -> Dict:
-        """
-        Parse detailed property information from Realtor.com API
+        Parse property data directly from Realtor.com search results
         """
         try:
-            property_data = data.get('data', {})
             description = property_data.get('description', {})
+            location = property_data.get('location', {})
             
             result = {
                 'estimate': property_data.get('list_price'),
                 'property_details': {
                     'bedrooms': description.get('beds'),
-                    'bathrooms': description.get('baths'),
+                    'bathrooms': description.get('baths_consolidated'),
                     'square_feet': description.get('sqft'),
                     'lot_size': description.get('lot_sqft'),
-                    'year_built': description.get('year_built'),
                     'property_type': description.get('type'),
-                    'stories': description.get('stories'),
-                    'units': description.get('units'),
-                    'garage': description.get('garage'),
-                    'pool': description.get('pool'),
-                    'heating': description.get('heating'),
-                    'cooling': description.get('cooling'),
+                    'sub_type': description.get('sub_type'),
                     'property_id': property_data.get('property_id'),
                     'listing_id': property_data.get('listing_id'),
                     'status': property_data.get('status'),
-                    'list_date': property_data.get('list_date')
+                    'list_date': property_data.get('list_date'),
+                    'sold_price': description.get('sold_price'),
+                    'sold_date': description.get('sold_date')
                 },
                 'detailed_info': {
-                    'description_text': description.get('text'),
-                    'hoa_fee': property_data.get('hoa', {}).get('fee'),
-                    'mortgage_info': property_data.get('mortgage', {}),
-                    'property_tax_rate': property_data.get('mortgage', {}).get('property_tax_rate'),
-                    'nearby_schools': property_data.get('nearby_schools', {}),
-                    'pet_policy': property_data.get('pet_policy'),
-                    'last_update_date': property_data.get('last_update_date'),
-                    'last_price_change': {
-                        'date': property_data.get('last_price_change_date'),
-                        'amount': property_data.get('last_price_change_amount')
-                    }
+                    'permalink': property_data.get('permalink'),
+                    'price_reduced_amount': property_data.get('price_reduced_amount'),
+                    'street_view_url': location.get('street_view_url'),
+                    'county': location.get('county', {}),
+                    'coordinates': location.get('address', {}).get('coordinate', {}),
+                    'flags': property_data.get('flags', {}),
+                    'branding': property_data.get('branding', []),
+                    'products': property_data.get('products', {}),
+                    'open_houses': property_data.get('open_houses'),
+                    'virtual_tours': property_data.get('virtual_tours'),
+                    'matterport': property_data.get('matterport', False)
                 },
-                'confidence': 0.9
+                'confidence': 0.85
             }
             
             # Extract property images if available
-            if property_data.get('photos'):
-                photos = property_data['photos']
-                if photos and len(photos) > 0:
-                    result['images'] = [photo.get('href') for photo in photos[:5]]  # First 5 images
+            photos = property_data.get('photos', [])
+            if photos and len(photos) > 0:
+                result['images'] = [photo.get('href') for photo in photos[:5]]  # First 5 images
+            elif property_data.get('primary_photo'):
+                result['images'] = [property_data['primary_photo'].get('href')]
             
             return result
             
         except Exception as e:
-            logging.error(f"Error parsing Realtor.com property details: {e}")
+            logging.error(f"Error parsing Realtor.com search result: {e}")
             return None
     
     def test_api_connection(self) -> Dict:
