@@ -32,10 +32,10 @@ class RapidAPIPropertyService:
                 }
             },
             'realtor': {
-                'host': 'realtor-com1.p.rapidapi.com',  # Typical RapidAPI host pattern
+                'host': 'realtor-search.p.rapidapi.com',
                 'endpoints': {
-                    'property_details': '',
-                    'search': ''
+                    'property_detail': '/properties/detail',
+                    'property_search': '/properties/list-for-sale'
                 }
             }
         }
@@ -121,13 +121,44 @@ class RapidAPIPropertyService:
         Get property data from Realtor.com via RapidAPI
         """
         try:
+            logging.info(f"Calling Realtor.com API for: {address}")
+            
+            # Search for properties in the area to find matching property
+            search_url = f"https://{self.apis['realtor']['host']}{self.apis['realtor']['endpoints']['property_search']}"
+            
+            search_params = {
+                'city': city,
+                'state_code': state,
+                'limit': 50,
+                'offset': 0,
+                'status': 'for_sale'
+            }
+            
             headers = self.base_headers.copy()
             headers['X-RapidAPI-Host'] = self.apis['realtor']['host']
             
-            # TODO: Replace with actual endpoints once provided
-            logging.info("Realtor.com API integration ready - awaiting endpoints")
-            return None
+            response = requests.get(search_url, headers=headers, params=search_params, timeout=10)
             
+            if response.status_code == 200:
+                search_data = response.json()
+                
+                # Find matching property by address
+                matching_property = self._find_realtor_matching_property(search_data, address)
+                
+                if matching_property:
+                    # Get detailed property information
+                    property_id = matching_property.get('property_id')
+                    listing_id = matching_property.get('listing_id')
+                    
+                    if property_id and listing_id:
+                        return self._get_realtor_property_details(property_id, listing_id)
+                        
+                logging.info("No matching property found in Realtor.com search results")
+                return None
+            else:
+                logging.warning(f"Realtor.com search API returned status {response.status_code}")
+                return None
+                
         except Exception as e:
             logging.error(f"Error getting Realtor.com data: {e}")
             return None
@@ -388,6 +419,126 @@ class RapidAPIPropertyService:
         except Exception as e:
             logging.error(f"Error merging property data: {e}")
             return base_result
+    
+    def _find_realtor_matching_property(self, search_data: Dict, target_address: str) -> Optional[Dict]:
+        """
+        Find matching property in Realtor.com search results
+        """
+        try:
+            properties = search_data.get('data', {}).get('results', [])
+            
+            if not properties:
+                return None
+            
+            best_match = None
+            best_score = 0.0
+            
+            for prop in properties:
+                location = prop.get('location', {})
+                address = location.get('address', {})
+                
+                # Build full address from Realtor.com data
+                full_address = f"{address.get('line', '')} {address.get('city', '')} {address.get('state_code', '')}"
+                
+                # Calculate similarity score
+                similarity = self._calculate_address_similarity(target_address, full_address)
+                
+                if similarity > best_score:
+                    best_score = similarity
+                    best_match = prop
+            
+            if best_match and best_score >= 0.5:  # Minimum similarity threshold
+                return best_match
+                
+            return None
+            
+        except Exception as e:
+            logging.error(f"Error finding matching Realtor.com property: {e}")
+            return None
+    
+    def _get_realtor_property_details(self, property_id: str, listing_id: str) -> Dict:
+        """
+        Get detailed property information from Realtor.com
+        """
+        try:
+            detail_url = f"https://{self.apis['realtor']['host']}{self.apis['realtor']['endpoints']['property_detail']}"
+            
+            params = {
+                'propertyId': property_id,
+                'listingId': listing_id
+            }
+            
+            headers = self.base_headers.copy()
+            headers['X-RapidAPI-Host'] = self.apis['realtor']['host']
+            
+            response = requests.get(detail_url, headers=headers, params=params, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                return self._parse_realtor_property_details(data)
+            else:
+                logging.warning(f"Realtor.com details API returned status {response.status_code}")
+                return None
+                
+        except Exception as e:
+            logging.error(f"Error getting Realtor.com property details: {e}")
+            return None
+    
+    def _parse_realtor_property_details(self, data: Dict) -> Dict:
+        """
+        Parse detailed property information from Realtor.com API
+        """
+        try:
+            property_data = data.get('data', {})
+            description = property_data.get('description', {})
+            
+            result = {
+                'estimate': property_data.get('list_price'),
+                'property_details': {
+                    'bedrooms': description.get('beds'),
+                    'bathrooms': description.get('baths'),
+                    'square_feet': description.get('sqft'),
+                    'lot_size': description.get('lot_sqft'),
+                    'year_built': description.get('year_built'),
+                    'property_type': description.get('type'),
+                    'stories': description.get('stories'),
+                    'units': description.get('units'),
+                    'garage': description.get('garage'),
+                    'pool': description.get('pool'),
+                    'heating': description.get('heating'),
+                    'cooling': description.get('cooling'),
+                    'property_id': property_data.get('property_id'),
+                    'listing_id': property_data.get('listing_id'),
+                    'status': property_data.get('status'),
+                    'list_date': property_data.get('list_date')
+                },
+                'detailed_info': {
+                    'description_text': description.get('text'),
+                    'hoa_fee': property_data.get('hoa', {}).get('fee'),
+                    'mortgage_info': property_data.get('mortgage', {}),
+                    'property_tax_rate': property_data.get('mortgage', {}).get('property_tax_rate'),
+                    'nearby_schools': property_data.get('nearby_schools', {}),
+                    'pet_policy': property_data.get('pet_policy'),
+                    'last_update_date': property_data.get('last_update_date'),
+                    'last_price_change': {
+                        'date': property_data.get('last_price_change_date'),
+                        'amount': property_data.get('last_price_change_amount')
+                    }
+                },
+                'confidence': 0.9
+            }
+            
+            # Extract property images if available
+            if property_data.get('photos'):
+                photos = property_data['photos']
+                if photos and len(photos) > 0:
+                    result['images'] = [photo.get('href') for photo in photos[:5]]  # First 5 images
+            
+            return result
+            
+        except Exception as e:
+            logging.error(f"Error parsing Realtor.com property details: {e}")
+            return None
     
     def test_api_connection(self) -> Dict:
         """

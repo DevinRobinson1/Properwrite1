@@ -369,6 +369,30 @@ class EnhancedPropertyService:
                         property_data['realtor_estimate'] = realtor_data['estimate']
                         property_data['confidence_scores']['realtor'] = realtor_data.get('confidence', 0.8)
                         
+                        # Update property details from Realtor.com
+                        if realtor_data.get('property_details'):
+                            details = realtor_data['property_details']
+                            if details.get('bedrooms') and not property_data.get('bedrooms'):
+                                property_data['bedrooms'] = details['bedrooms']
+                            if details.get('bathrooms') and not property_data.get('bathrooms'):
+                                property_data['bathrooms'] = details['bathrooms']
+                            if details.get('square_feet') and not property_data.get('square_feet'):
+                                property_data['square_feet'] = details['square_feet']
+                            if details.get('lot_size') and not property_data.get('lot_size_sqft'):
+                                property_data['lot_size_sqft'] = details['lot_size']
+                            if details.get('year_built') and not property_data.get('year_built'):
+                                property_data['year_built'] = details['year_built']
+                        
+                        # Add detailed information if available
+                        if realtor_data.get('detailed_info'):
+                            property_data['realtor_detailed_info'] = realtor_data['detailed_info']
+                        
+                        # Add images if available
+                        if realtor_data.get('images') and not property_data.get('image_url'):
+                            images = realtor_data['images']
+                            if images and len(images) > 0:
+                                property_data['image_url'] = images[0]
+                        
                         logging.info(f"RapidAPI Realtor data: ${realtor_data['estimate']:,}")
                 
                 # Add data source indicators

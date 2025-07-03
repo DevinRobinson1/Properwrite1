@@ -1,0 +1,3348 @@
+
+Realtor Search
+GET properties/detail
+
+App: default-application_10722772
+X-RapidAPI-Key: be3e296439msh2693e44b9d2433fp17bebbjsn9aa77716b131
+Request URL: rapidapi.com
+X-RapidAPI-Host*: realtor-search.p.rapidapi.com
+
+Target:
+Python
+Client:
+http.client
+import http.client
+
+conn = http.client.HTTPSConnection("realtor-search.p.rapidapi.com")
+
+headers = {
+    'x-rapidapi-key': "be3e296439msh2693e44b9d2433fp17bebbjsn9aa77716b131",
+    'x-rapidapi-host': "realtor-search.p.rapidapi.com"
+}
+
+conn.request("GET", "/properties/detail?propertyId=4752427680&listingId=2964420807", headers=headers)
+
+res = conn.getresponse()
+data = res.read()
+
+print(data.decode("utf-8"))
+
+
+Status
+200
+Media Type
+JSON
+Example
+New Example
+Description
+
+Body
+
+{
+  "data": {
+    "property_id": "4752427680",
+    "last_update_date": "2024-02-25T05:49:40Z",
+    "last_price_change_date": null,
+    "last_price_change_amount": null,
+    "listing_id": "2964420807",
+    "status": "for_sale",
+    "href": "https://www.realtor.com/realestateandhomes-detail/9526-86th-St_Ozone-Park_NY_11416_M47524-27680",
+    "list_date": "2024-02-25T05:43:44Z",
+    "mortgage": {
+      "property_tax_rate": 0.00558799,
+      "rates_url": "https://www.realtor.com/mortgage/rates/?from=mobile#zip=11416&property_price=1199000&mlid=4752427680",
+      "estimate": {
+        "loan_amount": 959200,
+        "monthly_payment": 7378,
+        "total_payment": 2305260,
+        "down_payment": 239800,
+        "average_rate": {
+          "rate": 0.07034,
+          "loan_type": {
+            "term": 30
+          }
+        },
+        "monthly_payment_details": [
+          {
+            "type": "principal_and_interest",
+            "amount": 6404,
+            "display_name": "Principal & Interest"
+          },
+          {
+            "type": "home_insurance",
+            "amount": 416,
+            "display_name": "Home Insurance"
+          },
+          {
+            "type": "hoa_fees",
+            "amount": 0,
+            "display_name": "HOA Fees"
+          },
+          {
+            "type": "mortgage_insurance",
+            "amount": 0,
+            "display_name": "Mortgage Insurance"
+          },
+          {
+            "type": "property_tax",
+            "amount": 558,
+            "display_name": "Property Tax"
+          }
+        ]
+      },
+      "average_rates": [
+        {
+          "loan_type": {
+            "loan_id": "thirty_year_fix"
+          },
+          "rate": 0.07034
+        },
+        {
+          "loan_type": {
+            "loan_id": "twenty_year_fix"
+          },
+          "rate": 0.07038
+        },
+        {
+          "loan_type": {
+            "loan_id": "fifteen_year_fix"
+          },
+          "rate": 0.06335
+        },
+        {
+          "loan_type": {
+            "loan_id": "ten_year_fix"
+          },
+          "rate": 0.06278
+        },
+        {
+          "loan_type": {
+            "loan_id": "thirty_year_fha"
+          },
+          "rate": 0.06282
+        },
+        {
+          "loan_type": {
+            "loan_id": "thirty_year_va"
+          },
+          "rate": 0.06365
+        },
+        {
+          "loan_type": {
+            "loan_id": "five_one_arm"
+          },
+          "rate": 0.07093
+        },
+        {
+          "loan_type": {
+            "loan_id": "seven_one_arm"
+          },
+          "rate": 0.07126
+        }
+      ]
+    },
+    "hoa": {
+      "fee": 0
+    },
+    "buyers": null,
+    "description": {
+      "baths_consolidated": "3",
+      "baths": 3,
+      "baths_min": null,
+      "baths_max": null,
+      "heating": null,
+      "cooling": null,
+      "beds": 6,
+      "beds_min": null,
+      "beds_max": null,
+      "garage": null,
+      "garage_min": null,
+      "garage_max": null,
+      "pool": null,
+      "sqft": null,
+      "sqft_min": null,
+      "sqft_max": null,
+      "styles": null,
+      "lot_sqft": 5000,
+      "units": 2,
+      "stories": 2,
+      "type": "multi_family",
+      "text": "Welcome to R5 ZONING ! Massive lot fit up to 25-30 cars ! BUILDABLE LOT ! BUILD 2 MULTI-FAMILY BUILDINGS SEMI-DETACHED ! CURRENTLY holding a legal 2 family house with 6 bedrooms and 3 full baths , Full finished basement !! 50x100 LOT SIZE.......New hardwood FLOORS , NEW kitchens already built in ..etc..........",
+      "year_built": 1925,
+      "name": null
+    },
+    "pet_policy": null,
+    "nearby_schools": {
+      "schools": [
+        {
+          "__typename": "School",
+          "coordinate": {
+            "lat": 40.684604,
+            "lon": -73.847381
+          },
+          "distance_in_miles": 0.4,
+          "district": {
+            "id": "06194298051",
+            "name": "New York City Geographic District #27"
+          },
+          "education_levels": [
+            "middle"
+          ],
+          "funding_type": "public",
+          "grades": [
+            "6",
+            "7",
+            "8"
+          ],
+          "id": "0751466401",
+          "name": "Jhs 210 Elizabeth Blackwell",
+          "rating": 4,
+          "student_count": 1706
+        },
+        {
+          "__typename": "School",
+          "coordinate": {
+            "lat": 40.691591,
+            "lon": -73.84855
+          },
+          "distance_in_miles": 0.6,
+          "district": {
+            "id": "06194298051",
+            "name": "New York City Geographic District #27"
+          },
+          "education_levels": [
+            "elementary"
+          ],
+          "funding_type": "public",
+          "grades": [
+            "K",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "id": "0751619461",
+          "name": "New York City Academy For Discovery",
+          "rating": 5,
+          "student_count": 347
+        },
+        {
+          "__typename": "School",
+          "coordinate": {
+            "lat": 40.685486,
+            "lon": -73.856511
+          },
+          "distance_in_miles": 0.1,
+          "district": {
+            "id": "06194285711",
+            "name": null
+          },
+          "education_levels": [
+            "elementary",
+            "middle"
+          ],
+          "funding_type": "private",
+          "grades": [
+            "PK",
+            "K",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8"
+          ],
+          "id": "0751494441",
+          "name": "St Elizabeth Catholic Academy",
+          "rating": null,
+          "student_count": 386
+        },
+        {
+          "__typename": "School",
+          "coordinate": {
+            "lat": 40.681891,
+            "lon": -73.856901
+          },
+          "distance_in_miles": 0.2,
+          "district": {
+            "id": "06194298051",
+            "name": "New York City Geographic District #27"
+          },
+          "education_levels": [
+            "elementary"
+          ],
+          "funding_type": "public",
+          "grades": [
+            "K",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "id": "0751460631",
+          "name": "Ps 64 Joseph P Addabbo",
+          "rating": 5,
+          "student_count": 470
+        },
+        {
+          "__typename": "School",
+          "coordinate": {
+            "lat": 40.683396,
+            "lon": -73.849895
+          },
+          "distance_in_miles": 0.3,
+          "district": {
+            "id": "06194298051",
+            "name": "New York City Geographic District #27"
+          },
+          "education_levels": [
+            "elementary"
+          ],
+          "funding_type": "public",
+          "grades": [
+            "K",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "id": "0751689411",
+          "name": "Queens Explorers Elementary School",
+          "rating": 4,
+          "student_count": 456
+        },
+        {
+          "__typename": "School",
+          "coordinate": {
+            "lat": 40.682282,
+            "lon": -73.848176
+          },
+          "distance_in_miles": 0.4,
+          "district": {
+            "id": "06194285711",
+            "name": null
+          },
+          "education_levels": [
+            "elementary",
+            "middle"
+          ],
+          "funding_type": "private",
+          "grades": [
+            "PK",
+            "K",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8"
+          ],
+          "id": "0751494421",
+          "name": "Divine Mercy Catholic Academy",
+          "rating": null,
+          "student_count": 206
+        },
+        {
+          "__typename": "School",
+          "coordinate": {
+            "lat": 40.691448,
+            "lon": -73.856455
+          },
+          "distance_in_miles": 0.5,
+          "district": {
+            "id": "06194285711",
+            "name": null
+          },
+          "education_levels": [
+            "elementary",
+            "middle"
+          ],
+          "funding_type": "private",
+          "grades": [
+            "PK",
+            "K",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8"
+          ],
+          "id": "0751494801",
+          "name": "St Thomas The Apostle",
+          "rating": null,
+          "student_count": 253
+        },
+        {
+          "__typename": "School",
+          "coordinate": {
+            "lat": 40.689455,
+            "lon": -73.841216
+          },
+          "distance_in_miles": 0.8,
+          "district": {
+            "id": "06194298051",
+            "name": "New York City Geographic District #27"
+          },
+          "education_levels": [
+            "high"
+          ],
+          "funding_type": "public",
+          "grades": [
+            "9",
+            "10",
+            "11",
+            "12"
+          ],
+          "id": "0751554601",
+          "name": "High School Construction Trades Engineering And Arc",
+          "rating": 7,
+          "student_count": 1089
+        },
+        {
+          "__typename": "School",
+          "coordinate": {
+            "lat": 40.678328,
+            "lon": -73.83955
+          },
+          "distance_in_miles": 0.9,
+          "district": {
+            "id": "06194298051",
+            "name": "New York City Geographic District #27"
+          },
+          "education_levels": [
+            "middle"
+          ],
+          "funding_type": "public",
+          "grades": [
+            "6",
+            "7",
+            "8"
+          ],
+          "id": "0751529121",
+          "name": "Ms 137 America S School Of Heroes",
+          "rating": 7,
+          "student_count": 1923
+        },
+        {
+          "__typename": "School",
+          "coordinate": {
+            "lat": 40.678596,
+            "lon": -73.836994
+          },
+          "distance_in_miles": 1,
+          "district": {
+            "id": "06194298051",
+            "name": "New York City Geographic District #27"
+          },
+          "education_levels": [
+            "high"
+          ],
+          "funding_type": "public",
+          "grades": [
+            "9",
+            "10",
+            "11",
+            "12"
+          ],
+          "id": "0751457231",
+          "name": "John Adams High School",
+          "rating": 3,
+          "student_count": 2425
+        },
+        {
+          "__typename": "School",
+          "coordinate": {
+            "lat": 40.670975,
+            "lon": -73.845649
+          },
+          "distance_in_miles": 1,
+          "district": {
+            "id": "06194298051",
+            "name": "New York City Geographic District #27"
+          },
+          "education_levels": [
+            "middle"
+          ],
+          "funding_type": "public",
+          "grades": [
+            "6",
+            "7",
+            "8"
+          ],
+          "id": "0751466141",
+          "name": "Jhs 202 Robert H Goddard",
+          "rating": 6,
+          "student_count": 1028
+        },
+        {
+          "__typename": "School",
+          "coordinate": {
+            "lat": 40.670667,
+            "lon": -73.845732
+          },
+          "distance_in_miles": 1,
+          "district": {
+            "id": "06194298051",
+            "name": "New York City Geographic District #27"
+          },
+          "education_levels": [
+            "high"
+          ],
+          "funding_type": "public",
+          "grades": [
+            "9",
+            "10",
+            "11",
+            "12"
+          ],
+          "id": "0751619551",
+          "name": "Robert H Goddard High School For Community Arts 7 And T",
+          "rating": 6,
+          "student_count": 602
+        }
+      ]
+    },
+    "schools": {
+      "schools": [
+        {
+          "__typename": "School",
+          "coordinate": {
+            "lat": 40.684604,
+            "lon": -73.847381
+          },
+          "distance_in_miles": 0.4,
+          "district": {
+            "id": "06194298051",
+            "name": "New York City Geographic District #27"
+          },
+          "education_levels": [
+            "middle"
+          ],
+          "funding_type": "public",
+          "grades": [
+            "6",
+            "7",
+            "8"
+          ],
+          "id": "0751466401",
+          "name": "Jhs 210 Elizabeth Blackwell",
+          "rating": 4,
+          "student_count": 1706
+        },
+        {
+          "__typename": "School",
+          "coordinate": {
+            "lat": 40.691591,
+            "lon": -73.84855
+          },
+          "distance_in_miles": 0.6,
+          "district": {
+            "id": "06194298051",
+            "name": "New York City Geographic District #27"
+          },
+          "education_levels": [
+            "elementary"
+          ],
+          "funding_type": "public",
+          "grades": [
+            "K",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "id": "0751619461",
+          "name": "New York City Academy For Discovery",
+          "rating": 5,
+          "student_count": 347
+        },
+        {
+          "__typename": "School",
+          "coordinate": {
+            "lat": 40.685486,
+            "lon": -73.856511
+          },
+          "distance_in_miles": 0.1,
+          "district": {
+            "id": "06194285711",
+            "name": null
+          },
+          "education_levels": [
+            "elementary",
+            "middle"
+          ],
+          "funding_type": "private",
+          "grades": [
+            "PK",
+            "K",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8"
+          ],
+          "id": "0751494441",
+          "name": "St Elizabeth Catholic Academy",
+          "rating": null,
+          "student_count": 386
+        },
+        {
+          "__typename": "School",
+          "coordinate": {
+            "lat": 40.689455,
+            "lon": -73.841216
+          },
+          "distance_in_miles": 0.8,
+          "district": {
+            "id": "06194298051",
+            "name": "New York City Geographic District #27"
+          },
+          "education_levels": [
+            "high"
+          ],
+          "funding_type": "public",
+          "grades": [
+            "9",
+            "10",
+            "11",
+            "12"
+          ],
+          "id": "0751554601",
+          "name": "High School Construction Trades Engineering And Arc",
+          "rating": 7,
+          "student_count": 1089
+        }
+      ]
+    },
+    "products": {
+      "products": [
+        "co_broke"
+      ]
+    },
+    "list_price": 1199000,
+    "list_price_min": null,
+    "list_price_max": null,
+    "price_per_sqft": null,
+    "community": null,
+    "lead_attributes": {
+      "opcity_lead_attributes": {
+        "flip_the_market_enabled": false,
+        "cashback_enabled": false,
+        "phones": null
+      },
+      "ready_connect_mortgage": {
+        "show_contact_a_lender": false,
+        "show_veterans_united": false
+      },
+      "lead_type": "co_broke",
+      "show_lead_form": true,
+      "disclaimer_text": null,
+      "is_tcpa_message_enabled": null,
+      "show_text_leads": true,
+      "is_premium_ldp": null
+    },
+    "flags": {
+      "is_contingent": null,
+      "is_new_construction": null,
+      "is_pending": null,
+      "is_foreclosure": null,
+      "is_deal_available": null,
+      "is_subdivision": null,
+      "is_plan": null,
+      "is_price_reduced": null,
+      "is_new_listing": true,
+      "is_coming_soon": null,
+      "is_usda_eligible": false
+    },
+    "provider_url": null,
+    "source": {
+      "id": "LINY",
+      "disclaimer": {
+        "text": "© 2024, OneKey™ MLS.  All Rights Reserved.",
+        "href": null
+      },
+      "listing_id": "3533633",
+      "plan_id": null,
+      "spec_id": null,
+      "community_id": null,
+      "name": "OneKeyMLS",
+      "type": "mls",
+      "feed_type": null,
+      "agents": [
+        {
+          "agent_name": "Karnveer Singh"
+        }
+      ]
+    },
+    "details": [
+      {
+        "category": "Bedrooms",
+        "text": [
+          "Bedrooms: 6"
+        ]
+      },
+      {
+        "category": "Other Rooms",
+        "text": [
+          "Total Rooms: 12",
+          "Basement Features: Finished, Full, Walk-Out Access",
+          "Basement Description: Finished, Full, Walk-Out Access"
+        ]
+      },
+      {
+        "category": "Bathrooms",
+        "text": [
+          "Total Bathrooms: 3",
+          "Full Bathrooms: 3"
+        ]
+      },
+      {
+        "category": "Heating and Cooling",
+        "text": [
+          "Cooling Features: Wall Unit(s)",
+          "Heating Features: Natural Gas"
+        ]
+      },
+      {
+        "category": "Land Info",
+        "text": [
+          "Lot Description: Near Public Transit, Private",
+          "Lot Size Acres: 0.1147842",
+          "Lot Size Dimensions: 50x100",
+          "Lot Size Square Feet: 5000"
+        ]
+      },
+      {
+        "category": "Garage and Parking",
+        "text": [
+          "Parking Features: Private"
+        ]
+      },
+      {
+        "category": "Homeowners Association",
+        "text": [
+          "Association: No",
+          "Calculated Total Monthly Association Fees: 0"
+        ]
+      },
+      {
+        "category": "School Information",
+        "text": [
+          "Elementary School District: Queens 27",
+          "High School: Hs For Con, Trades, Engineer And Arc",
+          "High School District: Queens 27",
+          "Middle School: Jhs 210 Elizabeth Blackwell",
+          "Middle or Junior School District: Queens 27"
+        ]
+      },
+      {
+        "category": "Multi-Unit Info",
+        "text": [
+          "Number of Units: 2"
+        ]
+      },
+      {
+        "category": "Amenities and Community Features",
+        "text": [
+          "Community Features: Park, Near Public Transportation"
+        ]
+      },
+      {
+        "category": "Other Property Info",
+        "text": [
+          "Annual Tax Amount: 6700.00",
+          "Source Listing Status: Active",
+          "County: Queens",
+          "Cross Street: 95th Ave",
+          "Directions: Google Maps",
+          "List Price Low: 1199000",
+          "Source Property Type: Residential Income",
+          "Number of Separate Electric Meters: 2",
+          "Number of Separate Gas Meters: 2",
+          "Parcel Number: 09021-0017",
+          "Township: Queens",
+          "Zoning Description: R5",
+          "Property Subtype: Multi Family",
+          "Source System Name: C2C"
+        ]
+      },
+      {
+        "category": "Building and Construction",
+        "text": [
+          "Year Built: 1925",
+          "Common Walls: No Common Walls",
+          "Levels: Two",
+          "Property Age: 99",
+          "Architectural Style: Two Story"
+        ]
+      }
+    ],
+    "open_houses": null,
+    "tax_history": [
+      {
+        "tax": 6351,
+        "year": 2022,
+        "assessment": {
+          "building": 27360,
+          "land": 19500,
+          "total": 46860
+        }
+      },
+      {
+        "tax": 6695,
+        "year": 2021,
+        "assessment": {
+          "building": 19320,
+          "land": 19500,
+          "total": 38820
+        }
+      },
+      {
+        "tax": 6584,
+        "year": 2020,
+        "assessment": {
+          "building": 19440,
+          "land": 19500,
+          "total": 38940
+        }
+      },
+      {
+        "tax": 6145,
+        "year": 2019,
+        "assessment": {
+          "building": 19260,
+          "land": 19500,
+          "total": 38760
+        }
+      },
+      {
+        "tax": 5845,
+        "year": 2018,
+        "assessment": {
+          "building": 14569,
+          "land": 13376,
+          "total": 27945
+        }
+      },
+      {
+        "tax": 5404,
+        "year": 2017,
+        "assessment": {
+          "building": 11126,
+          "land": 15386,
+          "total": 26512
+        }
+      },
+      {
+        "tax": 5300,
+        "year": 2016,
+        "assessment": {
+          "building": 9846,
+          "land": 16666,
+          "total": 26512
+        }
+      },
+      {
+        "tax": 5069,
+        "year": 2015,
+        "assessment": {
+          "building": 11873,
+          "land": 14051,
+          "total": 25924
+        }
+      },
+      {
+        "tax": 4081,
+        "year": 2014,
+        "assessment": {
+          "building": 8981,
+          "land": 15501,
+          "total": 24482
+        }
+      },
+      {
+        "tax": 3872,
+        "year": 2013,
+        "assessment": {
+          "building": 10002,
+          "land": 13286,
+          "total": 23288
+        }
+      },
+      {
+        "tax": 3232,
+        "year": 2011,
+        "assessment": {
+          "building": 9409,
+          "land": 12685,
+          "total": 22094
+        }
+      },
+      {
+        "tax": 3138,
+        "year": 2010,
+        "assessment": {
+          "building": 9436,
+          "land": 12658,
+          "total": 22094
+        }
+      },
+      {
+        "tax": 3012,
+        "year": 2009,
+        "assessment": {
+          "building": 8565,
+          "land": 13039,
+          "total": 21604
+        }
+      },
+      {
+        "tax": 2466,
+        "year": 2007,
+        "assessment": {
+          "building": 15106,
+          "land": 3306,
+          "total": 18412
+        }
+      }
+    ],
+    "location": {
+      "address": {
+        "line": "95-26 86th St",
+        "city": "Ozone Park",
+        "state_code": "NY",
+        "postal_code": "11416",
+        "state": "New York",
+        "coordinate": {
+          "lat": 40.684081,
+          "lon": -73.854925
+        }
+      },
+      "county": {
+        "fips_code": "36081"
+      },
+      "street_view_url": "https://maps.googleapis.com/maps/api/streetview?channel=rdc-streetview&client=gme-movesalesinc&location=95-26%2086th%20St%2C%20Ozone%20Park%2C%20NY%2011416&size=640x480&source=outdoor&signature=Asyjvwz7i9gW6M1u-lyutssKfQY=",
+      "neighborhoods": [
+        {
+          "name": "Southwestern Queens",
+          "geo_statistics": {
+            "housing_market": {
+              "median_price_per_sqft": 466,
+              "median_sold_price": 725000,
+              "median_listing_price": 785000,
+              "median_days_on_market": 86
+            }
+          }
+        },
+        {
+          "name": "Ozone Park",
+          "geo_statistics": {
+            "housing_market": {
+              "median_price_per_sqft": 473,
+              "median_sold_price": 705000,
+              "median_listing_price": 799000,
+              "median_days_on_market": 90
+            }
+          }
+        }
+      ]
+    },
+    "branding": [
+      {
+        "type": "Agent",
+        "photo": null,
+        "name": "Karnveer Singh",
+        "phone": null,
+        "slogan": null,
+        "accent_color": null
+      },
+      {
+        "type": "Office",
+        "photo": null,
+        "name": "Barillas Realty Inc",
+        "phone": null,
+        "slogan": null,
+        "accent_color": null
+      }
+    ],
+    "consumer_advertisers": [
+      {
+        "advertiser_id": "3030912",
+        "office_id": "3030912",
+        "agent_id": null,
+        "name": "Karnveer Singh",
+        "phone": null,
+        "type": "Agent",
+        "href": null,
+        "photo": {
+          "href": null
+        },
+        "show_realtor_logo": false,
+        "hours": null
+      },
+      {
+        "advertiser_id": "3030912",
+        "office_id": "3030912",
+        "agent_id": null,
+        "name": "Barillas Realty Inc",
+        "phone": "(347) 776-6239",
+        "type": "Office",
+        "href": null,
+        "photo": {
+          "href": null
+        },
+        "show_realtor_logo": false,
+        "hours": null
+      }
+    ],
+    "specials": null,
+    "advertisers": [
+      {
+        "fulfillment_id": "0",
+        "name": "Karnveer Singh",
+        "type": "seller",
+        "email": "agentksingh@gmail.com",
+        "href": null,
+        "state_license": "10401336018",
+        "phones": [
+          {
+            "number": "(646) 423-6638",
+            "type": "Mobile",
+            "ext": null,
+            "trackable": null,
+            "primary": true
+          }
+        ],
+        "builder": null,
+        "office": {
+          "fulfillment_id": "3030912",
+          "name": "Barillas Realty Inc",
+          "href": null,
+          "photo": {
+            "href": ""
+          },
+          "email": "olimpia@realtyagent.com",
+          "phones": [
+            {
+              "number": "3477766239",
+              "type": "Mobile",
+              "ext": "",
+              "trackable": null,
+              "primary": true
+            }
+          ],
+          "address": {
+            "city": "SOUTH RICHMOND HILL",
+            "state_code": "NY"
+          }
+        },
+        "broker": null,
+        "photo": null,
+        "rental_management": null
+      }
+    ],
+    "photo_count": 5,
+    "photos": [
+      {
+        "href": "https://ap.rdcpix.com/426577dfd39b70954f3d74470bb3a3f3l-m3182792661s.jpg",
+        "type": "realtordotcom_mls_listing_image",
+        "tags": [
+          {
+            "label": "road_view",
+            "probability": 0.6078090071678162
+          }
+        ]
+      },
+      {
+        "href": "https://ap.rdcpix.com/426577dfd39b70954f3d74470bb3a3f3l-m1381284897s.jpg",
+        "type": "realtordotcom_mls_listing_image",
+        "tags": [
+          {
+            "label": "yard",
+            "probability": 0.8657664060592651
+          }
+        ]
+      },
+      {
+        "href": "https://ap.rdcpix.com/426577dfd39b70954f3d74470bb3a3f3l-m4052802802s.jpg",
+        "type": "realtordotcom_mls_listing_image",
+        "tags": [
+          {
+            "label": "house_view",
+            "probability": 0.9850859642028809
+          },
+          {
+            "label": "porch",
+            "probability": 0.9602183699607849
+          },
+          {
+            "label": "house_view",
+            "probability": 0.9422509074211121
+          },
+          {
+            "label": "house_view",
+            "probability": 0.7268251180648804
+          }
+        ]
+      },
+      {
+        "href": "https://ap.rdcpix.com/426577dfd39b70954f3d74470bb3a3f3l-m429218391s.jpg",
+        "type": "realtordotcom_mls_listing_image",
+        "tags": [
+          {
+            "label": "garage",
+            "probability": 0.9668309092521667
+          },
+          {
+            "label": "house_view",
+            "probability": 0.9406569004058838
+          },
+          {
+            "label": "road_view",
+            "probability": 0.8522440791130066
+          },
+          {
+            "label": "house_view",
+            "probability": 0.6910972595214844
+          },
+          {
+            "label": "unknown",
+            "probability": 0.5616337060928345
+          }
+        ]
+      },
+      {
+        "href": "https://ap.rdcpix.com/426577dfd39b70954f3d74470bb3a3f3l-m1812397903s.jpg",
+        "type": "realtordotcom_mls_listing_image",
+        "tags": [
+          {
+            "label": "garage",
+            "probability": 0.7795747518539429
+          },
+          {
+            "label": "house_view",
+            "probability": 0.9876024127006531
+          },
+          {
+            "label": "road_view",
+            "probability": 0.9566646814346313
+          },
+          {
+            "label": "house_view",
+            "probability": 0.7978132367134094
+          },
+          {
+            "label": "house_view",
+            "probability": 0.9262844324111938
+          }
+        ]
+      }
+    ],
+    "property_history": [
+      {
+        "date": "2024-02-25",
+        "event_name": "Listed",
+        "price": 1199000,
+        "source_name": "OneKeyMLS",
+        "listing": {
+          "photos": [
+            {
+              "href": "https://ap.rdcpix.com/426577dfd39b70954f3d74470bb3a3f3l-m3182792661s.jpg",
+              "type": "realtordotcom_mls_listing_image",
+              "tags": [
+                {
+                  "label": "road_view",
+                  "probability": 0.6078090071678162
+                }
+              ]
+            }
+          ],
+          "description": {
+            "sqft": null
+          }
+        }
+      },
+      {
+        "date": "2020-08-29",
+        "event_name": "Listing removed",
+        "price": 899000,
+        "source_name": "OneKeyMLS",
+        "listing": {
+          "photos": null,
+          "description": {
+            "sqft": null
+          }
+        }
+      },
+      {
+        "date": "2017-04-14",
+        "event_name": "Listing removed",
+        "price": 899000,
+        "source_name": "OneKeyMLS",
+        "listing": {
+          "photos": null,
+          "description": {
+            "sqft": null
+          }
+        }
+      },
+      {
+        "date": "2017-03-18",
+        "event_name": "Price Changed",
+        "price": 899000,
+        "source_name": "OneKeyMLS",
+        "listing": {
+          "photos": null,
+          "description": {
+            "sqft": null
+          }
+        }
+      },
+      {
+        "date": "2017-02-02",
+        "event_name": "Price Changed",
+        "price": 949000,
+        "source_name": "OneKeyMLS",
+        "listing": {
+          "photos": null,
+          "description": {
+            "sqft": null
+          }
+        }
+      },
+      {
+        "date": "2017-01-14",
+        "event_name": "Listed",
+        "price": 849000,
+        "source_name": "OneKeyMLS",
+        "listing": {
+          "photos": null,
+          "description": {
+            "sqft": null
+          }
+        }
+      },
+      {
+        "date": "2016-03-10",
+        "event_name": "Sold",
+        "price": 400000,
+        "source_name": "Public Record",
+        "listing": null
+      }
+    ],
+    "local": {
+      "noise": {
+        "score": 64,
+        "noise_categories": [
+          {
+            "type": "airport",
+            "text": "High"
+          },
+          {
+            "type": "traffic",
+            "text": "High"
+          },
+          {
+            "type": "local",
+            "text": "Medium"
+          },
+          {
+            "type": "score",
+            "text": "High"
+          }
+        ]
+      },
+      "flood": {
+        "fsid": "361386604",
+        "flood_factor_score": 6,
+        "flood_trend_paragraph": "This property’s risk of flood is <b>increasing</b> as weather patterns change. Flooding in this area is caused by precipitation.",
+        "firststreet_url": "https://riskfactor.com/property/9526-86th-st-ozone-park-ny-11416/361386604_fsid?utm_source=realtor#flood",
+        "fema_zone": [
+          "X (unshaded)"
+        ],
+        "flood_insurance_text": "As this property is located in FEMA Zone X (unshaded), flood insurance is not federally required to obtain a mortgage. You may want to purchase flood insurance to protect your home. Explore quotes for flood insurance from <b>$451</b> to <b>$934</b> per year.",
+        "insurance_rates": [
+          {
+            "provider_url": "https://1str.ee/t/neptune/flood/361386604?classification=HO3&source=realtor"
+          }
+        ]
+      }
+    },
+    "last_sold_price": 400000,
+    "last_sold_date": "2016-03-10",
+    "estimates": {
+      "current_values": [
+        {
+          "source": {
+            "type": "collateral",
+            "name": "Collateral Analytics"
+          },
+          "estimate": 797000,
+          "isbest_homevalue": true
+        },
+        {
+          "source": {
+            "type": "quantarium",
+            "name": "Quantarium"
+          },
+          "estimate": 619352,
+          "isbest_homevalue": false
+        },
+        {
+          "source": {
+            "type": "corelogic",
+            "name": "CoreLogic®"
+          },
+          "estimate": 800000,
+          "isbest_homevalue": false
+        }
+      ],
+      "historical_values": [
+        {
+          "source": {
+            "type": "collateral",
+            "name": "Collateral Analytics"
+          },
+          "estimates": [
+            {
+              "estimate": 797000,
+              "date": "2024-02-14"
+            },
+            {
+              "estimate": 719000,
+              "date": "2024-01-16"
+            },
+            {
+              "estimate": 654000,
+              "date": "2023-12-14"
+            },
+            {
+              "estimate": 650000,
+              "date": "2023-11-14"
+            },
+            {
+              "estimate": 639000,
+              "date": "2023-10-14"
+            },
+            {
+              "estimate": 734000,
+              "date": "2023-09-14"
+            },
+            {
+              "estimate": 815000,
+              "date": "2023-08-14"
+            },
+            {
+              "estimate": 807000,
+              "date": "2023-07-14"
+            },
+            {
+              "estimate": 817000,
+              "date": "2023-06-14"
+            },
+            {
+              "estimate": 892000,
+              "date": "2023-05-15"
+            },
+            {
+              "estimate": 860000,
+              "date": "2023-04-14"
+            },
+            {
+              "estimate": 871000,
+              "date": "2023-03-14"
+            },
+            {
+              "estimate": 793000,
+              "date": "2023-02-14"
+            },
+            {
+              "estimate": 721000,
+              "date": "2023-01-15"
+            },
+            {
+              "estimate": 678000,
+              "date": "2022-12-14"
+            },
+            {
+              "estimate": 682000,
+              "date": "2022-11-14"
+            },
+            {
+              "estimate": 675000,
+              "date": "2022-10-14"
+            },
+            {
+              "estimate": 761000,
+              "date": "2022-09-14"
+            },
+            {
+              "estimate": 845000,
+              "date": "2022-08-15"
+            },
+            {
+              "estimate": 812000,
+              "date": "2022-07-14"
+            },
+            {
+              "estimate": 738000,
+              "date": "2022-06-14"
+            },
+            {
+              "estimate": 714000,
+              "date": "2022-05-14"
+            },
+            {
+              "estimate": 713000,
+              "date": "2022-04-14"
+            },
+            {
+              "estimate": 781000,
+              "date": "2022-03-14"
+            },
+            {
+              "estimate": 710000,
+              "date": "2022-02-14"
+            },
+            {
+              "estimate": 675000,
+              "date": "2022-01-14"
+            },
+            {
+              "estimate": 690000,
+              "date": "2021-12-14"
+            },
+            {
+              "estimate": 699000,
+              "date": "2021-11-14"
+            },
+            {
+              "estimate": 661000,
+              "date": "2021-10-18"
+            },
+            {
+              "estimate": 734000,
+              "date": "2021-09-14"
+            },
+            {
+              "estimate": 704000,
+              "date": "2021-08-14"
+            },
+            {
+              "estimate": 782000,
+              "date": "2021-07-14"
+            },
+            {
+              "estimate": 807000,
+              "date": "2021-06-14"
+            },
+            {
+              "estimate": 734000,
+              "date": "2021-05-14"
+            },
+            {
+              "estimate": 730000,
+              "date": "2021-04-14"
+            },
+            {
+              "estimate": 732000,
+              "date": "2021-03-14"
+            },
+            {
+              "estimate": 690000,
+              "date": "2021-02-14"
+            },
+            {
+              "estimate": 779000,
+              "date": "2021-01-14"
+            },
+            {
+              "estimate": 865000,
+              "date": "2020-12-14"
+            },
+            {
+              "estimate": 840000,
+              "date": "2020-11-14"
+            },
+            {
+              "estimate": 764000,
+              "date": "2020-10-14"
+            },
+            {
+              "estimate": 623000,
+              "date": "2020-09-14"
+            },
+            {
+              "estimate": 642000,
+              "date": "2020-08-14"
+            },
+            {
+              "estimate": 713000,
+              "date": "2020-07-14"
+            },
+            {
+              "estimate": 715044,
+              "date": "2020-06-28"
+            },
+            {
+              "estimate": 717087,
+              "date": "2020-05-28"
+            },
+            {
+              "estimate": 701704,
+              "date": "2020-04-28"
+            },
+            {
+              "estimate": 687574,
+              "date": "2020-03-28"
+            },
+            {
+              "estimate": 675241,
+              "date": "2020-02-28"
+            },
+            {
+              "estimate": 664771,
+              "date": "2020-01-28"
+            },
+            {
+              "estimate": 655927,
+              "date": "2019-12-28"
+            },
+            {
+              "estimate": 648337,
+              "date": "2019-11-28"
+            },
+            {
+              "estimate": 641526,
+              "date": "2019-10-28"
+            },
+            {
+              "estimate": 635088,
+              "date": "2019-09-28"
+            },
+            {
+              "estimate": 628752,
+              "date": "2019-08-28"
+            },
+            {
+              "estimate": 622416,
+              "date": "2019-07-28"
+            },
+            {
+              "estimate": 616079,
+              "date": "2019-06-28"
+            },
+            {
+              "estimate": 609845,
+              "date": "2019-05-28"
+            },
+            {
+              "estimate": 603813,
+              "date": "2019-04-28"
+            },
+            {
+              "estimate": 598256,
+              "date": "2019-03-28"
+            },
+            {
+              "estimate": 593207,
+              "date": "2019-02-28"
+            },
+            {
+              "estimate": 588836,
+              "date": "2019-01-28"
+            },
+            {
+              "estimate": 585143,
+              "date": "2018-12-28"
+            },
+            {
+              "estimate": 582094,
+              "date": "2018-11-28"
+            },
+            {
+              "estimate": 579620,
+              "date": "2018-10-28"
+            },
+            {
+              "estimate": 577587,
+              "date": "2018-09-28"
+            },
+            {
+              "estimate": 575859,
+              "date": "2018-08-28"
+            },
+            {
+              "estimate": 574300,
+              "date": "2018-07-28"
+            },
+            {
+              "estimate": 572742,
+              "date": "2018-06-28"
+            },
+            {
+              "estimate": 571081,
+              "date": "2018-05-28"
+            },
+            {
+              "estimate": 569116,
+              "date": "2018-04-28"
+            },
+            {
+              "estimate": 566778,
+              "date": "2018-03-28"
+            },
+            {
+              "estimate": 563999,
+              "date": "2018-02-28"
+            },
+            {
+              "estimate": 560645,
+              "date": "2018-01-28"
+            },
+            {
+              "estimate": 556748,
+              "date": "2017-12-28"
+            },
+            {
+              "estimate": 552242,
+              "date": "2017-11-28"
+            },
+            {
+              "estimate": 547227,
+              "date": "2017-10-28"
+            },
+            {
+              "estimate": 541738,
+              "date": "2017-09-28"
+            },
+            {
+              "estimate": 535842,
+              "date": "2017-08-28"
+            },
+            {
+              "estimate": 529675,
+              "date": "2017-07-28"
+            },
+            {
+              "estimate": 523339,
+              "date": "2017-06-28"
+            },
+            {
+              "estimate": 517002,
+              "date": "2017-05-28"
+            },
+            {
+              "estimate": 510768,
+              "date": "2017-04-28"
+            },
+            {
+              "estimate": 504804,
+              "date": "2017-03-28"
+            },
+            {
+              "estimate": 499179,
+              "date": "2017-02-28"
+            },
+            {
+              "estimate": 494029,
+              "date": "2017-01-28"
+            },
+            {
+              "estimate": 489353,
+              "date": "2016-12-28"
+            },
+            {
+              "estimate": 485253,
+              "date": "2016-11-28"
+            },
+            {
+              "estimate": 481661,
+              "date": "2016-10-28"
+            },
+            {
+              "estimate": 478612,
+              "date": "2016-09-28"
+            },
+            {
+              "estimate": 476037,
+              "date": "2016-08-28"
+            },
+            {
+              "estimate": 473834,
+              "date": "2016-07-28"
+            },
+            {
+              "estimate": 471970,
+              "date": "2016-06-28"
+            },
+            {
+              "estimate": 470310,
+              "date": "2016-05-28"
+            },
+            {
+              "estimate": 468819,
+              "date": "2016-04-28"
+            },
+            {
+              "estimate": 467328,
+              "date": "2016-03-28"
+            },
+            {
+              "estimate": 465804,
+              "date": "2016-02-28"
+            },
+            {
+              "estimate": 464211,
+              "date": "2016-01-28"
+            },
+            {
+              "estimate": 462415,
+              "date": "2015-12-28"
+            },
+            {
+              "estimate": 460450,
+              "date": "2015-11-28"
+            },
+            {
+              "estimate": 458281,
+              "date": "2015-10-28"
+            },
+            {
+              "estimate": 455909,
+              "date": "2015-09-28"
+            },
+            {
+              "estimate": 453334,
+              "date": "2015-08-28"
+            },
+            {
+              "estimate": 450590,
+              "date": "2015-07-28"
+            },
+            {
+              "estimate": 447710,
+              "date": "2015-06-28"
+            },
+            {
+              "estimate": 444762,
+              "date": "2015-05-28"
+            },
+            {
+              "estimate": 441746,
+              "date": "2015-04-28"
+            },
+            {
+              "estimate": 438730,
+              "date": "2015-03-28"
+            },
+            {
+              "estimate": 435715,
+              "date": "2015-02-28"
+            },
+            {
+              "estimate": 432767,
+              "date": "2015-01-28"
+            },
+            {
+              "estimate": 429887,
+              "date": "2014-12-28"
+            },
+            {
+              "estimate": 427074,
+              "date": "2014-11-28"
+            },
+            {
+              "estimate": 424330,
+              "date": "2014-10-28"
+            },
+            {
+              "estimate": 421653,
+              "date": "2014-09-28"
+            },
+            {
+              "estimate": 419010,
+              "date": "2014-08-28"
+            },
+            {
+              "estimate": 416367,
+              "date": "2014-07-28"
+            },
+            {
+              "estimate": 413758,
+              "date": "2014-06-28"
+            },
+            {
+              "estimate": 411115,
+              "date": "2014-05-28"
+            },
+            {
+              "estimate": 408438,
+              "date": "2014-04-28"
+            },
+            {
+              "estimate": 405727,
+              "date": "2014-03-28"
+            },
+            {
+              "estimate": 402949,
+              "date": "2014-02-28"
+            },
+            {
+              "estimate": 400170,
+              "date": "2014-01-28"
+            },
+            {
+              "estimate": 397392,
+              "date": "2013-12-28"
+            },
+            {
+              "estimate": 394681,
+              "date": "2013-11-28"
+            },
+            {
+              "estimate": 392038,
+              "date": "2013-10-28"
+            },
+            {
+              "estimate": 389565,
+              "date": "2013-09-28"
+            },
+            {
+              "estimate": 387294,
+              "date": "2013-08-28"
+            },
+            {
+              "estimate": 385295,
+              "date": "2013-07-28"
+            },
+            {
+              "estimate": 383669,
+              "date": "2013-06-28"
+            },
+            {
+              "estimate": 382381,
+              "date": "2013-05-28"
+            },
+            {
+              "estimate": 381568,
+              "date": "2013-04-28"
+            },
+            {
+              "estimate": 381195,
+              "date": "2013-03-28"
+            },
+            {
+              "estimate": 381263,
+              "date": "2013-02-28"
+            },
+            {
+              "estimate": 381805,
+              "date": "2013-01-28"
+            },
+            {
+              "estimate": 382754,
+              "date": "2012-12-28"
+            },
+            {
+              "estimate": 384041,
+              "date": "2012-11-28"
+            },
+            {
+              "estimate": 385634,
+              "date": "2012-10-28"
+            },
+            {
+              "estimate": 387362,
+              "date": "2012-09-28"
+            },
+            {
+              "estimate": 389158,
+              "date": "2012-08-28"
+            },
+            {
+              "estimate": 390886,
+              "date": "2012-07-28"
+            },
+            {
+              "estimate": 392411,
+              "date": "2012-06-28"
+            },
+            {
+              "estimate": 393631,
+              "date": "2012-05-28"
+            },
+            {
+              "estimate": 394376,
+              "date": "2012-04-28"
+            },
+            {
+              "estimate": 394647,
+              "date": "2012-03-28"
+            },
+            {
+              "estimate": 394274,
+              "date": "2012-02-28"
+            },
+            {
+              "estimate": 393258,
+              "date": "2012-01-28"
+            },
+            {
+              "estimate": 391564,
+              "date": "2011-12-28"
+            },
+            {
+              "estimate": 389192,
+              "date": "2011-11-28"
+            },
+            {
+              "estimate": 386210,
+              "date": "2011-10-28"
+            },
+            {
+              "estimate": 382652,
+              "date": "2011-09-28"
+            },
+            {
+              "estimate": 378654,
+              "date": "2011-08-28"
+            },
+            {
+              "estimate": 374283,
+              "date": "2011-07-28"
+            },
+            {
+              "estimate": 369742,
+              "date": "2011-06-28"
+            },
+            {
+              "estimate": 365134,
+              "date": "2011-05-28"
+            },
+            {
+              "estimate": 360594,
+              "date": "2011-04-28"
+            },
+            {
+              "estimate": 356290,
+              "date": "2011-03-28"
+            },
+            {
+              "estimate": 352292,
+              "date": "2011-02-28"
+            },
+            {
+              "estimate": 348768,
+              "date": "2011-01-28"
+            },
+            {
+              "estimate": 345719,
+              "date": "2010-12-28"
+            },
+            {
+              "estimate": 343245,
+              "date": "2010-11-28"
+            },
+            {
+              "estimate": 341348,
+              "date": "2010-10-28"
+            },
+            {
+              "estimate": 340026,
+              "date": "2010-09-28"
+            },
+            {
+              "estimate": 339213,
+              "date": "2010-08-28"
+            },
+            {
+              "estimate": 338840,
+              "date": "2010-07-28"
+            },
+            {
+              "estimate": 338840,
+              "date": "2010-06-28"
+            }
+          ]
+        },
+        {
+          "source": {
+            "type": "quantarium",
+            "name": "Quantarium"
+          },
+          "estimates": [
+            {
+              "estimate": 619352,
+              "date": "2024-02-21"
+            },
+            {
+              "estimate": 618531,
+              "date": "2024-01-31"
+            },
+            {
+              "estimate": 624957,
+              "date": "2023-12-27"
+            },
+            {
+              "estimate": 647402,
+              "date": "2023-11-29"
+            },
+            {
+              "estimate": 704303,
+              "date": "2023-10-25"
+            },
+            {
+              "estimate": 640731,
+              "date": "2023-09-27"
+            },
+            {
+              "estimate": 631217,
+              "date": "2023-08-30"
+            },
+            {
+              "estimate": 631796,
+              "date": "2023-07-26"
+            },
+            {
+              "estimate": 709066,
+              "date": "2023-06-28"
+            },
+            {
+              "estimate": 719340,
+              "date": "2023-05-31"
+            },
+            {
+              "estimate": 692765,
+              "date": "2023-04-26"
+            },
+            {
+              "estimate": 635672,
+              "date": "2023-03-29"
+            },
+            {
+              "estimate": 629639,
+              "date": "2023-02-22"
+            },
+            {
+              "estimate": 669017,
+              "date": "2023-01-25"
+            },
+            {
+              "estimate": 699661,
+              "date": "2022-12-28"
+            },
+            {
+              "estimate": 703245,
+              "date": "2022-11-30"
+            },
+            {
+              "estimate": 712216,
+              "date": "2022-10-26"
+            },
+            {
+              "estimate": 703366,
+              "date": "2022-09-28"
+            },
+            {
+              "estimate": 695238,
+              "date": "2022-08-31"
+            },
+            {
+              "estimate": 698890,
+              "date": "2022-07-27"
+            },
+            {
+              "estimate": 719280,
+              "date": "2022-06-29"
+            },
+            {
+              "estimate": 710399,
+              "date": "2022-05-25"
+            },
+            {
+              "estimate": 694043,
+              "date": "2022-04-27"
+            },
+            {
+              "estimate": 683838,
+              "date": "2022-03-30"
+            },
+            {
+              "estimate": 674184,
+              "date": "2022-02-23"
+            },
+            {
+              "estimate": 685640,
+              "date": "2022-01-26"
+            },
+            {
+              "estimate": 682603,
+              "date": "2021-12-29"
+            },
+            {
+              "estimate": 639779,
+              "date": "2021-11-10"
+            },
+            {
+              "estimate": 655903,
+              "date": "2021-10-20"
+            },
+            {
+              "estimate": 625023,
+              "date": "2021-09-29"
+            },
+            {
+              "estimate": 640470,
+              "date": "2021-08-25"
+            },
+            {
+              "estimate": 680212,
+              "date": "2021-07-28"
+            },
+            {
+              "estimate": 625444,
+              "date": "2021-06-30"
+            },
+            {
+              "estimate": 675718,
+              "date": "2021-05-26"
+            },
+            {
+              "estimate": 663445,
+              "date": "2021-04-28"
+            },
+            {
+              "estimate": 614821,
+              "date": "2021-03-03"
+            },
+            {
+              "estimate": 614968,
+              "date": "2021-02-24"
+            },
+            {
+              "estimate": 587838,
+              "date": "2021-01-27"
+            },
+            {
+              "estimate": 600987,
+              "date": "2020-12-30"
+            },
+            {
+              "estimate": 579805,
+              "date": "2020-11-25"
+            },
+            {
+              "estimate": 582671,
+              "date": "2020-10-28"
+            },
+            {
+              "estimate": 582103,
+              "date": "2020-09-30"
+            },
+            {
+              "estimate": 586108,
+              "date": "2020-08-26"
+            },
+            {
+              "estimate": 602835,
+              "date": "2020-07-29"
+            },
+            {
+              "estimate": 597150,
+              "date": "2020-06-24"
+            },
+            {
+              "estimate": 615374,
+              "date": "2020-05-27"
+            },
+            {
+              "estimate": 610766,
+              "date": "2020-04-29"
+            },
+            {
+              "estimate": 613515,
+              "date": "2020-03-04"
+            },
+            {
+              "estimate": 613577,
+              "date": "2020-02-26"
+            },
+            {
+              "estimate": 596055,
+              "date": "2020-01-01"
+            },
+            {
+              "estimate": 597931,
+              "date": "2019-12-01"
+            },
+            {
+              "estimate": 600049,
+              "date": "2019-11-01"
+            },
+            {
+              "estimate": 602089,
+              "date": "2019-10-01"
+            },
+            {
+              "estimate": 604204,
+              "date": "2019-09-01"
+            },
+            {
+              "estimate": 602077,
+              "date": "2019-08-01"
+            },
+            {
+              "estimate": 599881,
+              "date": "2019-07-01"
+            },
+            {
+              "estimate": 598676,
+              "date": "2019-06-01"
+            },
+            {
+              "estimate": 596842,
+              "date": "2019-05-01"
+            },
+            {
+              "estimate": 595115,
+              "date": "2019-04-01"
+            },
+            {
+              "estimate": 594519,
+              "date": "2019-03-01"
+            },
+            {
+              "estimate": 593129,
+              "date": "2019-02-01"
+            },
+            {
+              "estimate": 595423,
+              "date": "2019-01-01"
+            },
+            {
+              "estimate": 597358,
+              "date": "2018-12-01"
+            },
+            {
+              "estimate": 589529,
+              "date": "2018-11-01"
+            },
+            {
+              "estimate": 577197,
+              "date": "2018-10-01"
+            },
+            {
+              "estimate": 570644,
+              "date": "2018-09-01"
+            },
+            {
+              "estimate": 565630,
+              "date": "2018-08-01"
+            },
+            {
+              "estimate": 562340,
+              "date": "2018-07-01"
+            },
+            {
+              "estimate": 555737,
+              "date": "2018-06-01"
+            },
+            {
+              "estimate": 555398,
+              "date": "2018-05-01"
+            },
+            {
+              "estimate": 557832,
+              "date": "2018-04-01"
+            },
+            {
+              "estimate": 560202,
+              "date": "2018-03-01"
+            },
+            {
+              "estimate": 563439,
+              "date": "2018-02-01"
+            },
+            {
+              "estimate": 564482,
+              "date": "2018-01-01"
+            },
+            {
+              "estimate": 565525,
+              "date": "2017-12-01"
+            },
+            {
+              "estimate": 565610,
+              "date": "2017-11-01"
+            },
+            {
+              "estimate": 562836,
+              "date": "2017-10-01"
+            },
+            {
+              "estimate": 560028,
+              "date": "2017-09-01"
+            },
+            {
+              "estimate": 554933,
+              "date": "2017-08-01"
+            },
+            {
+              "estimate": 549803,
+              "date": "2017-07-01"
+            },
+            {
+              "estimate": 551180,
+              "date": "2017-06-01"
+            },
+            {
+              "estimate": 547260,
+              "date": "2017-05-01"
+            },
+            {
+              "estimate": 538530,
+              "date": "2017-04-01"
+            },
+            {
+              "estimate": 536280,
+              "date": "2017-03-01"
+            },
+            {
+              "estimate": 533329,
+              "date": "2017-02-01"
+            },
+            {
+              "estimate": 530655,
+              "date": "2017-01-01"
+            },
+            {
+              "estimate": 528985,
+              "date": "2016-12-01"
+            },
+            {
+              "estimate": 525357,
+              "date": "2016-11-01"
+            },
+            {
+              "estimate": 519752,
+              "date": "2016-10-01"
+            },
+            {
+              "estimate": 513013,
+              "date": "2016-09-01"
+            },
+            {
+              "estimate": 502369,
+              "date": "2016-08-01"
+            },
+            {
+              "estimate": 497329,
+              "date": "2016-07-01"
+            },
+            {
+              "estimate": 496562,
+              "date": "2016-06-01"
+            },
+            {
+              "estimate": 495789,
+              "date": "2016-05-01"
+            },
+            {
+              "estimate": 493092,
+              "date": "2016-04-01"
+            },
+            {
+              "estimate": 489689,
+              "date": "2016-03-01"
+            },
+            {
+              "estimate": 486777,
+              "date": "2016-02-01"
+            },
+            {
+              "estimate": 483363,
+              "date": "2016-01-01"
+            },
+            {
+              "estimate": 480651,
+              "date": "2015-12-01"
+            },
+            {
+              "estimate": 478049,
+              "date": "2015-11-01"
+            },
+            {
+              "estimate": 471815,
+              "date": "2015-10-01"
+            },
+            {
+              "estimate": 469604,
+              "date": "2015-09-01"
+            },
+            {
+              "estimate": 466107,
+              "date": "2015-08-01"
+            },
+            {
+              "estimate": 459915,
+              "date": "2015-07-01"
+            },
+            {
+              "estimate": 455280,
+              "date": "2015-06-01"
+            },
+            {
+              "estimate": 452915,
+              "date": "2015-05-01"
+            },
+            {
+              "estimate": 447602,
+              "date": "2015-04-01"
+            },
+            {
+              "estimate": 444735,
+              "date": "2015-03-01"
+            },
+            {
+              "estimate": 442691,
+              "date": "2015-02-01"
+            },
+            {
+              "estimate": 442798,
+              "date": "2015-01-01"
+            },
+            {
+              "estimate": 442336,
+              "date": "2014-12-01"
+            },
+            {
+              "estimate": 440966,
+              "date": "2014-11-01"
+            },
+            {
+              "estimate": 438516,
+              "date": "2014-10-01"
+            },
+            {
+              "estimate": 434165,
+              "date": "2014-09-01"
+            },
+            {
+              "estimate": 429802,
+              "date": "2014-08-01"
+            },
+            {
+              "estimate": 427549,
+              "date": "2014-07-01"
+            },
+            {
+              "estimate": 428112,
+              "date": "2014-06-01"
+            },
+            {
+              "estimate": 431176,
+              "date": "2014-05-01"
+            },
+            {
+              "estimate": 434612,
+              "date": "2014-04-01"
+            },
+            {
+              "estimate": 432928,
+              "date": "2014-03-01"
+            },
+            {
+              "estimate": 426301,
+              "date": "2014-02-01"
+            },
+            {
+              "estimate": 420292,
+              "date": "2014-01-01"
+            },
+            {
+              "estimate": 413663,
+              "date": "2013-12-01"
+            },
+            {
+              "estimate": 408515,
+              "date": "2013-11-01"
+            },
+            {
+              "estimate": 404124,
+              "date": "2013-10-01"
+            },
+            {
+              "estimate": 404190,
+              "date": "2013-09-01"
+            },
+            {
+              "estimate": 401902,
+              "date": "2013-08-01"
+            },
+            {
+              "estimate": 397564,
+              "date": "2013-07-01"
+            },
+            {
+              "estimate": 394245,
+              "date": "2013-06-01"
+            },
+            {
+              "estimate": 391140,
+              "date": "2013-05-01"
+            },
+            {
+              "estimate": 387700,
+              "date": "2013-04-01"
+            },
+            {
+              "estimate": 389367,
+              "date": "2013-03-01"
+            },
+            {
+              "estimate": 387262,
+              "date": "2013-02-01"
+            },
+            {
+              "estimate": 388482,
+              "date": "2013-01-01"
+            },
+            {
+              "estimate": 388453,
+              "date": "2012-12-01"
+            },
+            {
+              "estimate": 386309,
+              "date": "2012-11-01"
+            },
+            {
+              "estimate": 384023,
+              "date": "2012-10-01"
+            },
+            {
+              "estimate": 381409,
+              "date": "2012-09-01"
+            },
+            {
+              "estimate": 381076,
+              "date": "2012-08-01"
+            },
+            {
+              "estimate": 378606,
+              "date": "2012-07-01"
+            },
+            {
+              "estimate": 376274,
+              "date": "2012-06-01"
+            },
+            {
+              "estimate": 377044,
+              "date": "2012-05-01"
+            },
+            {
+              "estimate": 375726,
+              "date": "2012-04-01"
+            },
+            {
+              "estimate": 376332,
+              "date": "2012-03-01"
+            },
+            {
+              "estimate": 376947,
+              "date": "2012-02-01"
+            },
+            {
+              "estimate": 375583,
+              "date": "2012-01-01"
+            },
+            {
+              "estimate": 373518,
+              "date": "2011-12-01"
+            },
+            {
+              "estimate": 373556,
+              "date": "2011-11-01"
+            },
+            {
+              "estimate": 371273,
+              "date": "2011-10-01"
+            },
+            {
+              "estimate": 371440,
+              "date": "2011-09-01"
+            },
+            {
+              "estimate": 371470,
+              "date": "2011-08-01"
+            },
+            {
+              "estimate": 372801,
+              "date": "2011-07-01"
+            },
+            {
+              "estimate": 374729,
+              "date": "2011-06-01"
+            },
+            {
+              "estimate": 377185,
+              "date": "2011-05-01"
+            },
+            {
+              "estimate": 378222,
+              "date": "2011-04-01"
+            },
+            {
+              "estimate": 381321,
+              "date": "2011-03-01"
+            },
+            {
+              "estimate": 382721,
+              "date": "2011-02-01"
+            },
+            {
+              "estimate": 380889,
+              "date": "2011-01-01"
+            },
+            {
+              "estimate": 381235,
+              "date": "2010-12-01"
+            },
+            {
+              "estimate": 381125,
+              "date": "2010-11-01"
+            },
+            {
+              "estimate": 380622,
+              "date": "2010-10-01"
+            },
+            {
+              "estimate": 378578,
+              "date": "2010-09-01"
+            },
+            {
+              "estimate": 377791,
+              "date": "2010-08-01"
+            },
+            {
+              "estimate": 376864,
+              "date": "2010-07-01"
+            },
+            {
+              "estimate": 375764,
+              "date": "2010-06-01"
+            },
+            {
+              "estimate": 374732,
+              "date": "2010-05-01"
+            },
+            {
+              "estimate": 371395,
+              "date": "2010-04-01"
+            },
+            {
+              "estimate": 371265,
+              "date": "2010-03-01"
+            },
+            {
+              "estimate": 373382,
+              "date": "2010-02-01"
+            }
+          ]
+        },
+        {
+          "source": {
+            "type": "corelogic",
+            "name": "CoreLogic®"
+          },
+          "estimates": [
+            {
+              "estimate": 800000,
+              "date": "2024-02-05"
+            },
+            {
+              "estimate": 786300,
+              "date": "2024-01-08"
+            },
+            {
+              "estimate": 795200,
+              "date": "2023-12-04"
+            },
+            {
+              "estimate": 810000,
+              "date": "2023-11-06"
+            },
+            {
+              "estimate": 768200,
+             "date": "2023-10-09"
+            },
+            {
+              "estimate": 748000,
+              "date": "2023-09-28"
+            },
+            {
+              "estimate": 725900,
+              "date": "2023-08-31"
+            },
+            {
+              "estimate": 742800,
+              "date": "2023-07-29"
+            },
+            {
+              "estimate": 734100,
+              "date": "2023-06-26"
+            },
+            {
+              "estimate": 733500,
+              "date": "2023-05-28"
+            },
+            {
+              "estimate": 766300,
+              "date": "2023-04-25"
+            },
+            {
+              "estimate": 757200,
+              "date": "2023-03-16"
+            },
+            {
+              "estimate": 752500,
+              "date": "2023-02-25"
+            },
+            {
+              "estimate": 773500,
+              "date": "2023-01-31"
+            },
+            {
+              "estimate": 773000,
+              "date": "2022-12-29"
+            },
+            {
+              "estimate": 739900,
+              "date": "2022-11-25"
+            },
+            {
+              "estimate": 743700,
+              "date": "2022-10-30"
+            },
+            {
+              "estimate": 685900,
+              "date": "2022-09-27"
+            },
+            {
+              "estimate": 685400,
+              "date": "2022-08-31"
+            },
+            {
+              "estimate": 674600,
+              "date": "2022-07-27"
+            },
+            {
+              "estimate": 671900,
+              "date": "2022-06-24"
+            },
+            {
+              "estimate": 672400,
+              "date": "2022-05-25"
+            },
+            {
+              "estimate": 669600,
+              "date": "2022-04-30"
+            },
+            {
+              "estimate": 672800,
+              "date": "2022-03-29"
+            },
+            {
+              "estimate": 694600,
+              "date": "2022-02-24"
+            },
+            {
+              "estimate": 703900,
+              "date": "2022-01-23"
+            },
+            {
+              "estimate": 711100,
+              "date": "2021-12-17"
+            },
+            {
+              "estimate": 708100,
+              "date": "2021-11-24"
+            },
+            {
+              "estimate": 708000,
+              "date": "2021-10-30"
+            },
+            {
+              "estimate": 713600,
+              "date": "2021-09-26"
+            },
+            {
+              "estimate": 706200,
+              "date": "2021-08-24"
+            },
+            {
+              "estimate": 726500,
+              "date": "2021-07-31"
+            },
+            {
+              "estimate": 711900,
+              "date": "2021-06-28"
+            },
+            {
+              "estimate": 706600,
+              "date": "2021-05-26"
+            },
+            {
+              "estimate": 683700,
+              "date": "2021-04-24"
+            },
+            {
+              "estimate": 667900,
+              "date": "2021-03-29"
+            },
+            {
+              "estimate": 652600,
+              "date": "2021-02-23"
+            },
+            {
+              "estimate": 615000,
+              "date": "2021-01-27"
+            },
+            {
+              "estimate": 616100,
+              "date": "2020-12-25"
+            },
+            {
+              "estimate": 635100,
+              "date": "2020-11-23"
+            },
+            {
+              "estimate": 675000,
+              "date": "2020-10-29"
+            },
+            {
+              "estimate": 672600,
+              "date": "2020-09-27"
+            },
+            {
+              "estimate": 661800,
+              "date": "2020-08-08"
+            },
+            {
+              "estimate": 659600,
+              "date": "2020-07-30"
+            },
+            {
+              "estimate": 654100,
+              "date": "2020-06-26"
+            },
+            {
+              "estimate": 658500,
+              "date": "2020-05-30"
+            },
+            {
+              "estimate": 661300,
+              "date": "2020-04-22"
+            },
+            {
+              "estimate": 647200,
+              "date": "2020-03-26"
+            },
+            {
+              "estimate": 633200,
+              "date": "2020-02-26"
+            },
+            {
+              "estimate": 644800,
+              "date": "2020-01-29"
+            },
+            {
+              "estimate": 648400,
+              "date": "2019-12-23"
+            },
+            {
+              "estimate": 656600,
+              "date": "2019-11-25"
+            },
+            {
+              "estimate": 631600,
+              "date": "2019-10-28"
+            },
+            {
+              "estimate": 631000,
+              "date": "2019-09-13"
+            },
+            {
+              "estimate": 643700,
+              "date": "2019-08-27"
+            },
+            {
+              "estimate": 647100,
+              "date": "2019-07-31"
+            },
+            {
+              "estimate": 620000,
+              "date": "2019-06-25"
+            },
+            {
+              "estimate": 628100,
+              "date": "2019-05-29"
+            },
+            {
+              "estimate": 575900,
+              "date": "2019-04-23"
+            },
+            {
+              "estimate": 598200,
+              "date": "2019-03-27"
+            },
+            {
+              "estimate": 591600,
+              "date": "2019-02-20"
+            },
+            {
+              "estimate": 609500,
+              "date": "2019-01-24"
+            },
+            {
+              "estimate": 651200,
+              "date": "2018-12-28"
+            },
+            {
+              "estimate": 637800,
+              "date": "2018-11-14"
+            },
+            {
+              "estimate": 609900,
+              "date": "2018-10-28"
+            },
+            {
+              "estimate": 507718,
+              "date": "2018-09-27"
+            },
+            {
+              "estimate": 581900,
+              "date": "2018-08-26"
+            },
+            {
+              "estimate": 601400,
+              "date": "2018-07-23"
+            },
+            {
+              "estimate": 589300,
+              "date": "2018-06-28"
+            },
+            {
+              "estimate": 592600,
+              "date": "2018-05-26"
+            },
+            {
+              "estimate": 584500,
+              "date": "2018-04-23"
+            },
+            {
+              "estimate": 603400,
+              "date": "2018-03-11"
+            },
+            {
+              "estimate": 582500,
+              "date": "2018-02-23"
+            },
+            {
+              "estimate": 495611,
+              "date": "2018-01-25"
+            },
+            {
+              "estimate": 915600,
+              "date": "2017-12-11"
+            },
+            {
+              "estimate": 917200,
+              "date": "2017-11-24"
+            },
+            {
+              "estimate": 916100,
+              "date": "2017-10-23"
+            },
+            {
+              "estimate": 915600,
+              "date": "2017-09-28"
+            },
+            {
+              "estimate": 915600,
+              "date": "2017-08-25"
+            },
+            {
+              "estimate": 919000,
+              "date": "2017-07-31"
+            },
+            {
+              "estimate": 915600,
+              "date": "2017-06-26"
+            },
+            {
+              "estimate": 910400,
+              "date": "2017-05-23"
+            },
+            {
+              "estimate": 909000,
+              "date": "2017-04-29"
+            },
+            {
+              "estimate": 911700,
+              "date": "2017-03-28"
+            },
+            {
+              "estimate": 911400,
+              "date": "2017-02-24"
+            },
+            {
+              "estimate": 815800,
+              "date": "2017-01-31"
+            },
+            {
+              "estimate": 495900,
+              "date": "2016-12-14"
+            },
+            {
+              "estimate": 483000,
+              "date": "2016-11-27"
+            },
+            {
+              "estimate": 471700,
+              "date": "2016-10-30"
+            },
+            {
+              "estimate": 473700,
+              "date": "2016-09-26"
+            },
+            {
+              "estimate": 458800,
+              "date": "2016-08-31"
+            },
+            {
+              "estimate": 410600,
+              "date": "2016-07-12"
+            },
+            {
+              "estimate": 410900,
+              "date": "2016-06-25"
+            },
+            {
+              "estimate": 410400,
+              "date": "2016-05-31"
+            },
+            {
+              "estimate": 410200,
+              "date": "2016-04-29"
+            },
+            {
+              "estimate": 409900,
+              "date": "2016-03-27"
+            },
+            {
+              "estimate": 472800,
+              "date": "2016-02-23"
+            },
+            {
+              "estimate": 466900,
+              "date": "2016-01-30"
+            },
+            {
+              "estimate": 492400,
+              "date": "2015-12-28"
+            },
+            {
+              "estimate": 466900,
+              "date": "2015-11-26"
+            },
+            {
+              "estimate": 466500,
+              "date": "2015-10-26"
+            },
+            {
+              "estimate": 435800,
+              "date": "2015-09-25"
+            },
+            {
+              "estimate": 467900,
+              "date": "2015-08-26"
+            },
+            {
+              "estimate": 449700,
+              "date": "2015-07-27"
+            },
+            {
+              "estimate": 423100,
+              "date": "2015-06-30"
+            },
+            {
+              "estimate": 449200,
+              "date": "2015-05-24"
+            },
+            {
+              "estimate": 454000,
+              "date": "2015-04-25"
+            },
+            {
+              "estimate": 454700,
+              "date": "2015-03-31"
+            },
+            {
+              "estimate": 440400,
+              "date": "2015-02-28"
+            },
+            {
+              "estimate": 463400,
+              "date": "2015-01-30"
+            },
+            {
+              "estimate": 428200,
+              "date": "2014-12-26"
+            },
+            {
+              "estimate": 448300,
+              "date": "2014-11-26"
+            },
+            {
+              "estimate": 444300,
+              "date": "2014-10-29"
+            },
+            {
+              "estimate": 446000,
+              "date": "2014-09-24"
+            },
+            {
+              "estimate": 412300,
+              "date": "2014-08-26"
+            },
+            {
+              "estimate": 413500,
+              "date": "2014-07-29"
+            },
+            {
+              "estimate": 433400,
+              "date": "2014-06-24"
+            },
+            {
+              "estimate": 439700,
+              "date": "2014-05-27"
+            },
+            {
+              "estimate": 435000,
+              "date": "2014-04-30"
+            },
+            {
+              "estimate": 420200,
+              "date": "2014-03-28"
+            },
+            {
+              "estimate": 402800,
+              "date": "2014-02-24"
+            },
+            {
+              "estimate": 395100,
+              "date": "2014-01-31"
+            }
+          ]
+        }
+      ],
+      "forecast_values": [
+        {
+          "source": {
+            "type": "collateral",
+            "name": "Collateral Analytics"
+          },
+          "estimates": [
+            {
+              "estimate": 799115,
+              "date": "2024-03-01"
+            },
+            {
+              "estimate": 801230,
+              "date": "2024-04-01"
+            },
+            {
+              "estimate": 803366,
+              "date": "2024-05-01"
+            },
+            {
+              "estimate": 805503,
+              "date": "2024-06-01"
+            },
+            {
+              "estimate": 807640,
+              "date": "2024-07-01"
+            },
+            {
+              "estimate": 809781,
+              "date": "2024-08-01"
+            },
+            {
+              "estimate": 811923,
+              "date": "2024-09-01"
+            },
+            {
+              "estimate": 814064,
+              "date": "2024-10-01"
+            },
+            {
+              "estimate": 816165,
+              "date": "2024-11-01"
+            },
+            {
+              "estimate": 818267,
+              "date": "2024-12-01"
+            },
+            {
+              "estimate": 820368,
+              "date": "2025-01-01"
+            },
+            {
+              "estimate": 822482,
+              "date": "2025-02-01"
+            }
+          ]
+        },
+        {
+          "source": {
+            "type": "quantarium",
+            "name": "Quantarium"
+          },
+          "estimates": [
+            {
+              "estimate": 619620,
+              "date": "2024-03-01"
+            },
+            {
+              "estimate": 619888,
+              "date": "2024-04-01"
+            },
+            {
+              "estimate": 620153,
+              "date": "2024-05-01"
+            },
+            {
+              "estimate": 620416,
+              "date": "2024-06-01"
+            },
+            {
+              "estimate": 620678,
+              "date": "2024-07-01"
+            },
+            {
+              "estimate": 620938,
+              "date": "2024-08-01"
+            },
+            {
+              "estimate": 621196,
+              "date": "2024-09-01"
+            },
+            {
+              "estimate": 621453,
+              "date": "2024-10-01"
+            },
+            {
+              "estimate": 621707,
+              "date": "2024-11-01"
+            },
+            {
+              "estimate": 621961,
+              "date": "2024-12-01"
+            },
+            {
+              "estimate": 622211,
+              "date": "2025-01-01"
+            },
+            {
+              "estimate": 622460,
+              "date": "2025-02-01"
+            }
+          ]
+        },
+        {
+          "source": {
+            "type": "corelogic",
+            "name": "CoreLogic®"
+          },
+          "estimates": [
+            {
+              "estimate": 798903,
+              "date": "2024-03-01"
+            },
+            {
+              "estimate": 799827,
+              "date": "2024-04-01"
+            },
+            {
+              "estimate": 802317,
+              "date": "2024-05-01"
+            },
+            {
+              "estimate": 805932,
+              "date": "2024-06-01"
+            },
+            {
+              "estimate": 809327,
+              "date": "2024-07-01"
+            },
+            {
+              "estimate": 811929,
+              "date": "2024-08-01"
+            },
+            {
+              "estimate": 812631,
+              "date": "2024-09-01"
+            },
+            {
+              "estimate": 812088,
+              "date": "2024-10-01"
+            },
+            {
+              "estimate": 810826,
+              "date": "2024-11-01"
+            },
+            {
+              "estimate": 808292,
+              "date": "2024-12-01"
+            },
+            {
+              "estimate": 805890,
+              "date": "2025-01-01"
+            },
+            {
+              "estimate": 803530,
+              "date": "2025-02-01"
+            }
+          ]
+        }
+      ]
+    },
+    "virtual_tours": null,
+    "home_tours": {
+      "virtual_tours": []
+    },
+    "matterport": null,
+    "terms": null,
+    "monthly_fees": null,
+    "one_time_fees": null,
+    "units": null,
+    "community_rental_floorplans": null
+  },
+  "status": true,
+  "message": "Successful"
+}
