@@ -1,0 +1,64 @@
+ Make Property-Value Lookups Far More Reliable
+
+Leave the UI exactly as-is.
+Improve the back-end data pipeline so “Not available” appears only when all fallback sources fail.
+
+1 . Address → lat/lng via Place ID (already solved)
+Use the stored place_id to pull precise coordinates:
+
+ts
+Copy
+Edit
+GET https://maps.googleapis.com/maps/api/geocode/json?place_id={id}&key=GMAPS
+Store lat,lng.
+
+2 . Primary Valuation Calls (parallel)
+Source	Endpoint (RapidAPI / Unofficial)	Params
+Zillow “Deep Search”	zillow57.p.rapidapi.com/property	address, zip
+Redfin Unofficial	https://www.redfin.com/stingray/do/location-autocomplete then property page scrape	address
+Realtor.com	realtor56.p.rapidapi.com/properties/v3/detail	lat, lng
+
+Wrap each call in fetchWithTimeout(url, 4000) to avoid console ERR_BLOCKED_BY_CLIENT.
+
+3 . Fallback Chain
+If primary calls all return no estimate:
+
+ATTOM AVM (RapidAPI attom-property-api – 500 free/mo).
+
+Estated AVM (https://api.estated.com/property/v3?token=…&address=…).
+
+First non-null AVM wins; flag with source:"ATTOM" etc.
+
+4 . Normalize & Cache
+ts
+Copy
+Edit
+interface Valuation {
+  zestimate?: number;
+  redfin?: number;
+  realtor?: number;
+  fallback?: { source:string; value:number };
+  fetchedAt: Date;
+}
+Cache to replitdb: valuations:{place_id} for 24 h to cut API cost.
+
+5 . Error Messaging
+Only display “Not available (Property may be unlisted)” after every source (Zillow, Redfin, Realtor, ATTOM, Estated) returns null or HTTP error.
+
+Provide tooltip: “Tried: Zillow, Redfin, Realtor, ATTOM, Estated”.
+
+6 . Implementation Steps
+Create services/valuations.ts with getValuations(place_id, address) implementing steps 1-4.
+
+Modify fetchValuations() in PropertyAnalysis.tsx to call that service; update state once.
+
+Console-log which source succeeded when process.env.NODE_ENV==="development".
+
+7 . QA
+Input “5208 Teakwood Drive, Kannapolis NC” → at least one AVM shows.
+
+Disconnect internet to mock fails → UI finally shows “Not available” after all fallbacks.
+
+Second lookup within 24 h reads cache (no new API hits).
+
+Build exactly this fallback chain; do not change any HTML/CSS.

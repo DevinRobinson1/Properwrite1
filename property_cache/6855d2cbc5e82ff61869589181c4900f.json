@@ -1,0 +1,43 @@
+{
+  "cache_timestamp": 1751551683.8511438,
+  "property_data": {
+    "status": "success",
+    "address": "11310 Tema Circle, Charlotte, Nc, Usa, Charlotte, NC, 28214",
+    "validated_address": {
+      "status": "normalized",
+      "source": "Manual Normalization",
+      "street": "11310 Tema Circle, Charlotte, Nc, Usa",
+      "city": "Charlotte",
+      "state": "NC",
+      "zip": "28214",
+      "full_address": "11310 Tema Circle, Charlotte, Nc, Usa, Charlotte, NC, 28214",
+      "latitude": null,
+      "longitude": null,
+      "confidence": "medium"
+    },
+    "source": "Rentcast API",
+    "data_retrieved_at": "2025-07-03T14:08:03.851099",
+    "estimate": 805000,
+    "rent_estimate": 0,
+    "confidence": "low",
+    "data_quality": "low",
+    "comparable_sales": [],
+    "market_analysis": {
+      "avg_price_per_sqft": 0.0,
+      "sales_count": 0,
+      "price_range": {
+        "min": 0,
+        "max": 0,
+        "avg": 0
+      }
+    },
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "square_feet": 1200,
+    "year_built": 1990,
+    "property_type": "Single Family Home",
+    "comps_count": 0,
+    "avg_price_per_sqft": 0.0
+  },
+  "address_normalized": "11310 Tema Circle, Charlotte, NC, USA, Charlotte, NC 28214"
+}

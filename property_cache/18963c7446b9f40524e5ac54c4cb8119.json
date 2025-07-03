@@ -1,0 +1,43 @@
+{
+  "cache_timestamp": 1751551576.4719865,
+  "property_data": {
+    "status": "success",
+    "address": "14303 Evening Flight Lane, Charlotte, Nc, Usa, Charlotte, NC, 28262",
+    "validated_address": {
+      "status": "normalized",
+      "source": "Manual Normalization",
+      "street": "14303 Evening Flight Lane, Charlotte, Nc, Usa",
+      "city": "Charlotte",
+      "state": "NC",
+      "zip": "28262",
+      "full_address": "14303 Evening Flight Lane, Charlotte, Nc, Usa, Charlotte, NC, 28262",
+      "latitude": null,
+      "longitude": null,
+      "confidence": "medium"
+    },
+    "source": "Rentcast API",
+    "data_retrieved_at": "2025-07-03T14:06:16.471953",
+    "estimate": 414000,
+    "rent_estimate": 0,
+    "confidence": "low",
+    "data_quality": "low",
+    "comparable_sales": [],
+    "market_analysis": {
+      "avg_price_per_sqft": 0.0,
+      "sales_count": 0,
+      "price_range": {
+        "min": 0,
+        "max": 0,
+        "avg": 0
+      }
+    },
+    "bedrooms": 3,
+    "bathrooms": 2.0,
+    "square_feet": 1200,
+    "year_built": 1990,
+    "property_type": "Single Family Home",
+    "comps_count": 0,
+    "avg_price_per_sqft": 0.0
+  },
+  "address_normalized": "14303 Evening Flight Lane, Charlotte, NC, USA, Charlotte, NC 28262"
+}
