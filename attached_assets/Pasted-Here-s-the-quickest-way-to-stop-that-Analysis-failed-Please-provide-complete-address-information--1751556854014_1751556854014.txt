@@ -1,0 +1,56 @@
+Here’s the quickest way to stop that “ Analysis failed: Please provide complete address information ” pop-up and make the flow tolerant of slight data-entry issues.
+
+1. Lock in a single, canonical address source before underwriting
+Step	What to do	Why it fixes the error
+a. Autocomplete only	Replace the four free-text fields with a single Google Places Autocomplete (sessionToken, types=address).
+→ After the user selects a suggestion, split the returned formatted_address into Street, City, State, ZIP and drop them into the hidden inputs.	Prevents partial entries like “5208 Teakwood Drive, Kannapolis,” that still miss NC/ZIP.
+b. Run Address Validation API	Immediately call https://addressvalidation.googleapis.com/v1:validateAddress with the selected address; accept only validationOutcome = CONFIRMED or PARTIAL.	Catches exceptions (rural routes, new builds) before they reach your underwriting worker.
+c. Store and reuse place_id	Save place_id in the DB and pass it downstream to Zillow/Redfin scrapers.	Every service now references the exact parcel even if the user edited the street line later.
+
+2. Backend guard-rails
+ts
+Copy
+Edit
+// middleware/requireAddress.ts
+export function requireAddress(req,res,next){
+  const { street, city, state, zip, placeId } = req.body;
+  if(!placeId || !street || !city || !state || !zip){
+      return res.status(400).json({err:'INCOMPLETE_ADDRESS'});
+  }
+  next();
+}
+The error you’re seeing fires because one of those fields is still empty after the client-side split; enforce it server-side so the stack trace is obvious.*
+
+3. User-feedback instead of modal panic
+Replace the alert() with a toast banner that says:
+
+“We couldn’t verify that address. Start typing and pick a Google-suggested address from the list.”
+
+In DevTools you’ll notice the 400 POST response – bubble that message (INCOMPLETE_ADDRESS) up so the toast is data-driven, not hard-coded.
+
+4. Timeout / API-key issues
+In your screenshot the console shows net::ERR_BLOCKED_BY_CLIENT for events.launchdarkly … that is an ad-blocker swatting the LaunchDarkly event, not the Google call. But I also see Promise.catch (index.js:XXXX) on populateWholesaleResults – that fires when the upstream geocoding service returned undefined. 99 % of the time it’s because:
+
+the key is restricted by IP and Replit’s outbound IP rotated
+
+or you exhausted your free tier for the day (Place Details will just 400 on you).
+
+Confirm quota in Google Cloud console > Places API > Metrics and whitelist 0.0.0.0/0 temporarily to test.
+
+5. Prompt for Replit (add but don’t change UI)
+markdown
+Copy
+Edit
+🔧 **Fix Address Incomplete Error**
+
+1. Swap manual Street/City/State/ZIP inputs for a single
+   `<GoogleAutocomplete />` component.
+2. On select → call Address Validation API; if outcome != CONFIRMED/PARTIAL
+   block and toast “invalid”.
+3. Split the validated result into the hidden four‐field form so calculators
+   stay untouched.
+4. Add `requireAddress` middleware (see snippet) to `/analyze` route.
+5. Replace the existing `alert()` with a Tailwind toast fed by backend error.
+
+_No modifications to Acquisitions/Dispositions components or their CSS._
+Give them that snippet and your Google key with Places API + Address Validation enabled, and the address errors should disappear for good.

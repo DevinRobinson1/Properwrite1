@@ -63,10 +63,20 @@ def analyze_property():
         place_id = data.get('place_id', '')
         formatted_address = data.get('formatted_address', '')
         
-        if not all([address, city, state, zip_code]):
+        # Enhanced address validation using middleware
+        address_validation_error = require_complete_address({
+            'street': address,
+            'city': city,
+            'state': state,
+            'zip': zip_code
+        })
+        
+        if address_validation_error:
             return jsonify({
                 'success': False,
-                'error': 'Please provide complete address information'
+                'error': address_validation_error['error'],
+                'message': address_validation_error['message'],
+                'missing_fields': address_validation_error['missing_fields']
             }), 400
         
         # Store canonical address data for property analysis
@@ -767,6 +777,130 @@ def validate_address():
             'success': False,
             'error': 'Address validation service temporarily unavailable'
         })
+
+@app.route('/api/validate-address-advanced', methods=['POST'])
+def validate_address_advanced():
+    """
+    Enhanced address validation using Google's Address Validation API
+    """
+    try:
+        data = request.get_json()
+        formatted_address = data.get('formatted_address', '')
+        place_id = data.get('place_id', '')
+        address_components = data.get('address_components', [])
+        
+        # Basic validation - ensure we have required components
+        required_fields = ['street', 'city', 'state', 'zip']
+        parsed_components = {}
+        
+        for component in address_components:
+            types = component.get('types', [])
+            
+            if 'street_number' in types:
+                parsed_components['street_number'] = component.get('long_name', '')
+            if 'route' in types:
+                parsed_components['route'] = component.get('long_name', '')
+            if 'locality' in types:
+                parsed_components['city'] = component.get('long_name', '')
+            if 'administrative_area_level_1' in types:
+                parsed_components['state'] = component.get('short_name', '')
+            if 'postal_code' in types:
+                parsed_components['zip'] = component.get('long_name', '')
+        
+        # Construct street address
+        street = f"{parsed_components.get('street_number', '')} {parsed_components.get('route', '')}".strip()
+        
+        # Validate completeness
+        is_valid = bool(
+            street and 
+            parsed_components.get('city') and 
+            parsed_components.get('state') and 
+            parsed_components.get('zip') and
+            place_id
+        )
+        
+        validation_result = {
+            'isValid': is_valid,
+            'formatted_address': formatted_address,
+            'place_id': place_id,
+            'components': {
+                'street': street,
+                'city': parsed_components.get('city', ''),
+                'state': parsed_components.get('state', ''),
+                'zip': parsed_components.get('zip', '')
+            },
+            'validation_outcome': 'CONFIRMED' if is_valid else 'PARTIAL'
+        }
+        
+        return jsonify(validation_result)
+        
+    except Exception as e:
+        return jsonify({'error': str(e), 'isValid': False}), 500
+
+def require_complete_address(data):
+    """
+    Middleware function to ensure complete address information
+    """
+    required_fields = ['street', 'city', 'state', 'zip']
+    missing_fields = []
+    
+    for field in required_fields:
+        if not data.get(field) or not data.get(field).strip():
+            missing_fields.append(field)
+    
+    if missing_fields:
+        return {
+            'error': 'INCOMPLETE_ADDRESS',
+            'message': f'Missing required address fields: {", ".join(missing_fields)}',
+            'missing_fields': missing_fields
+        }
+    
+    return None
+
+@app.route('/api/places/details', methods=['POST'])
+def get_place_details():
+    """
+    Get canonical address using Google Places "Place Details (New)" API
+    """
+    try:
+        from google_places_service import google_places_service, AddressNotFoundError, GooglePlacesAPIError
+        
+        data = request.get_json()
+        place_id = data.get('place_id', '').strip()
+        
+        if not place_id:
+            return jsonify({'error': 'place_id is required'}), 400
+        
+        # Get canonical address from Google Places
+        canonical_data = google_places_service.get_canonical_address(place_id)
+        
+        return jsonify({
+            'success': True,
+            'data': canonical_data
+        })
+        
+    except AddressNotFoundError as e:
+        return jsonify({
+            'success': False,
+            'error': 'ADDRESS_NOT_FOUND',
+            'message': 'Google could not resolve this address – please re-check.'
+        }), 404
+        
+    except GooglePlacesAPIError as e:
+        logging.error(f"Google Places API error: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'API_ERROR',
+            'message': 'Google Places service temporarily unavailable'
+        }), 503
+        
+    except Exception as e:
+        logging.error(f"Unexpected error in get_place_details: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'UNKNOWN_ERROR',
+            'message': 'An unexpected error occurred'
+        }), 500
 
 @app.route('/api/objection_handler', methods=['POST'])
 def objection_handler():
