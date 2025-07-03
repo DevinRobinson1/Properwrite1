@@ -5293,6 +5293,32 @@
                         // Update form validation status
                         addressInput.setAttribute('data-validated', 'true');
                         addressInput.setAttribute('data-place-id', address.placeId || '');
+                        
+                        // Debug: Force auto-populate fields manually if needed
+                        console.log('Manually filling fields with:', {
+                            city: address.city,
+                            state: address.state,
+                            zip: address.zip
+                        });
+                        
+                        const cityField = document.getElementById('city');
+                        const stateField = document.getElementById('state');
+                        const zipField = document.getElementById('zip');
+                        
+                        if (cityField && address.city) {
+                            cityField.value = address.city;
+                            cityField.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                        
+                        if (stateField && address.state) {
+                            stateField.value = address.state;
+                            stateField.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                        
+                        if (zipField && address.zip) {
+                            zipField.value = address.zip;
+                            zipField.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
                     },
                     onValidationComplete: function(result) {
                         console.log('Address validation complete:', result);
