@@ -5426,12 +5426,17 @@
             const sourcesData = data.valuations || {};
             const sourcesTried = data.sources_tried || [];
             
+            console.log('Updating comprehensive valuations:', { valuations, sourcesData, sourcesTried });
+            
             // Update Zillow
             if (sourcesData.zillow) {
+                console.log('Showing Zillow valuation:', sourcesData.zillow);
                 showValuation('zillow', sourcesData.zillow.value, sourcesData.zillow.source);
             } else if (sourcesTried.includes('Zillow')) {
+                console.log('Zillow tried but failed');
                 showValuationError('zillow', 'Not available (Tried: Zillow)');
             } else {
+                console.log('Zillow not available');
                 showValuationError('zillow', 'Not available');
             }
             
@@ -5472,7 +5477,7 @@
             
             // Show estimate
             document.getElementById(`${platform}-estimate`).classList.remove('hidden');
-            document.getElementById(`${platform}-value`).value = value.toLocaleString();
+            document.getElementById(`${platform}-value`).value = '$' + value.toLocaleString();
             document.getElementById(`${platform}-updated`).textContent = `Source: ${source}`;
         }
         
