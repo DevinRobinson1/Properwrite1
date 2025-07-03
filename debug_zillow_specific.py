@@ -1,0 +1,63 @@
+"""
+Debug Zillow API with specific address
+"""
+import requests
+import json
+
+rapidapi_key = "be3e296439msh2693e44b9d2433fp17bebbjsn9aa77716b131"
+
+def test_zillow_with_specific_address():
+    """Test Zillow API with the failing address"""
+    print("\n=== Testing Zillow API with 1431 Sumner Avenue ===")
+    
+    headers = {
+        "X-RapidAPI-Key": rapidapi_key,
+        "X-RapidAPI-Host": "zillow-com1.p.rapidapi.com"
+    }
+    
+    # Test the exact search that's failing
+    search_url = "https://zillow-com1.p.rapidapi.com/propertyExtendedSearch"
+    search_params = {
+        "location": "1431 Sumner Avenue, North Charleston, SC, USA, 29406",
+        "status_type": "RecentlySold,ForSale", 
+        "home_type": "Houses,Townhomes,Condos"
+    }
+    
+    print(f"URL: {search_url}")
+    print(f"Headers: {headers}")
+    print(f"Params: {search_params}")
+    
+    try:
+        response = requests.get(search_url, headers=headers, params=search_params, timeout=10)
+        print(f"Status Code: {response.status_code}")
+        print(f"Response Headers: {dict(response.headers)}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print(f"Success! Found {len(data.get('props', []))} properties")
+            if data.get('props'):
+                print(f"First property: {json.dumps(data['props'][0], indent=2)[:300]}...")
+        else:
+            print(f"Error Response: {response.text}")
+            
+        # Try simpler location format
+        print("\n--- Trying simpler location format ---")
+        simple_params = {
+            "location": "North Charleston, SC",
+            "status_type": "ForSale",
+            "home_type": "Houses"
+        }
+        
+        response2 = requests.get(search_url, headers=headers, params=simple_params, timeout=10)
+        print(f"Simple search status: {response2.status_code}")
+        if response2.status_code == 200:
+            data2 = response2.json()
+            print(f"Simple search found {len(data2.get('props', []))} properties")
+        else:
+            print(f"Simple search error: {response2.text[:200]}")
+            
+    except Exception as e:
+        print(f"Exception: {e}")
+
+if __name__ == "__main__":
+    test_zillow_with_specific_address()

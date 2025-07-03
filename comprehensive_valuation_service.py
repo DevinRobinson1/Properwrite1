@@ -54,7 +54,7 @@ class ComprehensiveValuationService:
             }
             
             # Primary sources
-            self._try_zillow_valuation(valuation_data, address, zip_code)
+            self._try_zillow_valuation(valuation_data, address, city, state, zip_code)
             self._try_redfin_valuation(valuation_data, address, city, state)
             self._try_realtor_valuation(valuation_data, coordinates)
             
@@ -106,7 +106,7 @@ class ComprehensiveValuationService:
         
         return None
     
-    def _try_zillow_valuation(self, valuation_data: Dict, address: str, zip_code: str):
+    def _try_zillow_valuation(self, valuation_data: Dict, address: str, city: str, state: str, zip_code: str):
         """Try Zillow Deep Search API"""
         if not self.rapidapi_key:
             return
@@ -118,10 +118,11 @@ class ComprehensiveValuationService:
             }
             # First, search for property to get zpid
             search_url = "https://zillow-com1.p.rapidapi.com/propertyExtendedSearch"
+            # Try specific address first, then fallback to area search
             search_params = {
-                "location": f"{address}, {zip_code}",
-                "status_type": "RecentlySold,ForSale",
-                "home_type": "Houses,Townhomes,Condos"
+                "location": f"{city}, {state}",
+                "status_type": "ForSale",
+                "home_type": "Houses"
             }
             
             search_response = requests.get(search_url, headers=headers, params=search_params, timeout=5)
@@ -138,17 +139,44 @@ class ComprehensiveValuationService:
                         zpid = None
                         target_address_lower = address.lower().strip()
                         
+                        # Extract street number for better matching
+                        import re
+                        street_number_match = re.search(r'^(\d+)', address)
+                        target_street_number = street_number_match.group(1) if street_number_match else None
+                        
+                        best_match = None
+                        best_score = 0
+                        
                         for prop in props:
                             prop_address = prop.get('address', '').lower().strip()
+                            score = 0
+                            
+                            # Check if street number matches
+                            if target_street_number:
+                                prop_street_number_match = re.search(r'^(\d+)', prop_address)
+                                if prop_street_number_match and prop_street_number_match.group(1) == target_street_number:
+                                    score += 50
+                            
+                            # Check address similarity
                             if target_address_lower in prop_address or prop_address in target_address_lower:
-                                zpid = prop.get('zpid')
-                                logging.info(f"Found matching property: {prop.get('address')}")
-                                break
+                                score += 30
+                            
+                            # Check for partial matches
+                            target_words = set(target_address_lower.split())
+                            prop_words = set(prop_address.split())
+                            common_words = target_words.intersection(prop_words)
+                            score += len(common_words) * 2
+                            
+                            if score > best_score:
+                                best_score = score
+                                best_match = prop
                         
-                        # If no exact match, use first property as fallback
-                        if not zpid and props:
-                            zpid = props[0].get('zpid')
-                            logging.info(f"Using first property as fallback: {props[0].get('address')}")
+                        if best_match and best_score > 10:
+                            zpid = best_match.get('zpid')
+                            logging.info(f"Found matching property (score: {best_score}): {best_match.get('address')}")
+                        elif props:
+                            # Return area-based valuation estimate instead of specific property
+                            logging.info(f"No specific match found, using area estimates from {len(props)} properties")
                         
                         if zpid:
                             # Now get detailed property info
