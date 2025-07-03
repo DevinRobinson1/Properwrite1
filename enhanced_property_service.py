@@ -395,6 +395,39 @@ class EnhancedPropertyService:
                         
                         logging.info(f"RapidAPI Realtor data: ${realtor_data['estimate']:,}")
                 
+                # Process Redfin.com data from RapidAPI
+                if 'redfin' in sources and sources['redfin']:
+                    redfin_data = sources['redfin']
+                    if redfin_data.get('estimate'):
+                        property_data['redfin_estimate'] = redfin_data['estimate']
+                        property_data['confidence_scores']['redfin'] = redfin_data.get('confidence', 0.8)
+                        
+                        # Update property details from Redfin.com
+                        if redfin_data.get('property_details'):
+                            details = redfin_data['property_details']
+                            if details.get('bedrooms') and not property_data.get('bedrooms'):
+                                property_data['bedrooms'] = details['bedrooms']
+                            if details.get('bathrooms') and not property_data.get('bathrooms'):
+                                property_data['bathrooms'] = details['bathrooms']
+                            if details.get('square_feet') and not property_data.get('square_feet'):
+                                property_data['square_feet'] = details['square_feet']
+                            if details.get('lot_size') and not property_data.get('lot_size_sqft'):
+                                property_data['lot_size_sqft'] = details['lot_size']
+                            if details.get('year_built') and not property_data.get('year_built'):
+                                property_data['year_built'] = details['year_built']
+                        
+                        # Add detailed information if available
+                        if redfin_data.get('detailed_info'):
+                            property_data['redfin_detailed_info'] = redfin_data['detailed_info']
+                        
+                        # Add images if available
+                        if redfin_data.get('images') and not property_data.get('image_url'):
+                            images = redfin_data['images']
+                            if images and len(images) > 0 and images[0] != 'redfin_photos_available':
+                                property_data['image_url'] = images[0]
+                        
+                        logging.info(f"RapidAPI Redfin data: ${redfin_data['estimate']:,}")
+                
                 # Add data source indicators
                 if not property_data.get('data_sources'):
                     property_data['data_sources'] = []

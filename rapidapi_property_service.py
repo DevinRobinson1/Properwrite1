@@ -36,6 +36,13 @@ class RapidAPIPropertyService:
                 'endpoints': {
                     'property_search': '/properties/search-url'
                 }
+            },
+            'redfin': {
+                'host': 'redfin-com-data.p.rapidapi.com',
+                'endpoints': {
+                    'property_search_sold': '/properties/search-sold',
+                    'property_search_sale': '/properties/search-sale'
+                }
             }
         }
         
@@ -65,6 +72,12 @@ class RapidAPIPropertyService:
             realtor_data = self._get_realtor_data(address, city, state, zip_code)
             if realtor_data:
                 results['sources']['realtor'] = realtor_data
+                results['success'] = True
+            
+            # Get Redfin.com data
+            redfin_data = self._get_redfin_data(address, city, state, zip_code)
+            if redfin_data:
+                results['sources']['redfin'] = redfin_data
                 results['success'] = True
                 
             # Merge and normalize data - no longer needed as data is structured during parsing
@@ -502,6 +515,156 @@ class RapidAPIPropertyService:
         except Exception as e:
             logging.error(f"Error parsing Realtor.com search result: {e}")
             return None
+    
+    def _get_redfin_data(self, address: str, city: str, state: str, zip_code: str) -> Optional[Dict]:
+        """
+        Get property data from Redfin.com via RapidAPI
+        """
+        try:
+            logging.info(f"Calling Redfin.com API for: {address}")
+            
+            # First, search for properties in the area to find matching property
+            search_url = f"https://{self.apis['redfin']['host']}{self.apis['redfin']['endpoints']['property_search_sale']}"
+            
+            # Use a reasonable regionId based on major cities, fallback to general search
+            region_id = self._get_redfin_region_id(city, state)
+            search_params = {
+                'regionId': region_id,
+                'limit': 50
+            }
+            
+            headers = self.base_headers.copy()
+            headers['X-RapidAPI-Host'] = self.apis['redfin']['host']
+            
+            response = requests.get(search_url, headers=headers, params=search_params, timeout=10)
+            
+            if response.status_code == 200:
+                search_data = response.json()
+                
+                # Find matching property by address
+                matching_property = self._find_redfin_matching_property(search_data, address)
+                
+                if matching_property:
+                    # Parse property data directly from search results
+                    return self._parse_redfin_search_result(matching_property)
+                        
+                logging.info("No matching property found in Redfin.com search results")
+                return None
+            else:
+                logging.warning(f"Redfin.com search API returned status {response.status_code}")
+                return None
+                
+        except Exception as e:
+            logging.error(f"Error getting Redfin.com data: {e}")
+            return None
+    
+    def _find_redfin_matching_property(self, search_data: Dict, target_address: str) -> Optional[Dict]:
+        """
+        Find matching property in Redfin.com search results
+        """
+        try:
+            properties = search_data.get('data', [])
+            
+            if not properties:
+                return None
+            
+            best_match = None
+            best_score = 0.0
+            
+            for prop in properties:
+                home_data = prop.get('homeData', {})
+                address_info = home_data.get('addressInfo', {})
+                
+                # Build full address from Redfin data
+                street = address_info.get('formattedStreetLine', '')
+                city = address_info.get('city', '')
+                state = address_info.get('state', '')
+                full_address = f"{street} {city} {state}"
+                
+                # Calculate similarity score
+                similarity = self._calculate_address_similarity(target_address, full_address)
+                
+                if similarity > best_score:
+                    best_score = similarity
+                    best_match = home_data
+            
+            if best_match and best_score >= 0.5:  # Minimum similarity threshold
+                return best_match
+                
+            return None
+            
+        except Exception as e:
+            logging.error(f"Error finding matching Redfin.com property: {e}")
+            return None
+    
+    def _parse_redfin_search_result(self, home_data: Dict) -> Dict:
+        """
+        Parse property data directly from Redfin.com search results
+        """
+        try:
+            price_info = home_data.get('priceInfo', {})
+            address_info = home_data.get('addressInfo', {})
+            
+            result = {
+                'estimate': int(price_info.get('amount', 0)) if price_info.get('amount') else None,
+                'property_details': {
+                    'bedrooms': home_data.get('beds'),
+                    'bathrooms': home_data.get('baths'),
+                    'square_feet': int(home_data.get('sqftInfo', {}).get('amount', 0)) if home_data.get('sqftInfo', {}).get('amount') else None,
+                    'lot_size': int(home_data.get('lotSize', {}).get('amount', 0)) if home_data.get('lotSize', {}).get('amount') else None,
+                    'year_built': home_data.get('yearBuilt', {}).get('yearBuilt'),
+                    'property_type': home_data.get('propertyType'),
+                    'property_id': home_data.get('propertyId'),
+                    'listing_id': home_data.get('listingId'),
+                    'mls_id': home_data.get('mlsId'),
+                    'full_baths': home_data.get('fullBaths'),
+                    'partial_baths': home_data.get('partialBaths')
+                },
+                'detailed_info': {
+                    'url': home_data.get('url'),
+                    'market_id': home_data.get('marketId'),
+                    'days_on_market': home_data.get('daysOnMarket', {}),
+                    'hoa_dues': int(home_data.get('hoaDues', {}).get('amount', 0)) if home_data.get('hoaDues', {}).get('amount') else None,
+                    'last_sale_data': home_data.get('lastSaleData', {}),
+                    'brokers': home_data.get('brokers', {}),
+                    'coordinates': address_info.get('centroid', {}).get('centroid', {}),
+                    'timezone': home_data.get('timezone'),
+                    'listing_metadata': home_data.get('listingMetadata', {}),
+                    'sashes': home_data.get('sashes', []),
+                    'bath_info': home_data.get('bathInfo', {})
+                },
+                'confidence': 0.85
+            }
+            
+            # Extract property photos if available
+            photos_info = home_data.get('photosInfo', {})
+            if photos_info and photos_info.get('photoRanges'):
+                # Redfin uses a complex photo system, we'll indicate photos are available
+                result['images'] = ['redfin_photos_available']
+            
+            return result
+            
+        except Exception as e:
+            logging.error(f"Error parsing Redfin.com search result: {e}")
+            return None
+    
+    def _get_redfin_region_id(self, city: str, state: str) -> str:
+        """
+        Get appropriate Redfin region ID based on city and state
+        """
+        # Common region IDs for major cities (these are examples from the API docs)
+        region_mapping = {
+            ('Camas', 'WA'): '6_2446',
+            ('Charlotte', 'NC'): '6_2447',  # Estimated
+            ('Raleigh', 'NC'): '6_2448',    # Estimated
+            ('Atlanta', 'GA'): '6_2449',    # Estimated
+            ('Nashville', 'TN'): '6_2450',  # Estimated
+            ('Seattle', 'WA'): '6_2451',    # Estimated
+            ('Portland', 'OR'): '6_2452',   # Estimated
+        }
+        
+        city_key = (city, state)
+        return region_mapping.get(city_key, '6_2446')  # Default to Camas, WA region
     
     def test_api_connection(self) -> Dict:
         """

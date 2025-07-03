@@ -1,0 +1,345 @@
+
+Redfin.com Data
+GET properties/search-sold
+
+App: default-application_10722772
+X-RapidAPI-Key: be3e296439msh2693e44b9d2433fp17bebbjsn9aa77716b131
+Request URL: rapidapi.com
+
+X-RapidAPI-Host*: redfin-com-data.p.rapidapi.com
+
+Target:
+Python
+Client:
+http.client
+import http.client
+
+conn = http.client.HTTPSConnection("redfin-com-data.p.rapidapi.com")
+
+headers = {
+    'x-rapidapi-key': "be3e296439msh2693e44b9d2433fp17bebbjsn9aa77716b131",
+    'x-rapidapi-host': "redfin-com-data.p.rapidapi.com"
+}
+
+conn.request("GET", "/properties/search-sold?regionId=6_2446&soldWithin=30", headers=headers)
+
+res = conn.getresponse()
+data = res.read()
+
+print(data.decode("utf-8"))
+
+
+Status
+200
+Media Type
+JSON
+Example
+New Example
+Description
+
+Body
+{
+  "data": [
+    {
+      "homeData": {
+        "propertyId": "66775624",
+        "listingId": "181125923",
+        "listingDisplayLevel": 1,
+        "mlsId": "2188147",
+        "url": "/WA/Camas/2539-NW-Lorenz-St-98607/home/66775624",
+        "dataSourceId": "1",
+        "marketId": "10",
+        "mlsStatusId": "3495",
+        "servicePolicyId": "4",
+        "listingMetadata": {
+          "searchStatus": 4,
+          "listingType": 1,
+          "isRedfin": true,
+          "hasVirtualTour": true
+        },
+        "propertyType": 6,
+        "beds": 3,
+        "baths": 2.5,
+        "priceInfo": {
+          "amount": "644900",
+          "displayLevel": 1,
+          "priceType": 2,
+          "homePrice": {
+            "displayLevel": 1,
+            "int64Value": "644900"
+          }
+        },
+        "sqftInfo": {
+          "amount": "2521",
+          "displayLevel": 1
+        },
+        "photosInfo": {
+          "photoRanges": [
+            {
+              "startPos": 0,
+              "endPos": 39,
+              "version": "0"
+            }
+          ],
+          "primaryPhotoDisplayLevel": 1,
+          "secondaryPhotoDisplayLevel": 1
+        },
+        "daysOnMarket": {
+          "listingAddedDate": "2024-01-18T18:28:40.563Z",
+          "displayLevel": 1
+        },
+        "timezone": "US/Pacific",
+        "yearBuilt": {
+          "yearBuilt": 2015,
+          "displayLevel": 1
+        },
+        "lotSize": {
+          "amount": "2558",
+          "displayLevel": 1
+        },
+        "hoaDues": {
+          "amount": "160",
+          "displayLevel": 1
+        },
+        "sashes": [
+          {
+            "isRedfin": true,
+            "lastSaleDate": "FEB 12, 2024",
+            "sashTypeId": 1,
+            "sashTypeName": "Sold",
+            "sashTypeColor": "#5D8ACB"
+          },
+          {
+            "sashTypeId": 31,
+            "sashTypeName": "3D Walkthrough",
+            "sashTypeColor": "#7556F2"
+          }
+        ],
+        "brokers": {
+          "listingBrokerAndAgent": {
+            "brokerName": "Redfin",
+            "isRedfin": true
+          },
+          "sellingBrokerAndAgent": {
+            "brokerName": "Redfin",
+            "isRedfin": true
+          }
+        },
+        "lastSaleData": {
+          "lastSoldDate": "2024-02-12T08:00:00Z"
+        },
+        "personalization": {},
+        "insights": {},
+        "showMlsId": false,
+        "directAccessInfo": {
+          "supportPhoneNumber": "N/A",
+          "timeZone": {
+            "id": 7,
+            "timeZoneIdString": "US/Pacific",
+            "olsonTimeZoneIdString": "America/Los_Angeles",
+            "description": "Pacific Time in the United States"
+          }
+        },
+        "fullBaths": 2,
+        "partialBaths": 1,
+        "bathInfo": {
+          "rawHalfBaths": 1,
+          "rawFullBaths": 2,
+          "computedPartialBaths": 1,
+          "computedFullBaths": 2,
+          "computedTotalBaths": 2.5
+        },
+        "addressInfo": {
+          "centroid": {
+            "centroid": {
+              "latitude": 45.5979172,
+              "longitude": -122.4708653
+            },
+            "displayLevel": 1
+          },
+          "formattedStreetLine": "2539 NW Lorenz St",
+          "city": "Camas",
+          "state": "WA",
+          "zip": "98607",
+          "location": "Camas",
+          "streetlineDisplayLevel": 1,
+          "unitNumberDisplayLevel": 1,
+          "locationDisplayLevel": 1,
+          "countryCode": 1,
+          "postalCodeDisplayLevel": 1
+        }
+      },
+      "defaultExtension": {}
+    },
+    {
+      "homeData": {
+        "propertyId": "55175035",
+        "listingId": "181585439",
+        "listingDisplayLevel": 1,
+        "mlsId": "2189613",
+        "url": "/WA/Camas/2030-NW-Lacamas-Dr-98607/home/55175035",
+        "dataSourceId": "1",
+        "marketId": "10",
+        "mlsStatusId": "3495",
+        "servicePolicyId": "4",
+        "listingMetadata": {
+          "searchStatus": 4,
+          "listingType": 1,
+          "isRedfin": true,
+          "hasVirtualTour": true
+        },
+        "propertyType": 6,
+        "beds": 4,
+        "baths": 4.5,
+        "priceInfo": {
+          "amount": "1575000",
+          "displayLevel": 1,
+          "priceType": 2,
+          "homePrice": {
+            "displayLevel": 1,
+            "int64Value": "1575000"
+          }
+        },
+        "sqftInfo": {
+          "amount": "4034",
+          "displayLevel": 1
+        },
+        "photosInfo": {
+          "photoRanges": [
+            {
+              "startPos": 0,
+              "endPos": 2,
+              "version": "0"
+            },
+            {
+              "startPos": 3,
+              "endPos": 3,
+              "version": "1"
+            },
+            {
+              "startPos": 4,
+              "endPos": 14,
+              "version": "0"
+            },
+            {
+              "startPos": 15,
+              "endPos": 16,
+              "version": "1"
+            },
+            {
+              "startPos": 17,
+              "endPos": 34,
+              "version": "0"
+            },
+            {
+              "startPos": 35,
+              "endPos": 35,
+              "version": "1"
+            },
+            {
+              "startPos": 36,
+              "endPos": 39,
+              "version": "0"
+            }
+          ],
+          "primaryPhotoDisplayLevel": 1,
+          "secondaryPhotoDisplayLevel": 1
+        },
+        "daysOnMarket": {
+          "listingAddedDate": "2024-02-01T14:08:57.062Z",
+          "displayLevel": 1
+        },
+        "timezone": "US/Pacific",
+        "yearBuilt": {
+          "yearBuilt": 2016,
+          "displayLevel": 1
+        },
+        "lotSize": {
+          "amount": "14118",
+          "displayLevel": 1
+        },
+        "hoaDues": {
+          "amount": "49",
+          "displayLevel": 1
+        },
+        "sashes": [
+          {
+            "isRedfin": true,
+            "lastSaleDate": "MAR 14, 2024",
+            "sashTypeId": 1,
+            "sashTypeName": "Sold",
+            "sashTypeColor": "#5D8ACB"
+          },
+          {
+            "sashTypeId": 31,
+            "sashTypeName": "3D Walkthrough",
+            "sashTypeColor": "#7556F2"
+          }
+        ],
+        "brokers": {
+          "listingBrokerAndAgent": {
+            "redfinAgentId": "6311",
+            "agentName": "Fred Sanchez",
+            "brokerName": "Redfin",
+            "isRedfin": true
+          },
+          "sellingBrokerAndAgent": {
+            "brokerName": "ZNonMember-Office-MLS"
+          }
+        },
+        "lastSaleData": {
+          "lastSoldDate": "2024-03-14T07:00:00Z"
+        },
+        "personalization": {},
+        "insights": {},
+        "showMlsId": false,
+        "directAccessInfo": {
+          "supportPhoneNumber": "N/A",
+          "timeZone": {
+            "id": 7,
+            "timeZoneIdString": "US/Pacific",
+            "olsonTimeZoneIdString": "America/Los_Angeles",
+            "description": "Pacific Time in the United States"
+          }
+        },
+        "fullBaths": 4,
+        "partialBaths": 1,
+        "bathInfo": {
+          "rawHalfBaths": 1,
+          "rawFullBaths": 4,
+          "computedPartialBaths": 1,
+          "computedFullBaths": 4,
+          "computedTotalBaths": 4.5
+        },
+        "addressInfo": {
+          "centroid": {
+            "centroid": {
+              "latitude": 45.615992,
+              "longitude": -122.4307804
+            },
+            "displayLevel": 1
+          },
+          "formattedStreetLine": "2030 NW Lacamas Dr",
+          "city": "Camas",
+          "state": "WA",
+          "zip": "98607",
+          "location": "Camas",
+          "streetlineDisplayLevel": 1,
+          "unitNumberDisplayLevel": 1,
+          "locationDisplayLevel": 1,
+          "countryCode": 1,
+          "postalCodeDisplayLevel": 1
+        }
+      },
+      "defaultExtension": {}
+    }
+  ],
+  "meta": {
+    "currentPage": 1,
+    "limit": 2,
+    "moreData": true,
+    "message ": "Use the 'page' parameter to get the full data until 'moreData=false'"
+  },
+  "status": true,
+  "message": "Successful"
+}

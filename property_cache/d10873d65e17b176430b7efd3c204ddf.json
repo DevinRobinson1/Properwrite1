@@ -1,0 +1,103 @@
+{
+  "cache_timestamp": 1751549704.7651203,
+  "property_data": {
+    "address": "1610 Nw 34Th Avenue, Camas, WA, 98607",
+    "validated_address": {
+      "status": "normalized",
+      "source": "Manual Normalization",
+      "street": "1610 Nw 34Th Avenue",
+      "city": "Camas",
+      "state": "WA",
+      "zip": "98607",
+      "full_address": "1610 Nw 34Th Avenue, Camas, WA, 98607",
+      "latitude": null,
+      "longitude": null,
+      "confidence": "medium"
+    },
+    "image_url": null,
+    "bedrooms": 3,
+    "bathrooms": 2,
+    "square_feet": 1400,
+    "year_built": 2005,
+    "lot_size_sqft": 8000,
+    "property_type": "Single Family",
+    "zillow_estimate": 272837,
+    "redfin_estimate": 1199000,
+    "realtor_estimate": 293511,
+    "rent_estimate": 2054.577,
+    "data_sources": [
+      "Zillow",
+      "Redfin",
+      "Realtor.com"
+    ],
+    "data_errors": [],
+    "last_updated": "2025-07-03T13:34:58.767585",
+    "confidence_scores": {
+      "zillow": 0.9999999999999999,
+      "redfin": 0.85,
+      "realtor": 0.9999999999999999
+    },
+    "redfin_detailed_info": {
+      "url": "/WA/Camas/1610-NW-34th-Ave-98607/home/14618679",
+      "market_id": "10",
+      "days_on_market": {
+        "daysOnMarket": "14",
+        "timeOnRedfin": "1210371.996s",
+        "listingAddedDate": "2025-06-19T13:22:12.502Z",
+        "displayLevel": 1
+      },
+      "hoa_dues": 24,
+      "last_sale_data": {
+        "lastSoldDate": "2004-05-21T07:00:00Z"
+      },
+      "brokers": {
+        "listingBrokerAndAgent": {
+          "redfinAgentId": "6311",
+          "agentName": "Fred Sanchez",
+          "brokerName": "Redfin",
+          "isRedfin": true
+        },
+        "sellingBrokerAndAgent": {}
+      },
+      "coordinates": {
+        "latitude": 45.6033256,
+        "longitude": -122.4260463
+      },
+      "timezone": "US/Pacific",
+      "listing_metadata": {
+        "searchStatus": 1,
+        "listingType": 1,
+        "isRedfin": true,
+        "hasVirtualTour": true
+      },
+      "sashes": [
+        {
+          "isRedfin": true,
+          "sashTypeId": 13,
+          "sashTypeName": "For Sale",
+          "sashTypeColor": "#2E7E36"
+        },
+        {
+          "sashTypeId": 33,
+          "sashTypeName": "3D & Video Tour",
+          "sashTypeColor": "#7556F2"
+        }
+      ],
+      "bath_info": {
+        "rawHalfBaths": 1,
+        "rawFullBaths": 2,
+        "computedPartialBaths": 1,
+        "computedFullBaths": 2,
+        "computedTotalBaths": 2.5
+      }
+    },
+    "average_estimate": 588449,
+    "estimate_range": {
+      "min": 272837,
+      "max": 1199000,
+      "count": 3
+    },
+    "data_quality": "excellent"
+  },
+  "address_normalized": "1610 NW 34th Ave, Camas, WA 98607"
+}
