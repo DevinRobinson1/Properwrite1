@@ -111,6 +111,7 @@ class GoogleAutocompleteNew {
             }
             
             const data = await response.json();
+            console.log('Autocomplete API response:', data);
             
             // Handle API not enabled case
             if (data.error === 'API_NOT_ENABLED') {
@@ -119,11 +120,13 @@ class GoogleAutocompleteNew {
             }
             
             this.suggestions = data.suggestions || [];
+            console.log('Parsed suggestions:', this.suggestions);
             this.renderSuggestions();
             
         } catch (error) {
             if (error.name !== 'AbortError') {
                 console.error('Autocomplete error:', error);
+                console.error('Error details:', error.message);
                 this.options.onError(error);
             }
         }

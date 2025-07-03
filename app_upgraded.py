@@ -878,6 +878,7 @@ def autocomplete():
         if not api_key:
             return jsonify({'error': 'Google Maps API key not configured'}), 500
         
+        # Try Google Places API (New) first
         url = 'https://places.googleapis.com/v1/places:autocomplete'
         headers = {
             'Content-Type': 'application/json',
@@ -892,17 +893,54 @@ def autocomplete():
             'sessionToken': session_token
         }
         
+        logging.info(f"Making Google Places API call with payload: {payload}")
         response = requests.post(url, json=payload, headers=headers)
         
+        logging.info(f"Google Places API response status: {response.status_code}")
+        logging.info(f"Google Places API response text: {response.text}")
+        
         if response.status_code == 200:
-            return jsonify(response.json())
+            response_data = response.json()
+            logging.info(f"Successful response with {len(response_data.get('suggestions', []))} suggestions")
+            return jsonify(response_data)
         elif response.status_code == 400 and "API key not valid" in response.text:
-            logging.warning("Google Places API (New) not enabled - using fallback")
-            return jsonify({
-                'error': 'API_NOT_ENABLED',
-                'message': 'Google Places API (New) requires activation in Google Cloud Console',
-                'suggestions': []
-            })
+            logging.warning("Google Places API (New) not enabled - trying legacy API")
+            
+            # Fallback to legacy Google Places API
+            legacy_url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json'
+            legacy_params = {
+                'input': input_text,
+                'key': api_key,
+                'types': 'address',
+                'language': language_code,
+                'sessiontoken': session_token
+            }
+            
+            legacy_response = requests.get(legacy_url, params=legacy_params)
+            
+            if legacy_response.status_code == 200:
+                legacy_data = legacy_response.json()
+                
+                # Transform legacy response to match new API format
+                suggestions = []
+                for prediction in legacy_data.get('predictions', []):
+                    suggestions.append({
+                        'placePrediction': {
+                            'placeId': prediction.get('place_id'),
+                            'text': {
+                                'text': prediction.get('description', '')
+                            }
+                        }
+                    })
+                
+                return jsonify({'suggestions': suggestions})
+            else:
+                logging.error(f"Legacy Google Places API error: {legacy_response.status_code} - {legacy_response.text}")
+                return jsonify({
+                    'error': 'API_NOT_ENABLED',
+                    'message': 'Google Places API (New) requires activation in Google Cloud Console',
+                    'suggestions': []
+                })
         else:
             logging.error(f"Google Autocomplete API error: {response.status_code} - {response.text}")
             return jsonify({'suggestions': []})
