@@ -54,10 +54,10 @@ def analyze_property():
     """
     try:
         data = request.get_json()
-        address = data.get('address', '').strip()
-        city = data.get('city', '').strip()
-        state = data.get('state', '').strip()
-        zip_code = data.get('zip', '').strip()
+        address = (data.get('address') or '').strip()
+        city = (data.get('city') or '').strip()
+        state = (data.get('state') or '').strip()
+        zip_code = (data.get('zip') or '').strip()
         
         # Check for Google Places canonical data
         place_id = data.get('place_id', '')
@@ -778,7 +778,7 @@ def objection_handler():
         import os
         
         data = request.get_json()
-        objection_text = data.get('objection_text', '').strip()
+        objection_text = (data.get('objection_text') or '').strip()
         category = data.get('category', '')
         regenerate = data.get('regenerate', False)
         
@@ -917,7 +917,7 @@ def jv_submit_deal():
                 }), 400
         
         # Validate partner name (at least 2 words)
-        name_parts = data.get('partner_name', '').strip().split()
+        name_parts = (data.get('partner_name') or '').strip().split()
         if len(name_parts) < 2:
             return jsonify({
                 'success': False,
