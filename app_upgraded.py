@@ -7,7 +7,7 @@ import logging
 import json
 import uuid
 from datetime import datetime
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, redirect
 from property_data_service import property_service
 from rentcast_property_service import rentcast_property_service
 from ai_strategy_assistant import ai_strategy_assistant
@@ -790,18 +790,42 @@ def jv_submit_page():
 @app.route('/api/jv-submit', methods=['POST'])
 def jv_submit_deal():
     """
-    Submit and auto-underwrite JV deal
+    Submit and auto-underwrite JV deal with partner information
     """
     try:
         data = request.get_json()
         
-        # Validate required fields
-        required_fields = ['property_address', 'deal_type', 'seller_asking_price', 'arv', 'rehab_needed', 'property_status', 'closing_date']
-        for field in required_fields:
+        # Validate required partner fields
+        partner_required_fields = ['partner_name', 'partner_email', 'partner_phone', 'partner_markets']
+        for field in partner_required_fields:
             if not data.get(field):
                 return jsonify({
                     'success': False,
-                    'error': f'Missing required field: {field}'
+                    'error': f'Missing required partner field: {field}'
+                }), 400
+        
+        # Validate partner name (at least 2 words)
+        name_parts = data.get('partner_name', '').strip().split()
+        if len(name_parts) < 2:
+            return jsonify({
+                'success': False,
+                'error': 'Full name must contain at least two words'
+            }), 400
+        
+        # Validate markets selection
+        if not data.get('partner_markets') or len(data.get('partner_markets', [])) == 0:
+            return jsonify({
+                'success': False,
+                'error': 'At least one market state must be selected'
+            }), 400
+        
+        # Validate required deal fields
+        deal_required_fields = ['property_address', 'deal_type', 'seller_asking_price', 'arv', 'rehab_needed', 'property_status', 'closing_date']
+        for field in deal_required_fields:
+            if not data.get(field):
+                return jsonify({
+                    'success': False,
+                    'error': f'Missing required deal field: {field}'
                 }), 400
         
         # Additional validation for wholesale deals
@@ -818,16 +842,22 @@ def jv_submit_deal():
                 'error': 'Rehab cost is required when rehab is needed'
             }), 400
         
-        # Generate submission ID
-        submission_id = str(uuid.uuid4())[:8].upper()
+        # Create or get partner record
+        from jv_database import jv_db
+        
+        partner_id = jv_db.create_or_get_partner(
+            name=data.get('partner_name'),
+            email=data.get('partner_email'),
+            phone=data.get('partner_phone'),
+            company=data.get('partner_company'),
+            markets=data.get('partner_markets', [])
+        )
         
         # Auto-underwrite the deal
         underwrite_result = auto_underwrite_deal(data)
         
-        # Prepare deal data for storage
+        # Prepare deal data for database storage
         deal_data = {
-            'submission_id': submission_id,
-            'submitted_at': datetime.now().isoformat(),
             'property_address': data.get('property_address'),
             'street': data.get('street', ''),
             'city': data.get('city', ''),
@@ -845,47 +875,29 @@ def jv_submit_deal():
             'closing_date': data.get('closing_date'),
             'additional_notes': data.get('additional_notes', ''),
             'underwrite_result': underwrite_result,
-            'status': 'pending_review' if underwrite_result['status'] == 'auto-approved' else 'auto_denied'
+            'partner_info': {
+                'name': data.get('partner_name'),
+                'email': data.get('partner_email'),
+                'phone': data.get('partner_phone'),
+                'company': data.get('partner_company'),
+                'markets': data.get('partner_markets', [])
+            }
         }
         
-        # Store in simple file-based storage (Replit DB alternative)
-        try:
-            # Create deals directory if it doesn't exist
-            os.makedirs('jv_deals', exist_ok=True)
-            
-            # Save deal to file
-            deal_file = f'jv_deals/{submission_id}.json'
-            with open(deal_file, 'w') as f:
-                json.dump(deal_data, f, indent=2)
-                
-            # Also maintain an index file for admin view
-            index_file = 'jv_deals/index.json'
-            try:
-                with open(index_file, 'r') as f:
-                    index = json.load(f)
-            except (FileNotFoundError, json.JSONDecodeError):
-                index = []
-            
-            index.append({
-                'submission_id': submission_id,
-                'submitted_at': deal_data['submitted_at'],
-                'property_address': deal_data['property_address'],
-                'deal_type': deal_data['deal_type'],
-                'status': deal_data['status']
-            })
-            
-            with open(index_file, 'w') as f:
-                json.dump(index, f, indent=2)
-                
-        except Exception as storage_error:
-            logging.error(f"Failed to store deal: {storage_error}")
-            # Continue anyway, just log the error
+        # Store deal in database
+        deal_id = jv_db.create_deal_submission(
+            partner_id=partner_id,
+            deal_data=deal_data,
+            auto_status='approved' if underwrite_result['status'] == 'auto-approved' else 'denied',
+            reasons=underwrite_result.get('reasons', [])
+        )
         
         return jsonify({
             'success': True,
-            'submission_id': submission_id,
+            'submission_id': deal_id,
+            'partner_id': partner_id,
             'underwrite_result': underwrite_result,
-            'status': deal_data['status']
+            'status': 'approved' if underwrite_result['status'] == 'auto-approved' else 'denied'
         })
         
     except Exception as e:
@@ -898,25 +910,131 @@ def jv_submit_deal():
 @app.route('/jv-admin')
 def jv_admin_page():
     """
-    Admin view for JV deals (placeholder for Phase 2)
+    Admin dashboard for JV deals and partners
     """
     try:
-        # Load deal index
-        index_file = 'jv_deals/index.json'
-        try:
-            with open(index_file, 'r') as f:
-                deals = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            deals = []
+        # Check admin authentication (simple token check)
+        admin_token = os.environ.get('ADMIN_TOKEN', 'admin123')  # Default for demo
+        provided_token = request.args.get('token')
         
-        # Sort by submission date, newest first
-        deals.sort(key=lambda x: x['submitted_at'], reverse=True)
+        if provided_token != admin_token:
+            return render_template('jv_admin_login.html')
         
-        return render_template('jv_admin.html', deals=deals)
+        from jv_database import jv_db
+        
+        # Get dashboard stats
+        stats = jv_db.get_dashboard_stats()
+        
+        # Get recent partners
+        partners = jv_db.get_all_partners(limit=20)
+        
+        return render_template('jv_admin.html', 
+                             stats=stats, 
+                             partners=partners, 
+                             admin_token=admin_token)
         
     except Exception as e:
         logging.error(f"Error loading admin page: {e}")
-        return render_template('jv_admin.html', deals=[], error=str(e))
+        return render_template('jv_admin.html', 
+                             stats={'total_partners': 0, 'deals_last_30_days': 0, 'auto_approved': 0, 'auto_denied': 0, 'approval_rate': 0}, 
+                             partners=[], 
+                             error=str(e))
+
+@app.route('/jv-admin/partner/<partner_id>')
+def jv_admin_partner_detail(partner_id):
+    """
+    Partner detail view
+    """
+    try:
+        # Check admin authentication
+        admin_token = os.environ.get('ADMIN_TOKEN', 'admin123')
+        provided_token = request.args.get('token')
+        
+        if provided_token != admin_token:
+            return redirect(f'/jv-admin?token={admin_token}')
+        
+        from jv_database import jv_db
+        
+        # Get partner details
+        partner = jv_db.get_partner_by_id(partner_id)
+        if not partner:
+            return "Partner not found", 404
+        
+        # Get partner deals
+        deals = jv_db.get_partner_deals(partner_id, limit=50)
+        
+        # Get partner stats
+        stats = jv_db.get_partner_stats(partner_id)
+        
+        return render_template('jv_admin_partner.html', 
+                             partner=partner, 
+                             deals=deals, 
+                             stats=stats,
+                             admin_token=admin_token)
+        
+    except Exception as e:
+        logging.error(f"Error loading partner detail: {e}")
+        return f"Error: {e}", 500
+
+@app.route('/jv-admin/deal/<deal_id>')
+def jv_admin_deal_detail(deal_id):
+    """
+    Deal detail view
+    """
+    try:
+        # Check admin authentication
+        admin_token = os.environ.get('ADMIN_TOKEN', 'admin123')
+        provided_token = request.args.get('token')
+        
+        if provided_token != admin_token:
+            return redirect(f'/jv-admin?token={admin_token}')
+        
+        from jv_database import jv_db
+        
+        # Get deal details
+        deal = jv_db.get_deal_by_id(deal_id)
+        if not deal:
+            return "Deal not found", 404
+        
+        return render_template('jv_admin_deal.html', 
+                             deal=deal,
+                             admin_token=admin_token)
+        
+    except Exception as e:
+        logging.error(f"Error loading deal detail: {e}")
+        return f"Error: {e}", 500
+
+@app.route('/api/jv-admin/deal/<deal_id>/status', methods=['POST'])
+def jv_admin_update_deal_status(deal_id):
+    """
+    Update deal final status (admin approval/denial)
+    """
+    try:
+        # Check admin authentication
+        admin_token = os.environ.get('ADMIN_TOKEN', 'admin123')
+        provided_token = request.json.get('admin_token') if request.json else None
+        
+        if provided_token != admin_token:
+            return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+        
+        data = request.get_json()
+        final_status = data.get('final_status')
+        
+        if final_status not in ['approved', 'denied']:
+            return jsonify({'success': False, 'error': 'Invalid status'}), 400
+        
+        from jv_database import jv_db
+        
+        success = jv_db.update_deal_final_status(deal_id, final_status)
+        
+        if success:
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'Deal not found'}), 404
+        
+    except Exception as e:
+        logging.error(f"Error updating deal status: {e}")
+        return jsonify({'success': False, 'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -31,8 +31,59 @@
     <div class="max-w-6xl mx-auto px-4 py-8">
         <!-- Header -->
         <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">JV Deal Submissions</h2>
-            <p class="text-gray-600">Review and manage joint venture deal submissions.</p>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">JV Partnership Dashboard</h2>
+            <p class="text-gray-600">Manage partners and joint venture deal submissions.</p>
+        </div>
+
+        <!-- Dashboard Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-gray-800">{{ stats.total_partners }}</h3>
+                        <p class="text-gray-600 text-sm">Total Partners</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <i class="fas fa-handshake text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-gray-800">{{ stats.deals_last_30_days }}</h3>
+                        <p class="text-gray-600 text-sm">Deals (30 days)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <i class="fas fa-check-circle text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-gray-800">{{ stats.auto_approved }}</h3>
+                        <p class="text-gray-600 text-sm">Auto-Approved</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-red-100 text-red-600">
+                        <i class="fas fa-times-circle text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-gray-800">{{ "%.1f"|format(stats.approval_rate) }}%</h3>
+                        <p class="text-gray-600 text-sm">Approval Rate</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {% if error %}
@@ -44,27 +95,34 @@
         </div>
         {% endif %}
 
-        <!-- Deals Table -->
+        <!-- Partners Table -->
         <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-            {% if deals %}
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">Partners</h3>
+            </div>
+            
+            {% if partners %}
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Submission
+                                Partner
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Property
+                                Company
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Deal Type
+                                Markets
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
+                                Deals Submitted
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Date
+                                Last Deal
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Auto-Approval Rate
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Actions
@@ -72,52 +130,64 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        {% for deal in deals %}
-                        <tr class="hover:bg-gray-50">
+                        {% for partner in partners %}
+                        <tr class="hover:bg-gray-50 cursor-pointer" onclick="viewPartner('{{ partner.id }}')">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ deal.submission_id }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ deal.property_address }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900 capitalize">
-                                    {{ deal.deal_type.replace('_', ' ') }}
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                            <span class="text-sm font-medium text-blue-600">
+                                                {{ partner.name.split()[0][0] }}{{ partner.name.split()[1][0] if partner.name.split()|length > 1 else '' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">{{ partner.name }}</div>
+                                        <div class="text-sm text-gray-500">{{ partner.email }}</div>
+                                    </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                {% if deal.status == 'pending_review' %}
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                    Auto-Approved
-                                </span>
-                                {% elif deal.status == 'auto_denied' %}
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                                    Auto-Denied
-                                </span>
-                                {% else %}
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
-                                    {{ deal.status.replace('_', ' ').title() }}
-                                </span>
-                                {% endif %}
+                                <div class="text-sm text-gray-900">{{ partner.company or '-' }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    {% if partner.markets %}
+                                        {{ partner.markets|join(', ')[:30] }}{% if partner.markets|join(', ')|length > 30 %}...{% endif %}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ partner.total_deals or 0 }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ deal.submitted_at[:10] }}
+                                {% if partner.last_deal_date %}
+                                    {{ partner.last_deal_date.strftime('%Y-%m-%d') if partner.last_deal_date.strftime else partner.last_deal_date[:10] }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if partner.total_deals and partner.total_deals > 0 %}
+                                <div class="flex items-center">
+                                    <div class="text-sm font-medium text-gray-900">{{ "%.0f"|format(partner.approval_rate) }}%</div>
+                                    <div class="ml-2 w-16 bg-gray-200 rounded-full h-2">
+                                        <div class="h-2 rounded-full {% if partner.approval_rate >= 70 %}bg-green-500{% elif partner.approval_rate >= 50 %}bg-yellow-500{% else %}bg-red-500{% endif %}" 
+                                             style="width: {{ partner.approval_rate }}%"></div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <span class="text-sm text-gray-500">-</span>
+                                {% endif %}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button onclick="viewDeal('{{ deal.submission_id }}')" 
-                                        class="text-blue-600 hover:text-blue-900 mr-3">
-                                    View
-                                </button>
-                                {% if deal.status == 'pending_review' %}
-                                <button onclick="approveDeal('{{ deal.submission_id }}')" 
-                                        class="text-green-600 hover:text-green-900 mr-3">
-                                    Approve
-                                </button>
-                                <button onclick="denyDeal('{{ deal.submission_id }}')" 
-                                        class="text-red-600 hover:text-red-900">
-                                    Deny
-                                </button>
-                                {% endif %}
+                                <a href="/jv-admin/partner/{{ partner.id }}?token={{ admin_token }}" 
+                                   class="text-blue-600 hover:text-blue-900"
+                                   onclick="event.stopPropagation();">
+                                    View Details
+                                </a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -126,9 +196,9 @@
             </div>
             {% else %}
             <div class="text-center py-12">
-                <i class="fas fa-folder-open text-gray-400 text-6xl mb-4"></i>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">No submissions yet</h3>
-                <p class="text-gray-500 mb-6">JV deal submissions will appear here for review.</p>
+                <i class="fas fa-users text-gray-400 text-6xl mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No partners yet</h3>
+                <p class="text-gray-500 mb-6">Partners will appear here as they submit deals.</p>
                 <a href="/jv-submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
                     <i class="fas fa-plus mr-2"></i>
                     Submit First Deal
@@ -156,21 +226,8 @@
     </div>
 
     <script>
-        // Placeholder functions for Phase 2 implementation
-        function viewDeal(submissionId) {
-            alert(`Phase 2: View deal details for ${submissionId}`);
-        }
-
-        function approveDeal(submissionId) {
-            if (confirm('Approve this deal?')) {
-                alert(`Phase 2: Approve deal ${submissionId}`);
-            }
-        }
-
-        function denyDeal(submissionId) {
-            if (confirm('Deny this deal?')) {
-                alert(`Phase 2: Deny deal ${submissionId}`);
-            }
+        function viewPartner(partnerId) {
+            window.location.href = `/jv-admin/partner/${partnerId}?token={{ admin_token }}`;
         }
 
         function closeDealModal() {

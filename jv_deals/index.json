@@ -1,0 +1,16 @@
+[
+  {
+    "submission_id": "42AF0D80",
+    "submitted_at": "2025-07-03T12:38:07.858873",
+    "property_address": "14303 Evening Flighjt Lane Charlotte NC",
+    "deal_type": "wholesale",
+    "status": "pending_review"
+  },
+  {
+    "submission_id": "E81A570E",
+    "submitted_at": "2025-07-03T12:38:42.112542",
+    "property_address": "14303 Evnein FFlgh lan",
+    "deal_type": "wholesale",
+    "status": "auto_denied"
+  }
+]

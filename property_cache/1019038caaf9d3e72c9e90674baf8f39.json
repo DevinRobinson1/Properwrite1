@@ -1,5 +1,5 @@
 {
-  "cache_timestamp": 1750946441.9961815,
+  "cache_timestamp": 1751546662.152761,
   "property_data": {
     "status": "success",
     "address": "14303 Evening Flight, Charlotte, NC, 28262",
@@ -16,8 +16,8 @@
       "confidence": "medium"
     },
     "source": "Rentcast API",
-    "data_retrieved_at": "2025-06-26T14:00:41.996139",
-    "estimate": 415000,
+    "data_retrieved_at": "2025-07-03T12:44:22.152714",
+    "estimate": 414000,
     "rent_estimate": 0,
     "confidence": "low",
     "data_quality": "low",
@@ -39,5 +39,5 @@
     "comps_count": 0,
     "avg_price_per_sqft": 0.0
   },
-  "address_normalized": "14303 Evening Flight, Charlotte, Nc 28262"
+  "address_normalized": "14303 evening flight, charlotte, Nc 28262"
 }

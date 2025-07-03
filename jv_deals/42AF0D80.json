@@ -1,0 +1,28 @@
+{
+  "submission_id": "42AF0D80",
+  "submitted_at": "2025-07-03T12:38:07.858873",
+  "property_address": "14303 Evening Flighjt Lane Charlotte NC",
+  "street": "14303 Evening Flighjt Lane Charlotte NC",
+  "city": "",
+  "state": "",
+  "zip": "",
+  "deal_type": "wholesale",
+  "purchase_price": "200000",
+  "seller_asking_price": "200000",
+  "arv": "385000",
+  "rehab_needed": "yes",
+  "rehab_cost": "30000",
+  "property_description": "VInyl Village",
+  "photos_link": "https://drive.google.com/drive/u/0/folders/1KSbx-dO7-xiTU-vy_9j_HE_cq07BDcrR",
+  "property_status": "vacant",
+  "closing_date": "2025-07-25",
+  "additional_notes": "",
+  "underwrite_result": {
+    "status": "auto-approved",
+    "mao": 239500.0,
+    "reasons": [
+      "Purchase price $200,000 is within MAO of $239,500"
+    ]
+  },
+  "status": "pending_review"
+}

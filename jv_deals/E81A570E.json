@@ -1,0 +1,28 @@
+{
+  "submission_id": "E81A570E",
+  "submitted_at": "2025-07-03T12:38:42.112542",
+  "property_address": "14303 Evnein FFlgh lan",
+  "street": "14303 Evnein FFlgh lan",
+  "city": "",
+  "state": "",
+  "zip": "",
+  "deal_type": "wholesale",
+  "purchase_price": "350000",
+  "seller_asking_price": "35000",
+  "arv": "385000",
+  "rehab_needed": "yes",
+  "rehab_cost": "25000",
+  "property_description": "its good, i promise",
+  "photos_link": "https://drive.google.com/drive/u/0/folders/1KSbx-dO7-xiTU-vy_9j_HE_cq07BDcrR",
+  "property_status": "vacant",
+  "closing_date": "2025-07-26",
+  "additional_notes": "",
+  "underwrite_result": {
+    "status": "auto-denied",
+    "mao": 244500.0,
+    "reasons": [
+      "Purchase price exceeds MAO by $105,500"
+    ]
+  },
+  "status": "auto_denied"
+}

@@ -1,0 +1,123 @@
+JV Partner Profiles & Admin Dashboard
+
+0. Keep existing site intact
+No changes to Acquisitions / Dispositions UX.
+
+Build new modules only under /jv-submit and /jv-admin.
+
+1️⃣ Extend JV Deal Submit Form
+Add a “Partner Info” section above the property fields:
+
+Field	Validation	Notes
+Full Name	required, min 2 words	
+Email	required, @ + domain, lowercase store	
+Phone	required, US phone regex	
+Company (optional)	60 chars max	
+Primary Market States (multi-select)	at least one	populate from 50-state list
+
+Submission payload:
+
+ts
+Copy
+Edit
+interface PartnerSubmission {
+  id: string;                // uuid
+  partnerId: string;         // foreign key -> PartnerProfile
+  deal: DealPayload;         // existing fields
+  createdAt: ISODate;
+  autoStatus: "approved" | "denied";
+  reasons: string[];
+}
+If an email already exists in PartnerProfile, link to that partnerId; otherwise create a new profile on the fly.
+
+2️⃣ Database Schema (PostgreSQL or ReplitDB wrapper)
+pgsql
+Copy
+Edit
+Table: partners
+  id TEXT PK
+  name TEXT
+  email TEXT UNIQUE
+  phone TEXT
+  company TEXT
+  markets TEXT[]        -- array of state codes
+  created_at TIMESTAMP
+
+Table: jv_deals
+  id TEXT PK
+  partner_id TEXT FK -> partners.id
+  deal_json JSONB
+  auto_status TEXT      -- "approved"/"denied"
+  reasons TEXT[]
+  created_at TIMESTAMP
+3️⃣ /jv-admin Dashboard (admin-only)
+Overview cards
+
+Total partners
+
+Deals submitted (last 30 days)
+
+Auto-Approved vs Auto-Denied ratio
+
+Partners table (paginated)
+| Partner | Company | Markets | Deals Submitted | Last Deal | Auto-Approval Rate |
+Click row → Partner Profile view.
+
+Partner Profile View /jv-admin/partner/:id
+
+Header: Name, email, phone, company, markets.
+
+Deal list with status badges, created date, link to deal detail.
+
+Deal Detail
+
+All fields of submission.
+
+Auto result.
+
+Admin “Final Approve / Deny” buttons (writes final_status).
+
+Auth
+
+Use existing admin login (or add .env ADMIN_TOKEN= check).
+
+Protect /jv-admin* routes.
+
+4️⃣ Frequency Metrics
+For each partner row compute:
+
+sql
+Copy
+Edit
+SELECT COUNT(*)          AS total,
+       COUNT(*) FILTER (WHERE auto_status='approved') AS approved,
+       DATE(MAX(created_at)) AS last_date
+FROM jv_deals
+WHERE partner_id = $1;
+Update on dashboard load.
+
+5️⃣ Front-end Tech
+React + Tailwind (same design language).
+
+Re-use existing Card & Table components.
+
+Charts (optional): small bar / pie via Recharts.
+
+6️⃣ Validation & UX
+All new required fields must block submit until valid.
+
+Show toast “Submission received – you’ll hear from us soon.”
+
+Keep auto-underwriting logic exactly as earlier; only append partnerId.
+
+Implement:
+
+Extend /jv-submit page with Partner Info section & validation.
+
+Create partners and jv_deals tables (or ReplitDB collections).
+
+Build /jv-admin, /jv-admin/partner/:id, /jv-admin/deal/:id pages.
+
+Secure admin routes with token check.
+
+Ensure no existing UX is changed elsewhere.
