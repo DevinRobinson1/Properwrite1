@@ -198,43 +198,86 @@ class ComprehensiveValuationService:
                         if zpid:
                             logging.info(f"Found property match: {selected_property.get('address')} (ZPID: {zpid})")
                             
-                            # Get detailed property information using the ZPID
+                            # Initialize sources_used if not exists
+                            if 'sources_used' not in valuation_data:
+                                valuation_data['sources_used'] = []
+                            
+                            # Try to get detailed property information using the ZPID
                             details_url = "https://zillow-com1.p.rapidapi.com/property"
                             details_params = {"zpid": zpid}
-                            details_response = requests.get(details_url, headers=headers, params=details_params, timeout=10)
                             
-                            if details_response.status_code == 200:
-                                details_data = details_response.json()
+                            try:
+                                details_response = requests.get(details_url, headers=headers, params=details_params, timeout=10)
                                 
-                                # Extract property valuation data
-                                if details_data:
-                                    # Try to extract Zestimate or current value
-                                    zestimate = details_data.get('zestimate')
-                                    if zestimate:
-                                        valuation_data['zillow_estimate'] = zestimate
-                                        valuation_data['sources_used'].append('Zillow')
-                                        logging.info(f"Zillow Zestimate: ${zestimate:,}")
-                                        
-                                    # Also try tax history for recent value
-                                    tax_history = details_data.get('taxHistory', [])
-                                    if tax_history and len(tax_history) > 0:
-                                        recent_tax_value = tax_history[0].get('value')
-                                        if recent_tax_value:
-                                            valuation_data['zillow_tax_value'] = recent_tax_value
-                                            logging.info(f"Zillow Tax Value: ${recent_tax_value:,}")
-                                            
-                                    # Store complete property details for reference
-                                    valuation_data['zillow_details'] = {
-                                        'zpid': zpid,
-                                        'address': details_data.get('streetAddress', ''),
-                                        'living_area': details_data.get('livingAreaValue'),
-                                        'county': details_data.get('county', ''),
-                                        'tax_history': tax_history[:3] if tax_history else []  # Keep recent 3 years
-                                    }
+                                if details_response.status_code == 200:
+                                    details_data = details_response.json()
                                     
-                                    return  # Success - exit early
-                            else:
-                                logging.warning(f"Failed to get property details for ZPID {zpid}: {details_response.status_code}")
+                                    # Extract property valuation data if subscription allows
+                                    if details_data and not details_data.get('message'):  # No error message
+                                        logging.info(f"Zillow property details: {details_data}")
+                                        
+                                        # Try to extract Zestimate or current value
+                                        zestimate = details_data.get('zestimate')
+                                        if zestimate:
+                                            valuation_data['zillow_estimate'] = zestimate
+                                            valuation_data['sources_used'].append('Zillow')
+                                            logging.info(f"Zillow Zestimate: ${zestimate:,}")
+                                            
+                                        # Also try tax history for recent value
+                                        tax_history = details_data.get('taxHistory', [])
+                                        if tax_history and len(tax_history) > 0:
+                                            recent_tax_value = tax_history[0].get('value')
+                                            if recent_tax_value:
+                                                valuation_data['zillow_tax_value'] = recent_tax_value
+                                                logging.info(f"Zillow Tax Value: ${recent_tax_value:,}")
+                                                
+                                        # Store complete property details for reference
+                                        valuation_data['zillow_details'] = {
+                                            'zpid': zpid,
+                                            'address': details_data.get('streetAddress', ''),
+                                            'living_area': details_data.get('livingAreaValue'),
+                                            'county': details_data.get('county', ''),
+                                            'tax_history': tax_history[:3] if tax_history else []  # Keep recent 3 years
+                                        }
+                                        
+                                        # If we have any valuation data, mark Zillow as successful
+                                        if zestimate or (tax_history and len(tax_history) > 0):
+                                            if 'Zillow' not in valuation_data['sources_used']:
+                                                valuation_data['sources_used'].append('Zillow')
+                                        
+                                        return  # Success - exit early
+                                    else:
+                                        # Subscription not available for property details, but we found the property
+                                        error_msg = details_data.get('message', 'Unknown error') if details_data else 'No response'
+                                        logging.warning(f"Zillow property details subscription required: {error_msg}")
+                                        
+                                        # Use search data to indicate property was found
+                                        valuation_data['zillow_property_found'] = {
+                                            'zpid': zpid,
+                                            'address': selected_property.get('address'),
+                                            'address_type': selected_property.get('addressType'),
+                                            'subscription_note': 'Property details API requires RapidAPI subscription upgrade'
+                                        }
+                                        
+                                        # Mark as partial success
+                                        valuation_data['sources_used'].append('Zillow (search only)')
+                                        logging.info(f"Zillow: Found property but details require subscription upgrade")
+                                        return
+                                else:
+                                    logging.warning(f"Failed to get property details for ZPID {zpid}: {details_response.status_code}")
+                                    
+                            except Exception as e:
+                                logging.warning(f"Error accessing Zillow property details: {e}")
+                                
+                            # Fallback: Use search result data as indication property exists
+                            valuation_data['zillow_property_found'] = {
+                                'zpid': zpid,
+                                'address': selected_property.get('address'),
+                                'address_type': selected_property.get('addressType'),
+                                'note': 'Property found in Zillow database'
+                            }
+                            valuation_data['sources_used'].append('Zillow (search only)')
+                            logging.info(f"Zillow: Property found in database but detailed valuation unavailable")
                     
                     # Fallback: Check old format for backward compatibility  
                     elif 'zpid' in search_data:
