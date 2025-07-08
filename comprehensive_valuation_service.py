@@ -124,60 +124,125 @@ class ComprehensiveValuationService:
             }
             # First, search for property to get zpid
             search_url = "https://zillow-com1.p.rapidapi.com/propertyExtendedSearch"
-            # Try specific address first, then fallback to area search
-            # Use full address for better matching
-            full_address = f"{address}, {city}, {state} {zip_code}".strip()
-            search_params = {
-                "location": full_address,
-                "status_type": "ForSale",
-                "home_type": "Houses"
-            }
+            # Try multiple search strategies for better property matching
+            search_strategies = [
+                # Strategy 1: Full address - RecentlySold first
+                {
+                    "location": f"{address}, {city}, {state} {zip_code}".strip(),
+                    "status_type": "RecentlySold",
+                    "home_type": "Houses"
+                },
+                # Strategy 2: Full address - ForSale
+                {
+                    "location": f"{address}, {city}, {state} {zip_code}".strip(),
+                    "status_type": "ForSale",
+                    "home_type": "Houses"
+                },
+                # Strategy 3: Address without zip - RecentlySold
+                {
+                    "location": f"{address}, {city}, {state}".strip(),
+                    "status_type": "RecentlySold", 
+                    "home_type": "Houses"
+                },
+                # Strategy 4: Address without zip - ForSale
+                {
+                    "location": f"{address}, {city}, {state}".strip(),
+                    "status_type": "ForSale", 
+                    "home_type": "Houses"
+                }
+            ]
             
-            search_response = requests.get(search_url, headers=headers, params=search_params, timeout=5)
             valuation_data['sources_tried'].append('Zillow')
             
-            if search_response.status_code == 200:
-                search_data = search_response.json()
+            for strategy_idx, search_params in enumerate(search_strategies):
+                search_response = requests.get(search_url, headers=headers, params=search_params, timeout=5)
+                logging.info(f"Zillow search strategy {strategy_idx + 1}: {search_params}")
                 
-                # Find the property in search results
-                if search_data and 'props' in search_data:
-                    props = search_data['props']
-                    if props and len(props) > 0:
-                        # Try to find exact match by address
-                        zpid = None
-                        target_address_lower = address.lower().strip()
+                if search_response.status_code == 200:
+                    search_data = search_response.json()
+                
+                    # Check if we got a direct ZPID match (successful direct lookup)
+                    if 'zpid' in search_data:
+                        zpid = search_data['zpid']
+                        logging.info(f"Found direct ZPID match: {zpid}")
                         
-                        # Extract street number for better matching
-                        import re
-                        street_number_match = re.search(r'^(\d+)', address)
-                        target_street_number = street_number_match.group(1) if street_number_match else None
+                        # Get detailed property information using the ZPID
+                        details_url = "https://zillow-com1.p.rapidapi.com/property"
+                        details_params = {"zpid": zpid}
+                        details_response = requests.get(details_url, headers=headers, params=details_params, timeout=10)
                         
-                        best_match = None
-                        best_score = 0
+                        if details_response.status_code == 200:
+                            details_data = details_response.json()
+                            
+                            # Extract property valuation data
+                            if details_data:
+                                # Try to extract Zestimate or current value
+                                zestimate = details_data.get('zestimate')
+                                if zestimate:
+                                    valuation_data['zillow_estimate'] = zestimate
+                                    valuation_data['sources_used'].append('Zillow')
+                                    logging.info(f"Zillow Zestimate: ${zestimate:,}")
+                                    
+                                # Also try tax history for recent value
+                                tax_history = details_data.get('taxHistory', [])
+                                if tax_history and len(tax_history) > 0:
+                                    recent_tax_value = tax_history[0].get('value')
+                                    if recent_tax_value:
+                                        valuation_data['zillow_tax_value'] = recent_tax_value
+                                        logging.info(f"Zillow Tax Value: ${recent_tax_value:,}")
+                                        
+                                # Store complete property details for reference
+                                valuation_data['zillow_details'] = {
+                                    'zpid': zpid,
+                                    'address': details_data.get('streetAddress', ''),
+                                    'living_area': details_data.get('livingAreaValue'),
+                                    'county': details_data.get('county', ''),
+                                    'tax_history': tax_history[:3] if tax_history else []  # Keep recent 3 years
+                                }
+                                
+                                return  # Success - exit early
+                        else:
+                            logging.warning(f"Failed to get property details for ZPID {zpid}: {details_response.status_code}")
+                    
+                    # Fallback: Find the property in search results if no direct ZPID
+                    elif search_data and 'props' in search_data:
+                        props = search_data['props']
+                        if props and len(props) > 0:
+                            # Try to find exact match by address
+                            zpid = None
+                            target_address_lower = address.lower().strip()
                         
-                        for prop in props:
-                            prop_address = prop.get('address', '').lower().strip()
-                            score = 0
+                            # Extract street number for better matching
+                            import re
+                            street_number_match = re.search(r'^(\d+)', address)
+                            target_street_number = street_number_match.group(1) if street_number_match else None
                             
-                            # Check if street number matches
-                            if target_street_number:
-                                prop_street_number_match = re.search(r'^(\d+)', prop_address)
-                                if prop_street_number_match and prop_street_number_match.group(1) == target_street_number:
-                                    score += 50
+                            best_match = None
+                            best_score = 0
                             
-                            # Check address similarity
-                            if target_address_lower in prop_address or prop_address in target_address_lower:
-                                score += 30
-                            
-                            # Check for partial matches
-                            target_words = set(target_address_lower.split())
-                            prop_words = set(prop_address.split())
-                            common_words = target_words.intersection(prop_words)
-                            score += len(common_words) * 2
-                            
-                            if score > best_score:
-                                best_score = score
-                                best_match = prop
+                            for prop in props:
+                                prop_address = prop.get('address', '').lower().strip()
+                                score = 0
+                                
+                                # Check if street number matches
+                                if target_street_number:
+                                    prop_street_number_match = re.search(r'^(\d+)', prop_address)
+                                    if prop_street_number_match and prop_street_number_match.group(1) == target_street_number:
+                                        score += 50
+                                
+                                # Check address similarity
+                                if target_address_lower in prop_address or prop_address in target_address_lower:
+                                    score += 30
+                                
+                                # Check for partial matches
+                                target_words = set(target_address_lower.split())
+                                prop_words = set(prop_address.split())
+                                common_words = target_words.intersection(prop_words)
+                                score += len(common_words) * 2
+                                
+                                if score > best_score:
+                                    best_score = score
+                                    best_match = prop
                         
                         if best_match and best_score > 10:
                             zpid = best_match.get('zpid')
