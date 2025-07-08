@@ -58,9 +58,7 @@ class ComprehensiveValuationService:
             # Primary sources (based on available RapidAPI subscriptions)
             self._try_zillow_valuation(valuation_data, address, city, state, zip_code)
             
-            # If Zillow API failed, try scraping fallback
-            if 'zillow' not in valuation_data['valuations']:
-                self._try_zillow_scraping_fallback(valuation_data, address, city, state)
+            # Skip scraping fallback to avoid browser security errors
                 
             self._try_redfin_valuation(valuation_data, address, city, state)
             # Note: Realtor.com API requires separate subscription
@@ -199,25 +197,10 @@ class ComprehensiveValuationService:
                                 detail_data = detail_response.json()
                                 logging.info(f"Zillow detail response keys: {list(detail_data.keys()) if detail_data else 'None'}")
                                 
-                                # Extract Zestimate from multiple possible locations
+                                # Use enhanced extraction method
                                 zestimate = None
                                 if detail_data:
-                                    # Try different possible zestimate locations
-                                    zestimate = (detail_data.get('zestimate') or 
-                                               detail_data.get('price') or
-                                               detail_data.get('homeValue'))
-                                    
-                                    # Try nested locations
-                                    if not zestimate and 'resoFacts' in detail_data:
-                                        reso_facts = detail_data['resoFacts']
-                                        zestimate = (reso_facts.get('zestimate') or
-                                                   reso_facts.get('lastSoldPrice') or
-                                                   reso_facts.get('listPrice'))
-                                    
-                                    # Try listing info
-                                    if not zestimate and 'listingDataSource' in detail_data:
-                                        listing = detail_data['listingDataSource']
-                                        zestimate = listing.get('lastSoldPrice')
+                                    zestimate = self._extract_zillow_data_with_regex(detail_data)
                                     
                                     if zestimate:
                                         valuation_data['valuations']['zillow'] = {
@@ -240,91 +223,53 @@ class ComprehensiveValuationService:
         except Exception as e:
             logging.warning(f"Zillow valuation failed: {e}")
             
-    def _try_zillow_scraping_fallback(self, valuation_data: Dict, address: str, city: str, state: str):
+    def _extract_zillow_data_with_regex(self, detail_data: Dict) -> Optional[int]:
         """
-        Fallback method using improved regex-based scraping for Zillow data
-        More resilient to HTML structure changes
+        Enhanced Zillow data extraction using multiple patterns and fallbacks
+        More resilient to API response variations
         """
-        if not self.rapidapi_key:
-            return
-            
         try:
-            # Use requests-html for better scraping
-            import requests_html
+            # Primary extraction paths
+            zestimate_paths = [
+                'zestimate',
+                'price', 
+                'homeValue',
+                'listPrice',
+                'lastSoldPrice'
+            ]
             
-            session = requests_html.HTMLSession()
+            # Try direct extraction first
+            for path in zestimate_paths:
+                if path in detail_data and detail_data[path]:
+                    return int(detail_data[path])
             
-            # First, try to get the property page URL
-            search_query = f"{address} {city} {state}"
-            search_url = f"https://www.zillow.com/homes/{search_query.replace(' ', '-')}_rb/"
+            # Try nested extraction in common locations
+            nested_locations = [
+                ('resoFacts', zestimate_paths),
+                ('homeFacts', zestimate_paths),
+                ('listingDataSource', zestimate_paths),
+                ('priceHistory', ['price', 'amount']),
+                ('homeInsights', ['priceInsights', 'listPrice'])
+            ]
             
-            response = session.get(search_url)
-            
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.content, 'html.parser')
-                
-                # Initialize property data
-                property_data = {}
-                
-                # Regex patterns for improved extraction
-                ZESTIMATE_LABEL = re.compile(r'Zestimate', re.I)
-                
-                # 1. Locate the Zestimate box first
-                zest_container = soup.find(string=ZESTIMATE_LABEL)
-                if zest_container:
-                    price_match = re.search(r'\$([\d,]+)', zest_container.parent.text)
-                    if price_match:
-                        property_data['estimate'] = int(price_match.group(1).replace(',', ''))
-                
-                # 2. Resilient bed/bath/sqft regexes
-                def regex_number(s, patt):
-                    m = re.search(patt, s, re.I)
-                    return m.group(1) if m else None
-                
-                text = soup.get_text(" ", strip=True)
-                
-                property_data['bedrooms'] = int(regex_number(text, r'(\d+)\s*(?:bed|bd|bds)') or 0)
-                property_data['bathrooms'] = float(regex_number(text, r'(\d+(?:\.\d+)?)\s*(?:bath|ba)') or 0)
-                sqft_match = regex_number(text, r'([\d,]+)\s*sqft')
-                if sqft_match:
-                    property_data['square_feet'] = int(sqft_match.replace(',', ''))
-                
-                # 3. Hero image
-                hero = soup.select_one('picture[data-testid="hero-image"] img[src]')
-                if hero:
-                    property_data['image_url'] = hero['src']
-                
-                # If we found a Zestimate, add it to valuation data
-                if property_data.get('estimate'):
-                    valuation_data['valuations']['zillow'] = {
-                        'value': property_data['estimate'],
-                        'source': 'Zillow Scraping Fallback',
-                        'confidence': 'medium'
-                    }
-                    logging.info(f"Zillow scraping fallback success: ${property_data['estimate']:,}")
+            for location, paths in nested_locations:
+                if location in detail_data and isinstance(detail_data[location], dict):
+                    nested_data = detail_data[location]
+                    for path in paths:
+                        if path in nested_data and nested_data[path]:
+                            return int(nested_data[path])
+                            
+            # Try regex extraction from stringified data if available
+            if 'description' in detail_data:
+                price_match = re.search(r'\$([0-9,]+)', str(detail_data['description']))
+                if price_match:
+                    return int(price_match.group(1).replace(',', ''))
                     
-                    # Also store additional property details
-                    if property_data.get('bedrooms'):
-                        valuation_data['property_details'] = valuation_data.get('property_details', {})
-                        valuation_data['property_details']['bedrooms'] = property_data['bedrooms']
-                    if property_data.get('bathrooms'):
-                        valuation_data['property_details'] = valuation_data.get('property_details', {})
-                        valuation_data['property_details']['bathrooms'] = property_data['bathrooms']
-                    if property_data.get('square_feet'):
-                        valuation_data['property_details'] = valuation_data.get('property_details', {})
-                        valuation_data['property_details']['square_feet'] = property_data['square_feet']
-                    if property_data.get('image_url'):
-                        valuation_data['property_details'] = valuation_data.get('property_details', {})
-                        valuation_data['property_details']['image_url'] = property_data['image_url']
-                else:
-                    logging.warning("No Zestimate found in scraped content")
-            else:
-                logging.warning(f"Zillow scraping failed: {response.status_code}")
-                
-        except ImportError:
-            logging.warning("requests-html not available for scraping fallback")
-        except Exception as e:
-            logging.warning(f"Zillow scraping fallback failed: {e}")
+            return None
+            
+        except (ValueError, TypeError) as e:
+            logging.warning(f"Error extracting Zillow price data: {e}")
+            return None
     
     def _try_redfin_valuation(self, valuation_data: Dict, address: str, city: str, state: str):
         """Try Redfin valuation via RapidAPI"""
