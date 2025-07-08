@@ -707,9 +707,24 @@ class ComprehensiveValuationService:
     
     def get_best_estimate(self, valuation_data: Dict) -> Optional[Dict]:
         """Get the best available estimate with source priority"""
-        valuations = valuation_data.get('valuations', {})
         
-        # Priority order: Zillow > Redfin > Realtor > ATTOM > Estated
+        # Check for direct Zillow estimates first (from new property details API)
+        if valuation_data.get('zillow_estimate'):
+            return {
+                'estimate': valuation_data['zillow_estimate'],
+                'source': 'Zillow Zestimate',
+                'confidence': 'high'
+            }
+        
+        if valuation_data.get('zillow_tax_value'):
+            return {
+                'estimate': valuation_data['zillow_tax_value'],
+                'source': 'Zillow Tax Record',
+                'confidence': 'medium'
+            }
+        
+        # Check structured valuations
+        valuations = valuation_data.get('valuations', {})
         priority_order = ['zillow', 'redfin', 'realtor', 'attom', 'estated']
         
         for source in priority_order:
