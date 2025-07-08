@@ -97,7 +97,7 @@ def analyze_property():
             'square_feet': 1200,
             'year_built': 1995,
             'property_type': 'Single Family',
-            'data_sources': ['Manual Input'],
+            'data_sources': ['Google Places API'] if canonical_address.get('place_id') else ['Manual Input'],
             'images': []
         }
         
@@ -170,11 +170,18 @@ def analyze_property():
             )
         
         # Store in session for later use
-        # Add valuation data to the response
+        # Add valuation data to the response and update data sources
         if 'valuations' in valuation_data:
             property_data['valuations'] = valuation_data['valuations']
             property_data['valuation_sources'] = list(valuation_data['valuations'].keys())
             property_data['sources_tried'] = valuation_data.get('sources_tried', [])
+            
+            # Update data sources to include successful API sources
+            api_sources = []
+            if canonical_address.get('place_id'):
+                api_sources.append('Google Places API')
+            api_sources.extend(valuation_data.get('sources_tried', []))
+            property_data['data_sources'] = list(set(api_sources))  # Remove duplicates
         
         session['current_property'] = property_data
         
