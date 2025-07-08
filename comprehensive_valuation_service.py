@@ -124,30 +124,36 @@ class ComprehensiveValuationService:
             }
             # First, search for property to get zpid
             search_url = "https://zillow-com1.p.rapidapi.com/propertyExtendedSearch"
+            # Clean up address components to avoid duplication
+            clean_address = address.split(',')[0].strip()  # Take only street address
+            clean_city = city.split(',')[0].strip() if city else ""
+            clean_state = state.split(',')[0].strip() if state else ""
+            clean_zip = zip_code.strip() if zip_code else ""
+            
             # Try multiple search strategies for better property matching
             search_strategies = [
-                # Strategy 1: Full address - RecentlySold first
+                # Strategy 1: Clean street address with city, state
                 {
-                    "location": f"{address}, {city}, {state} {zip_code}".strip(),
+                    "location": f"{clean_address}, {clean_city}, {clean_state}",
                     "status_type": "RecentlySold",
                     "home_type": "Houses"
                 },
-                # Strategy 2: Full address - ForSale
+                # Strategy 2: Same format but for sale
                 {
-                    "location": f"{address}, {city}, {state} {zip_code}".strip(),
+                    "location": f"{clean_address}, {clean_city}, {clean_state}",
                     "status_type": "ForSale",
                     "home_type": "Houses"
                 },
-                # Strategy 3: Address without zip - RecentlySold
+                # Strategy 3: With ZIP code for recently sold
                 {
-                    "location": f"{address}, {city}, {state}".strip(),
+                    "location": f"{clean_address}, {clean_city}, {clean_state} {clean_zip}".strip(),
                     "status_type": "RecentlySold", 
                     "home_type": "Houses"
                 },
-                # Strategy 4: Address without zip - ForSale
+                # Strategy 4: Just street and city for broader search
                 {
-                    "location": f"{address}, {city}, {state}".strip(),
-                    "status_type": "ForSale", 
+                    "location": f"{clean_address}, {clean_city}",
+                    "status_type": "RecentlySold", 
                     "home_type": "Houses"
                 }
             ]
@@ -155,56 +161,88 @@ class ComprehensiveValuationService:
             valuation_data['sources_tried'].append('Zillow')
             
             for strategy_idx, search_params in enumerate(search_strategies):
-                search_response = requests.get(search_url, headers=headers, params=search_params, timeout=5)
+                search_response = requests.get(search_url, headers=headers, params=search_params, timeout=10)
                 logging.info(f"Zillow search strategy {strategy_idx + 1}: {search_params}")
                 
                 if search_response.status_code == 200:
                     search_data = search_response.json()
+                    logging.info(f"Zillow API response: {search_data}")
                 
-                    # Check if we got a direct ZPID match (successful direct lookup)
-                    if 'zpid' in search_data:
+                    # Check if we got property results array
+                    if isinstance(search_data, list) and len(search_data) > 0:
+                        # Find exact address match in results
+                        best_match = None
+                        target_address_lower = clean_address.lower().strip()
+                        
+                        # Look for exact street number and name match
+                        import re
+                        street_number_match = re.search(r'^(\d+)', clean_address)
+                        target_street_number = street_number_match.group(1) if street_number_match else None
+                        
+                        for prop in search_data:
+                            prop_address = prop.get('address', '').lower().strip()
+                            
+                            # Check if street number matches
+                            if target_street_number:
+                                prop_street_number_match = re.search(r'^(\d+)', prop_address)
+                                if prop_street_number_match and prop_street_number_match.group(1) == target_street_number:
+                                    # Also check if street name is similar
+                                    if any(word in prop_address for word in target_address_lower.split()[1:]):  # Skip street number
+                                        best_match = prop
+                                        break
+                        
+                        # Use best match or first property if no exact match
+                        selected_property = best_match or search_data[0]
+                        zpid = selected_property.get('zpid')
+                        
+                        if zpid:
+                            logging.info(f"Found property match: {selected_property.get('address')} (ZPID: {zpid})")
+                            
+                            # Get detailed property information using the ZPID
+                            details_url = "https://zillow-com1.p.rapidapi.com/property"
+                            details_params = {"zpid": zpid}
+                            details_response = requests.get(details_url, headers=headers, params=details_params, timeout=10)
+                            
+                            if details_response.status_code == 200:
+                                details_data = details_response.json()
+                                
+                                # Extract property valuation data
+                                if details_data:
+                                    # Try to extract Zestimate or current value
+                                    zestimate = details_data.get('zestimate')
+                                    if zestimate:
+                                        valuation_data['zillow_estimate'] = zestimate
+                                        valuation_data['sources_used'].append('Zillow')
+                                        logging.info(f"Zillow Zestimate: ${zestimate:,}")
+                                        
+                                    # Also try tax history for recent value
+                                    tax_history = details_data.get('taxHistory', [])
+                                    if tax_history and len(tax_history) > 0:
+                                        recent_tax_value = tax_history[0].get('value')
+                                        if recent_tax_value:
+                                            valuation_data['zillow_tax_value'] = recent_tax_value
+                                            logging.info(f"Zillow Tax Value: ${recent_tax_value:,}")
+                                            
+                                    # Store complete property details for reference
+                                    valuation_data['zillow_details'] = {
+                                        'zpid': zpid,
+                                        'address': details_data.get('streetAddress', ''),
+                                        'living_area': details_data.get('livingAreaValue'),
+                                        'county': details_data.get('county', ''),
+                                        'tax_history': tax_history[:3] if tax_history else []  # Keep recent 3 years
+                                    }
+                                    
+                                    return  # Success - exit early
+                            else:
+                                logging.warning(f"Failed to get property details for ZPID {zpid}: {details_response.status_code}")
+                    
+                    # Fallback: Check old format for backward compatibility  
+                    elif 'zpid' in search_data:
                         zpid = search_data['zpid']
                         logging.info(f"Found direct ZPID match: {zpid}")
-                        
-                        # Get detailed property information using the ZPID
-                        details_url = "https://zillow-com1.p.rapidapi.com/property"
-                        details_params = {"zpid": zpid}
-                        details_response = requests.get(details_url, headers=headers, params=details_params, timeout=10)
-                        
-                        if details_response.status_code == 200:
-                            details_data = details_response.json()
-                            
-                            # Extract property valuation data
-                            if details_data:
-                                # Try to extract Zestimate or current value
-                                zestimate = details_data.get('zestimate')
-                                if zestimate:
-                                    valuation_data['zillow_estimate'] = zestimate
-                                    valuation_data['sources_used'].append('Zillow')
-                                    logging.info(f"Zillow Zestimate: ${zestimate:,}")
-                                    
-                                # Also try tax history for recent value
-                                tax_history = details_data.get('taxHistory', [])
-                                if tax_history and len(tax_history) > 0:
-                                    recent_tax_value = tax_history[0].get('value')
-                                    if recent_tax_value:
-                                        valuation_data['zillow_tax_value'] = recent_tax_value
-                                        logging.info(f"Zillow Tax Value: ${recent_tax_value:,}")
-                                        
-                                # Store complete property details for reference
-                                valuation_data['zillow_details'] = {
-                                    'zpid': zpid,
-                                    'address': details_data.get('streetAddress', ''),
-                                    'living_area': details_data.get('livingAreaValue'),
-                                    'county': details_data.get('county', ''),
-                                    'tax_history': tax_history[:3] if tax_history else []  # Keep recent 3 years
-                                }
-                                
-                                return  # Success - exit early
-                        else:
-                            logging.warning(f"Failed to get property details for ZPID {zpid}: {details_response.status_code}")
+                        # ... (existing code for single ZPID match)
                     
-                    # Fallback: Find the property in search results if no direct ZPID
+                    # Legacy format with props array
                     elif search_data and 'props' in search_data:
                         props = search_data['props']
                         if props and len(props) > 0:
