@@ -113,6 +113,9 @@ class EnhancedAddressInput {
         // Store globally for form submission
         window.selectedAddressData = this.selectedAddress;
         
+        // Populate hidden fields for backend compatibility
+        this.populateHiddenFields();
+        
         // Also store in the format expected by form submission
         window.lastGoogleAutocompleteData = {
             placeId: this.selectedAddress.placeId,
@@ -333,6 +336,25 @@ class EnhancedAddressInput {
                 errorDiv.remove();
             }
         }, 5000);
+    }
+    
+    populateHiddenFields() {
+        if (!this.selectedAddress) return;
+        
+        // Populate hidden fields for backend compatibility
+        const cityField = document.getElementById('city');
+        const stateField = document.getElementById('state');
+        const zipField = document.getElementById('zip');
+        
+        if (cityField) cityField.value = this.selectedAddress.city || '';
+        if (stateField) stateField.value = this.selectedAddress.state || '';
+        if (zipField) zipField.value = this.selectedAddress.zip || '';
+        
+        console.log('Populated hidden fields:', {
+            city: this.selectedAddress.city,
+            state: this.selectedAddress.state,
+            zip: this.selectedAddress.zip
+        });
     }
     
     // Public methods
