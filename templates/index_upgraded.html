@@ -5479,7 +5479,12 @@
             // Show error with custom message
             const errorDiv = document.getElementById(`${platform}-error`);
             errorDiv.classList.remove('hidden');
-            errorDiv.querySelector('div:last-child div').textContent = message;
+            const messageDiv = errorDiv.querySelector('div:last-child div');
+            if (messageDiv) {
+                messageDiv.textContent = message;
+            }
+            
+            console.log(`${platform} valuation failed: ${message}`);
         }
     </script>
 </body>

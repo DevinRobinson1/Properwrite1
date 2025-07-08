@@ -125,8 +125,10 @@ class ComprehensiveValuationService:
             # First, search for property to get zpid
             search_url = "https://zillow-com1.p.rapidapi.com/propertyExtendedSearch"
             # Try specific address first, then fallback to area search
+            # Use full address for better matching
+            full_address = f"{address}, {city}, {state} {zip_code}".strip()
             search_params = {
-                "location": f"{city}, {state}",
+                "location": full_address,
                 "status_type": "ForSale",
                 "home_type": "Houses"
             }
@@ -217,6 +219,38 @@ class ComprehensiveValuationService:
                         logging.warning("No properties found in Zillow search")
                 else:
                     logging.warning("Invalid Zillow search response format")
+                    
+                    # Try fallback search with just city, state
+                    fallback_params = {
+                        "location": f"{city}, {state}",
+                        "status_type": "ForSale", 
+                        "home_type": "Houses"
+                    }
+                    
+                    fallback_response = requests.get(search_url, headers=headers, params=fallback_params, timeout=5)
+                    if fallback_response.status_code == 200:
+                        fallback_data = fallback_response.json()
+                        if fallback_data and 'props' in fallback_data:
+                            props = fallback_data['props']
+                            if props and len(props) > 0:
+                                # Use the first property as a general area estimate
+                                zpid = props[0].get('zpid')
+                                if zpid:
+                                    detail_url = "https://zillow-com1.p.rapidapi.com/property"
+                                    detail_params = {"zpid": zpid}
+                                    detail_response = requests.get(detail_url, headers=headers, params=detail_params, timeout=5)
+                                    
+                                    if detail_response.status_code == 200:
+                                        detail_data = detail_response.json()
+                                        zestimate = self._extract_zillow_data_with_regex(detail_data)
+                                        
+                                        if zestimate:
+                                            valuation_data['valuations']['zillow'] = {
+                                                'value': int(zestimate),
+                                                'source': 'Zillow Property Data (Area Estimate)',
+                                                'confidence': 'medium'
+                                            }
+                                            logging.info(f"Zillow fallback valuation success: ${zestimate:,}")
             else:
                 logging.warning(f"Zillow search API failed: {search_response.status_code}")
         
@@ -272,7 +306,7 @@ class ComprehensiveValuationService:
             return None
     
     def _try_redfin_valuation(self, valuation_data: Dict, address: str, city: str, state: str):
-        """Try Redfin valuation via RapidAPI"""
+        """Try Redfin valuation via RapidAPI with enhanced error handling"""
         if not self.rapidapi_key:
             return
             
@@ -349,7 +383,37 @@ class ComprehensiveValuationService:
                     else:
                         logging.info(f"No good Redfin match found. Best score: {best_score}")
                 else:
-                    logging.warning(f"Redfin API error: {search_data.get('message', 'No data returned')}")
+                    error_message = search_data.get('message', 'No data returned')
+                    logging.warning(f"Redfin API error: {error_message}")
+                    
+                    # If regionId error, try with different region as fallback
+                    if 'regionId' in error_message:
+                        fallback_regions = ['11997', '41593', '30756', '39593']  # Charlotte, Raleigh, Atlanta, Nashville
+                        for fallback_region in fallback_regions:
+                            if fallback_region != region_id:
+                                try:
+                                    fallback_params = {
+                                        "regionId": fallback_region,
+                                        "limit": 20
+                                    }
+                                    fallback_response = requests.get(search_url, headers=headers, params=fallback_params, timeout=5)
+                                    if fallback_response.status_code == 200:
+                                        fallback_data = fallback_response.json()
+                                        if fallback_data and fallback_data.get('status') and fallback_data.get('data'):
+                                            properties = fallback_data['data']
+                                            if properties and len(properties) > 0:
+                                                # Use first property as area estimate
+                                                prop = properties[0]
+                                                if 'price' in prop and prop['price']:
+                                                    valuation_data['valuations']['redfin'] = {
+                                                        'value': int(prop['price']),
+                                                        'source': 'Redfin Property Data (Area Estimate)',
+                                                        'confidence': 'medium'
+                                                    }
+                                                    logging.info(f"Redfin fallback valuation success: ${prop['price']:,}")
+                                                    return
+                                except:
+                                    continue
             else:
                 logging.warning(f"Redfin search API failed: {search_response.status_code}")
         

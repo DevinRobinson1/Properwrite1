@@ -149,7 +149,8 @@ def analyze_property():
                 'estimated_value': 0,
                 'data_source': 'Error',
                 'data_quality': 'low',
-                'valuation_error': str(e)
+                'valuation_error': str(e),
+                'address_status': 'valid_but_apis_failed'
             })
         
         # Generate estimates for missing values
