@@ -1,0 +1,96 @@
+Why Zestimate / RapidAPI data still isn’t showing
+Symptom	Root cause	Quick check
+Zillow box shows $0	RapidAPI request never makes it to Zillow endpoint (blocked by CORS or key missing)	Open DevTools → Network → Filter “rapidapi”. Do you see a 200 OK? If you get net::ERR_FAILED or CORS the call is being made from the browser instead of the server.
+Red error line in server logs: “401 / 403”	RapidAPI key missing / wrong header names	X-RapidAPI-Key and X-RapidAPI-Host: zillow-com1.p.rapidapi.com must be present.
+200 OK but response has {status:"error", message:"property not found"}	You’re calling the Zillow-Property-Details endpoint with an address string instead of a Zillow zpid	You must first hit Zillow-AutoComplete (or PropertySearch) to get the zpid.
+
+Minimal working flow (RapidAPI Zillow combo)
+Server-side (⭑don’t call RapidAPI directly from React – CORS & key exposure!⭑)
+
+python
+Copy
+Edit
+# backend/routes/property.py
+from fastapi import APIRouter, HTTPException
+import httpx, os
+
+router = APIRouter()
+RAPID_KEY  = os.getenv("RAPIDAPI_KEY")
+RAPID_HOST = "zillow88.p.rapidapi.com"
+
+@router.get("/api/zestimate")
+async def get_zestimate(address: str):
+    # 1️⃣   address ➜ zpid
+    async with httpx.AsyncClient() as client:
+        ac_params = {"address": address}
+        ac_headers = {"X-RapidAPI-Key": RAPID_KEY, "X-RapidAPI-Host": RAPID_HOST}
+        ac_resp = await client.get(
+            f"https://{RAPID_HOST}/autocomplete", params=ac_params, headers=ac_headers
+        )
+    ac_json = ac_resp.json()
+    if not ac_json.get("suggestions"):
+        raise HTTPException(404, "Address not found on Zillow")
+    zpid = ac_json["suggestions"][0]["zpid"]
+
+    # 2️⃣   zpid ➜ zestimate
+    async with httpx.AsyncClient() as client:
+        ze_params = {"zpid": zpid}
+        ze_headers = ac_headers
+        ze_resp = await client.get(
+            f"https://{RAPID_HOST}/property", params=ze_params, headers=ze_headers
+        )
+    data = ze_resp.json()
+    return {
+        "zestimate": data.get("zestimate", 0),
+        "beds":      data.get("bedrooms"),
+        "baths":     data.get("bathrooms"),
+        "sqft":      data.get("livingArea")
+    }
+Front-end
+
+ts
+Copy
+Edit
+// src/services/zestimate.ts
+export const fetchZestimate = async (addr: string) => {
+  const res = await fetch(`/api/zestimate?address=${encodeURIComponent(addr)}`);
+  if (!res.ok) throw new Error("Zestimate fetch failed");
+  return res.json();
+};
+Mapper in React – after the user hits Analyze Property:
+
+ts
+Copy
+Edit
+try {
+  const z = await fetchZestimate(fullAddress);
+  setZillowEstimate(z.zestimate);
+  setBedrooms(z.beds);
+  setBathrooms(z.baths);
+  setSquareFeet(z.sqft);
+} catch (e) {
+  console.warn(e);
+}
+“What should I hand Replit?”
+text
+Copy
+Edit
+🛠 Replit Prompt: Fix RapidAPI Zillow Fetch (no UX changes)
+1. Move the RapidAPI calls **server-side** (FastAPI route `/api/zestimate`):
+   • Hit `/autocomplete` with full address → grab first `zpid`.
+   • Hit `/property` with that zpid → extract zestimate, beds, baths, sqft.
+   • Return JSON {zestimate, beds, baths, sqft}.
+   • Use env var RAPIDAPI_KEY, header `X-RapidAPI-Host: zillow88.p.rapidapi.com`.
+
+2. On the front-end, in `src/services/zestimate.ts`, call the new route instead of RapidAPI directly.
+
+3. In `PropertyAnalyzer.tsx` hook, after the Google Address Validation succeeds, call `fetchZestimate()`, then update:
+   • `#zillow-estimate`
+   • beds / baths / sqft boxes (only if empty).
+   (Keep existing manual-edit behaviour intact.)
+
+4. **Do NOT** touch any JSX layout or CSS—the Zillow card should already read from state.
+
+5. Add a brief console log if RapidAPI quota is exhausted but leave UI unchanged.
+
+6. Ignore LaunchDarkly / RealEstateTracker errors (third-party scripts).

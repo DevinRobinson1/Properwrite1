@@ -5457,8 +5457,18 @@
             
             // Show estimate
             document.getElementById(`${platform}-estimate`).classList.remove('hidden');
-            document.getElementById(`${platform}-value`).value = '$' + value.toLocaleString();
+            
+            // For input fields, set numeric value without dollar sign
+            const valueInput = document.getElementById(`${platform}-value`);
+            if (valueInput.type === 'number') {
+                valueInput.value = value; // Just the number for input fields
+            } else {
+                valueInput.textContent = '$' + value.toLocaleString(); // Formatted for display elements
+            }
+            
             document.getElementById(`${platform}-updated`).textContent = `Source: ${source}`;
+            
+            console.log(`Successfully displayed ${platform} valuation: $${value.toLocaleString()}`);
         }
         
         function showValuationError(platform, message) {
