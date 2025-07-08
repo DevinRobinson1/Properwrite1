@@ -33,7 +33,41 @@ def require_valid_address(f):
             state = (data.get('state') or '').strip()
             zip_code = (data.get('zip_code') or '').strip()
             
-            # Check if all required components are present
+            # Check if Google Places data is available
+            if data.get('placeId') and data.get('formattedAddress'):
+                # Use Google Places data directly
+                logging.info(f"Using Google Places data for validation: {data.get('formattedAddress')}")
+                
+                # Extract components from Google Places data if available
+                if data.get('addressComponents'):
+                    components = data.get('addressComponents')
+                    street = components.get('street', street)
+                    city = components.get('city', city)
+                    state = components.get('state', state)
+                    zip_code = components.get('zip', zip_code)
+                
+                # If we have place_id and formatted address, proceed with minimal validation
+                if data.get('placeId') and data.get('formattedAddress'):
+                    # Create validated address object from Google Places data
+                    request.validated_address = {
+                        'isValid': True,
+                        'formattedAddress': data.get('formattedAddress'),
+                        'latitude': data.get('latitude'),
+                        'longitude': data.get('longitude'),
+                        'components': {
+                            'street': street,
+                            'city': city,
+                            'state': state,
+                            'zip': zip_code
+                        },
+                        'source': 'google_places_autocomplete',
+                        'placeId': data.get('placeId')
+                    }
+                    
+                    logging.info(f"Google Places validation successful: {data.get('formattedAddress')}")
+                    return f(*args, **kwargs)
+            
+            # Check if all required components are present for manual validation
             if not all([street, city, state, zip_code]):
                 missing_fields = []
                 if not street: missing_fields.append('street_address')
