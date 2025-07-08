@@ -352,7 +352,7 @@ class ComprehensiveValuationService:
                                     
                                     if zestimate:
                                         valuation_data['valuations']['zillow'] = {
-                                            'value': int(zestimate),
+                                            'zestimate': int(zestimate),
                                             'source': 'Zillow Property Data',
                                             'confidence': 'high'
                                         }
@@ -392,7 +392,7 @@ class ComprehensiveValuationService:
                                         
                                         if zestimate:
                                             valuation_data['valuations']['zillow'] = {
-                                                'value': int(zestimate),
+                                                'zestimate': int(zestimate),
                                                 'source': 'Zillow Property Data (Area Estimate)',
                                                 'confidence': 'medium'
                                             }
@@ -729,8 +729,10 @@ class ComprehensiveValuationService:
         
         for source in priority_order:
             if source in valuations:
+                # Handle different key names: Zillow uses 'zestimate', others use 'value'
+                estimate_value = valuations[source].get('zestimate') or valuations[source].get('value')
                 return {
-                    'estimate': valuations[source]['value'],
+                    'estimate': estimate_value,
                     'source': valuations[source]['source'],
                     'confidence': valuations[source]['confidence']
                 }

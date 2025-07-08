@@ -5411,7 +5411,7 @@
             // Update Zillow
             if (sourcesData.zillow) {
                 console.log('Showing Zillow valuation:', sourcesData.zillow);
-                showValuation('zillow', sourcesData.zillow.value, sourcesData.zillow.source);
+                showValuation('zillow', sourcesData.zillow.zestimate, sourcesData.zillow.source);
             } else if (sourcesTried.includes('Zillow')) {
                 console.log('Zillow tried but failed');
                 showValuationError('zillow', 'Not available (Tried: Zillow)');
