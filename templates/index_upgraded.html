@@ -317,6 +317,78 @@
         .toast .toast-close:hover {
             opacity: 1;
         }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 15% auto;
+            padding: 0;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+        
+        .modal-header {
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 4px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -340,36 +412,20 @@
                 
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center space-x-8">
-                    <!-- Features Dropdown -->
-                    <div class="relative" id="features-dropdown">
-                        <button onclick="toggleFeaturesDropdown()" class="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors font-medium">
-                            <span>Features</span>
-                            <i class="fas fa-chevron-down text-sm transition-transform duration-200"></i>
-                        </button>
-                        <div id="features-menu" class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 hidden backdrop-blur-sm">
-                            <div class="py-2">
-                                <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                                    <i class="fas fa-brain mr-3 text-blue-500"></i>AI Valuations
-                                </a>
-                                <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                                    <i class="fas fa-chart-bar mr-3 text-purple-500"></i>Comps Analysis
-                                </a>
-                                <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                                    <i class="fas fa-coins mr-3 text-amber-500"></i>Credits System
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Features Button -->
+                    <button onclick="showFeaturesModal()" class="text-gray-600 hover:text-blue-600 transition-colors font-medium">
+                        Features
+                    </button>
                     
-                    <!-- Pricing Link -->
-                    <a href="#pricing" class="text-gray-600 hover:text-blue-600 transition-colors font-medium">
+                    <!-- Pricing Button -->
+                    <button onclick="showPricingModal()" class="text-gray-600 hover:text-blue-600 transition-colors font-medium">
                         Pricing
-                    </a>
+                    </button>
                     
-                    <!-- How It Works Link -->
-                    <a href="#how-it-works" class="text-gray-600 hover:text-blue-600 transition-colors font-medium">
+                    <!-- How It Works Button -->
+                    <button onclick="showHowItWorksModal()" class="text-gray-600 hover:text-blue-600 transition-colors font-medium">
                         How It Works
-                    </a>
+                    </button>
                     
                     <!-- User Authentication Section -->
                     <div id="auth-section-desktop">
@@ -441,15 +497,15 @@
                 <div>
                     <div class="text-sm font-semibold text-gray-900 mb-3">Navigation</div>
                     <div class="space-y-2 pl-2">
-                        <a href="#" class="block text-sm text-gray-600 hover:text-blue-600 transition-colors py-2">
+                        <button onclick="showFeaturesModal()" class="w-full text-left text-sm text-gray-600 hover:text-blue-600 transition-colors py-2">
                             <i class="fas fa-cog mr-3 text-blue-500"></i>Features
-                        </a>
-                        <a href="#pricing" class="block text-sm text-gray-600 hover:text-blue-600 transition-colors py-2">
+                        </button>
+                        <button onclick="showPricingModal()" class="w-full text-left text-sm text-gray-600 hover:text-blue-600 transition-colors py-2">
                             <i class="fas fa-tag mr-3 text-purple-500"></i>Pricing
-                        </a>
-                        <a href="#how-it-works" class="block text-sm text-gray-600 hover:text-blue-600 transition-colors py-2">
+                        </button>
+                        <button onclick="showHowItWorksModal()" class="w-full text-left text-sm text-gray-600 hover:text-blue-600 transition-colors py-2">
                             <i class="fas fa-info-circle mr-3 text-green-500"></i>How It Works
-                        </a>
+                        </button>
                     </div>
                 </div>
                 
@@ -7410,6 +7466,237 @@
                 default: return 'Information';
             }
         }
+        
+        // Modal Functions
+        function showFeaturesModal() {
+            document.getElementById('featuresModal').classList.add('show');
+        }
+        
+        function showPricingModal() {
+            document.getElementById('pricingModal').classList.add('show');
+        }
+        
+        function showHowItWorksModal() {
+            document.getElementById('howItWorksModal').classList.add('show');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+        
+        // Close modal on background click
+        window.onclick = function(event) {
+            const modals = ['featuresModal', 'pricingModal', 'howItWorksModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target == modal) {
+                    closeModal(modalId);
+                }
+            });
+        }
     </script>
+    
+    <!-- Features Modal -->
+    <div id="featuresModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-cog text-blue-500 mr-2"></i>
+                    Platform Features
+                </h2>
+                <button class="modal-close" onclick="closeModal('featuresModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="space-y-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-brain text-blue-600 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-2">AI Valuations</h3>
+                            <p class="text-gray-600">Get instant property valuations using AI-powered analysis of comparable sales, market trends, and property characteristics.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-chart-bar text-purple-600 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-2">Comps Analysis</h3>
+                            <p class="text-gray-600">Comprehensive comparable sales analysis with real market data from Zillow, Redfin, and other trusted sources.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-calculator text-green-600 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-2">Investment Strategies</h3>
+                            <p class="text-gray-600">Multiple investment strategy calculators including wholesale, subject-to, seller financing, and more.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-coins text-amber-600 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-2">Credits System</h3>
+                            <p class="text-gray-600">Flexible credit-based system with subscription plans and one-time purchases to fit your analysis needs.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-users text-red-600 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-2">Team Collaboration</h3>
+                            <p class="text-gray-600">Team management with role-based access, shared credits, and collaborative analysis tools.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pricing Modal -->
+    <div id="pricingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-tag text-purple-500 mr-2"></i>
+                    Pricing Plans
+                </h2>
+                <button class="modal-close" onclick="closeModal('pricingModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Pro Plan -->
+                        <div class="border-2 border-blue-200 rounded-lg p-6 bg-blue-50">
+                            <div class="text-center">
+                                <h3 class="font-bold text-xl text-blue-600 mb-2">Pro</h3>
+                                <div class="text-3xl font-bold text-gray-900 mb-1">$79<span class="text-lg font-normal text-gray-500">/month</span></div>
+                                <p class="text-sm text-gray-600 mb-4">Perfect for individual investors</p>
+                                <ul class="text-left space-y-2 text-sm text-gray-600">
+                                    <li><i class="fas fa-check text-green-500 mr-2"></i>300 credits/month</li>
+                                    <li><i class="fas fa-check text-green-500 mr-2"></i>1 user account</li>
+                                    <li><i class="fas fa-check text-green-500 mr-2"></i>All analysis tools</li>
+                                    <li><i class="fas fa-check text-green-500 mr-2"></i>Email support</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Team5 Plan -->
+                        <div class="border-2 border-purple-200 rounded-lg p-6 bg-purple-50 relative">
+                            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                                Most Popular
+                            </div>
+                            <div class="text-center">
+                                <h3 class="font-bold text-xl text-purple-600 mb-2">Team5</h3>
+                                <div class="text-3xl font-bold text-gray-900 mb-1">$199<span class="text-lg font-normal text-gray-500">/month</span></div>
+                                <p class="text-sm text-gray-600 mb-4">Great for small teams</p>
+                                <ul class="text-left space-y-2 text-sm text-gray-600">
+                                    <li><i class="fas fa-check text-green-500 mr-2"></i>1,000 credits/month</li>
+                                    <li><i class="fas fa-check text-green-500 mr-2"></i>5 user accounts</li>
+                                    <li><i class="fas fa-check text-green-500 mr-2"></i>Team collaboration</li>
+                                    <li><i class="fas fa-check text-green-500 mr-2"></i>Priority support</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Growth10 Plan -->
+                        <div class="border-2 border-green-200 rounded-lg p-6 bg-green-50">
+                            <div class="text-center">
+                                <h3 class="font-bold text-xl text-green-600 mb-2">Growth10</h3>
+                                <div class="text-3xl font-bold text-gray-900 mb-1">$399<span class="text-lg font-normal text-gray-500">/month</span></div>
+                                <p class="text-sm text-gray-600 mb-4">For growing businesses</p>
+                                <ul class="text-left space-y-2 text-sm text-gray-600">
+                                    <li><i class="fas fa-check text-green-500 mr-2"></i>Unlimited credits</li>
+                                    <li><i class="fas fa-check text-green-500 mr-2"></i>10 user accounts</li>
+                                    <li><i class="fas fa-check text-green-500 mr-2"></i>Advanced analytics</li>
+                                    <li><i class="fas fa-check text-green-500 mr-2"></i>Dedicated support</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center pt-4">
+                        <p class="text-sm text-gray-600 mb-4">Need more credits? Purchase additional credit packs anytime.</p>
+                        <button onclick="showSignupModal()" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-semibold">
+                            Get Started Today
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- How It Works Modal -->
+    <div id="howItWorksModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-info-circle text-green-500 mr-2"></i>
+                    How It Works
+                </h2>
+                <button class="modal-close" onclick="closeModal('howItWorksModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="space-y-8">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-blue-600 font-bold text-lg">1</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-2">Enter Property Address</h3>
+                            <p class="text-gray-600">Simply type any property address using our Google Places autocomplete. We'll validate and format it for maximum accuracy.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-purple-600 font-bold text-lg">2</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-2">Get Real-Time Data</h3>
+                            <p class="text-gray-600">Our system pulls authentic property data from Zillow, Redfin, and other trusted sources including valuations, property details, and market information.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-green-600 font-bold text-lg">3</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-2">Analyze Investment Strategies</h3>
+                            <p class="text-gray-600">Review multiple investment approaches including wholesale, subject-to, seller financing, and more with detailed financial breakdowns.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-amber-600 font-bold text-lg">4</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-2">Make Informed Decisions</h3>
+                            <p class="text-gray-600">Use AI-powered insights, comparable sales analysis, and detailed financial projections to make confident investment decisions.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-lg p-6 text-center">
+                        <h3 class="font-semibold text-gray-900 mb-2">Ready to get started?</h3>
+                        <p class="text-gray-600 mb-4">Join thousands of investors using Properwrite for smarter real estate analysis.</p>
+                        <button onclick="showSignupModal()" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-semibold">
+                            Start Your Free Trial
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

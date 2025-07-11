@@ -1,0 +1,48 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 705000,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 2069043376,
+      "matched_address": "7 Morning Mist Pl Bluffton, SC 29910",
+      "images": [
+        "https://photos.zillowstatic.com/fp/a57af29e150d379245cf2b86e6eeb179-p_d.jpg"
+      ],
+      "bedrooms": 3.0,
+      "bathrooms": 3.0,
+      "square_feet": null,
+      "year_built": 2016
+    },
+    "rentcast": {
+      "estimate": 592000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin"
+  ],
+  "sources_used": [
+    "Zillow",
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "7 Morning Mist Pl, Bluffton, SC",
+    "city": "Bluffton",
+    "state": "South Carolina",
+    "zip_code": "29910",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-11T20:49:38.232642"
+}
