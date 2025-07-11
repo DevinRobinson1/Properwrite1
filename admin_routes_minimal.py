@@ -251,6 +251,7 @@ def create_credit_code():
     max_uses = data.get('max_uses', 1)
     description = data.get('description', '').strip()
     expires_days = data.get('expires_days', 0)
+    custom_code = data.get('custom_code', '').strip().upper()
     
     if not credit_amount or credit_amount <= 0:
         return jsonify({'error': 'Credit amount must be greater than 0'}), 400
@@ -258,10 +259,30 @@ def create_credit_code():
     if not max_uses or max_uses <= 0:
         return jsonify({'error': 'Max uses must be greater than 0'}), 400
     
-    # Generate unique credit code
-    import random
-    import string
-    code = 'CREDIT' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    # Handle custom code or generate one
+    if custom_code:
+        # Validate custom code
+        if len(custom_code) < 3:
+            return jsonify({'error': 'Custom code must be at least 3 characters long'}), 400
+        
+        # Check if custom code already exists
+        try:
+            from billing_service import BillingService
+            billing_service = BillingService()
+            existing_codes = billing_service.get_credit_codes()
+            
+            if any(existing_code.get('code') == custom_code for existing_code in existing_codes):
+                return jsonify({'error': 'Custom code already exists. Please choose a different code.'}), 400
+        except Exception as e:
+            print(f"Error checking existing codes: {e}")
+            # Continue with creation if we can't check existing codes
+        
+        code = custom_code
+    else:
+        # Generate unique credit code
+        import random
+        import string
+        code = 'CREDIT' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
     
     # Calculate expiration date
     expires_at = None
