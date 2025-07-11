@@ -1717,6 +1717,56 @@ def create_team_invite():
         logging.error(f"Error creating team invite: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/api/team/member/<member_id>', methods=['DELETE'])
+@require_role('manager')
+def remove_team_member(member_id):
+    """Remove team member (managers and owners only)"""
+    try:
+        # Don't allow removing the team owner
+        if member_id == g.current_user['id']:
+            return jsonify({'error': 'Cannot remove yourself from the team'}), 400
+        
+        result = billing_service.remove_team_member(
+            team_id=g.current_user['team_id'],
+            member_id=member_id
+        )
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logging.error(f"Error removing team member: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/team/member/<member_id>/role', methods=['PUT'])
+@require_role('manager')
+def update_member_role(member_id):
+    """Update team member role (managers and owners only)"""
+    try:
+        data = request.get_json()
+        new_role = data.get('role')
+        
+        if not new_role:
+            return jsonify({'error': 'Role is required'}), 400
+        
+        if new_role not in ['analyst', 'manager', 'owner']:
+            return jsonify({'error': 'Invalid role'}), 400
+        
+        # Only owners can promote to owner
+        if new_role == 'owner' and g.current_user['role'] != 'owner':
+            return jsonify({'error': 'Only owners can promote to owner role'}), 403
+        
+        result = billing_service.update_member_role(
+            team_id=g.current_user['team_id'],
+            member_id=member_id,
+            new_role=new_role
+        )
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logging.error(f"Error updating member role: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
 @app.route('/settings/billing')
 @require_auth
 def billing_settings():

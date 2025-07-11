@@ -392,6 +392,70 @@ class BillingService:
             logging.error(f"Error creating team invite: {e}")
             return {'success': False, 'error': str(e)}
     
+    def remove_team_member(self, team_id: str, member_id: str) -> Dict:
+        """
+        Remove a team member
+        """
+        try:
+            with Session(engine) as db:
+                # Check if team exists
+                team = db.query(Team).filter(Team.id == team_id).first()
+                if not team:
+                    return {'success': False, 'error': 'Team not found'}
+                
+                # Check if member exists and is part of the team
+                member = db.query(User).filter(
+                    and_(User.id == member_id, User.team_id == team_id)
+                ).first()
+                
+                if not member:
+                    return {'success': False, 'error': 'Member not found in team'}
+                
+                # Don't allow removing the team owner
+                if member.role == 'owner':
+                    return {'success': False, 'error': 'Cannot remove team owner'}
+                
+                # Deactivate the user instead of deleting
+                member.is_active = False
+                member.team_id = None
+                member.role = 'analyst'
+                db.commit()
+                
+                return {'success': True, 'message': 'Team member removed successfully'}
+                
+        except Exception as e:
+            logging.error(f"Error removing team member: {e}")
+            return {'success': False, 'error': str(e)}
+    
+    def update_member_role(self, team_id: str, member_id: str, new_role: str) -> Dict:
+        """
+        Update team member role
+        """
+        try:
+            with Session(engine) as db:
+                # Check if team exists
+                team = db.query(Team).filter(Team.id == team_id).first()
+                if not team:
+                    return {'success': False, 'error': 'Team not found'}
+                
+                # Check if member exists and is part of the team
+                member = db.query(User).filter(
+                    and_(User.id == member_id, User.team_id == team_id)
+                ).first()
+                
+                if not member:
+                    return {'success': False, 'error': 'Member not found in team'}
+                
+                # Update the role
+                member.role = new_role
+                db.commit()
+                
+                return {'success': True, 'message': 'Member role updated successfully'}
+                
+        except Exception as e:
+            logging.error(f"Error updating member role: {e}")
+            return {'success': False, 'error': str(e)}
+    
     def _send_invitation_email(self, email: str, team_name: str, token: str):
         """
         Send team invitation email

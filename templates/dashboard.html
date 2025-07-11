@@ -541,6 +541,38 @@
         </div>
     </div>
 
+    <!-- Team Invite Modal -->
+    <div id="team-invite-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+            <h3 class="text-lg font-semibold mb-4">Invite Team Member</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                    <input type="email" id="invite-email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter email address">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                    <select id="invite-role" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="analyst">Analyst</option>
+                        <option value="manager">Manager</option>
+                    </select>
+                </div>
+                
+                <div class="text-sm text-gray-600">
+                    <p><strong>Analyst:</strong> Can analyze properties and view reports</p>
+                    <p><strong>Manager:</strong> Can invite/remove members and manage team</p>
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-3 mt-6">
+                <button onclick="closeTeamInviteModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Cancel</button>
+                <button onclick="sendTeamInvite()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Send Invite</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Mobile Bottom Navigation -->
     <div class="mobile-nav sm:hidden">
         <div class="flex justify-around py-2">
@@ -617,19 +649,113 @@
         }
 
         function showInviteModal() {
-            // Implement invite modal
-            console.log('Showing invite modal...');
+            document.getElementById('team-invite-modal').classList.remove('hidden');
+        }
+
+        function closeTeamInviteModal() {
+            document.getElementById('team-invite-modal').classList.add('hidden');
+            document.getElementById('invite-email').value = '';
+            document.getElementById('invite-role').value = 'analyst';
+        }
+
+        async function sendTeamInvite() {
+            const email = document.getElementById('invite-email').value.trim();
+            const role = document.getElementById('invite-role').value;
+            
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            if (!email.includes('@')) {
+                alert('Please enter a valid email address');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/team/invite', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        role: role
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Team invitation sent successfully!');
+                    closeTeamInviteModal();
+                    // Refresh the page to show updated team list
+                    location.reload();
+                } else {
+                    alert('Error sending invitation: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error sending invite:', error);
+                alert('Error sending invitation. Please try again.');
+            }
         }
 
         function editMember(memberId) {
-            // Implement member editing
-            console.log('Editing member:', memberId);
+            // Show role editing modal
+            const newRole = prompt('Enter new role (analyst, manager, owner):');
+            if (newRole && ['analyst', 'manager', 'owner'].includes(newRole.toLowerCase())) {
+                updateMemberRole(memberId, newRole.toLowerCase());
+            }
         }
 
-        function removeMember(memberId) {
-            if (confirm('Are you sure you want to remove this team member?')) {
-                // Implement member removal
-                console.log('Removing member:', memberId);
+        async function updateMemberRole(memberId, newRole) {
+            try {
+                const response = await fetch(`/api/team/member/${memberId}/role`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        role: newRole
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Member role updated successfully!');
+                    location.reload();
+                } else {
+                    alert('Error updating member role: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error updating member role:', error);
+                alert('Error updating member role. Please try again.');
+            }
+        }
+
+        async function removeMember(memberId) {
+            if (confirm('Are you sure you want to remove this team member? This action cannot be undone.')) {
+                try {
+                    const response = await fetch(`/api/team/member/${memberId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('Team member removed successfully!');
+                        location.reload();
+                    } else {
+                        alert('Error removing member: ' + (result.error || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Error removing member:', error);
+                    alert('Error removing member. Please try again.');
+                }
             }
         }
 
