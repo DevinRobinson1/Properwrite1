@@ -110,8 +110,14 @@
                                 <a href="/jv-submit" target="_blank" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <i class="fas fa-handshake mr-2"></i>JV With Us
                                 </a>
-                                <a href="#" onclick="showFundingModal()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <a href="https://reilegacy.co/wholesale" target="_blank" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-chalkboard-teacher mr-2"></i>Wholesale Coaching
+                                </a>
+                                <a href="https://pinnexcapital.com/" target="_blank" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <i class="fas fa-dollar-sign mr-2"></i>Get Funding
+                                </a>
+                                <a href="https://www.skool.com/theraiseroom" target="_blank" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-chart-line mr-2"></i>Raise Capital
                                 </a>
                             </div>
                         </div>
@@ -180,8 +186,14 @@
                         <a href="/jv-submit" target="_blank" class="block text-sm text-gray-600 hover:text-gray-900">
                             <i class="fas fa-handshake mr-2"></i>JV With Us
                         </a>
-                        <a href="#" onclick="showFundingModal()" class="block text-sm text-gray-600 hover:text-gray-900">
+                        <a href="https://reilegacy.co/wholesale" target="_blank" class="block text-sm text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-chalkboard-teacher mr-2"></i>Wholesale Coaching
+                        </a>
+                        <a href="https://pinnexcapital.com/" target="_blank" class="block text-sm text-gray-600 hover:text-gray-900">
                             <i class="fas fa-dollar-sign mr-2"></i>Get Funding
+                        </a>
+                        <a href="https://www.skool.com/theraiseroom" target="_blank" class="block text-sm text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-chart-line mr-2"></i>Raise Capital
                         </a>
                     </div>
                 </div>
@@ -5302,36 +5314,7 @@
             document.body.appendChild(modal);
         }
 
-        function showFundingModal() {
-            // Create and show funding modal
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-            modal.innerHTML = `
-                <div class="bg-white p-8 rounded-lg max-w-md w-full mx-4">
-                    <h2 class="text-2xl font-bold mb-6">Get Funding</h2>
-                    <p class="text-gray-600 mb-6">Connect with our funding partners to finance your real estate investments.</p>
-                    <div class="space-y-4">
-                        <div class="p-4 border rounded-lg">
-                            <h3 class="font-semibold">Hard Money Lenders</h3>
-                            <p class="text-sm text-gray-600">Fast funding for fix-and-flip projects</p>
-                        </div>
-                        <div class="p-4 border rounded-lg">
-                            <h3 class="font-semibold">Private Lenders</h3>
-                            <p class="text-sm text-gray-600">Flexible terms for creative deals</p>
-                        </div>
-                        <div class="p-4 border rounded-lg">
-                            <h3 class="font-semibold">Portfolio Lenders</h3>
-                            <p class="text-sm text-gray-600">Long-term financing solutions</p>
-                        </div>
-                    </div>
-                    <div class="flex justify-end space-x-3 mt-6">
-                        <button type="button" onclick="this.closest('.fixed').remove()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Close</button>
-                        <button type="button" onclick="alert('Contact form coming soon!')" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Get Connected</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
+
 
         function logout() {
             // Handle logout
