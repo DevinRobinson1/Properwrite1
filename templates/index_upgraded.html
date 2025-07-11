@@ -4608,6 +4608,7 @@
         }
 
         function displayCompsResults(data) {
+            console.log('Displaying comps results:', data);
             document.getElementById('comps-results').classList.remove('hidden');
             
             // Display comparable properties
@@ -4616,7 +4617,8 @@
             
             if (data.comps && data.comps.length > 0) {
                 data.comps.forEach((comp, index) => {
-                    const compCard = createCompCard(comp, data.adjustments[index]);
+                    const adjustment = data.adjustments && data.adjustments[index] ? data.adjustments[index] : null;
+                    const compCard = createCompCard(comp, adjustment);
                     compsGrid.appendChild(compCard);
                 });
             } else {
@@ -4638,6 +4640,7 @@
             const div = document.createElement('div');
             div.className = 'bg-gray-50 border border-gray-200 rounded-lg p-4';
             
+            console.log('Creating comp card for:', comp);
             const adjustedPrice = comp.price + (adjustments?.total_adjustment || 0);
             const distance = comp.distance?.toFixed(2) || '0';
             const daysOld = comp.days_old || 0;
@@ -4669,9 +4672,9 @@
                     </div>
                 </div>
                 
-                ${adjustments ? `
+                ${adjustments && adjustments.adjustments && adjustments.adjustments.length > 0 ? `
                 <div class="mt-2 pt-2 border-t border-gray-200 text-xs text-gray-600">
-                    <p>Adjustments: ${adjustments.map(adj => 
+                    <p>Adjustments: ${adjustments.adjustments.map(adj => 
                         `${adj.type} (${adj.adjustment > 0 ? '+' : ''}$${adj.adjustment.toLocaleString()})`
                     ).join(' • ')}</p>
                 </div>
