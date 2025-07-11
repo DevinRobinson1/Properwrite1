@@ -1,0 +1,44 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 387200,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 121306547,
+      "matched_address": "14303 Evening Flight Ln Charlotte, NC 28262",
+      "images": [
+        "https://photos.zillowstatic.com/fp/11e705630a8c6a7333a4498bdea6f58d-p_d.jpg"
+      ]
+    },
+    "rentcast": {
+      "estimate": 387500,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": "14303 Evening Flight Ln, Charlotte, NC 28262",
+      "bedrooms": 3,
+      "bathrooms": 2.5,
+      "square_feet": 1995,
+      "property_type": "Single Family",
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin"
+  ],
+  "sources_used": [
+    "Zillow",
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "14303 Evening Flight Lane, Charlotte, NC, USA, North Carolina",
+    "city": "Charlotte",
+    "state": "North Carolina",
+    "zip_code": "28262",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-11T11:35:36.281519"
+}
