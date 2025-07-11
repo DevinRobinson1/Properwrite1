@@ -98,6 +98,10 @@ def get_dashboard_data():
             # Get team stats using billing service
             team_stats = billing_service.get_team_stats(user.team_id)
             
+            # Extract team and member data from billing service response
+            team_data = team_stats.get('team', {}) if team_stats.get('success') else {}
+            members_data = team_stats.get('members', []) if team_stats.get('success') else []
+            
             return jsonify({
                 'success': True,
                 'user': {
@@ -110,15 +114,16 @@ def get_dashboard_data():
                 },
                 'team': {
                     'id': str(user.team_id),
-                    'name': team_stats.get('team_name', 'My Team'),
-                    'plan': team_stats.get('plan_name', 'Free'),
-                    'credits_remaining': team_stats.get('credits_remaining', 0),
-                    'credits_used_this_month': team_stats.get('credits_used_this_month', 0),
-                    'total_members': team_stats.get('total_members', 1),
-                    'max_members': team_stats.get('max_members', 1),
-                    'subscription_status': team_stats.get('subscription_status', 'active'),
-                    'next_billing_date': team_stats.get('next_billing_date')
+                    'name': team_data.get('name', 'My Team'),
+                    'plan': team_data.get('tier', 'Free').capitalize(),
+                    'credits_remaining': team_data.get('credit_balance', 0),
+                    'credits_used_this_month': 0,  # Can be calculated from recent activity
+                    'total_members': len(members_data),
+                    'max_members': team_data.get('seats_max', 1),
+                    'subscription_status': 'active',
+                    'next_billing_date': None  # Can be populated from Stripe data
                 },
+                'members': members_data,
                 'recent_activity': []  # Can be populated later
             })
     except Exception as e:
@@ -1775,12 +1780,28 @@ def billing_webhook():
         return jsonify({'error': 'Webhook processing failed'}), 400
 
 @app.route('/api/team/stats')
-@require_auth
 def get_team_stats():
     """Get team statistics and billing information"""
     try:
-        stats = billing_service.get_team_stats(g.current_user['team_id'])
-        return jsonify(stats)
+        # For testing, use the session user_id like in dashboard()
+        user_id = session.get('user_id')
+        
+        if not user_id:
+            return jsonify({'error': 'Not authenticated'}), 401
+            
+        # Get user data from database
+        with Session(engine) as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+            
+            if not user.team_id:
+                return jsonify({'error': 'User has no team assigned'}), 400
+            
+            # Get team stats using billing service
+            stats = billing_service.get_team_stats(user.team_id)
+            return jsonify(stats)
         
     except Exception as e:
         logging.error(f"Error getting team stats: {e}")

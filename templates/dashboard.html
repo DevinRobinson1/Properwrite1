@@ -926,6 +926,17 @@
                         }
                     });
                     
+                    // Update team members table
+                    if (data.members && data.members.length > 0) {
+                        updateTeamMemberList(data.members);
+                    } else {
+                        // Show empty state if no members
+                        const memberTableBody = document.querySelector('#team-members-table tbody');
+                        if (memberTableBody) {
+                            memberTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500 py-8">No team members found</td></tr>';
+                        }
+                    }
+                    
                 } else {
                     console.error('Error loading dashboard data:', data.error);
                     // Show error message
