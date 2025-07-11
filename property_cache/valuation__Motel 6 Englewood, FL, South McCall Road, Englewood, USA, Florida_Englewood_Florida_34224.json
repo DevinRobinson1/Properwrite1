@@ -1,0 +1,33 @@
+{
+  "valuations": {
+    "rentcast": {
+      "estimate": 131000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin"
+  ],
+  "sources_used": [
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "Motel 6 Englewood, FL, South McCall Road, Englewood, USA, Florida",
+    "city": "Englewood",
+    "state": "Florida",
+    "zip_code": "34224",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-11T12:16:08.566867"
+}
