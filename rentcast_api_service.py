@@ -40,17 +40,27 @@ class RentCastAPIService:
         try:
             # RentCast property details endpoint
             url = f"{self.base_url}/properties"
+            
+            # Parse address components
+            address_parts = address.split(',')[0].strip()  # Get street address
+            
             params = {
-                'address': full_address,
-                'propertyType': 'Single Family',
-                'bedrooms': '',
-                'bathrooms': '',
-                'squareFootage': ''
+                'address': address_parts,
+                'city': city,
+                'state': state
             }
             
+            # Add zipcode if available in address
+            if ',' in address:
+                parts = address.split(',')
+                for part in parts:
+                    part = part.strip()
+                    if part.isdigit() and len(part) == 5:
+                        params['zipcode'] = part
+                        break
+            
             headers = {
-                'x-api-key': self.api_key,
-                'Content-Type': 'application/json'
+                'X-Api-Key': self.api_key  # Note: uppercase X-Api-Key
             }
             
             response = requests.get(url, params=params, headers=headers, timeout=30)
@@ -63,9 +73,19 @@ class RentCastAPIService:
                 if data and len(data) > 0:
                     property_data = data[0]  # Take first match
                     
-                    # Extract property value
-                    value = property_data.get('value')
-                    confidence = property_data.get('confidence', 0)
+                    # Extract property value from last sale price or tax assessment
+                    value = property_data.get('lastSalePrice')
+                    
+                    # Fallback to tax assessment if no sale price
+                    if not value and property_data.get('taxAssessments'):
+                        # Get most recent tax assessment
+                        tax_years = sorted(property_data['taxAssessments'].keys(), reverse=True)
+                        if tax_years:
+                            latest_assessment = property_data['taxAssessments'][tax_years[0]]
+                            value = latest_assessment.get('value')
+                    
+                    # Use formatted address for exact match confidence
+                    confidence = 0.95 if property_data.get('formattedAddress') else 0.8
                     
                     if value and value > 0:
                         return {
@@ -75,7 +95,7 @@ class RentCastAPIService:
                             'bathrooms': property_data.get('bathrooms'),
                             'square_feet': property_data.get('squareFootage'),
                             'property_type': property_data.get('propertyType'),
-                            'address': property_data.get('address'),
+                            'address': property_data.get('formattedAddress', property_data.get('addressLine1')),
                             'city': property_data.get('city'),
                             'state': property_data.get('state'),
                             'zip_code': property_data.get('zipCode'),
