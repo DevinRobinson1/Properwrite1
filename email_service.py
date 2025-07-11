@@ -36,7 +36,9 @@ class EmailService:
         self.smtp_server = os.environ.get('SMTP_SERVER', default_smtp_server)
         self.smtp_port = int(os.environ.get('SMTP_PORT', default_smtp_port))
         self.smtp_username = smtp_username
-        self.smtp_password = os.environ.get('SMTP_PASSWORD')
+        # Handle Google App Password format (remove spaces if present)
+        raw_password = os.environ.get('SMTP_PASSWORD', '')
+        self.smtp_password = raw_password.replace(' ', '') if raw_password else ''
         self.from_email = os.environ.get('FROM_EMAIL', smtp_username)
         self.from_name = os.environ.get('FROM_NAME', 'Properwrite Team')
         
