@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Admin Navigation -->
+    <nav class="bg-gray-900 text-white sticky top-0 z-50">
+        <div class="container mx-auto px-6">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-8">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xl font-bold">Admin Panel</span>
+                    </div>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="/admin" class="hover:text-amber-400 transition-colors">Dashboard</a>
+                        <a href="/admin/users" class="hover:text-amber-400 transition-colors">Users</a>
+                        <a href="/admin/billing" class="text-amber-400">Billing</a>
+                        <a href="/admin/api-health" class="hover:text-amber-400 transition-colors">API Health</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-300">Admin</span>
+                    <a href="/admin/logout" class="text-sm hover:text-amber-400 transition-colors">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-6 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Billing & Revenue</h1>
+            <p class="text-gray-600 mt-2">Financial overview and subscription management</p>
+        </div>
+
+        <!-- Revenue Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Monthly Recurring Revenue</p>
+                        <p class="text-3xl font-bold text-gray-800">${{ mrr }}</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Revenue</p>
+                        <p class="text-3xl font-bold text-gray-800">$0</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-chart-line text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Active Subscriptions</p>
+                        <p class="text-3xl font-bold text-gray-800">0</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-users text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Placeholder Content -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Billing Features</h2>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Revenue Tracking</h3>
+                        <p class="text-gray-600 text-sm">Track subscription revenue and credit purchases</p>
+                    </div>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Coming Soon</span>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Subscription Management</h3>
+                        <p class="text-gray-600 text-sm">Manage user subscriptions and billing</p>
+                    </div>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Coming Soon</span>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Financial Reports</h3>
+                        <p class="text-gray-600 text-sm">Generate detailed financial reports</p>
+                    </div>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Coming Soon</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
