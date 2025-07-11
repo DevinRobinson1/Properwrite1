@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Optional, List, Tuple
 import time
 from bs4 import BeautifulSoup
+from urllib.parse import quote
 
 class ComprehensiveValuationService:
     def __init__(self):
@@ -111,6 +112,15 @@ class ComprehensiveValuationService:
             logging.warning(f"Google Geocoding for place_id failed: {e}")
         
         return None
+    
+    def _to_single_line(self, address: str) -> str:
+        """Strip duplicate city/state tokens returned from Google Places"""
+        parts = [x.strip() for x in address.split(',')]
+        deduped = []
+        for p in parts:
+            if p.lower() not in [d.lower() for d in deduped]:
+                deduped.append(p)
+        return ', '.join(deduped)
     
     def _try_zillow_valuation(self, valuation_data: Dict, address: str, city: str, state: str, zip_code: str):
         """Try Zillow Deep Search API"""
