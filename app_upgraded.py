@@ -257,7 +257,7 @@ def analyze_property():
         canonical_address = {
             'place_id': data.get('place_id', ''),  # May be empty for basic validation
             'formatted_address': formatted_address,
-            'street': address or data.get('address', ''),  # Use original address if street is empty
+            'street': address,
             'city': city,
             'state': state,
             'zip': zip_code,
@@ -273,7 +273,7 @@ def analyze_property():
         
         # Initialize property data with defaults
         property_data = {
-            'address': canonical_address['street'] or address,  # Use the best available address
+            'address': address,
             'city': city,
             'state': state,
             'zip': zip_code,
@@ -294,16 +294,9 @@ def analyze_property():
             # Clean up the formatted address to remove duplicates before sending to APIs
             from address_utils import to_zillow_search_string, normalize_address_for_apis
             
-            # Construct full address if formatted_address is incomplete
-            if not canonical_address['formatted_address'] or len(canonical_address['formatted_address'].strip()) < 10:
-                full_address = f"{canonical_address['street']}, {canonical_address['city']}, {canonical_address['state']} {canonical_address['zip']}"
-            else:
-                full_address = canonical_address['formatted_address']
-            
             # Use the normalized address for API calls
-            clean_address = normalize_address_for_apis(full_address)
+            clean_address = normalize_address_for_apis(canonical_address['formatted_address'])
             
-            logging.info(f"🐛 Full address constructed: {full_address}")
             logging.info(f"🐛 Cleaned address for APIs: {clean_address}")
             
             valuation_data = comprehensive_valuation_service.get_comprehensive_valuation(
