@@ -14,14 +14,20 @@ from datetime import datetime, timedelta
 
 class GooglePlacesService:
     def __init__(self):
-        self.api_key = os.environ.get('GOOGLE_MAPS_API_KEY')
-        if not self.api_key:
-            raise ValueError("GOOGLE_MAPS_API_KEY environment variable is required")
+        self.api_key = None
+        self.initialized = False
         
-        self.base_url = "https://places.googleapis.com/v1/places"
-        self.validation_url = "https://addressvalidation.googleapis.com/v1:validateAddress"
-        self.cache = {}  # In-memory cache (consider Redis for production)
-        self.cache_ttl = timedelta(days=30)
+    def _ensure_initialized(self):
+        """Lazy initialization of API key"""
+        if not self.initialized:
+            self.api_key = os.environ.get('GOOGLE_MAPS_API_KEY')
+            if not self.api_key:
+                raise ValueError("GOOGLE_MAPS_API_KEY environment variable is required")
+            self.base_url = "https://places.googleapis.com/v1/places"
+            self.validation_url = "https://addressvalidation.googleapis.com/v1:validateAddress"
+            self.cache = {}  # In-memory cache (consider Redis for production)
+            self.cache_ttl = timedelta(days=30)
+            self.initialized = True
         
     def get_canonical_address(self, place_id: str) -> Dict[str, Any]:
         """
@@ -37,6 +43,7 @@ class GooglePlacesService:
             - lng: number
             - placeId: string
         """
+        self._ensure_initialized()
         if not place_id:
             raise ValueError("place_id is required")
         
@@ -70,6 +77,7 @@ class GooglePlacesService:
         Raises:
             AddressValidationError: If address cannot be confirmed
         """
+        self._ensure_initialized()
         # Generate cache key
         address_hash = self._generate_address_hash(street, city, state, zip_code)
         cache_key = f"addrval:{address_hash}"
