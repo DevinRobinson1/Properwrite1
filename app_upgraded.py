@@ -24,7 +24,7 @@ from billing_service import BillingService
 from auth_middleware import require_auth, require_seat, require_role, require_credits
 from google_places_service import google_places_service, AddressNotFoundError, GooglePlacesAPIError, AddressValidationError
 from require_valid_address import require_valid_address, extract_validated_address_data
-from admin_routes import admin_bp
+from admin_routes_minimal import admin_bp
 
 # Load environment variables from .env file
 if os.path.exists('.env'):
