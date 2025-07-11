@@ -325,6 +325,21 @@ class ComprehensiveValuationService:
                 }
                 valuation_data['sources_used'].append('RentCast')
                 logging.info(f"RentCast valuation success: ${rentcast_data['value']:,}")
+                
+                # Also try to get rental estimate
+                try:
+                    rental_data = self.rentcast_service.get_rental_estimate(address, city, state)
+                    if rental_data and rental_data.get('rent_estimate'):
+                        valuation_data['valuations']['rentcast_rental'] = {
+                            'rent_estimate': int(rental_data['rent_estimate']),
+                            'source': 'RentCast Rental Data',
+                            'confidence': 'high' if rental_data.get('confidence', 0) > 0.7 else 'medium',
+                            'updated': rental_data.get('updated', datetime.now().strftime('%Y-%m-%d'))
+                        }
+                        logging.info(f"RentCast rental estimate: ${rental_data['rent_estimate']:,}/month")
+                except Exception as e:
+                    logging.warning(f"Failed to get RentCast rental estimate: {e}")
+                
                 return
             else:
                 logging.warning("RentCast API returned no valuation data")

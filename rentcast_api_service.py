@@ -135,13 +135,17 @@ class RentCastAPIService:
         
         try:
             # RentCast rental estimate endpoint
-            url = f"{self.base_url}/rentals"
+            url = f"{self.base_url}/avm/rent/long-term"
+            
+            # Split address into components
+            parts = address.split(',')
+            street_address = parts[0].strip() if parts else address
+            
             params = {
-                'address': full_address,
-                'propertyType': 'Single Family',
-                'bedrooms': '',
-                'bathrooms': '',
-                'squareFootage': ''
+                'address': street_address,
+                'city': city or '',
+                'state': state or '',
+                'propertyType': 'Single Family'
             }
             
             headers = {

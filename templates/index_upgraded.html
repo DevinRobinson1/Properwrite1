@@ -239,30 +239,30 @@
                             </div>
                         </div>
 
-                        <!-- Realtor.com Estimate Card -->
+                        <!-- Rental Estimate Card -->
                         <div class="bg-white border border-gray-200 rounded-lg p-4 transition-all duration-300 hover:shadow-md">
                             <div class="flex items-center space-x-3 mb-3">
-                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background-color: #E4002B;">
-                                    R
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background-color: #6B46C1;">
+                                    <i class="fas fa-dollar-sign text-sm"></i>
                                 </div>
                                 <div>
-                                    <div class="font-semibold text-gray-800">Realtor.com</div>
-                                    <div class="text-xs text-gray-500">Estimate</div>
+                                    <div class="font-semibold text-gray-800">Monthly Rent</div>
+                                    <div class="text-xs text-gray-500">RentCast Estimate</div>
                                 </div>
                             </div>
-                            <div class="realtor-estimate-content">
-                                <div id="realtor-loading" class="text-sm text-gray-400">Loading...</div>
-                                <div id="realtor-estimate" class="hidden">
-                                    <input type="number" id="realtor-value" class="w-full text-2xl font-bold border-none bg-transparent focus:outline-none focus:ring-2 focus:ring-red-500 rounded p-1" style="color: #E4002B;" placeholder="$0">
+                            <div class="rental-estimate-content">
+                                <div id="rental-loading" class="text-sm text-gray-400">Loading...</div>
+                                <div id="rental-estimate" class="hidden">
+                                    <input type="number" id="rental-value" class="w-full text-2xl font-bold border-none bg-transparent focus:outline-none focus:ring-2 focus:ring-purple-500 rounded p-1" style="color: #6B46C1;" placeholder="$0">
                                     <div class="text-xs text-gray-500 mt-1">
-                                        <span id="realtor-updated">Updated: --</span>
+                                        <span id="rental-updated">Updated: --</span>
                                     </div>
                                 </div>
-                                <div id="realtor-error" class="hidden text-sm text-gray-500">
+                                <div id="rental-error" class="hidden text-sm text-gray-500">
                                     <div class="text-center">
                                         <i class="fas fa-search-minus text-gray-400 mb-2"></i>
                                         <div>Not available</div>
-                                        <div class="text-xs">Property may be unlisted</div>
+                                        <div class="text-xs">No rental data found</div>
                                     </div>
                                 </div>
                             </div>
@@ -5429,20 +5429,39 @@
                 showValuationError('redfin', 'Not available');
             }
             
-            // Update Realtor
-            if (data.realtor_estimate) {
-                showValuation('realtor', data.realtor_estimate, 'Realtor.com');
-            } else if (sourcesTried.includes('Realtor.com')) {
-                showValuationError('realtor', 'Not available (Tried: Realtor.com)');
+            // Update Rental Estimate (third box)
+            if (data.rental_estimate) {
+                showValuation('rental', data.rental_estimate, 'RentCast Rental Data');
             } else {
-                showValuationError('realtor', 'Not available');
+                showValuationError('rental', 'Not available');
             }
             
-            // Calculate and show average - using the individual estimates
+            // Auto-populate property fields from data
+            if (data.bedrooms) {
+                const bedroomsInput = document.getElementById('bedrooms');
+                if (bedroomsInput) bedroomsInput.value = data.bedrooms;
+            }
+            if (data.bathrooms) {
+                const bathroomsInput = document.getElementById('bathrooms');
+                if (bathroomsInput) bathroomsInput.value = data.bathrooms;
+            }
+            if (data.square_feet) {
+                const sqftInput = document.getElementById('square_feet');
+                if (sqftInput) sqftInput.value = data.square_feet;
+            }
+            if (data.calculated_arv) {
+                const arvInput = document.getElementById('arv');
+                if (arvInput) arvInput.value = data.calculated_arv;
+            }
+            if (data.rental_estimate) {
+                const rentInput = document.getElementById('monthly_rent');
+                if (rentInput) rentInput.value = data.rental_estimate;
+            }
+            
+            // Calculate and show average - using only Zillow and RentCast as per user requirement
             const estimates = [];
             if (data.zillow_estimate) estimates.push(data.zillow_estimate);
-            if (data.redfin_estimate) estimates.push(data.redfin_estimate);
-            if (data.realtor_estimate) estimates.push(data.realtor_estimate);
+            if (data.rentcast_estimate) estimates.push(data.rentcast_estimate);
             
             if (estimates.length > 0) {
                 const average = Math.round(estimates.reduce((a, b) => a + b, 0) / estimates.length);

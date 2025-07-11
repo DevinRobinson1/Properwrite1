@@ -219,6 +219,22 @@ def analyze_property():
                 property_data['realtor_estimate'] = valuations['realtor'].get('estimate')
             if 'rentcast' in valuations:
                 property_data['rentcast_estimate'] = valuations['rentcast'].get('estimate')
+                # Extract property details from RentCast
+                property_data['bedrooms'] = valuations['rentcast'].get('bedrooms')
+                property_data['bathrooms'] = valuations['rentcast'].get('bathrooms')
+                property_data['square_feet'] = valuations['rentcast'].get('square_feet')
+            if 'rentcast_rental' in valuations:
+                property_data['rental_estimate'] = valuations['rentcast_rental'].get('rent_estimate')
+                
+            # Calculate ARV as average of Zillow and RentCast
+            arv_estimates = []
+            if property_data.get('zillow_estimate'):
+                arv_estimates.append(property_data['zillow_estimate'])
+            if property_data.get('rentcast_estimate'):
+                arv_estimates.append(property_data['rentcast_estimate'])
+            
+            if arv_estimates:
+                property_data['calculated_arv'] = int(sum(arv_estimates) / len(arv_estimates))
             
             # Update data sources to include successful API sources
             api_sources = []
