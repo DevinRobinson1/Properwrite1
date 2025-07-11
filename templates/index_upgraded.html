@@ -2897,11 +2897,30 @@
                 }
                 
                 // Also check for selectedAddressData from enhanced-address-input.js
-                if (window.selectedAddressData && window.selectedAddressData.latitude) {
-                    payload.latitude = window.selectedAddressData.latitude;
-                    payload.longitude = window.selectedAddressData.longitude;
+                if (window.selectedAddressData) {
+                    // Use the parsed street address from autocomplete if available
+                    if (window.selectedAddressData.addressComponents && window.selectedAddressData.addressComponents.street) {
+                        payload.street_address = window.selectedAddressData.addressComponents.street;
+                        payload.address = window.selectedAddressData.addressComponents.street;
+                    }
+                    if (window.selectedAddressData.addressComponents && window.selectedAddressData.addressComponents.city) {
+                        payload.city = window.selectedAddressData.addressComponents.city;
+                    }
+                    if (window.selectedAddressData.addressComponents && window.selectedAddressData.addressComponents.state) {
+                        payload.state = window.selectedAddressData.addressComponents.state;
+                    }
+                    if (window.selectedAddressData.addressComponents && window.selectedAddressData.addressComponents.zip) {
+                        payload.zip_code = window.selectedAddressData.addressComponents.zip;
+                    }
+                    if (window.selectedAddressData.latitude) {
+                        payload.latitude = window.selectedAddressData.latitude;
+                    }
+                    if (window.selectedAddressData.longitude) {
+                        payload.longitude = window.selectedAddressData.longitude;
+                    }
                     payload.formattedAddress = window.selectedAddressData.formattedAddress || payload.formattedAddress;
-                    console.log('Adding coordinates from selectedAddressData:', window.selectedAddressData);
+                    payload.placeId = window.selectedAddressData.placeId;
+                    console.log('Using complete selectedAddressData:', window.selectedAddressData);
                 }
                 
                 // Analyze property with external data

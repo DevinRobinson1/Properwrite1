@@ -240,13 +240,26 @@ def analyze_property():
         data = request.get_json()
         
         # Extract address components from request data
-        address = data.get('address', '').strip()
+        # Check for both 'address' and 'street_address' keys for compatibility
+        address = data.get('address', data.get('street_address', '')).strip()
         city = data.get('city', '').strip()
         state = data.get('state', '').strip()
-        zip_code = data.get('zip_code', '').strip()
-        formatted_address = data.get('formatted_address', f"{address}, {city}, {state} {zip_code}")
+        zip_code = data.get('zip_code', data.get('zip', '')).strip()
+        
+        # Use formatted address from Google if available, otherwise build it
+        if data.get('formattedAddress'):
+            formatted_address = data.get('formattedAddress')
+        elif data.get('formatted_address'):
+            formatted_address = data.get('formatted_address')
+        else:
+            formatted_address = f"{address}, {city}, {state} {zip_code}".strip(', ')
+            
         latitude = data.get('latitude')
         longitude = data.get('longitude')
+        
+        # Log the received data for debugging
+        logging.info(f"Received address data: address='{address}', city='{city}', state='{state}', zip='{zip_code}'")
+        logging.info(f"Formatted address: '{formatted_address}'")
         
         # Store canonical address data for property analysis (now validated)
         canonical_address = {
@@ -1124,7 +1137,7 @@ def autocomplete():
         import requests
         import os
         
-        api_key = os.environ.get('GMAPS_API_KEY')
+        api_key = os.environ.get('GOOGLE_MAPS_API_KEY')
         if not api_key:
             return jsonify({'error': 'Google Maps API key not configured'}), 500
         
@@ -1217,7 +1230,7 @@ def place_details():
         import requests
         import os
         
-        api_key = os.environ.get('GMAPS_API_KEY')
+        api_key = os.environ.get('GOOGLE_MAPS_API_KEY')
         if not api_key:
             return jsonify({'error': 'Google Maps API key not configured'}), 500
         
@@ -1234,7 +1247,9 @@ def place_details():
         response = requests.get(url, headers=headers)
         
         if response.status_code == 200:
-            return jsonify(response.json())
+            place_data = response.json()
+            logging.info(f"Place details response: {place_data}")
+            return jsonify(place_data)
         elif response.status_code == 400 and "API key not valid" in response.text:
             logging.warning("Google Places API (New) not enabled for place details")
             return jsonify({

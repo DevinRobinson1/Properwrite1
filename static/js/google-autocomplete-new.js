@@ -176,8 +176,10 @@ class GoogleAutocompleteNew {
     }
     
     async selectSuggestion(prediction) {
-        // Update input value
-        this.input.value = prediction.text.text;
+        console.log('Selected prediction:', prediction);
+        
+        // Don't update the input value here - wait for place details
+        // This prevents the incomplete address from being shown
         
         // Hide suggestions
         this.hideSuggestions();
@@ -200,6 +202,7 @@ class GoogleAutocompleteNew {
             }
             
             const placeData = await response.json();
+            console.log('Place details response:', placeData);
             
             // Handle API not enabled case
             if (placeData.error === 'API_NOT_ENABLED') {
@@ -209,6 +212,7 @@ class GoogleAutocompleteNew {
             
             // Parse address components
             const addressComponents = this.parseAddressComponents(placeData.addressComponents || []);
+            console.log('Parsed address components:', addressComponents);
             
             // Call the selection callback with parsed data
             this.options.onSelect({
@@ -238,11 +242,19 @@ class GoogleAutocompleteNew {
         };
         
         components.forEach(component => {
-            const type = component.types[0];
-            if (parsed.hasOwnProperty(type)) {
-                parsed[type] = component.longText || component.shortText || '';
-            }
+            // Handle both old and new API formats
+            const types = component.types || [];
+            types.forEach(type => {
+                if (parsed.hasOwnProperty(type)) {
+                    // New API format uses longText/shortText, old uses long_name/short_name
+                    parsed[type] = component.longText || component.shortText || 
+                                   component.long_name || component.short_name || '';
+                }
+            });
         });
+        
+        // Log the parsed components for debugging
+        console.log('Parsed address components:', parsed);
         
         return {
             street: `${parsed.street_number} ${parsed.route}`.trim(),
@@ -318,18 +330,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Store selected address data globally for form submission
                 window.selectedAddressData = data;
                 
+                // Update the main address input with the full formatted address
+                if (data.formattedAddress) {
+                    streetAddressInput.value = data.formattedAddress;
+                    console.log('Updated address field with:', data.formattedAddress);
+                }
+                
                 // Auto-populate city, state, and zip fields
                 if (cityInput && data.addressComponents.city) {
                     cityInput.value = data.addressComponents.city;
+                    console.log('Set city field to:', data.addressComponents.city);
+                } else {
+                    console.log('City field not populated:', { cityInput, city: data.addressComponents.city });
                 }
                 
                 if (stateInput && data.addressComponents.state) {
                     stateInput.value = data.addressComponents.state;
+                    console.log('Set state field to:', data.addressComponents.state);
+                } else {
+                    console.log('State field not populated:', { stateInput, state: data.addressComponents.state });
                 }
                 
                 if (zipInput && data.addressComponents.zip) {
                     zipInput.value = data.addressComponents.zip;
+                    console.log('Set zip field to:', data.addressComponents.zip);
+                } else {
+                    console.log('Zip field not populated:', { zipInput, zip: data.addressComponents.zip });
                 }
+                
+                // Log the complete address data
+                console.log('Complete address data stored:', window.selectedAddressData);
                 
                 // Show success toast
                 showToast('Address selected successfully!', 'success');
