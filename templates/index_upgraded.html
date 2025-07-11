@@ -4580,20 +4580,30 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('comps-loading').classList.add('hidden');
+                const loadingEl = document.getElementById('comps-loading');
+                if (loadingEl) loadingEl.classList.add('hidden');
                 
                 if (data.error || !data.success) {
-                    document.getElementById('comps-error').classList.remove('hidden');
-                    document.getElementById('comps-error-message').textContent = data.error || 'Failed to analyze comparable properties';
+                    const errorEl = document.getElementById('comps-error');
+                    if (errorEl) {
+                        errorEl.classList.remove('hidden');
+                        const errorMsgEl = document.getElementById('comps-error-message');
+                        if (errorMsgEl) errorMsgEl.textContent = data.error || 'Failed to analyze comparable properties';
+                    }
                 } else {
                     displayCompsResults(data);
                 }
             })
             .catch(error => {
                 console.error('Comps analysis error:', error);
-                document.getElementById('comps-loading').classList.add('hidden');
-                document.getElementById('comps-error').classList.remove('hidden');
-                document.getElementById('comps-error-message').textContent = 'Failed to analyze comparable properties';
+                const loadingEl = document.getElementById('comps-loading');
+                if (loadingEl) loadingEl.classList.add('hidden');
+                const errorEl = document.getElementById('comps-error');
+                if (errorEl) {
+                    errorEl.classList.remove('hidden');
+                    const errorMsgEl = document.getElementById('comps-error-message');
+                    if (errorMsgEl) errorMsgEl.textContent = 'Failed to analyze comparable properties';
+                }
             });
         }
 

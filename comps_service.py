@@ -130,8 +130,50 @@ class CompsService:
                 if zpid:
                     detail = self._get_property_details(zpid)
                     if detail:
+                        # Log first comp details for debugging
+                        if len(detailed_comps) == 0:
+                            logger.info(f"First comp detail fields: {list(detail.keys())[:20]}")
                         # Merge data
                         comp.update(detail)
+                        # Ensure we have the correct fields for display
+                        # Handle bedrooms - check multiple possible field names
+                        if not comp.get('bedrooms'):
+                            comp['bedrooms'] = comp.get('beds') or comp.get('resoFacts', {}).get('bedrooms') or 0
+                        
+                        # Handle bathrooms - check multiple possible field names  
+                        if not comp.get('bathrooms'):
+                            comp['bathrooms'] = comp.get('baths') or comp.get('bathsFull') or comp.get('resoFacts', {}).get('bathrooms') or 0
+                        
+                        # Handle price - check multiple possible field names
+                        if not comp.get('price'):
+                            comp['price'] = (comp.get('soldPrice') or 
+                                           comp.get('lastSoldPrice') or 
+                                           comp.get('priceHistory', [{}])[0].get('price') if comp.get('priceHistory') else 0)
+                        
+                        # Handle living area - check multiple possible field names
+                        if not comp.get('livingArea'):
+                            comp['livingArea'] = (comp.get('livingAreaValue') or 
+                                                comp.get('resoFacts', {}).get('livingArea') or 
+                                                comp.get('livingAreaSqFt') or 0)
+                        
+                        # Handle address
+                        if not comp.get('address'):
+                            comp['address'] = comp.get('streetAddress', '') + ', ' + comp.get('city', '') + ', ' + comp.get('state', '')
+                        
+                        # Get sold date
+                        if not comp.get('dateSold') and comp.get('priceHistory'):
+                            for history in comp.get('priceHistory', []):
+                                if history.get('event') == 'Sold':
+                                    comp['dateSold'] = history.get('date')
+                                    break
+                        
+                        # Calculate days on market
+                        if comp.get('dateSold'):
+                            try:
+                                sold_date = datetime.fromtimestamp(comp['dateSold'] / 1000)
+                                comp['days_old'] = (datetime.now() - sold_date).days
+                            except:
+                                comp['days_old'] = 0
                         detailed_comps.append(comp)
             
             return {
