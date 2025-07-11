@@ -125,6 +125,8 @@ class CompsService:
             
             # Get detailed info for top comps
             detailed_comps = []
+            subject_address_clean = address.lower().replace(',', '').replace(' ', '')
+            
             for comp in all_comps[:10]:  # Get details for top 10
                 zpid = comp.get('zpid')
                 if zpid:
@@ -171,6 +173,15 @@ class CompsService:
                                 city = comp.get('city', '') or comp.get('addressCity', '') or ''
                                 state = comp.get('state', '') or comp.get('addressState', '') or ''
                                 comp['address'] = f"{street} {city} {state}".strip()
+                        
+                        # Filter out subject property itself
+                        comp_address = comp.get('address', '')
+                        comp_address_clean = comp_address.lower().replace(',', '').replace(' ', '')
+                        
+                        # Skip if this is the subject property
+                        if comp_address_clean == subject_address_clean:
+                            logger.info(f"Skipping subject property: {comp_address}")
+                            continue
                         
                         # Get sold date - check multiple sources
                         if not comp.get('dateSold'):

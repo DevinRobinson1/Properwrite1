@@ -119,6 +119,121 @@
             opacity: 1;
         }
         
+        /* Editable input styling */
+        .editable-input {
+            background-color: rgb(255 251 235) !important; /* bg-amber-50 */
+            border: 1px solid rgb(251 191 36 / 0.4) !important; /* ring-amber-400/40 */
+            transition: all 0.2s ease;
+        }
+        
+        .editable-input:focus {
+            border-color: rgb(251 191 36 / 0.6) !important;
+            outline: none;
+            box-shadow: 0 0 0 3px rgb(251 191 36 / 0.1);
+        }
+        
+        .editable-input:hover::after {
+            content: "✎";
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgb(251 191 36);
+            font-size: 12px;
+        }
+        
+        /* Section dividers */
+        .section-title {
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: rgb(59 130 246);
+            border-bottom: 1px solid rgb(229 231 235);
+            padding-bottom: 0.5rem;
+        }
+        
+        /* Info tooltip icon */
+        .info-tooltip {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-color: rgb(107 114 128);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 16px;
+            font-size: 10px;
+            margin-left: 4px;
+            cursor: help;
+        }
+        
+        .info-tooltip:hover {
+            background-color: rgb(59 130 246);
+        }
+        
+        /* Placeholder text styling */
+        ::placeholder {
+            color: rgb(156 163 175) !important; /* text-gray-400 */
+            opacity: 1;
+        }
+        
+        /* Button responsive layout */
+        .button-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        @media (min-width: 640px) {
+            .button-row {
+                flex-direction: row;
+            }
+            
+            .button-row > * {
+                flex: 1;
+            }
+        }
+        
+        /* Property image skeleton */
+        .property-image-skeleton {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* API status badges */
+        .api-status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        
+        .api-status-offline {
+            background-color: rgb(229 231 235);
+            color: rgb(107 114 128);
+        }
+        
+        .api-status-upgrade {
+            background-color: rgb(254 240 138);
+            color: rgb(146 64 14);
+        }
+        
         /* Improved error states */
         .error-state {
             background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
@@ -459,7 +574,8 @@
         <!-- Property Analysis Results -->
         <div id="analysis-results" class="hidden">
             
-            <!-- Property Overview -->
+            <!-- Property Data Section -->
+            <div class="section-title">🏠 Property Data</div>
             <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                     <div class="lg:col-span-2">
@@ -477,9 +593,19 @@
                     
                     <!-- Property Image -->
                     <div class="lg:col-span-1">
-                        <div class="bg-gray-200 rounded-lg min-h-64 flex items-center justify-center overflow-hidden" id="property-image-container">
-                            <i class="fas fa-home text-gray-400 text-6xl"></i>
-                            <span class="ml-4 text-gray-500">Property Image</span>
+                        <div class="bg-gray-200 rounded-lg min-h-64 flex items-center justify-center overflow-hidden relative" id="property-image-container">
+                            <!-- Loading skeleton -->
+                            <div id="property-image-skeleton" class="property-image-skeleton">
+                                <div class="text-center">
+                                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500 mx-auto mb-2"></div>
+                                    <span class="text-sm">Loading image...</span>
+                                </div>
+                            </div>
+                            <!-- Fallback icon -->
+                            <div id="property-image-fallback" class="hidden text-center">
+                                <i class="fas fa-image text-gray-400 text-4xl mb-2"></i>
+                                <div class="text-sm text-gray-500">Image unavailable</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1674,7 +1800,7 @@
                                     <div class="text-center mb-6">
                                         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
                                         <p class="text-gray-600 font-medium">Searching for comparable properties...</p>
-                                        <p class="text-sm text-gray-500 mt-2">This may take up to 10 seconds</p>
+                                        <p class="text-sm text-gray-500 mt-2">This may take up to a minute</p>
                                     </div>
                                     
                                     <!-- Skeleton loader for comps -->
@@ -1939,7 +2065,13 @@
 
                         <!-- Installment Equitable Deposit Structure -->
                         <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg mb-6">
-                            <h4 class="text-lg font-semibold text-blue-800 mb-4">💰 Installment Equitable Deposit Structure</h4>
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-lg font-semibold text-blue-800">💰 Installment Equitable Deposit Structure</h4>
+                                <div class="flex items-center">
+                                    <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                                    <span class="text-sm text-blue-600 font-medium">Specifically used for the Installment Method</span>
+                                </div>
+                            </div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <!-- Refundable Consideration -->
                                 <div class="bg-white p-4 rounded-lg border border-green-200">
