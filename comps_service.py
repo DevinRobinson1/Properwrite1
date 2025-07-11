@@ -76,12 +76,12 @@ class CompsService:
                         "location": address,
                         "status_type": "RecentlySold",
                         "home_type": "Houses",
-                        "minBeds": max(1, beds - 1),
-                        "maxBeds": beds + 1,
+                        "minBeds": max(1, beds - 2),  # Expanded range
+                        "maxBeds": beds + 2,          # Expanded range
                         "minBaths": max(1, baths - 1),
-                        "maxBaths": baths + 1,
-                        "minSqft": max(500, sqft - 500),
-                        "maxSqft": sqft + 500,
+                        "maxBaths": baths + 2,        # Expanded range
+                        "minSqft": max(500, sqft - 1000),  # Expanded range
+                        "maxSqft": sqft + 1000,            # Expanded range
                         "daysOnZillow": days
                     }
                     
@@ -162,6 +162,7 @@ class CompsService:
                                                 comp.get('livingAreaSqFt') or 0)
                         
                         # Handle address - check for nested address object first
+                        original_address = comp.get('address')
                         if not comp.get('address') or isinstance(comp.get('address'), dict):
                             # Check if address is a nested object
                             if isinstance(comp.get('address'), dict):
@@ -173,14 +174,28 @@ class CompsService:
                                 city = comp.get('city', '') or comp.get('addressCity', '') or ''
                                 state = comp.get('state', '') or comp.get('addressState', '') or ''
                                 comp['address'] = f"{street} {city} {state}".strip()
+                                
+                        # Log address extraction for debugging
+                        logger.info(f"Address extraction - Original: {original_address}, Final: {comp.get('address')}, Street: {comp.get('streetAddress')}, City: {comp.get('city')}, State: {comp.get('state')}")
                         
-                        # Filter out subject property itself
+                        # Filter out subject property itself and very similar addresses
                         comp_address = comp.get('address', '')
-                        comp_address_clean = comp_address.lower().replace(',', '').replace(' ', '')
+                        comp_address_clean = comp_address.lower().replace(',', '').replace(' ', '').replace('.', '')
                         
-                        # Skip if this is the subject property
+                        # Skip if this is the subject property or very similar address
                         if comp_address_clean == subject_address_clean:
                             logger.info(f"Skipping subject property: {comp_address}")
+                            continue
+                        
+                        # Also skip if addresses are too similar (same street number and name)
+                        subject_parts = subject_address_clean.split()
+                        comp_parts = comp_address_clean.split()
+                        
+                        # Check if first part (street number) and second part (street name) are the same
+                        if (len(subject_parts) >= 2 and len(comp_parts) >= 2 and 
+                            subject_parts[0] == comp_parts[0] and 
+                            subject_parts[1] == comp_parts[1]):
+                            logger.info(f"Skipping very similar address: {comp_address} (similar to {address})")
                             continue
                         
                         # Get sold date - check multiple sources
@@ -203,17 +218,127 @@ class CompsService:
                                     # Unix timestamp in milliseconds
                                     sold_date = datetime.fromtimestamp(comp['dateSold'] / 1000)
                                 elif isinstance(comp['dateSold'], str):
-                                    # Try parsing string date
-                                    sold_date = datetime.strptime(comp['dateSold'], '%Y-%m-%d')
+                                    # Try multiple date formats
+                                    date_formats = ['%Y-%m-%d', '%m/%d/%Y', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%M:%S.%f']
+                                    sold_date = None
+                                    for fmt in date_formats:
+                                        try:
+                                            sold_date = datetime.strptime(comp['dateSold'], fmt)
+                                            break
+                                        except:
+                                            continue
+                                    if not sold_date:
+                                        sold_date = datetime.now()
                                 else:
                                     sold_date = datetime.now()
                                 
                                 comp['days_old'] = (datetime.now() - sold_date).days
-                            except:
+                                logger.info(f"Calculated days_old for {comp.get('address', 'unknown')}: {comp['days_old']} days (sold: {comp['dateSold']})")
+                            except Exception as e:
+                                logger.warning(f"Error calculating days_old: {e}")
                                 comp['days_old'] = 0
                         else:
+                            # If no dateSold, try to calculate from other sources
                             comp['days_old'] = 0
+                            # Check if property has timeOnZillow or similar fields
+                            if comp.get('timeOnZillow'):
+                                comp['days_old'] = comp['timeOnZillow']
+                            elif comp.get('daysOnMarket'):
+                                comp['days_old'] = comp['daysOnMarket']
                         detailed_comps.append(comp)
+            
+            # If we don't have enough diverse comps, try a broader search
+            if len(detailed_comps) < 3:
+                logger.info(f"Only found {len(detailed_comps)} diverse comps, attempting broader search")
+                
+                # Try a much broader search
+                params = {
+                    "location": address,
+                    "status_type": "RecentlySold",
+                    "home_type": "Houses",
+                    "minBeds": max(1, beds - 3),
+                    "maxBeds": beds + 3,
+                    "minBaths": max(1, baths - 2),
+                    "maxBaths": baths + 3,
+                    "minSqft": max(500, sqft - 1500),
+                    "maxSqft": sqft + 1500,
+                    "daysOnZillow": 365
+                }
+                
+                response = requests.get(search_url, headers=self.zillow_headers, params=params)
+                if response.status_code == 200:
+                    data = response.json()
+                    properties = data.get('props', []) if isinstance(data, dict) else data
+                    
+                    for comp in properties[:20]:  # Check more properties
+                        zpid = comp.get('zpid')
+                        if zpid:
+                            detail = self._get_property_details(zpid)
+                            if detail:
+                                comp.update(detail)
+                                
+                                # Same address handling logic
+                                original_address = comp.get('address')
+                                if not comp.get('address') or isinstance(comp.get('address'), dict):
+                                    if isinstance(comp.get('address'), dict):
+                                        addr_obj = comp.get('address', {})
+                                        comp['address'] = f"{addr_obj.get('streetAddress', '')} {addr_obj.get('city', '')} {addr_obj.get('state', '')}"
+                                    else:
+                                        street = comp.get('streetAddress', '') or comp.get('streetLine', '') or ''
+                                        city = comp.get('city', '') or comp.get('addressCity', '') or ''
+                                        state = comp.get('state', '') or comp.get('addressState', '') or ''
+                                        comp['address'] = f"{street} {city} {state}".strip()
+                                
+                                # Filter out similar addresses
+                                comp_address = comp.get('address', '')
+                                comp_address_clean = comp_address.lower().replace(',', '').replace(' ', '').replace('.', '')
+                                
+                                # Skip if too similar
+                                if comp_address_clean == subject_address_clean:
+                                    continue
+                                
+                                # Skip if already in our list
+                                if any(existing_comp.get('address', '').lower().replace(',', '').replace(' ', '').replace('.', '') == comp_address_clean 
+                                       for existing_comp in detailed_comps):
+                                    continue
+                                
+                                # Add missing fields
+                                if not comp.get('bedrooms'):
+                                    comp['bedrooms'] = comp.get('beds') or comp.get('resoFacts', {}).get('bedrooms') or 0
+                                if not comp.get('bathrooms'):
+                                    comp['bathrooms'] = comp.get('baths') or comp.get('bathsFull') or comp.get('resoFacts', {}).get('bathrooms') or 0
+                                if not comp.get('price'):
+                                    comp['price'] = (comp.get('soldPrice') or comp.get('lastSoldPrice') or 
+                                                   comp.get('priceHistory', [{}])[0].get('price') if comp.get('priceHistory') else 0)
+                                if not comp.get('livingArea'):
+                                    comp['livingArea'] = (comp.get('livingAreaValue') or comp.get('resoFacts', {}).get('livingArea') or 
+                                                        comp.get('livingAreaSqFt') or 0)
+                                
+                                # Calculate days old
+                                comp['days_old'] = 0
+                                if comp.get('dateSold'):
+                                    try:
+                                        if isinstance(comp['dateSold'], (int, float)):
+                                            sold_date = datetime.fromtimestamp(comp['dateSold'] / 1000)
+                                        elif isinstance(comp['dateSold'], str):
+                                            date_formats = ['%Y-%m-%d', '%m/%d/%Y', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%M:%S.%f']
+                                            sold_date = None
+                                            for fmt in date_formats:
+                                                try:
+                                                    sold_date = datetime.strptime(comp['dateSold'], fmt)
+                                                    break
+                                                except:
+                                                    continue
+                                            if sold_date:
+                                                comp['days_old'] = (datetime.now() - sold_date).days
+                                    except:
+                                        pass
+                                
+                                detailed_comps.append(comp)
+                                
+                                # Stop when we have enough
+                                if len(detailed_comps) >= 5:
+                                    break
             
             return {
                 'success': True,
