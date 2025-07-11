@@ -61,6 +61,87 @@ def dashboard():
     """User Account Dashboard"""
     return render_template('dashboard.html')
 
+@app.route('/api/user-status', methods=['GET'])
+def get_user_status():
+    """Get current user authentication status and credit information"""
+    try:
+        # For now, simulate authentication - this can be enhanced with real auth
+        # Check if user has a session or token
+        user_id = session.get('user_id')
+        auth_header = request.headers.get('Authorization')
+        
+        if user_id or auth_header:
+            # User is logged in
+            return jsonify({
+                'logged_in': True,
+                'credits': 100,  # Mock credit balance
+                'unlimited_credits': False,
+                'user_id': user_id or 'mock_user'
+            })
+        else:
+            # User not logged in
+            return jsonify({
+                'logged_in': False,
+                'remaining_uses': 3,  # Free uses remaining
+                'credits': 0
+            })
+    except Exception as e:
+        logging.error(f"Error getting user status: {str(e)}")
+        return jsonify({
+            'logged_in': False,
+            'remaining_uses': 3,
+            'credits': 0
+        })
+
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    """Logout current user"""
+    try:
+        # Clear session
+        session.clear()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Logged out successfully'
+        })
+    except Exception as e:
+        logging.error(f"Error logging out: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Error logging out'
+        }), 500
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    """Simple login endpoint for testing"""
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        
+        # Simple mock authentication - in production this would check against database
+        if email and password:
+            # Set session for logged in user
+            session['user_id'] = f"user_{email.split('@')[0]}"
+            session['email'] = email
+            
+            return jsonify({
+                'success': True,
+                'message': 'Logged in successfully',
+                'user_id': session['user_id']
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Email and password required'
+            }), 400
+    except Exception as e:
+        logging.error(f"Error logging in: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Error logging in'
+        }), 500
+
 @app.route('/api/analyze-property', methods=['POST'])
 @require_valid_address
 def analyze_property():

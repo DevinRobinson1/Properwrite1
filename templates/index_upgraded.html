@@ -5281,11 +5281,11 @@
                     <form id="login-form">
                         <div class="mb-4">
                             <label class="block text-sm font-medium mb-2">Email</label>
-                            <input type="email" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <input type="email" name="email" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div class="mb-6">
                             <label class="block text-sm font-medium mb-2">Password</label>
-                            <input type="password" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <input type="password" name="password" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div class="flex justify-end space-x-3">
                             <button type="button" onclick="this.closest('.fixed').remove()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
@@ -5295,6 +5295,47 @@
                 </div>
             `;
             document.body.appendChild(modal);
+            
+            // Add form submission handler
+            const form = modal.querySelector('#login-form');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData(form);
+                const email = formData.get('email');
+                const password = formData.get('password');
+                
+                try {
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email, password })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Close modal
+                        modal.remove();
+                        
+                        // Update UI to show logged-in state
+                        updateAuthenticationUI(true);
+                        
+                        // Reload user status
+                        await loadUserStatus();
+                        
+                        // Show success message
+                        showMobileToast('Logged in successfully!', 'success');
+                    } else {
+                        showMobileToast(data.error || 'Login failed', 'error');
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    showMobileToast('Login failed. Please try again.', 'error');
+                }
+            });
         }
 
         function showSignupModal() {
@@ -5325,29 +5366,6 @@
                 </div>
             `;
             document.body.appendChild(modal);
-        }
-
-
-
-        function logout() {
-            // Handle logout
-            if (confirm('Are you sure you want to logout?')) {
-                // Switch to not logged in state
-                document.getElementById('not-logged-in').classList.remove('hidden');
-                document.getElementById('mobile-not-logged-in').classList.remove('hidden');
-                document.getElementById('logged-in').classList.add('hidden');
-                document.getElementById('mobile-logged-in').classList.add('hidden');
-                
-                // Hide dropdowns
-                document.getElementById('user-menu').classList.add('hidden');
-                document.getElementById('mobile-menu').classList.add('hidden');
-                
-                // Clear user data
-                document.getElementById('credit-balance-desktop').textContent = '--';
-                document.getElementById('credit-balance-mobile').textContent = '--';
-                
-                alert('You have been logged out successfully.');
-            }
         }
 
         function scrollToResults() {
@@ -6428,8 +6446,11 @@
                 const response = await fetch('/api/user-status');
                 const data = await response.json();
                 
-                const creditBalance = document.getElementById('credit-balance');
-                const mobileCreditBalance = document.getElementById('mobile-credit-balance');
+                // Update authentication state in UI
+                updateAuthenticationUI(data.logged_in);
+                
+                const creditBalance = document.getElementById('credit-balance-desktop');
+                const mobileCreditBalance = document.getElementById('credit-balance-mobile');
                 
                 let displayValue;
                 if (data.logged_in) {
@@ -6448,9 +6469,78 @@
                 
             } catch (error) {
                 console.error('Error loading user status:', error);
-                document.getElementById('credit-balance').textContent = '--';
-                const mobileCreditBalance = document.getElementById('mobile-credit-balance');
+                const creditBalance = document.getElementById('credit-balance-desktop');
+                const mobileCreditBalance = document.getElementById('credit-balance-mobile');
+                if (creditBalance) creditBalance.textContent = '--';
                 if (mobileCreditBalance) mobileCreditBalance.textContent = '--';
+            }
+        }
+        
+        function updateAuthenticationUI(isLoggedIn) {
+            // Desktop navigation elements
+            const desktopNotLoggedIn = document.getElementById('not-logged-in');
+            const desktopLoggedIn = document.getElementById('logged-in');
+            
+            // Mobile navigation elements  
+            const mobileNotLoggedIn = document.getElementById('mobile-not-logged-in');
+            const mobileLoggedIn = document.getElementById('mobile-logged-in');
+            
+            if (isLoggedIn) {
+                // Show logged-in state
+                if (desktopNotLoggedIn) desktopNotLoggedIn.classList.add('hidden');
+                if (desktopLoggedIn) desktopLoggedIn.classList.remove('hidden');
+                if (mobileNotLoggedIn) mobileNotLoggedIn.classList.add('hidden');
+                if (mobileLoggedIn) mobileLoggedIn.classList.remove('hidden');
+            } else {
+                // Show not logged-in state
+                if (desktopNotLoggedIn) desktopNotLoggedIn.classList.remove('hidden');
+                if (desktopLoggedIn) desktopLoggedIn.classList.add('hidden');
+                if (mobileNotLoggedIn) mobileNotLoggedIn.classList.remove('hidden');
+                if (mobileLoggedIn) mobileLoggedIn.classList.add('hidden');
+            }
+        }
+        
+        function toggleUserDropdown() {
+            const menu = document.getElementById('user-menu');
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
+        }
+        
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
+        }
+        
+        async function logout() {
+            try {
+                const response = await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (response.ok) {
+                    // Update UI to show logged-out state
+                    updateAuthenticationUI(false);
+                    
+                    // Reset credit displays
+                    const creditBalance = document.getElementById('credit-balance-desktop');
+                    const mobileCreditBalance = document.getElementById('credit-balance-mobile');
+                    if (creditBalance) creditBalance.textContent = '--';
+                    if (mobileCreditBalance) mobileCreditBalance.textContent = '--';
+                    
+                    // Show success message
+                    showMobileToast('Logged out successfully', 'success');
+                } else {
+                    showMobileToast('Error logging out', 'error');
+                }
+            } catch (error) {
+                console.error('Error logging out:', error);
+                showMobileToast('Error logging out', 'error');
             }
         }
 
