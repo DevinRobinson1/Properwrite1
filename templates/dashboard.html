@@ -807,7 +807,16 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    alert('Team invitation sent successfully!');
+                    let message = 'Team invitation created successfully!';
+                    if (result.email_sent) {
+                        message += ' Email notification sent to ' + email;
+                    } else {
+                        message += ' Please share the invitation link with ' + email + ' manually.';
+                        if (result.invitation_link) {
+                            message += '\n\nInvitation link: ' + result.invitation_link;
+                        }
+                    }
+                    alert(message);
                     closeTeamInviteModal();
                     // Refresh the page to show updated team list
                     location.reload();

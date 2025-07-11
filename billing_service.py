@@ -403,12 +403,18 @@ class BillingService:
                 db.commit()
                 
                 # Send invitation email
-                self._send_invitation_email(email, team.name, token)
+                email_sent = self._send_invitation_email(email, team.name, token)
+                
+                # Create invitation link
+                base_url = os.environ.get('BASE_URL', 'https://properwrite.com')
+                invitation_link = f"{base_url}/accept-invitation?token={token}"
                 
                 return {
                     'success': True,
                     'invite_token': token,
-                    'expires_at': expires_at.isoformat()
+                    'expires_at': expires_at.isoformat(),
+                    'email_sent': email_sent,
+                    'invitation_link': invitation_link
                 }
                 
         except Exception as e:
@@ -557,10 +563,13 @@ class BillingService:
             # Always log the invitation for tracking
             logging.info(f"Team invitation sent to {email} for team {team_name} with token {token}")
             
+            return email_sent
+            
         except Exception as e:
             logging.error(f"Error sending invitation email: {e}")
             # Still log the invitation for tracking even if email fails
             logging.info(f"Team invitation sent to {email} for team {team_name} with token {token}")
+            return False
     
     def check_low_credits(self, threshold: int = 20) -> List[Dict]:
         """

@@ -21,8 +21,8 @@ class EmailService:
         self.smtp_port = int(os.environ.get('SMTP_PORT', '587'))
         self.smtp_username = os.environ.get('SMTP_USERNAME')
         self.smtp_password = os.environ.get('SMTP_PASSWORD')
-        self.from_email = os.environ.get('FROM_EMAIL', 'support@fundflowos.com')
-        self.from_name = os.environ.get('FROM_NAME', 'Properwrite Support')
+        self.from_email = os.environ.get('FROM_EMAIL', 'devin@pureflairhomes.com')
+        self.from_name = os.environ.get('FROM_NAME', 'Properwrite Team')
         
         # Alternative: SendGrid API
         self.sendgrid_api_key = os.environ.get('SENDGRID_API_KEY')
@@ -106,7 +106,7 @@ class EmailService:
                 logger.info(f"Email sent successfully via SendGrid to {to_email}")
                 return True
             else:
-                logger.error(f"SendGrid API error: {response.status_code}")
+                logger.error(f"SendGrid API error: {response.status_code} - {response.body}")
                 return False
                 
         except Exception as e:
