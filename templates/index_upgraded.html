@@ -1379,8 +1379,20 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="space-y-4">
                                     <div class="flex justify-between items-center">
-                                        <span class="text-gray-700">List Price:</span>
-                                        <span class="font-bold text-blue-600 text-lg" id="mls-novation-list-price">$0</span>
+                                        <span class="text-gray-700">List Price: 
+                                            <span class="info-tooltip" title="Editable - adjust if needed">
+                                                <span class="tooltiptext">Editable - adjust if needed</span>
+                                                i
+                                            </span>
+                                        </span>
+                                        <div class="flex items-center">
+                                            <span class="text-xs text-gray-500 mr-2">$</span>
+                                            <input type="text" id="mls-novation-list-price" value="346,500" 
+                                                   class="w-24 px-2 py-1 border border-blue-300 rounded text-right font-bold text-blue-600 editable-input"
+                                                   onchange="formatAndRecalculateDispositions(this); calculateMLSNovation();"
+                                                   oninput="formatNumber(this)"
+                                                   placeholder="Enter list price">
+                                        </div>
                                     </div>
                                     <div class="space-y-2">
                                         <div class="flex justify-between">
@@ -4644,14 +4656,23 @@
         function calculateMLSNovation() {
             console.log('calculateMLSNovation called');
             
-            // Get values from property header
-            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/,/g, '')) || 415000;
-            const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/,/g, '')) || 30000;
+            // Get list price from editable input (if user has manually adjusted it)
+            const listPriceInput = document.getElementById('mls-novation-list-price');
+            let listPrice = parseFloat(listPriceInput?.value?.replace(/,/g, '')) || 346500;
             
-            // Calculate list price: (ARV - Repairs) - discount
-            const afterRepairs = arv - repairs;
-            const discount = Math.max(afterRepairs * 0.10, 20000); // 10% discount or minimum $20,000
-            const listPrice = afterRepairs - discount;
+            // If list price is the default/empty, calculate it automatically
+            if (!listPriceInput?.value || listPriceInput.value === '0' || listPriceInput.value === '') {
+                const arv = parseFloat(document.getElementById('arv')?.value?.replace(/,/g, '')) || 415000;
+                const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/,/g, '')) || 30000;
+                
+                // Calculate list price: (ARV - Repairs) - discount
+                const afterRepairs = arv - repairs;
+                const discount = Math.max(afterRepairs * 0.10, 20000); // 10% discount or minimum $20,000
+                listPrice = afterRepairs - discount;
+                
+                // Update the input field with calculated value
+                listPriceInput.value = listPrice.toLocaleString();
+            }
             
             // Get commission rates
             const listingCommission = parseFloat(document.getElementById('mls-listing-commission-input')?.value) || 2;
@@ -4666,10 +4687,6 @@
             const netToUs = listPrice - totalCommissions - ourFee;
             
             console.log('MLS/Novation calculation:', {
-                arv,
-                repairs,
-                afterRepairs,
-                discount,
                 listPrice,
                 totalCommissions,
                 ourFee,
@@ -4677,7 +4694,6 @@
             });
             
             // Update the display elements
-            document.getElementById('mls-novation-list-price').textContent = '$' + listPrice.toLocaleString();
             document.getElementById('mls-novation-gross-sale').textContent = '$' + listPrice.toLocaleString();
             document.getElementById('mls-novation-commissions').textContent = '$' + totalCommissions.toLocaleString();
             document.getElementById('mls-novation-our-fee').textContent = '$' + ourFee.toLocaleString();
