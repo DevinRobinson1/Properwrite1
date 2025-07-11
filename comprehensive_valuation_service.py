@@ -126,6 +126,7 @@ class ComprehensiveValuationService:
             )
             
             valuation_data['sources_tried'].append('Zillow')
+            logging.info(f"🐛 Zillow search URL: {search_url}")
             logging.info(f"Zillow search with normalized address: {normalized_location}")
             
             search_response = requests.get(search_url, headers=headers, timeout=10)
@@ -165,10 +166,23 @@ class ComprehensiveValuationService:
                                     'matched_address': matched_address
                                 }
                                 valuation_data['sources_used'].append('Zillow')
-                                logging.info(f"Zillow valuation success: ${zestimate:,}")
+                                logging.info(f"🐛 Zillow success: ZPID {zpid} → ${zestimate:,}")
                                 return
                             else:
                                 logging.info(f"No valuation found in Zillow detail data")
+                        elif detail_response.status_code == 401:
+                            # Free tier - property found but details require paid plan
+                            valuation_data['valuations']['zillow'] = {
+                                'zestimate': 0,
+                                'source': 'Zillow Property Found',
+                                'confidence': 'low',
+                                'zpid': zpid,
+                                'matched_address': matched_address,
+                                'message': 'Property found on Zillow - upgrade RapidAPI plan for detailed valuations'
+                            }
+                            valuation_data['sources_used'].append('Zillow (Limited)')
+                            logging.info(f"🐛 Zillow found property but requires paid plan: ZPID {zpid}")
+                            return
                         else:
                             logging.warning(f"Zillow detail API failed: {detail_response.status_code}")
                     else:

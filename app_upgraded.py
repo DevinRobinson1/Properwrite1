@@ -86,6 +86,9 @@ def analyze_property():
         
         logging.info(f"Analyzing property with canonical address: {canonical_address['formatted_address']}")
         
+        # 🐛 DEBUG: Print final address sent to Zillow
+        logging.info(f"🐛 Address sent to valuation service: {canonical_address['formatted_address']}")
+        
         # Initialize property data with defaults
         property_data = {
             'address': address,
