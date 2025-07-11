@@ -178,6 +178,7 @@ def get_user_status():
         })
 
 @app.route('/api/logout', methods=['POST'])
+@app.route('/logout', methods=['POST'])
 def logout():
     """Logout current user"""
     try:
