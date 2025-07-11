@@ -1893,6 +1893,78 @@ def get_team_stats():
         logging.error(f"Error getting team stats: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/api/redeem-credit-code', methods=['POST'])
+def redeem_credit_code():
+    """Redeem credit code for authenticated user"""
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'error': 'Not authenticated'}), 401
+        
+        data = request.get_json()
+        code = data.get('code', '').strip().upper()
+        
+        if not code:
+            return jsonify({'error': 'Credit code is required'}), 400
+        
+        if len(code) < 3:
+            return jsonify({'error': 'Invalid credit code format'}), 400
+        
+        # Get user from database first to get their email
+        with Session(engine) as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+            
+            # Use the billing service to redeem the credit code
+            result = billing_service.redeem_credit_code(code, user.email)
+            
+            if not result.get('success'):
+                error_message = result.get('error', 'Unknown error')
+                if error_message == 'invalid':
+                    return jsonify({'error': 'Credit code not found'}), 404
+                elif error_message == 'expired':
+                    return jsonify({'error': 'Credit code has expired'}), 400
+                elif error_message == 'exhausted':
+                    return jsonify({'error': 'Credit code has reached maximum uses'}), 400
+                elif error_message == 'expired or disabled':
+                    return jsonify({'error': 'Credit code is no longer active'}), 400
+                else:
+                    return jsonify({'error': 'Failed to redeem credit code'}), 500
+            
+            # Add credits to user
+            credits_to_add = result.get('credits_added', 0)
+            original_balance = user.credits
+            user.credits += credits_to_add
+            
+            # Log the credit addition
+            try:
+                credit_log = CreditLog(
+                    user_id=user.id,
+                    team_id=user.team_id,
+                    credits_added=credits_to_add,
+                    credits_used=0,
+                    reason=f"Credit code redeemed: {code}",
+                    created_at=datetime.utcnow()
+                )
+                db.add(credit_log)
+            except Exception as log_error:
+                logging.warning(f"Failed to log credit redemption: {log_error}")
+            
+            db.commit()
+            
+            return jsonify({
+                'success': True,
+                'credits_added': credits_to_add,
+                'new_balance': user.credits,
+                'previous_balance': original_balance,
+                'message': f'Successfully redeemed {credits_to_add} credits!'
+            })
+        
+    except Exception as e:
+        logging.error(f"Error redeeming credit code: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
 @app.route('/api/team/invite', methods=['POST'])
 @require_role('manager')
 def create_team_invite():

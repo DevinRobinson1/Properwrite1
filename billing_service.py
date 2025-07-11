@@ -608,3 +608,139 @@ class BillingService:
         except Exception as e:
             logging.error(f"Error checking low credits: {e}")
             return []
+    
+    def get_credit_codes(self) -> List[Dict]:
+        """
+        Get all active credit codes (placeholder - implement with actual storage)
+        """
+        # This is a placeholder method - in a real implementation, 
+        # you would store credit codes in a database table
+        # For now, we'll use a simple in-memory store or file-based approach
+        
+        try:
+            # Simple file-based storage for credit codes
+            import json
+            credit_codes_file = 'credit_codes.json'
+            
+            if os.path.exists(credit_codes_file):
+                with open(credit_codes_file, 'r') as f:
+                    credit_codes = json.load(f)
+                    return credit_codes
+            else:
+                return []
+        except Exception as e:
+            logging.error(f"Error getting credit codes: {e}")
+            return []
+    
+    def save_credit_codes(self, credit_codes: List[Dict]) -> bool:
+        """
+        Save credit codes to storage
+        """
+        try:
+            import json
+            credit_codes_file = 'credit_codes.json'
+            
+            with open(credit_codes_file, 'w') as f:
+                json.dump(credit_codes, f, indent=2)
+            return True
+        except Exception as e:
+            logging.error(f"Error saving credit codes: {e}")
+            return False
+    
+    def update_credit_code_usage(self, code: str, new_usage_count: int) -> bool:
+        """
+        Update credit code usage count
+        """
+        try:
+            credit_codes = self.get_credit_codes()
+            
+            # Find and update the credit code
+            for cc in credit_codes:
+                if cc.get('code') == code:
+                    cc['current_uses'] = new_usage_count
+                    cc['last_used'] = datetime.utcnow().isoformat()
+                    
+                    # If usage has reached max, deactivate the code
+                    if new_usage_count >= cc.get('max_uses', 1):
+                        cc['status'] = 'exhausted'
+                    
+                    # Save updated credit codes
+                    return self.save_credit_codes(credit_codes)
+            
+            return False  # Code not found
+        except Exception as e:
+            logging.error(f"Error updating credit code usage: {e}")
+            return False
+    
+    def redeem_credit_code(self, code: str, user_email: str) -> Dict:
+        """
+        Redeem a credit code for a user
+        """
+        try:
+            credit_codes = self.get_credit_codes()
+            
+            # Find the credit code
+            target_code = None
+            for cc in credit_codes:
+                if cc.get('code') == code:
+                    target_code = cc
+                    break
+            
+            if not target_code:
+                return {'success': False, 'error': 'invalid'}
+            
+            # Check if code is active
+            if target_code.get('status') != 'active':
+                return {'success': False, 'error': 'expired or disabled'}
+            
+            # Check if code has expired
+            if target_code.get('expires_at'):
+                from datetime import datetime
+                expiry_date = datetime.fromisoformat(target_code['expires_at'])
+                if datetime.utcnow() > expiry_date:
+                    target_code['status'] = 'expired'
+                    self.save_credit_codes(credit_codes)
+                    return {'success': False, 'error': 'expired'}
+            
+            # Check if code has reached max uses
+            current_uses = target_code.get('current_uses', 0)
+            max_uses = target_code.get('max_uses', 1)
+            
+            if current_uses >= max_uses:
+                target_code['status'] = 'exhausted'
+                self.save_credit_codes(credit_codes)
+                return {'success': False, 'error': 'exhausted'}
+            
+            # Redeem the code
+            credits_to_add = target_code.get('credit_amount', 0)
+            
+            # Update usage count
+            target_code['current_uses'] = current_uses + 1
+            target_code['last_used'] = datetime.utcnow().isoformat()
+            
+            # Add redemption record
+            if 'redemptions' not in target_code:
+                target_code['redemptions'] = []
+            
+            target_code['redemptions'].append({
+                'email': user_email,
+                'redeemed_at': datetime.utcnow().isoformat(),
+                'credits_added': credits_to_add
+            })
+            
+            # Mark as exhausted if reached max uses
+            if target_code['current_uses'] >= max_uses:
+                target_code['status'] = 'exhausted'
+            
+            # Save updated credit codes
+            self.save_credit_codes(credit_codes)
+            
+            return {
+                'success': True,
+                'credits_added': credits_to_add,
+                'description': target_code.get('description', 'Credit code redeemed')
+            }
+            
+        except Exception as e:
+            logging.error(f"Error redeeming credit code: {e}")
+            return {'success': False, 'error': 'system error'}

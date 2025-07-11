@@ -243,10 +243,16 @@
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-semibold text-gray-900">Credit Balance</h3>
-                            <button onclick="showAddCreditsModal()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
-                                <i class="fas fa-plus mr-2"></i>
-                                Add Credits
-                            </button>
+                            <div class="flex space-x-3">
+                                <button onclick="showRedeemCodeModal()" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                    <i class="fas fa-gift mr-2"></i>
+                                    Redeem Code
+                                </button>
+                                <button onclick="showAddCreditsModal()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+                                    <i class="fas fa-plus mr-2"></i>
+                                    Buy Credits
+                                </button>
+                            </div>
                         </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -777,6 +783,32 @@
         </div>
     </div>
 
+    <!-- Redeem Code Modal -->
+    <div id="redeem-code-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+            <h3 class="text-lg font-semibold mb-4">Redeem Credit Code</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Enter Your Code</label>
+                    <input type="text" id="redeem-code-input" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 font-mono uppercase" 
+                           placeholder="Enter credit code" oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')">
+                </div>
+                
+                <div class="text-sm text-gray-600">
+                    <p><i class="fas fa-info-circle mr-1"></i>Enter a valid credit code to add credits to your account</p>
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-3 mt-6">
+                <button onclick="closeRedeemCodeModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Cancel</button>
+                <button onclick="redeemCreditCode()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                    <i class="fas fa-gift mr-2"></i>Redeem Code
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Mobile Bottom Navigation -->
     <div class="mobile-nav sm:hidden">
         <div class="flex justify-around py-2">
@@ -872,6 +904,56 @@
             document.getElementById('team-invite-modal').classList.add('hidden');
             document.getElementById('invite-email').value = '';
             document.getElementById('invite-role').value = 'analyst';
+        }
+
+        // Redeem Code Modal Functions
+        function showRedeemCodeModal() {
+            document.getElementById('redeem-code-modal').classList.remove('hidden');
+        }
+
+        function closeRedeemCodeModal() {
+            document.getElementById('redeem-code-modal').classList.add('hidden');
+            document.getElementById('redeem-code-input').value = '';
+        }
+
+        async function redeemCreditCode() {
+            const code = document.getElementById('redeem-code-input').value.trim();
+            
+            if (!code) {
+                alert('Please enter a credit code');
+                return;
+            }
+            
+            if (code.length < 3) {
+                alert('Credit code must be at least 3 characters long');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/redeem-credit-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: code
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`Success! ${result.credits_added} credits added to your account. You now have ${result.new_balance} credits.`);
+                    closeRedeemCodeModal();
+                    // Refresh the page to show updated credit balance
+                    location.reload();
+                } else {
+                    alert('Error redeeming code: ' + (result.error || 'Invalid or expired code'));
+                }
+            } catch (error) {
+                console.error('Error redeeming code:', error);
+                alert('Error redeeming code. Please try again.');
+            }
         }
 
         async function sendTeamInvite() {

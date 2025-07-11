@@ -50,6 +50,7 @@ def register():
         email = request.form.get('email')
         name = request.form.get('name')
         password = request.form.get('password')
+        credit_code = request.form.get('credit_code', '').strip().upper()
         
         if not email:
             flash('Email is required', 'error')
@@ -61,11 +62,35 @@ def register():
             flash('Account already exists with this email. Please login.', 'error')
             return redirect(url_for('login'))
         
+        # Start with default credits
+        starting_credits = 4
+        credit_message = 'Registration successful! You now have 4 credits to use.'
+        
+        # Check credit code if provided
+        if credit_code:
+            try:
+                from billing_service import BillingService
+                billing_service = BillingService()
+                
+                # Try to redeem the credit code
+                result = billing_service.redeem_credit_code(credit_code, email)
+                
+                if result.get('success'):
+                    starting_credits += result.get('credits_added', 0)
+                    credit_message = f'Registration successful! Credit code "{credit_code}" redeemed for {result.get("credits_added", 0)} bonus credits. You now have {starting_credits} credits to use.'
+                else:
+                    # Show error but continue with registration
+                    flash(f'Credit code "{credit_code}" is {result.get("error", "invalid")}. Continuing with 4 default credits.', 'warning')
+            except Exception as e:
+                import logging
+                logging.error(f"Error redeeming credit code during registration: {e}")
+                flash(f'Could not validate credit code. Continuing with 4 default credits.', 'warning')
+        
         # Create new user
         user = User(
             email=email,
             name=name,
-            credits=4  # 4 credits for new users
+            credits=starting_credits
         )
         
         # Add password if provided
@@ -77,7 +102,7 @@ def register():
         
         # Log the user in
         login_user(user)
-        flash('Registration successful! You now have 4 credits to use.', 'success')
+        flash(credit_message, 'success')
         return redirect(url_for('index'))
     
     return render_template('auth/register.html')

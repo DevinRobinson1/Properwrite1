@@ -46,8 +46,15 @@
                 <div>
                     <label for="password" class="sr-only">Password</label>
                     <input id="password" name="password" type="password"
-                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" 
+                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" 
                            placeholder="Password (optional - email-only login available)">
+                </div>
+                <div>
+                    <label for="credit_code" class="sr-only">Credit Code</label>
+                    <input id="credit_code" name="credit_code" type="text"
+                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm font-mono uppercase" 
+                           placeholder="Credit Code (optional for bonus credits)"
+                           oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')">
                 </div>
             </div>
 

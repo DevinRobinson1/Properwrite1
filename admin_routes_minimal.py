@@ -303,11 +303,29 @@ def create_credit_code():
         'created_at': datetime.utcnow().isoformat()
     }
     
-    return jsonify({
-        'success': True,
-        'credit_code': credit_code_data,
-        'message': f'Credit code {code} created successfully'
-    })
+    # Store credit code using billing service
+    try:
+        from billing_service import BillingService
+        billing_service = BillingService()
+        
+        # Get existing credit codes
+        existing_codes = billing_service.get_credit_codes()
+        
+        # Add new credit code
+        existing_codes.append(credit_code_data)
+        
+        # Save updated codes
+        if billing_service.save_credit_codes(existing_codes):
+            return jsonify({
+                'success': True,
+                'message': f'Credit code created successfully: {code}',
+                'credit_code': credit_code_data
+            })
+        else:
+            return jsonify({'error': 'Failed to save credit code'}), 500
+    except Exception as e:
+        logging.error(f"Error creating credit code: {e}")
+        return jsonify({'error': 'Failed to create credit code'}), 500
 
 @admin_bp.route('/api/credit-code/<string:code>/disable', methods=['POST'])
 @require_admin
@@ -323,9 +341,15 @@ def disable_credit_code(code):
 @require_admin
 def get_credit_codes():
     """Get all credit codes"""
-    # Placeholder data - in real implementation, this would query the database
-    credit_codes = []
-    return jsonify({
-        'success': True,
-        'credit_codes': credit_codes
-    })
+    try:
+        from billing_service import BillingService
+        billing_service = BillingService()
+        
+        credit_codes = billing_service.get_credit_codes()
+        return jsonify({
+            'success': True,
+            'credit_codes': credit_codes
+        })
+    except Exception as e:
+        logging.error(f"Error getting credit codes: {e}")
+        return jsonify({'error': 'Failed to get credit codes'}), 500
