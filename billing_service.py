@@ -16,6 +16,7 @@ import jwt
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email_service import EmailService
 
 # Configure Stripe
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
@@ -28,6 +29,7 @@ class BillingService:
     def __init__(self):
         self.stripe = stripe
         self.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
+        self.email_service = EmailService()
         
     def create_checkout_session(self, lookup_key: str, quantity: int = 1, customer_email: str = None, 
                                team_id: str = None, success_url: str = None, cancel_url: str = None) -> Dict:
@@ -482,12 +484,83 @@ class BillingService:
         Send team invitation email
         """
         try:
-            # This would be implemented with your email service
-            # For now, just log the invitation
+            # Create invitation link
+            base_url = os.environ.get('BASE_URL', 'https://properwrite.com')
+            invitation_link = f"{base_url}/accept-invitation?token={token}"
+            
+            # Create email content
+            subject = f"You've been invited to join {team_name} on Properwrite"
+            
+            html_content = f"""
+            <html>
+            <head>
+                <style>
+                    body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                    .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                    .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
+                    .header h1 {{ color: white; margin: 0; font-size: 24px; }}
+                    .content {{ background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }}
+                    .button {{ display: inline-block; background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }}
+                    .footer {{ text-align: center; margin-top: 30px; color: #666; font-size: 12px; }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>🏠 Properwrite Team Invitation</h1>
+                    </div>
+                    <div class="content">
+                        <h2>You've been invited to join {team_name}!</h2>
+                        <p>Hello,</p>
+                        <p>You've been invited to join the <strong>{team_name}</strong> team on Properwrite, the premier real estate investment analysis platform.</p>
+                        <p>Click the button below to accept your invitation and start analyzing properties:</p>
+                        <a href="{invitation_link}" class="button">Accept Invitation</a>
+                        <p>If the button doesn't work, copy and paste this link into your browser:</p>
+                        <p><a href="{invitation_link}">{invitation_link}</a></p>
+                        <p>This invitation will expire in 7 days.</p>
+                        <p>Best regards,<br>The Properwrite Team</p>
+                    </div>
+                    <div class="footer">
+                        <p>This email was sent from Properwrite. If you didn't expect this invitation, you can safely ignore this email.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            
+            text_content = f"""
+            You've been invited to join {team_name} on Properwrite!
+            
+            You've been invited to join the {team_name} team on Properwrite, the premier real estate investment analysis platform.
+            
+            Click this link to accept your invitation: {invitation_link}
+            
+            This invitation will expire in 7 days.
+            
+            Best regards,
+            The Properwrite Team
+            """
+            
+            # Try to send email
+            email_sent = self.email_service.send_email(
+                to_email=email,
+                subject=subject,
+                html_content=html_content,
+                text_content=text_content
+            )
+            
+            if email_sent:
+                logging.info(f"Team invitation email sent successfully to {email} for team {team_name}")
+            else:
+                logging.warning(f"Failed to send invitation email to {email} - email service may not be configured")
+                
+            # Always log the invitation for tracking
             logging.info(f"Team invitation sent to {email} for team {team_name} with token {token}")
             
         except Exception as e:
             logging.error(f"Error sending invitation email: {e}")
+            # Still log the invitation for tracking even if email fails
+            logging.info(f"Team invitation sent to {email} for team {team_name} with token {token}")
     
     def check_low_credits(self, threshold: int = 20) -> List[Dict]:
         """
