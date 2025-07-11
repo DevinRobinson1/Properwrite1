@@ -2581,8 +2581,20 @@
             if (data.bedrooms) document.getElementById('bedrooms').value = data.bedrooms;
             if (data.bathrooms) document.getElementById('bathrooms').value = data.bathrooms;
             if (data.square_feet) document.getElementById('square_feet').value = data.square_feet;
-            if (data.estimated_value) document.getElementById('arv').value = data.estimated_value;
-            if (data.rent_estimate) document.getElementById('rent').value = data.rent_estimate;
+            if (data.estimated_value) {
+                document.getElementById('arv').value = data.estimated_value;
+                // Trigger dispositions recalculation after property data is loaded
+                setTimeout(() => {
+                    recalculateAllDispositionStrategies();
+                }, 100);
+            }
+            if (data.rent_estimate) {
+                document.getElementById('rent').value = data.rent_estimate;
+                // Also trigger recalculation when rent is set
+                setTimeout(() => {
+                    recalculateAllDispositionStrategies();
+                }, 100);
+            }
             
             // Update data sources
             const dataSourcesContainer = document.getElementById('data-sources');
