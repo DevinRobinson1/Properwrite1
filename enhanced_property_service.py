@@ -55,6 +55,7 @@ class EnhancedPropertyService:
             'zillow_estimate': None,
             'redfin_estimate': None,
             'realtor_estimate': None,
+            'rentcast_estimate': None,
             'rent_estimate': None,
             'data_sources': [],
             'data_errors': [],
@@ -78,14 +79,15 @@ class EnhancedPropertyService:
         property_data['status'] = 'success'
         
         # If no estimates found from any source, provide helpful feedback
-        if not any([property_data['zillow_estimate'], property_data['redfin_estimate'], property_data['realtor_estimate']]):
+        if not any([property_data['zillow_estimate'], property_data['redfin_estimate'], property_data['realtor_estimate'], property_data['rentcast_estimate']]):
             property_data['data_errors'].append("Property not found in major real estate databases. This may be a new construction, private sale, or unlisted property.")
             property_data['data_quality'] = 'unavailable'
         
         # Calculate average estimate if multiple sources available
         estimates = [est for est in [property_data['zillow_estimate'], 
                                    property_data['redfin_estimate'], 
-                                   property_data['realtor_estimate']] if est]
+                                   property_data['realtor_estimate'],
+                                   property_data['rentcast_estimate']] if est]
         
         if estimates:
             property_data['average_estimate'] = sum(estimates) // len(estimates)

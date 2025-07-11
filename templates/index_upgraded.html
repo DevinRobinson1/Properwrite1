@@ -162,7 +162,7 @@
                     
                     <!-- Property Image -->
                     <div class="lg:col-span-1">
-                        <div class="bg-gray-200 rounded-lg h-64 flex items-center justify-center" id="property-image-container">
+                        <div class="bg-gray-200 rounded-lg min-h-64 flex items-center justify-center overflow-hidden" id="property-image-container">
                             <i class="fas fa-home text-gray-400 text-6xl"></i>
                             <span class="ml-4 text-gray-500">Property Image</span>
                         </div>
@@ -217,7 +217,7 @@
                                     R
                                 </div>
                                 <div>
-                                    <div class="font-semibold text-gray-800">Redfin</div>
+                                    <div class="font-semibold text-gray-800">RentCast</div>
                                     <div class="text-xs text-gray-500">Estimate</div>
                                 </div>
                             </div>
@@ -2610,7 +2610,9 @@
             // Update property image if available
             if (data.images && data.images.length > 0) {
                 const imageContainer = document.getElementById('property-image-container');
-                imageContainer.innerHTML = `<img src="${data.images[0]}" alt="Property" class="w-full h-64 object-cover rounded-lg">`;
+                imageContainer.innerHTML = `<img src="${data.images[0]}" alt="Property" class="w-full max-w-full h-auto object-contain rounded-lg shadow-lg">`;
+                imageContainer.classList.remove('bg-gray-200');
+                imageContainer.classList.add('bg-white');
             }
         }
 
@@ -5418,11 +5420,11 @@
                 showValuationError('zillow', 'Not available');
             }
             
-            // Update Redfin
-            if (data.redfin_estimate) {
-                showValuation('redfin', data.redfin_estimate, 'Redfin');
-            } else if (sourcesTried.includes('Redfin')) {
-                showValuationError('redfin', 'Not available (Tried: Redfin)');
+            // Update RentCast (shows in Redfin slot)
+            if (data.rentcast_estimate) {
+                showValuation('redfin', data.rentcast_estimate, 'RentCast Property Data');
+            } else if (sourcesTried.includes('RentCast')) {
+                showValuationError('redfin', 'Not available (Tried: RentCast)');
             } else {
                 showValuationError('redfin', 'Not available');
             }

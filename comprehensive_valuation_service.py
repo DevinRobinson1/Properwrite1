@@ -11,6 +11,7 @@ import time
 from datetime import datetime, timedelta
 from typing import Dict, Optional, List
 from address_utils import to_zillow_search_string
+from rentcast_api_service import RentCastAPIService
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -21,6 +22,9 @@ class ComprehensiveValuationService:
         self.rapidapi_key = os.getenv('RAPIDAPI_KEY')
         self.google_maps_key = os.getenv('GMAPS_API_KEY')
         self.cache_expiry_hours = 24
+        
+        # Initialize RentCast API service
+        self.rentcast_service = RentCastAPIService()
         
         if not self.rapidapi_key:
             logging.warning("RAPIDAPI_KEY not found in environment variables")
@@ -70,6 +74,7 @@ class ComprehensiveValuationService:
         
         # Try primary sources in order of preference
         self._try_zillow_valuation(valuation_data, address, city, state, zip_code)
+        self._try_rentcast_valuation(valuation_data, address, city, state)
         self._try_redfin_valuation(valuation_data, address, city, state, zip_code)
         # Disabled Realtor.com - API only returns nearby properties, not exact matches
         # self._try_realtor_valuation(valuation_data, address, city, state, zip_code, latitude, longitude)
@@ -297,6 +302,35 @@ class ComprehensiveValuationService:
                 unique_images.append(img)
                 
         return unique_images
+    
+    def _try_rentcast_valuation(self, valuation_data: Dict, address: str, city: str, state: str):
+        """Try RentCast API for property valuation"""
+        valuation_data['sources_tried'].append('RentCast')
+        
+        try:
+            # Get property value from RentCast
+            rentcast_data = self.rentcast_service.get_property_value(address, city, state)
+            
+            if rentcast_data and rentcast_data.get('value'):
+                valuation_data['valuations']['rentcast'] = {
+                    'estimate': int(rentcast_data['value']),
+                    'source': 'RentCast Property Data',
+                    'confidence': 'high' if rentcast_data.get('confidence', 0) > 0.7 else 'medium',
+                    'matched_address': rentcast_data.get('address', ''),
+                    'bedrooms': rentcast_data.get('bedrooms'),
+                    'bathrooms': rentcast_data.get('bathrooms'),
+                    'square_feet': rentcast_data.get('square_feet'),
+                    'property_type': rentcast_data.get('property_type'),
+                    'api_confidence': rentcast_data.get('confidence', 0)
+                }
+                valuation_data['sources_used'].append('RentCast')
+                logging.info(f"RentCast valuation success: ${rentcast_data['value']:,}")
+                return
+            else:
+                logging.warning("RentCast API returned no valuation data")
+                
+        except Exception as e:
+            logging.warning(f"RentCast valuation failed: {e}")
     
     def _try_redfin_valuation(self, valuation_data: Dict, address: str, city: str, state: str, zip_code: str):
         """Try Redfin valuation via RapidAPI with enhanced error handling"""

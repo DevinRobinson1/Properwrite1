@@ -209,6 +209,17 @@ def analyze_property():
             property_data['valuation_sources'] = list(valuation_data['valuations'].keys())
             property_data['sources_tried'] = valuation_data.get('sources_tried', [])
             
+            # Extract individual platform estimates for frontend display
+            valuations = valuation_data.get('valuations', {})
+            if 'zillow' in valuations:
+                property_data['zillow_estimate'] = valuations['zillow'].get('estimate') or valuations['zillow'].get('zestimate')
+            if 'redfin' in valuations:
+                property_data['redfin_estimate'] = valuations['redfin'].get('estimate')
+            if 'realtor' in valuations:
+                property_data['realtor_estimate'] = valuations['realtor'].get('estimate')
+            if 'rentcast' in valuations:
+                property_data['rentcast_estimate'] = valuations['rentcast'].get('estimate')
+            
             # Update data sources to include successful API sources
             api_sources = []
             if canonical_address.get('place_id'):
