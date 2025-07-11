@@ -71,7 +71,8 @@ class ComprehensiveValuationService:
         # Try primary sources in order of preference
         self._try_zillow_valuation(valuation_data, address, city, state, zip_code)
         self._try_redfin_valuation(valuation_data, address, city, state, zip_code)
-        self._try_realtor_valuation(valuation_data, address, city, state, zip_code)
+        # Disabled Realtor.com - API only returns nearby properties, not exact matches
+        # self._try_realtor_valuation(valuation_data, address, city, state, zip_code, latitude, longitude)
         
         # Cache the results
         self._cache_valuation(cache_key, valuation_data)
@@ -308,11 +309,13 @@ class ComprehensiveValuationService:
                 "X-RapidAPI-Host": "redfin-com-data.p.rapidapi.com"
             }
             
-            # Search for property first
-            search_url = "https://redfin-com-data.p.rapidapi.com/properties/search"
+            # Use the properties/search-rent endpoint
+            search_url = "https://redfin-com-data.p.rapidapi.com/properties/search-rent"
+            
+            # Create params for the GET request
             search_params = {
-                "query": f"{address}, {city}, {state} {zip_code}",
-                "limit": 5
+                "query": f"{address}, {city}, {state}",
+                "limit": "10"
             }
             
             valuation_data['sources_tried'].append('Redfin')
@@ -365,8 +368,8 @@ class ComprehensiveValuationService:
         except Exception as e:
             logging.warning(f"Redfin valuation failed: {e}")
     
-    def _try_realtor_valuation(self, valuation_data: Dict, address: str, city: str, state: str, zip_code: str):
-        """Try Realtor.com valuation via RapidAPI"""
+    def _try_realtor_valuation(self, valuation_data: Dict, address: str, city: str, state: str, zip_code: str, latitude: float = None, longitude: float = None):
+        """Try Realtor.com valuation via RapidAPI using the correct endpoint"""
         if not self.rapidapi_key:
             return
             
@@ -376,52 +379,84 @@ class ComprehensiveValuationService:
                 "X-RapidAPI-Host": "realtor-search.p.rapidapi.com"
             }
             
-            # Search for property
-            search_url = "https://realtor-search.p.rapidapi.com/properties/search"
-            search_params = {
-                "query": f"{address}, {city}, {state} {zip_code}",
-                "limit": 5
-            }
+            # Use the GET endpoint for nearby homes values
+            search_url = "https://realtor-search.p.rapidapi.com/properties/nearby-home-values"
+            
+            # Create params for the GET request - requires lat/lon
+            params = {}
+            if latitude and longitude:
+                params = {
+                    "lat": str(latitude),
+                    "lon": str(longitude)
+                }
+            else:
+                # Try to get coordinates from address
+                logging.warning("Realtor.com API requires coordinates, but none provided")
+                return
             
             valuation_data['sources_tried'].append('Realtor.com')
             
-            search_response = requests.get(search_url, headers=headers, params=search_params, timeout=10)
+            # Make GET request
+            search_response = requests.get(search_url, headers=headers, params=params, timeout=10)
             
             if search_response.status_code == 200:
                 search_data = search_response.json()
+                logging.info(f"Realtor.com response type: {type(search_data)}")
                 
-                if search_data and 'properties' in search_data:
-                    properties = search_data['properties']
-                    if properties and len(properties) > 0:
-                        # Find best matching property
-                        best_match = None
-                        best_score = 0
-                        
-                        for prop in properties:
-                            prop_address = prop.get('address', '').lower()
-                            target_address = address.lower()
+                # The nearby-home-values endpoint returns home_search data
+                if search_data and 'data' in search_data and 'home_search' in search_data['data']:
+                    home_search = search_data['data']['home_search']
+                    if 'results' in home_search:
+                        properties = home_search['results']
+                        if properties and len(properties) > 0:
+                            # Find best matching property
+                            best_match = None
+                            best_score = 0
                             
-                            score = self._calculate_address_similarity(target_address, prop_address)
+                            for prop in properties:
+                                # Extract address from property data
+                                prop_address = prop.get('location', {}).get('address', {}).get('line', '') if prop.get('location') else ''
+                                if not prop_address:
+                                    continue
+                                    
+                                target_address = address.lower()
+                                prop_address_lower = prop_address.lower()
+                                
+                                score = self._calculate_address_similarity(target_address, prop_address_lower)
+                                
+                                if score > best_score:
+                                    best_score = score
+                                    best_match = prop
                             
-                            if score > best_score:
-                                best_score = score
-                                best_match = prop
-                        
-                        if best_match and best_score > 0.3:
-                            estimate = best_match.get('price') or best_match.get('list_price')
-                            if estimate:
-                                valuation_data['valuations']['realtor'] = {
-                                    'estimate': int(estimate),
-                                    'source': 'Realtor.com Property Data',
-                                    'confidence': 'medium',
-                                    'matched_address': best_match.get('address', ''),
-                                    'similarity_score': best_score
-                                }
-                                valuation_data['sources_used'].append('Realtor.com')
-                                logging.info(f"Realtor.com valuation success: ${estimate:,}")
-                                return
-                        else:
-                            logging.warning("No matching properties found in Realtor.com search")
+                            if best_match and best_score > 0.3:
+                                # Extract price from the property data
+                                estimate = None
+                                
+                                # Try current_estimates field first
+                                current_estimates = best_match.get('current_estimates')
+                                if current_estimates:
+                                    if isinstance(current_estimates, dict):
+                                        estimate = current_estimates.get('estimate') or current_estimates.get('value')
+                                    elif isinstance(current_estimates, (int, float)):
+                                        estimate = current_estimates
+                                
+                                # Fallback to list_price
+                                if not estimate and best_match.get('list_price'):
+                                    estimate = best_match.get('list_price')
+                                
+                                if estimate:
+                                    valuation_data['valuations']['realtor'] = {
+                                        'estimate': int(estimate),
+                                        'source': 'Realtor.com Property Data',
+                                        'confidence': 'medium',
+                                        'matched_address': best_match.get('location', {}).get('address', {}).get('line', ''),
+                                        'similarity_score': best_score
+                                    }
+                                    valuation_data['sources_used'].append('Realtor.com')
+                                    logging.info(f"Realtor.com valuation success: ${estimate:,}")
+                                    return
+                            else:
+                                logging.warning("No matching properties found in Realtor.com search")
                     else:
                         logging.warning("No properties found in Realtor.com search")
                 else:

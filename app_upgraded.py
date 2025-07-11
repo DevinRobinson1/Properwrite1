@@ -149,7 +149,17 @@ def analyze_property():
                 
                 if images:
                     property_data['images'] = images
+                    property_data['property_images'] = images  # Add for compatibility
                     logging.info(f"Retrieved {len(images)} property images from {best_estimate['source']}")
+                
+                # Extract individual platform estimates
+                valuations = valuation_data.get('valuations', {})
+                if 'zillow' in valuations and valuations['zillow'].get('zestimate'):
+                    property_data['zillow_estimate'] = valuations['zillow']['zestimate']
+                if 'redfin' in valuations and valuations['redfin'].get('estimate'):
+                    property_data['redfin_estimate'] = valuations['redfin']['estimate']
+                if 'realtor' in valuations and valuations['realtor'].get('estimate'):
+                    property_data['realtor_estimate'] = valuations['realtor']['estimate']
                 
                 logging.info(f"Retrieved property valuation: ${best_estimate['estimate']:,} from {best_estimate['source']}")
             else:

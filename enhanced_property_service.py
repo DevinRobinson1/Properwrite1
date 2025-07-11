@@ -320,23 +320,36 @@ class EnhancedPropertyService:
     
     def _retrieve_rapidapi_data(self, property_data: Dict, address: str, city: str, state: str, zip_code: str):
         """
-        Retrieve property data from RapidAPI sources (Zillow, Realtor.com)
+        Retrieve property data from comprehensive valuation service
         """
         try:
-            logging.info(f"Attempting RapidAPI data retrieval for {address}")
+            logging.info(f"Attempting comprehensive valuation for {address}")
             
-            # Get comprehensive data from RapidAPI
-            rapidapi_result = rapidapi_service.get_property_data(address, city, state, zip_code)
-            logging.info(f"RapidAPI result: {rapidapi_result}")
+            # Import comprehensive valuation service
+            from comprehensive_valuation_service import ComprehensiveValuationService
+            valuation_service = ComprehensiveValuationService()
             
-            if rapidapi_result and rapidapi_result.get('success'):
-                sources = rapidapi_result.get('sources', {})
+            # Get place_id from property_data if available
+            place_id = property_data.get('place_id', '')
+            latitude = property_data.get('latitude')
+            longitude = property_data.get('longitude')
+            
+            # Get comprehensive valuation data
+            valuation_result = valuation_service.get_comprehensive_valuation(
+                place_id, address, city, state, zip_code, latitude, longitude
+            )
+            
+            logging.info(f"Comprehensive valuation result: {valuation_result}")
+            
+            if valuation_result and valuation_result.get('valuations'):
+                valuations = valuation_result.get('valuations', {})
+                sources = valuation_result.get('sources', {})  # Keep for backward compatibility
                 
-                # Process Zillow data from RapidAPI
-                if 'zillow' in sources and sources['zillow']:
-                    zillow_data = sources['zillow']
-                    if zillow_data.get('estimate'):
-                        property_data['zillow_estimate'] = zillow_data['estimate']
+                # Process Zillow data
+                if 'zillow' in valuations:
+                    zillow_data = valuations['zillow']
+                    if zillow_data.get('zestimate'):
+                        property_data['zillow_estimate'] = zillow_data['zestimate']
                         property_data['confidence_scores']['zillow'] = zillow_data.get('confidence', 0.8)
                         
                         # Update property details from Zillow
@@ -368,11 +381,12 @@ class EnhancedPropertyService:
                             if images and len(images) > 0:
                                 property_data['image_url'] = images[0]
                         
-                        logging.info(f"RapidAPI Zillow data: ${zillow_data['estimate']:,}")
+                        property_data['data_sources'].append('Zillow')
+                        logging.info(f"RapidAPI Zillow data: ${property_data['zillow_estimate']:,}")
                 
-                # Process Realtor.com data from RapidAPI
-                if 'realtor' in sources and sources['realtor']:
-                    realtor_data = sources['realtor']
+                # Process Realtor.com data
+                if 'realtor' in valuations:
+                    realtor_data = valuations['realtor']
                     if realtor_data.get('estimate'):
                         property_data['realtor_estimate'] = realtor_data['estimate']
                         property_data['confidence_scores']['realtor'] = realtor_data.get('confidence', 0.8)
@@ -401,11 +415,12 @@ class EnhancedPropertyService:
                             if images and len(images) > 0:
                                 property_data['image_url'] = images[0]
                         
+                        property_data['data_sources'].append('Realtor.com')
                         logging.info(f"RapidAPI Realtor data: ${realtor_data['estimate']:,}")
                 
-                # Process Redfin.com data from RapidAPI
-                if 'redfin' in sources and sources['redfin']:
-                    redfin_data = sources['redfin']
+                # Process Redfin.com data
+                if 'redfin' in valuations:
+                    redfin_data = valuations['redfin']
                     if redfin_data.get('estimate'):
                         property_data['redfin_estimate'] = redfin_data['estimate']
                         property_data['confidence_scores']['redfin'] = redfin_data.get('confidence', 0.8)
@@ -434,27 +449,16 @@ class EnhancedPropertyService:
                             if images and len(images) > 0 and images[0] != 'redfin_photos_available':
                                 property_data['image_url'] = images[0]
                         
+                        property_data['data_sources'].append('Redfin')
                         logging.info(f"RapidAPI Redfin data: ${redfin_data['estimate']:,}")
                 
-                # Add data source indicators
-                if not property_data.get('data_sources'):
-                    property_data['data_sources'] = []
-                
-                if 'zillow' in sources and sources['zillow']:
-                    property_data['data_sources'].append({
-                        'name': 'Zillow (RapidAPI)',
-                        'estimate': sources['zillow'].get('estimate'),
-                        'confidence': sources['zillow'].get('confidence', 0.8),
-                        'color': 'blue'
-                    })
-                
-                if 'realtor' in sources and sources['realtor']:
-                    property_data['data_sources'].append({
-                        'name': 'Realtor.com (RapidAPI)',
-                        'estimate': sources['realtor'].get('estimate'),
-                        'confidence': sources['realtor'].get('confidence', 0.8),
-                        'color': 'red'
-                    })
+                # Add data source indicators based on successful API calls
+                if property_data.get('zillow_estimate'):
+                    property_data['data_sources'].append('Zillow')
+                if property_data.get('redfin_estimate'):
+                    property_data['data_sources'].append('Redfin')
+                if property_data.get('realtor_estimate'):
+                    property_data['data_sources'].append('Realtor.com')
                     
             else:
                 logging.info("RapidAPI data retrieval returned no results")

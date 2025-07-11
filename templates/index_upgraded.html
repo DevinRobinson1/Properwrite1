@@ -5401,17 +5401,15 @@
         }
         
         function updateComprehensiveValuations(data) {
-            // Extract valuation data from comprehensive service
-            const valuations = data.valuation_sources || [];
-            const sourcesData = data.valuations || {};
+            // Extract valuation data - support both formats
             const sourcesTried = data.sources_tried || [];
             
-            console.log('Updating comprehensive valuations:', { valuations, sourcesData, sourcesTried });
+            console.log('Updating comprehensive valuations:', data);
             
             // Update Zillow
-            if (sourcesData.zillow) {
-                console.log('Showing Zillow valuation:', sourcesData.zillow);
-                showValuation('zillow', sourcesData.zillow.zestimate, sourcesData.zillow.source);
+            if (data.zillow_estimate) {
+                console.log('Showing Zillow valuation:', data.zillow_estimate);
+                showValuation('zillow', data.zillow_estimate, 'Zillow Property Data');
             } else if (sourcesTried.includes('Zillow')) {
                 console.log('Zillow tried but failed');
                 showValuationError('zillow', 'Not available (Tried: Zillow)');
@@ -5421,8 +5419,8 @@
             }
             
             // Update Redfin
-            if (sourcesData.redfin) {
-                showValuation('redfin', sourcesData.redfin.value, sourcesData.redfin.source);
+            if (data.redfin_estimate) {
+                showValuation('redfin', data.redfin_estimate, 'Redfin');
             } else if (sourcesTried.includes('Redfin')) {
                 showValuationError('redfin', 'Not available (Tried: Redfin)');
             } else {
@@ -5430,20 +5428,28 @@
             }
             
             // Update Realtor
-            if (sourcesData.realtor) {
-                showValuation('realtor', sourcesData.realtor.value, sourcesData.realtor.source);
+            if (data.realtor_estimate) {
+                showValuation('realtor', data.realtor_estimate, 'Realtor.com');
             } else if (sourcesTried.includes('Realtor.com')) {
                 showValuationError('realtor', 'Not available (Tried: Realtor.com)');
             } else {
                 showValuationError('realtor', 'Not available');
             }
             
-            // Calculate and show average
-            const availableValues = Object.values(sourcesData).map(v => v.value).filter(v => v > 0);
-            if (availableValues.length > 0) {
-                const average = Math.round(availableValues.reduce((a, b) => a + b, 0) / availableValues.length);
+            // Calculate and show average - using the individual estimates
+            const estimates = [];
+            if (data.zillow_estimate) estimates.push(data.zillow_estimate);
+            if (data.redfin_estimate) estimates.push(data.redfin_estimate);
+            if (data.realtor_estimate) estimates.push(data.realtor_estimate);
+            
+            if (estimates.length > 0) {
+                const average = Math.round(estimates.reduce((a, b) => a + b, 0) / estimates.length);
                 document.getElementById('average-estimate').textContent = '$' + average.toLocaleString();
-                document.getElementById('estimate-count').textContent = availableValues.length + ' sources';
+                document.getElementById('estimate-count').textContent = estimates.length + ' sources';
+            } else if (data.average_estimate) {
+                // Use pre-calculated average if available
+                document.getElementById('average-estimate').textContent = '$' + data.average_estimate.toLocaleString();
+                document.getElementById('estimate-count').textContent = (data.data_sources ? data.data_sources.length : 0) + ' sources';
             } else {
                 document.getElementById('average-estimate').textContent = 'Not available';
                 document.getElementById('estimate-count').textContent = 'All sources failed';

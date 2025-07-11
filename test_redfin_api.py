@@ -1,74 +1,72 @@
 #!/usr/bin/env python3
-"""
-Test script to find working property API endpoints
-"""
 import os
 import requests
 import json
+import time
 
 rapidapi_key = os.environ.get('RAPIDAPI_KEY')
 if not rapidapi_key:
     print("No RapidAPI key found")
     exit(1)
 
-print("Testing property API endpoints with RapidAPI key...")
+print("Testing Redfin.com Data API endpoints...")
 print("=" * 60)
 
-# Test address
-test_address = "14303 Evening Flight Lane, Charlotte, NC 28262"
-
-# Test 1: Realtor Search API - nearby-home-values endpoint
-print("\n1. REALTOR SEARCH API - nearby-home-values")
-headers = {
-    "X-RapidAPI-Key": rapidapi_key,
-    "X-RapidAPI-Host": "realtor-search.p.rapidapi.com"
-}
-url = "https://realtor-search.p.rapidapi.com/properties/nearby-home-values"
-params = {"address": test_address}
-try:
-    response = requests.get(url, headers=headers, params=params, timeout=10)
-    print(f"Status: {response.status_code}")
-    if response.status_code == 200:
-        data = response.json()
-        print(f"Response: {json.dumps(data, indent=2)[:500]}...")
-    else:
-        print(f"Error: {response.text[:200]}")
-except Exception as e:
-    print(f"Exception: {e}")
-
-# Test 2: Redfin.com Data API - properties/search-rent endpoint
-print("\n2. REDFIN.COM DATA API - properties/search-rent")
 headers = {
     "X-RapidAPI-Key": rapidapi_key,
     "X-RapidAPI-Host": "redfin-com-data.p.rapidapi.com"
 }
-url = "https://redfin-com-data.p.rapidapi.com/properties/search-rent"
+
+# Test 1: Try search-sale with regionId
+print("\n1. Testing properties/search-sale with regionId")
+url = "https://redfin-com-data.p.rapidapi.com/properties/search-sale"
 params = {
-    "query": "Charlotte, NC",
+    "regionId": "11053",  # Charlotte, NC region ID
     "limit": "5"
 }
+
 try:
     response = requests.get(url, headers=headers, params=params, timeout=10)
     print(f"Status: {response.status_code}")
     if response.status_code == 200:
         data = response.json()
-        print(f"Response type: {type(data)}")
         print(f"Response: {json.dumps(data, indent=2)[:500]}...")
     else:
         print(f"Error: {response.text[:200]}")
 except Exception as e:
     print(f"Exception: {e}")
 
-# Test 3: Redfin.com Data API - properties/details endpoint
-print("\n3. REDFIN.COM DATA API - properties/details")
-headers = {
-    "X-RapidAPI-Key": rapidapi_key,
-    "X-RapidAPI-Host": "redfin-com-data.p.rapidapi.com"
+# Wait a bit to avoid rate limiting
+time.sleep(2)
+
+# Test 2: Try auto-complete to get regionId
+print("\n2. Testing auto-complete to find Charlotte regionId")
+url = "https://redfin-com-data.p.rapidapi.com/auto-complete"
+params = {
+    "query": "Charlotte NC"
 }
+
+try:
+    response = requests.get(url, headers=headers, params=params, timeout=10)
+    print(f"Status: {response.status_code}")
+    if response.status_code == 200:
+        data = response.json()
+        print(f"Response: {json.dumps(data, indent=2)[:500]}...")
+    else:
+        print(f"Error: {response.text[:200]}")
+except Exception as e:
+    print(f"Exception: {e}")
+
+# Wait a bit to avoid rate limiting
+time.sleep(2)
+
+# Test 3: Try property details with a specific URL
+print("\n3. Testing properties/details with URL")
 url = "https://redfin-com-data.p.rapidapi.com/properties/details"
 params = {
-    "propertyId": "48433514"  # Example property ID
+    "url": "https://www.redfin.com/NC/Charlotte/14303-Evening-Flight-Ln-28262/home/47435141"
 }
+
 try:
     response = requests.get(url, headers=headers, params=params, timeout=10)
     print(f"Status: {response.status_code}")
@@ -79,6 +77,3 @@ try:
         print(f"Error: {response.text[:200]}")
 except Exception as e:
     print(f"Exception: {e}")
-
-print("\n" + "=" * 60)
-print("Test complete. Check which endpoints are working above.")
