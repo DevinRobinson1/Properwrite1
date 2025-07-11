@@ -48,15 +48,22 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-2024")
 # Initialize billing service
 billing_service = BillingService()
 
-# Database connection with proper connection pool settings
+# Database connection with proper connection pool settings and SSL handling
 DATABASE_URL = os.environ.get("DATABASE_URL")
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,
     pool_recycle=300,
-    pool_size=10,
-    max_overflow=20,
-    echo=False
+    pool_size=5,
+    max_overflow=10,
+    echo=False,
+    connect_args={
+        "sslmode": "require",
+        "connect_timeout": 10,
+        "keepalives_idle": 30,
+        "keepalives_interval": 10,
+        "keepalives_count": 5
+    }
 )
 
 # Initialize comps service

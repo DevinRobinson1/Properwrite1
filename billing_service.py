@@ -21,9 +21,22 @@ from email_service import EmailService
 # Configure Stripe
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
 
-# Database connection
+# Database connection with enhanced SSL settings
 DATABASE_URL = os.environ.get("DATABASE_URL")
-engine = create_engine(DATABASE_URL)
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    pool_recycle=300,
+    pool_size=5,
+    max_overflow=10,
+    connect_args={
+        "sslmode": "require",
+        "connect_timeout": 10,
+        "keepalives_idle": 30,
+        "keepalives_interval": 10,
+        "keepalives_count": 5
+    }
+)
 
 class BillingService:
     def __init__(self):
