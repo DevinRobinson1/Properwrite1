@@ -5,6 +5,10 @@ Basic admin interface for platform management
 
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, session
 from functools import wraps
+from datetime import datetime, timedelta
+from sqlalchemy import func, desc, or_, String, cast
+from models import User, CreditPurchase, CompingCredit, GuestUsage
+import logging
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -78,9 +82,37 @@ def dashboard():
 @require_admin
 def users():
     """User management page"""
-    # Placeholder for user management
-    users = []
-    return render_template('admin_users.html', users=users)
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+    search_query = request.args.get('search', '')
+    filter_type = request.args.get('filter', 'all')
+    
+    # Build query
+    query = User.query
+    
+    # Apply search filter
+    if search_query:
+        query = query.filter(or_(
+            User.email.ilike(f'%{search_query}%'),
+            cast(User.id, String).ilike(f'%{search_query}%')
+        ))
+    
+    # Apply filter
+    if filter_type == 'subscribed':
+        query = query.filter(User.subscription_tier != 'free')
+    elif filter_type == 'free':
+        query = query.filter(User.subscription_tier == 'free')
+    
+    # Order by creation date, newest first
+    query = query.order_by(desc(User.created_at))
+    
+    # Paginate results
+    users = query.paginate(page=page, per_page=per_page, error_out=False)
+    
+    return render_template('admin_users.html', 
+                         users=users, 
+                         search=search_query,
+                         filter_type=filter_type)
 
 @admin_bp.route('/affiliates')
 @require_admin

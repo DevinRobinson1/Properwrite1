@@ -7,10 +7,13 @@ from flask import Blueprint, render_template, request, jsonify, redirect, url_fo
 from functools import wraps
 from datetime import datetime, timedelta
 from sqlalchemy import func, desc, and_, or_
-from models import User, CreditPurchase, CompingCredit, GuestUsage
+from models import User, CreditPurchase, CompingCredit, GuestUsage, db
+from billing_models import Team, CreditLog, UserActivity
+from admin_models import Affiliate, AffiliateReferral, SupportTicket, APIError
 from flask import current_app
 import hashlib
 import secrets
+import logging
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -57,22 +60,29 @@ def logout():
 @require_admin
 def dashboard():
     """Main admin dashboard"""
-    # Simplified dashboard with basic statistics
+    # Get actual statistics from database
     stats = {
-        'total_users': 0,  # TODO: Add user count
-        'active_subscriptions': 0,  # TODO: Add subscription tracking
-        'total_teams': 0,  # TODO: Add team tracking
-        'pending_jv_deals': 0,  # TODO: Add JV deal tracking
-        'total_revenue': 0,  # TODO: Add revenue tracking
-        'properties_analyzed_today': 0,  # TODO: Add activity tracking
-        'api_errors_today': 0,  # TODO: Add error tracking
-        'open_tickets': 0  # TODO: Add ticket tracking
+        'total_users': User.query.count(),
+        'active_subscriptions': User.query.filter(User.subscription_status == 'active').count(),
+        'total_teams': Team.query.count(),
+        'pending_jv_deals': 0,  # Add JV deal model if needed
+        'total_revenue': db.session.query(func.sum(CreditPurchase.amount)).scalar() or 0,
+        'properties_analyzed_today': UserActivity.query.filter(
+            UserActivity.action == 'property_analysis',
+            UserActivity.created_at >= datetime.now().replace(hour=0, minute=0, second=0)
+        ).count(),
+        'api_errors_today': APIError.query.filter(
+            APIError.created_at >= datetime.now().replace(hour=0, minute=0, second=0)
+        ).count(),
+        'open_tickets': SupportTicket.query.filter(
+            SupportTicket.status.in_(['open', 'in_progress'])
+        ).count()
     }
     
     # Get recent activity
-    recent_users = []  # TODO: Add user tracking
-    recent_deals = []  # TODO: Add JV deal tracking
-    recent_errors = []  # TODO: Add error tracking
+    recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
+    recent_deals = []  # Add JV deal tracking if needed
+    recent_errors = APIError.query.order_by(APIError.created_at.desc()).limit(5).all()
     
     return render_template('admin_dashboard.html', 
                          stats=stats,
@@ -84,20 +94,59 @@ def dashboard():
 @require_admin
 def users():
     """User management page"""
-    # Simplified user management
-    users = []  # TODO: Add user management functionality
+    # Get search and filter parameters
+    search = request.args.get('search', '')
+    filter_type = request.args.get('filter', 'all')
+    page = request.args.get('page', 1, type=int)
     
-    return render_template('admin_users.html', users=users)
+    # Build query
+    query = User.query
+    
+    # Apply search filter
+    if search:
+        query = query.filter(or_(
+            User.email.contains(search),
+            User.name.contains(search),
+            User.id.contains(search)
+        ))
+    
+    # Apply type filter
+    if filter_type == 'active':
+        query = query.filter(User.subscription_status == 'active')
+    elif filter_type == 'trial':
+        query = query.filter(User.subscription_status == 'trial')
+    elif filter_type == 'inactive':
+        query = query.filter(or_(
+            User.subscription_status == 'cancelled',
+            User.subscription_status == None
+        ))
+    
+    # Order by creation date
+    query = query.order_by(User.created_at.desc())
+    
+    # Paginate results
+    users = query.paginate(page=page, per_page=20, error_out=False)
+    
+    # Add additional data for each user
     for user in users.items:
+        # Count credits used
         user.credits_used = CreditLog.query.filter_by(
             user_id=user.id,
             action='property_analysis'
         ).count()
+        
+        # Get last activity
         user.last_activity = UserActivity.query.filter_by(
             user_id=user.id
         ).order_by(UserActivity.created_at.desc()).first()
+        
+        # Get team info
+        user.team = Team.query.filter(Team.users.any(id=user.id)).first()
     
-    return render_template('admin_users.html', users=users, search=search, filter_type=filter_type)
+    return render_template('admin_users.html', 
+                         users=users, 
+                         search=search, 
+                         filter_type=filter_type)
 
 @admin_bp.route('/users/<user_id>')
 @require_admin

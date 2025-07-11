@@ -17,6 +17,7 @@ class User(UserMixin, Base):
     name = Column(String(255), nullable=True)
     credits = Column(Integer, default=4)  # 4 remaining credits after registration
     subscription_tier = Column(String(50), default='free')  # free, starter, pro, team5, growth10
+    subscription_status = Column(String(50), default='active')  # active, trial, cancelled
     unlimited_credits = Column(Boolean, default=False)  # True for growth10 plan
     total_credits_used = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
