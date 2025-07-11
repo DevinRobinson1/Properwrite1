@@ -2964,6 +2964,9 @@
                         updateAllTabCalculations();
                     }, 200);
                     
+                    // Update comps subject property with analyzed data
+                    populateCompsSubjectProperty();
+                    
                     // Show results
                     document.getElementById('loading-state').classList.add('hidden');
                     document.getElementById('analysis-results').classList.remove('hidden');
@@ -2997,6 +3000,17 @@
         });
 
         function populatePropertyData(data) {
+            // Store property data for later use (e.g., comps analysis)
+            window.lastPropertyData = {
+                address: `${data.address}, ${data.city}`,
+                beds: data.bedrooms,
+                baths: data.bathrooms,
+                sqft: data.square_feet,
+                year_built: data.year_built,
+                latitude: data.latitude,
+                longitude: data.longitude
+            };
+            
             // Update property overview
             document.getElementById('property-title').textContent = `${data.address}, ${data.city}`;
             document.getElementById('property-address').textContent = `${data.city}, ${data.state} ${data.zip}`;
@@ -4545,14 +4559,20 @@
 
         // Comps Analysis Functions
         function populateCompsSubjectProperty() {
-            // Get current property data from form inputs
-            const address = document.getElementById('street-address')?.value || '';
-            const beds = document.getElementById('beds')?.value || '-';
-            const baths = document.getElementById('baths')?.value || '-';
-            const sqft = document.getElementById('sqft')?.value || '-';
+            // Get current property data from the last analysis or form inputs
+            const address = window.lastPropertyData?.address || 
+                          document.getElementById('street-address')?.value || 
+                          'No address provided';
+            
+            const beds = window.lastPropertyData?.beds || 
+                        document.getElementById('beds')?.value || '-';
+            const baths = window.lastPropertyData?.baths || 
+                         document.getElementById('baths')?.value || '-';
+            const sqft = window.lastPropertyData?.sqft || 
+                        document.getElementById('sqft')?.value || '-';
             
             // Update subject property display
-            updateElementIfExists('comps-subject-address', address || 'No address provided');
+            updateElementIfExists('comps-subject-address', address);
             updateElementIfExists('comps-subject-beds', beds);
             updateElementIfExists('comps-subject-baths', baths);
             updateElementIfExists('comps-subject-sqft', sqft);
