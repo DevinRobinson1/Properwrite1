@@ -106,6 +106,10 @@
                             <i class="fas fa-key mr-3"></i>
                             API & Integrations
                         </button>
+                        <button onclick="showSection('resources')" class="nav-item w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
+                            <i class="fas fa-graduation-cap mr-3"></i>
+                            Resources
+                        </button>
                     </nav>
                 </div>
             </div>
@@ -446,6 +450,116 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Resources Section -->
+                <div id="resources-section" class="section hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Resources</h2>
+                        <p class="text-gray-600">Access our recommended tools and training resources</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Wholesale Coaching -->
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-chalkboard-teacher text-blue-600 text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-semibold text-gray-900">Wholesale Coaching</h3>
+                                    <p class="text-sm text-gray-500">Expert guidance</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-4">Master the art of wholesale real estate with expert guidance from industry professionals.</p>
+                            <a href="https://reilegacy.co/wholesale" target="_blank" 
+                               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-external-link-alt mr-2"></i>
+                                Learn More
+                            </a>
+                        </div>
+
+                        <!-- Get Funding -->
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-semibold text-gray-900">Get Funding</h3>
+                                    <p class="text-sm text-gray-500">Capital solutions</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-4">Secure the capital you need for your real estate deals with trusted funding partners.</p>
+                            <a href="https://pinnexcapital.com/" target="_blank" 
+                               class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+                                <i class="fas fa-external-link-alt mr-2"></i>
+                                Get Started
+                            </a>
+                        </div>
+
+                        <!-- Raise Capital -->
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-semibold text-gray-900">Raise Capital</h3>
+                                    <p class="text-sm text-gray-500">Private money</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mb-4">Learn strategies to raise private money for investments and scale your real estate business.</p>
+                            <a href="https://www.skool.com/theraiseroom" target="_blank" 
+                               class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
+                                <i class="fas fa-external-link-alt mr-2"></i>
+                                Join Now
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Additional Resources -->
+                    <div class="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Additional Resources</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-book text-blue-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-900">Knowledge Base</p>
+                                        <p class="text-xs text-gray-500">Comprehensive guides and tutorials</p>
+                                    </div>
+                                </div>
+                                <button class="text-sm text-blue-600 hover:text-blue-900">View</button>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-video text-green-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-900">Video Tutorials</p>
+                                        <p class="text-xs text-gray-500">Step-by-step video guides</p>
+                                    </div>
+                                </div>
+                                <button class="text-sm text-green-600 hover:text-green-900">Watch</button>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-comments text-purple-600"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-900">Community Support</p>
+                                        <p class="text-xs text-gray-500">Connect with other investors</p>
+                                    </div>
+                                </div>
+                                <button class="text-sm text-purple-600 hover:text-purple-900">Join</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -542,6 +656,10 @@
             <button onclick="showSection('settings')" class="flex flex-col items-center p-2">
                 <i class="fas fa-cog text-gray-600"></i>
                 <span class="text-xs text-gray-600 mt-1">Settings</span>
+            </button>
+            <button onclick="showSection('resources')" class="flex flex-col items-center p-2">
+                <i class="fas fa-graduation-cap text-gray-600"></i>
+                <span class="text-xs text-gray-600 mt-1">Resources</span>
             </button>
         </div>
     </div>
