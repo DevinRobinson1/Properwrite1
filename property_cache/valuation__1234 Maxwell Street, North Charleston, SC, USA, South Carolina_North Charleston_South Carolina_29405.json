@@ -1,0 +1,44 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 564100,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 10915101,
+      "matched_address": "1234 Maxwell Street, North Charleston, SC, USA, South Carolina, North Charleston, South Carolina 29405",
+      "images": [
+        "https://photos.zillowstatic.com/fp/a5b2b8d8f8593aca97535c20b39fe19b-p_d.jpg"
+      ]
+    },
+    "rentcast": {
+      "estimate": 599000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin"
+  ],
+  "sources_used": [
+    "Zillow",
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "1234 Maxwell Street, North Charleston, SC, USA, South Carolina",
+    "city": "North Charleston",
+    "state": "South Carolina",
+    "zip_code": "29405",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-11T14:00:36.244193"
+}

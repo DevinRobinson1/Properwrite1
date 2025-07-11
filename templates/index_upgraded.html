@@ -79,7 +79,7 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
     
-    <!-- Properwrite Header - Mobile Optimized -->
+    <!-- Enhanced Navigation Header -->
     <div class="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-[1150px] mx-auto px-4 sm:px-6">
             <div class="flex items-center justify-between h-14 sm:h-16">
@@ -96,22 +96,123 @@
                     </div>
                 </div>
                 
-                <!-- Credit Status & Actions -->
-                <div class="flex items-center space-x-2 sm:space-x-4">
-                    <div class="flex items-center space-x-1 sm:space-x-2 bg-gray-50 px-2 sm:px-3 py-1 sm:py-2 rounded-lg">
-                        <div class="w-2 h-2 bg-green-400 rounded-full"></div>
-                        <span class="text-xs sm:text-sm text-gray-600">Credits:</span>
-                        <span class="font-semibold text-gray-800 text-sm sm:text-base" id="credit-balance">--</span>
-                    </div>
-                    <div class="flex items-center space-x-1 sm:space-x-2">
-                        <button onclick="showBillingModal()" class="bg-amber-600 text-white px-2 sm:px-4 py-1 sm:py-2 rounded-lg hover:bg-amber-700 transition-all duration-300 text-xs sm:text-sm">
-                            <i class="fas fa-credit-card sm:mr-2"></i>
-                            <span class="hidden sm:inline">Upgrade</span>
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <!-- Resources Dropdown -->
+                    <div class="relative" id="resources-dropdown">
+                        <button onclick="toggleResourcesDropdown()" class="flex items-center space-x-1 text-gray-600 hover:text-gray-900 transition-colors">
+                            <span>Resources</span>
+                            <i class="fas fa-chevron-down text-sm"></i>
                         </button>
-                        <a href="/jv-submit" target="_blank" class="bg-gray-600 text-white px-2 sm:px-4 py-1 sm:py-2 rounded-lg hover:bg-gray-700 transition-all duration-300 text-xs sm:text-sm">
-                            <i class="fas fa-handshake sm:mr-2"></i>
-                            <span class="hidden sm:inline">JV Submit</span>
+                        <div id="resources-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden">
+                            <div class="py-1">
+                                <a href="/jv-submit" target="_blank" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-handshake mr-2"></i>JV With Us
+                                </a>
+                                <a href="#" onclick="showFundingModal()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-dollar-sign mr-2"></i>Get Funding
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- User Authentication Section -->
+                    <div id="auth-section-desktop">
+                        <!-- Not Logged In State -->
+                        <div id="not-logged-in" class="flex items-center space-x-3">
+                            <button onclick="showLoginModal()" class="text-gray-600 hover:text-gray-900 transition-colors">
+                                Sign In
+                            </button>
+                            <button onclick="showSignupModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                Sign Up
+                            </button>
+                        </div>
+                        
+                        <!-- Logged In State -->
+                        <div id="logged-in" class="hidden flex items-center space-x-4">
+                            <div class="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg">
+                                <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                                <span class="text-sm text-gray-600">Credits:</span>
+                                <span class="font-semibold text-gray-800" id="credit-balance-desktop">--</span>
+                            </div>
+                            
+                            <!-- User Avatar Dropdown -->
+                            <div class="relative" id="user-dropdown">
+                                <button onclick="toggleUserDropdown()" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-sm"></i>
+                                    </div>
+                                    <i class="fas fa-chevron-down text-sm"></i>
+                                </button>
+                                <div id="user-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden">
+                                    <div class="py-1">
+                                        <a href="/dashboard" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <i class="fas fa-credit-card mr-2"></i>Credits
+                                        </a>
+                                        <a href="/dashboard" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <i class="fas fa-user mr-2"></i>Account
+                                        </a>
+                                        <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-button" onclick="toggleMobileMenu()" class="md:hidden text-gray-600 hover:text-gray-900 transition-colors">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white border-t border-gray-200">
+            <div class="px-4 py-3 space-y-3">
+                <!-- Resources Section -->
+                <div>
+                    <div class="text-sm font-medium text-gray-900 mb-2">Resources</div>
+                    <div class="space-y-2 pl-4">
+                        <a href="/jv-submit" target="_blank" class="block text-sm text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-handshake mr-2"></i>JV With Us
                         </a>
+                        <a href="#" onclick="showFundingModal()" class="block text-sm text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-dollar-sign mr-2"></i>Get Funding
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Mobile Auth Section -->
+                <div id="mobile-auth-section">
+                    <!-- Not Logged In State -->
+                    <div id="mobile-not-logged-in" class="space-y-2">
+                        <button onclick="showLoginModal()" class="w-full text-left text-sm text-gray-600 hover:text-gray-900">
+                            Sign In
+                        </button>
+                        <button onclick="showSignupModal()" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                            Sign Up
+                        </button>
+                    </div>
+                    
+                    <!-- Logged In State -->
+                    <div id="mobile-logged-in" class="hidden space-y-2">
+                        <div class="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg">
+                            <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                            <span class="text-sm text-gray-600">Credits:</span>
+                            <span class="font-semibold text-gray-800" id="credit-balance-mobile">--</span>
+                        </div>
+                        <a href="/dashboard" class="block text-sm text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-credit-card mr-2"></i>Credits
+                        </a>
+                        <a href="/dashboard" class="block text-sm text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-user mr-2"></i>Account
+                        </a>
+                        <button onclick="logout()" class="block w-full text-left text-sm text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </button>
                     </div>
                 </div>
             </div>
@@ -2629,6 +2730,18 @@
                     // Show results
                     document.getElementById('loading-state').classList.add('hidden');
                     document.getElementById('analysis-results').classList.remove('hidden');
+                    
+                    // Smooth scroll to results after a brief delay
+                    setTimeout(() => {
+                        const resultsElement = document.getElementById('analysis-results');
+                        if (resultsElement) {
+                            resultsElement.scrollIntoView({ 
+                                behavior: 'smooth', 
+                                block: 'start',
+                                inline: 'nearest'
+                            });
+                        }
+                    }, 300);
                 } else {
                     throw new Error(data.error || 'Failed to analyze property');
                 }
@@ -4816,6 +4929,147 @@
                 alert('Error copying to clipboard. Please copy manually.');
             });
         }
+
+        // Enhanced Navigation Functions
+        function toggleResourcesDropdown() {
+            const menu = document.getElementById('resources-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function toggleUserDropdown() {
+            const menu = document.getElementById('user-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function showLoginModal() {
+            // Create and show login modal
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white p-8 rounded-lg max-w-md w-full mx-4">
+                    <h2 class="text-2xl font-bold mb-6">Sign In</h2>
+                    <form id="login-form">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Email</label>
+                            <input type="email" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium mb-2">Password</label>
+                            <input type="password" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" onclick="this.closest('.fixed').remove()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+                            <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Sign In</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function showSignupModal() {
+            // Create and show signup modal
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white p-8 rounded-lg max-w-md w-full mx-4">
+                    <h2 class="text-2xl font-bold mb-6">Sign Up</h2>
+                    <form id="signup-form">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Name</label>
+                            <input type="text" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Email</label>
+                            <input type="email" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium mb-2">Password</label>
+                            <input type="password" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" onclick="this.closest('.fixed').remove()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+                            <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Sign Up</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function showFundingModal() {
+            // Create and show funding modal
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white p-8 rounded-lg max-w-md w-full mx-4">
+                    <h2 class="text-2xl font-bold mb-6">Get Funding</h2>
+                    <p class="text-gray-600 mb-6">Connect with our funding partners to finance your real estate investments.</p>
+                    <div class="space-y-4">
+                        <div class="p-4 border rounded-lg">
+                            <h3 class="font-semibold">Hard Money Lenders</h3>
+                            <p class="text-sm text-gray-600">Fast funding for fix-and-flip projects</p>
+                        </div>
+                        <div class="p-4 border rounded-lg">
+                            <h3 class="font-semibold">Private Lenders</h3>
+                            <p class="text-sm text-gray-600">Flexible terms for creative deals</p>
+                        </div>
+                        <div class="p-4 border rounded-lg">
+                            <h3 class="font-semibold">Portfolio Lenders</h3>
+                            <p class="text-sm text-gray-600">Long-term financing solutions</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" onclick="this.closest('.fixed').remove()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Close</button>
+                        <button type="button" onclick="alert('Contact form coming soon!')" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Get Connected</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function logout() {
+            // Handle logout
+            if (confirm('Are you sure you want to logout?')) {
+                // Switch to not logged in state
+                document.getElementById('not-logged-in').classList.remove('hidden');
+                document.getElementById('mobile-not-logged-in').classList.remove('hidden');
+                document.getElementById('logged-in').classList.add('hidden');
+                document.getElementById('mobile-logged-in').classList.add('hidden');
+                
+                // Hide dropdowns
+                document.getElementById('user-menu').classList.add('hidden');
+                document.getElementById('mobile-menu').classList.add('hidden');
+                
+                // Clear user data
+                document.getElementById('credit-balance-desktop').textContent = '--';
+                document.getElementById('credit-balance-mobile').textContent = '--';
+                
+                alert('You have been logged out successfully.');
+            }
+        }
+
+        function scrollToResults() {
+            const resultsElement = document.getElementById('analysis-results');
+            if (resultsElement && !resultsElement.classList.contains('hidden')) {
+                resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('#resources-dropdown')) {
+                document.getElementById('resources-menu').classList.add('hidden');
+            }
+            if (!event.target.closest('#user-dropdown')) {
+                document.getElementById('user-menu').classList.add('hidden');
+            }
+        });
 
         // Update Rentcast fallback display
         function updateRentcastFallback(data) {
