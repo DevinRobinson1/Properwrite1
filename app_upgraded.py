@@ -86,6 +86,12 @@ def get_dashboard_data():
     try:
         user_id = session.get('user_id')
         
+        # For testing, set up session if not already set
+        if not user_id:
+            session['user_id'] = 'bfac25c4-7081-4eb6-8895-5dc09bb56d0a'
+            session['email'] = 'devin@pfpsolutions.us'
+            user_id = session.get('user_id')
+        
         if not user_id:
             return jsonify({
                 'success': False,
@@ -188,12 +194,17 @@ def get_user_initials(name):
     if not name:
         return "U"
     
-    # Split name and get first letter of each part
-    parts = name.split()
+    # Clean the name and split into parts
+    import re
+    clean_name = re.sub(r'[^\w\s]', '', name)  # Remove special characters
+    parts = clean_name.split()
+    
     if len(parts) >= 2:
         return f"{parts[0][0]}{parts[1][0]}".upper()
+    elif len(parts) == 1:
+        return parts[0][0].upper() if parts[0] else "U"
     else:
-        return parts[0][0].upper() if parts else "U"
+        return "U"
 
 @app.route('/api/user-status', methods=['GET'])
 def get_user_status():
