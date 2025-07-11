@@ -3127,7 +3127,7 @@
             // Update dispositions separately (client-side only, no API calls)
             try {
                 recalculateAllDispositionStrategies();
-                recalculateMLSNovation(); // Added this to ensure MLS/Novation updates
+                updateNovationCalculation(); // Added this to ensure MLS/Novation updates
             } catch (dispositionError) {
                 console.log('Dispositions calculation in progress...');
             }
@@ -3907,7 +3907,7 @@
                 updateElementIfExists('max-profit-flipper-price', '$' + Math.round(maxProfitPrice).toLocaleString());
             
                 // Update other strategies
-                recalculateMLSNovation();
+                updateNovationCalculation();
                 formatAndRecalculateSubjectTo(null);
                 updateWrapConfiguration();
                 updateLeaseOptionCalculation();
