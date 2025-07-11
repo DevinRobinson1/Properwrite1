@@ -1,0 +1,44 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 973700,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 110228579,
+      "matched_address": "1426 Iroquois Street, North Charleston, SC, USA, South Carolina, North Charleston, South Carolina 29405",
+      "images": [
+        "https://maps.googleapis.com/maps/api/streetview?location=1426+Iroquois+St%2C+North+Charleston%2C+SC+29405&size=400x300&key=AIzaSyARFMLB1na-BBWf7_R3-5YOQQaHqEJf6RQ&source=outdoor&&signature=6zx_qA-38ITcdyvATnTasxa8RWo="
+      ]
+    },
+    "rentcast": {
+      "estimate": 561000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin"
+  ],
+  "sources_used": [
+    "Zillow",
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "1426 Iroquois Street, North Charleston, SC, USA, South Carolina",
+    "city": "North Charleston",
+    "state": "South Carolina",
+    "zip_code": "29405",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-11T12:54:03.158535"
+}

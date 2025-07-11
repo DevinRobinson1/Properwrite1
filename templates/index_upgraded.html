@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real Estate Investment Analyzer - Smart Data Pulling</title>
+    <title>Properwrite - Real Estate Investment Analysis Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -79,23 +79,47 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
     
-    <!-- Header -->
-    <div class="gradient-bg text-white py-8 mb-8">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center mb-2">
-                <div></div> <!-- Spacer -->
-                <h1 class="text-4xl font-bold text-center">
-                    <i class="fas fa-chart-line mr-3"></i>Real Estate Investment Analyzer
-                </h1>
-                <div class="text-right space-x-3">
-                    <a href="#" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition-all duration-300 font-medium">
-                        <i class="fas fa-dollar-sign mr-2"></i>Need Transactional Funding for your Double-Close
-                    </a>
-                    <a href="/jv-submit" target="_blank" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition-all duration-300 font-medium">
-                        <i class="fas fa-handshake mr-2"></i>JV Deal Submit
-                    </a>
+    <!-- Properwrite Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Properwrite Brand -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-amber-600 to-amber-800 flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">P</span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold bg-gradient-to-r from-gray-800 to-amber-600 bg-clip-text text-transparent">
+                            Properwrite
+                        </h1>
+                        <p class="text-xs text-gray-500">Real Estate Investment Analysis</p>
+                    </div>
+                </div>
+                
+                <!-- Credit Status & Actions -->
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg">
+                        <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                        <span class="text-sm text-gray-600">Credits:</span>
+                        <span class="font-semibold text-gray-800" id="credit-balance">--</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="showBillingModal()" class="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition-all duration-300 text-sm">
+                            <i class="fas fa-credit-card mr-2"></i>Upgrade
+                        </button>
+                        <a href="/jv-submit" target="_blank" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-all duration-300 text-sm">
+                            <i class="fas fa-handshake mr-2"></i>JV Submit
+                        </a>
+                    </div>
                 </div>
             </div>
+        </div>
+    </div>
+    
+    <!-- Hero Section -->
+    <div class="gradient-bg text-white py-12 mb-8">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">Professional Real Estate Analysis Platform</h2>
             <p class="text-xl text-center opacity-90">Smart Property Analysis with External Data Integration</p>
         </div>
     </div>
@@ -5651,6 +5675,196 @@
             
             console.log(`${platform} valuation failed: ${message}`);
         }
+        
+        // Billing and Credit System
+        function showBillingModal() {
+            document.getElementById('billing-modal').classList.remove('hidden');
+        }
+        
+        function hideBillingModal() {
+            document.getElementById('billing-modal').classList.add('hidden');
+        }
+        
+        function loadCreditBalance() {
+            fetch('/api/team/stats')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('credit-balance').textContent = data.credit_balance;
+                        if (data.credit_balance < 10) {
+                            document.getElementById('credit-balance').className = 'font-semibold text-red-600';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading credit balance:', error);
+                    document.getElementById('credit-balance').textContent = 'Error';
+                });
+        }
+        
+        function createCheckout(tier) {
+            const button = event.target;
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+            
+            fetch('/api/billing/create-checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    tier: tier,
+                    type: tier.includes('pack') ? 'credit' : 'subscription'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.checkout_url;
+                } else {
+                    alert('Error creating checkout: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error creating checkout:', error);
+                alert('Error creating checkout. Please try again.');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.innerHTML = button.dataset.originalText;
+            });
+        }
+        
+        // Load credit balance on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCreditBalance();
+        });
     </script>
+    
+    <!-- Billing Modal -->
+    <div id="billing-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-4xl w-full mx-4 max-h-90vh overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Properwrite Pricing</h2>
+                <button onclick="hideBillingModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Subscription Plans -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold mb-4 text-gray-700">Monthly Subscription Plans</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Starter Plan -->
+                    <div class="border border-gray-200 rounded-lg p-6 relative">
+                        <div class="text-center">
+                            <h4 class="font-semibold text-gray-800 mb-2">Starter</h4>
+                            <div class="text-3xl font-bold text-amber-600 mb-2">$39</div>
+                            <div class="text-sm text-gray-500 mb-4">per month</div>
+                            <ul class="text-sm text-gray-600 space-y-2 mb-6">
+                                <li>• 1 Team Member</li>
+                                <li>• 50 Credits/month</li>
+                                <li>• Basic Support</li>
+                                <li>• Property Analysis</li>
+                            </ul>
+                            <button onclick="createCheckout('starter')" data-original-text="Get Started" class="w-full bg-amber-600 text-white py-2 rounded-lg hover:bg-amber-700 transition-all">
+                                Get Started
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Pro Plan -->
+                    <div class="border border-amber-500 rounded-lg p-6 relative">
+                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-amber-600 text-white px-3 py-1 rounded-full text-sm">Popular</div>
+                        <div class="text-center">
+                            <h4 class="font-semibold text-gray-800 mb-2">Pro</h4>
+                            <div class="text-3xl font-bold text-amber-600 mb-2">$79</div>
+                            <div class="text-sm text-gray-500 mb-4">per month</div>
+                            <ul class="text-sm text-gray-600 space-y-2 mb-6">
+                                <li>• 1 Team Member</li>
+                                <li>• 150 Credits/month</li>
+                                <li>• Priority Support</li>
+                                <li>• Advanced Analytics</li>
+                            </ul>
+                            <button onclick="createCheckout('pro')" data-original-text="Get Started" class="w-full bg-amber-600 text-white py-2 rounded-lg hover:bg-amber-700 transition-all">
+                                Get Started
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Team5 Plan -->
+                    <div class="border border-gray-200 rounded-lg p-6">
+                        <div class="text-center">
+                            <h4 class="font-semibold text-gray-800 mb-2">Team5</h4>
+                            <div class="text-3xl font-bold text-amber-600 mb-2">$199</div>
+                            <div class="text-sm text-gray-500 mb-4">per month</div>
+                            <ul class="text-sm text-gray-600 space-y-2 mb-6">
+                                <li>• 5 Team Members</li>
+                                <li>• 450 Credits/month</li>
+                                <li>• Premium Support</li>
+                                <li>• Team Management</li>
+                            </ul>
+                            <button onclick="createCheckout('team5')" data-original-text="Get Started" class="w-full bg-amber-600 text-white py-2 rounded-lg hover:bg-amber-700 transition-all">
+                                Get Started
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Growth10 Plan -->
+                    <div class="border border-gray-200 rounded-lg p-6">
+                        <div class="text-center">
+                            <h4 class="font-semibold text-gray-800 mb-2">Growth10</h4>
+                            <div class="text-3xl font-bold text-amber-600 mb-2">$399</div>
+                            <div class="text-sm text-gray-500 mb-4">per month</div>
+                            <ul class="text-sm text-gray-600 space-y-2 mb-6">
+                                <li>• 10 Team Members</li>
+                                <li>• 1000 Credits/month</li>
+                                <li>• Premium Support</li>
+                                <li>• Advanced Features</li>
+                            </ul>
+                            <button onclick="createCheckout('growth10')" data-original-text="Get Started" class="w-full bg-amber-600 text-white py-2 rounded-lg hover:bg-amber-700 transition-all">
+                                Get Started
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Credit Packs -->
+            <div>
+                <h3 class="text-lg font-semibold mb-4 text-gray-700">One-Time Credit Packs</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="border border-gray-200 rounded-lg p-6 text-center">
+                        <h4 class="font-semibold text-gray-800 mb-2">100 Credits</h4>
+                        <div class="text-2xl font-bold text-green-600 mb-4">$15</div>
+                        <button onclick="createCheckout('pack-100')" data-original-text="Purchase" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-all">
+                            Purchase
+                        </button>
+                    </div>
+                    
+                    <div class="border border-green-500 rounded-lg p-6 text-center relative">
+                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-3 py-1 rounded-full text-sm">Best Value</div>
+                        <h4 class="font-semibold text-gray-800 mb-2">500 Credits</h4>
+                        <div class="text-2xl font-bold text-green-600 mb-4">$60</div>
+                        <button onclick="createCheckout('pack-500')" data-original-text="Purchase" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-all">
+                            Purchase
+                        </button>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-6 text-center">
+                        <h4 class="font-semibold text-gray-800 mb-2">1000 Credits</h4>
+                        <div class="text-2xl font-bold text-green-600 mb-4">$99</div>
+                        <button onclick="createCheckout('pack-1000')" data-original-text="Purchase" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-all">
+                            Purchase
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 text-center text-sm text-gray-500">
+                <p>Each property analysis consumes 1 credit. Credits never expire.</p>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
