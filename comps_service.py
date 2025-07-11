@@ -99,6 +99,13 @@ class CompsService:
                         else:
                             properties = data.get('props', [])
                         
+                        # Log search response for debugging
+                        if len(all_comps) == 0 and len(properties) > 0:
+                            logger.info(f"First search property fields: {list(properties[0].keys())[:30] if properties else 'No properties'}")
+                            if properties:
+                                first_prop = properties[0]
+                                logger.info(f"Search property example - address: {first_prop.get('address')}, streetAddress: {first_prop.get('streetAddress')}, addressStreet: {first_prop.get('addressStreet')}, addressCity: {first_prop.get('addressCity')}, addressState: {first_prop.get('addressState')}")
+                        
                         # Filter by distance if we have coordinates
                         if lat and lng:
                             filtered_props = []
@@ -135,11 +142,27 @@ class CompsService:
                         # Log first comp details for debugging
                         if len(detailed_comps) == 0:
                             logger.info(f"First comp detail fields: {list(detail.keys())[:20]}")
-                            logger.info(f"Address fields in comp: address={comp.get('address')}, streetAddress={comp.get('streetAddress')}, city={comp.get('city')}, state={comp.get('state')}")
-                            if isinstance(comp.get('address'), dict):
-                                logger.info(f"Address object fields: {comp.get('address')}")
+                            logger.info(f"BEFORE merge - Address fields in comp: address={comp.get('address')}, streetAddress={comp.get('streetAddress')}, city={comp.get('city')}, state={comp.get('state')}")
+                            logger.info(f"Detail API response address fields: address={detail.get('address')}, streetAddress={detail.get('streetAddress')}, city={detail.get('city')}, state={detail.get('state')}")
+                            if isinstance(detail.get('address'), dict):
+                                logger.info(f"Detail address object: {detail.get('address')}")
+                        
+                        # Save original address info from search before merging
+                        original_search_address = comp.get('address')
+                        original_street = comp.get('streetAddress') or comp.get('address')
+                        original_city = comp.get('city')
+                        original_state = comp.get('state')
+                        
                         # Merge data
                         comp.update(detail)
+                        
+                        # Restore address if detail API didn't provide it
+                        if not comp.get('streetAddress') and original_street:
+                            comp['streetAddress'] = original_street
+                        if not comp.get('city') and original_city:
+                            comp['city'] = original_city
+                        if not comp.get('state') and original_state:
+                            comp['state'] = original_state
                         # Ensure we have the correct fields for display
                         # Handle bedrooms - check multiple possible field names
                         if not comp.get('bedrooms'):
@@ -162,21 +185,30 @@ class CompsService:
                                                 comp.get('livingAreaSqFt') or 0)
                         
                         # Handle address - check for nested address object first
-                        original_address = comp.get('address')
-                        if not comp.get('address') or isinstance(comp.get('address'), dict):
-                            # Check if address is a nested object
-                            if isinstance(comp.get('address'), dict):
-                                addr_obj = comp.get('address', {})
-                                comp['address'] = f"{addr_obj.get('streetAddress', '')} {addr_obj.get('city', '')} {addr_obj.get('state', '')}"
-                            else:
-                                # Build from individual fields
-                                street = comp.get('streetAddress', '') or comp.get('streetLine', '') or ''
-                                city = comp.get('city', '') or comp.get('addressCity', '') or ''
-                                state = comp.get('state', '') or comp.get('addressState', '') or ''
-                                comp['address'] = f"{street} {city} {state}".strip()
+                        if isinstance(comp.get('address'), dict):
+                            # Address is a nested object
+                            addr_obj = comp.get('address', {})
+                            comp['address'] = f"{addr_obj.get('streetAddress', '')} {addr_obj.get('city', '')} {addr_obj.get('state', '')}"
+                        elif not comp.get('address') or comp.get('address') == address:
+                            # Build from individual fields if address is missing or same as subject
+                            street = comp.get('streetAddress', '') or comp.get('streetLine', '') or original_street or ''
+                            city = comp.get('city', '') or comp.get('addressCity', '') or original_city or ''
+                            state = comp.get('state', '') or comp.get('addressState', '') or original_state or ''
+                            
+                            # If we still don't have good address parts, try to extract from original_search_address
+                            if not street and original_search_address and isinstance(original_search_address, str):
+                                parts = original_search_address.split(',')
+                                if len(parts) >= 1:
+                                    street = parts[0].strip()
+                                if len(parts) >= 2:
+                                    city = parts[1].strip()
+                                if len(parts) >= 3:
+                                    state = parts[2].strip()
+                            
+                            comp['address'] = f"{street} {city} {state}".strip()
                                 
                         # Log address extraction for debugging
-                        logger.info(f"Address extraction - Original: {original_address}, Final: {comp.get('address')}, Street: {comp.get('streetAddress')}, City: {comp.get('city')}, State: {comp.get('state')}")
+                        logger.info(f"Address extraction - Final: {comp.get('address')}, Street: {comp.get('streetAddress')}, City: {comp.get('city')}, State: {comp.get('state')}, Original search: {original_search_address}")
                         
                         # Filter out subject property itself and very similar addresses
                         comp_address = comp.get('address', '')
