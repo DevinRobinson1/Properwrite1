@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affiliates Management - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Admin Navigation -->
+    <nav class="bg-gray-900 text-white sticky top-0 z-50">
+        <div class="container mx-auto px-6">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-8">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xl font-bold">Admin Panel</span>
+                    </div>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="/admin" class="hover:text-amber-400 transition-colors">Dashboard</a>
+                        <a href="/admin/users" class="hover:text-amber-400 transition-colors">Users</a>
+                        <a href="/admin/affiliates" class="text-amber-400">Affiliates</a>
+                        <a href="/admin/billing" class="hover:text-amber-400 transition-colors">Billing</a>
+                        <a href="/admin/api-health" class="hover:text-amber-400 transition-colors">API Health</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-300">Admin</span>
+                    <a href="/admin/logout" class="text-sm hover:text-amber-400 transition-colors">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-6 py-8">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Affiliates & Referral Program</h1>
+                <p class="text-gray-600 mt-2">Manage affiliate partners and referral codes</p>
+            </div>
+            <div class="flex space-x-4">
+                <button onclick="createAffiliateCode()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    <i class="fas fa-plus mr-2"></i>Create Affiliate Code
+                </button>
+                <button onclick="exportAffiliates()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-download mr-2"></i>Export Report
+                </button>
+            </div>
+        </div>
+
+        <!-- Affiliate Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Affiliates</p>
+                        <p class="text-3xl font-bold text-gray-800">{{ stats.total_affiliates }}</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-users text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Active Affiliates</p>
+                        <p class="text-3xl font-bold text-green-600">{{ stats.active_affiliates }}</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-user-check text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Referrals</p>
+                        <p class="text-3xl font-bold text-purple-600">{{ stats.total_referrals }}</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-handshake text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Commissions</p>
+                        <p class="text-3xl font-bold text-orange-600">${{ stats.total_commissions }}</p>
+                    </div>
+                    <div class="bg-orange-100 p-3 rounded-full">
+                        <i class="fas fa-dollar-sign text-orange-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Pending Payouts</p>
+                        <p class="text-3xl font-bold text-red-600">${{ stats.pending_payouts }}</p>
+                    </div>
+                    <div class="bg-red-100 p-3 rounded-full">
+                        <i class="fas fa-clock text-red-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Affiliate Code Generator -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Generate Affiliate Code</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Affiliate Name</label>
+                    <input type="text" id="affiliateName" placeholder="Enter affiliate name" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Commission Rate (%)</label>
+                    <input type="number" id="commissionRate" value="20" min="0" max="100" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tier</label>
+                    <select id="affiliateTier" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="basic">Basic (20%)</option>
+                        <option value="premium">Premium (25%)</option>
+                        <option value="top">Top (30%)</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button onclick="generateAffiliateCode()" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-code mr-2"></i>Generate Code
+                    </button>
+                </div>
+            </div>
+            <div id="generatedCode" class="mt-4 p-4 bg-gray-50 rounded-lg hidden">
+                <p class="text-sm text-gray-600">Generated Affiliate Code:</p>
+                <div class="flex items-center mt-2">
+                    <code id="affiliateCode" class="bg-gray-800 text-green-400 px-3 py-2 rounded font-mono text-sm flex-1"></code>
+                    <button onclick="copyAffiliateCode()" class="ml-2 bg-gray-600 text-white px-3 py-2 rounded hover:bg-gray-700">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Affiliates Table -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-800">Active Affiliates</h2>
+            </div>
+            {% if affiliates %}
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Affiliate</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tier</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Commission Rate</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referrals</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Earnings</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for affiliate in affiliates %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div>
+                                <div class="text-sm font-medium text-gray-900">{{ affiliate.name }}</div>
+                                <div class="text-xs text-gray-500">{{ affiliate.email }}</div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <code class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">{{ affiliate.code }}</code>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full
+                                {% if affiliate.tier == 'top' %}bg-purple-100 text-purple-800{% elif affiliate.tier == 'premium' %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ affiliate.tier.title() }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm text-gray-900">{{ affiliate.commission_rate }}%</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm text-gray-900">{{ affiliate.total_referrals }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm text-gray-900">${{ affiliate.total_earnings }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full
+                                {% if affiliate.status == 'active' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ affiliate.status.title() }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="viewAffiliate('{{ affiliate.id }}')" class="text-blue-600 hover:text-blue-900 mr-3">View</button>
+                            <button onclick="payAffiliate('{{ affiliate.id }}')" class="text-green-600 hover:text-green-900 mr-3">Pay</button>
+                            <button onclick="suspendAffiliate('{{ affiliate.id }}')" class="text-red-600 hover:text-red-900">Suspend</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="text-center py-12">
+                <i class="fas fa-handshake text-gray-400 text-4xl mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No Affiliates Found</h3>
+                <p class="text-gray-500">Create your first affiliate code to start building your partner network.</p>
+                <button onclick="createAffiliateCode()" class="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                    <i class="fas fa-plus mr-2"></i>Create First Affiliate Code
+                </button>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Referral Analytics -->
+        <div class="mt-8 bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Referral Analytics</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-blue-600">0</div>
+                    <div class="text-sm text-gray-500">Referrals This Month</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-green-600">0%</div>
+                    <div class="text-sm text-gray-500">Conversion Rate</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-purple-600">$0</div>
+                    <div class="text-sm text-gray-500">Average Commission</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function generateAffiliateCode() {
+            const name = document.getElementById('affiliateName').value;
+            const rate = document.getElementById('commissionRate').value;
+            const tier = document.getElementById('affiliateTier').value;
+            
+            if (!name) {
+                alert('Please enter an affiliate name');
+                return;
+            }
+            
+            // Call API to generate affiliate code
+            fetch('/admin/api/affiliate/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: name,
+                    tier: tier,
+                    commission_rate: rate
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('affiliateCode').textContent = data.affiliate.code;
+                    document.getElementById('generatedCode').classList.remove('hidden');
+                    alert(data.message);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to generate affiliate code');
+            });
+        }
+        
+        function copyAffiliateCode() {
+            const code = document.getElementById('affiliateCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Affiliate code copied to clipboard!');
+            });
+        }
+        
+        function createAffiliateCode() {
+            document.getElementById('affiliateName').focus();
+        }
+        
+        function exportAffiliates() {
+            alert('Export functionality will be implemented once affiliate data is available');
+        }
+        
+        function viewAffiliate(affiliateId) {
+            alert('View affiliate details: ' + affiliateId);
+        }
+        
+        function payAffiliate(affiliateId) {
+            const amount = prompt('Enter payout amount:');
+            if (!amount || isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            const method = prompt('Payment method (paypal/bank_transfer/stripe):', 'paypal');
+            if (!method) return;
+            
+            fetch(`/admin/api/affiliate/${affiliateId}/payout`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    amount: parseFloat(amount),
+                    method: method
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to process payout');
+            });
+        }
+        
+        function suspendAffiliate(affiliateId) {
+            if (confirm('Are you sure you want to suspend this affiliate?')) {
+                fetch(`/admin/api/affiliate/${affiliateId}/suspend`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to suspend affiliate');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

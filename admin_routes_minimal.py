@@ -82,6 +82,23 @@ def users():
     users = []
     return render_template('admin_users.html', users=users)
 
+@admin_bp.route('/affiliates')
+@require_admin
+def affiliates():
+    """Affiliates management page"""
+    # Placeholder affiliate data
+    affiliates = []
+    affiliate_stats = {
+        'total_affiliates': 0,
+        'active_affiliates': 0,
+        'total_referrals': 0,
+        'total_commissions': 0,
+        'pending_payouts': 0
+    }
+    return render_template('admin_affiliates.html', 
+                         affiliates=affiliates,
+                         stats=affiliate_stats)
+
 @admin_bp.route('/billing')
 @require_admin
 def billing():
@@ -117,3 +134,77 @@ def clear_cache():
     """Clear application cache"""
     # Placeholder cache clearing
     return jsonify({'success': True, 'message': 'Cache cleared successfully'})
+
+@admin_bp.route('/api/affiliate/create', methods=['POST'])
+@require_admin
+def create_affiliate():
+    """Create new affiliate code"""
+    data = request.get_json()
+    
+    name = data.get('name', '').strip()
+    tier = data.get('tier', 'basic')
+    commission_rate = float(data.get('commission_rate', 20))
+    
+    if not name:
+        return jsonify({'error': 'Affiliate name is required'}), 400
+    
+    # Generate unique affiliate code
+    import random
+    import string
+    base_code = ''.join(c for c in name.upper() if c.isalnum())[:6]
+    if len(base_code) < 3:
+        base_code = 'AFF'
+    
+    # Add random suffix to ensure uniqueness
+    suffix = ''.join(random.choices(string.digits, k=4))
+    affiliate_code = f"{base_code}{suffix}"
+    
+    # Set commission rate based on tier
+    tier_rates = {
+        'basic': 20,
+        'premium': 25,
+        'top': 30
+    }
+    
+    if tier in tier_rates:
+        commission_rate = tier_rates[tier]
+    
+    # Return the generated affiliate data
+    affiliate_data = {
+        'name': name,
+        'code': affiliate_code,
+        'tier': tier,
+        'commission_rate': commission_rate,
+        'status': 'active',
+        'created_at': datetime.utcnow().isoformat()
+    }
+    
+    return jsonify({
+        'success': True,
+        'affiliate': affiliate_data,
+        'message': f'Affiliate code {affiliate_code} created successfully'
+    })
+
+@admin_bp.route('/api/affiliate/<string:affiliate_id>/payout', methods=['POST'])
+@require_admin
+def process_affiliate_payout(affiliate_id):
+    """Process affiliate payout"""
+    data = request.get_json()
+    amount = data.get('amount', 0)
+    method = data.get('method', 'paypal')
+    
+    # Placeholder payout processing
+    return jsonify({
+        'success': True,
+        'message': f'Payout of ${amount} processed via {method}'
+    })
+
+@admin_bp.route('/api/affiliate/<string:affiliate_id>/suspend', methods=['POST'])
+@require_admin
+def suspend_affiliate(affiliate_id):
+    """Suspend affiliate account"""
+    # Placeholder suspension
+    return jsonify({
+        'success': True,
+        'message': 'Affiliate account suspended'
+    })
