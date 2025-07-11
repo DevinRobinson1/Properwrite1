@@ -246,10 +246,10 @@ def analyze_property():
         
         # Extract address components from request data
         # Check for both 'address' and 'street_address' keys for compatibility
-        address = data.get('address', data.get('street_address', '')).strip()
-        city = data.get('city', '').strip()
-        state = data.get('state', '').strip()
-        zip_code = data.get('zip_code', data.get('zip', '')).strip()
+        address = (data.get('address') or data.get('street_address') or '').strip()
+        city = (data.get('city') or '').strip()
+        state = (data.get('state') or '').strip()
+        zip_code = (data.get('zip_code') or data.get('zip') or '').strip()
         
         # Use formatted address from Google if available, otherwise build it
         if data.get('formattedAddress'):
