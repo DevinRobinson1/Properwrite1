@@ -5024,7 +5024,11 @@
             
             // Initialize tab and recalculate values
             setTimeout(() => {
-                recalculateDispositions();
+                if (tabName === 'mls-novation') {
+                    updateNovationCalculation();
+                } else {
+                    recalculateAllDispositionStrategies();
+                }
             }, 100);
         }
 
