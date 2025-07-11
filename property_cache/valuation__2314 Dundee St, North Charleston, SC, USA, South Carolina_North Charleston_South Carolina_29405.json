@@ -1,0 +1,44 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 290400,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 10912207,
+      "matched_address": "2314 Dundee St, North Charleston, SC, USA, South Carolina, North Charleston, South Carolina 29405",
+      "images": [
+        "https://photos.zillowstatic.com/fp/3c03297130ccc99b6a56b6f95b36e48b-p_d.jpg"
+      ]
+    },
+    "rentcast": {
+      "estimate": 279000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin"
+  ],
+  "sources_used": [
+    "Zillow",
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "2314 Dundee St, North Charleston, SC, USA, South Carolina",
+    "city": "North Charleston",
+    "state": "South Carolina",
+    "zip_code": "29405",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-11T12:44:52.060924"
+}

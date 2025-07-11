@@ -1,0 +1,44 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 435900,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 10880764,
+      "matched_address": "2345 Assembly Dr, Charleston, SC, USA, South Carolina, Charleston, South Carolina 29414",
+      "images": [
+        "https://photos.zillowstatic.com/fp/598023a1455eb7760b46a1fb79ba01cd-p_d.jpg"
+      ]
+    },
+    "rentcast": {
+      "estimate": 319000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin"
+  ],
+  "sources_used": [
+    "Zillow",
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "2345 Assembly Dr, Charleston, SC, USA, South Carolina",
+    "city": "Charleston",
+    "state": "South Carolina",
+    "zip_code": "29414",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-11T12:43:54.602888"
+}
