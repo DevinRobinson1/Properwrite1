@@ -69,8 +69,8 @@
                 <!-- User Info -->
                 <div class="flex items-center space-x-4">
                     <div class="hidden sm:block text-right">
-                        <p class="text-sm font-medium text-gray-900" id="user-name">John Doe</p>
-                        <p class="text-xs text-gray-500" id="user-email">john@example.com</p>
+                        <p class="text-sm font-medium text-gray-900" id="user-name">Loading...</p>
+                        <p class="text-xs text-gray-500" id="user-email">Loading...</p>
                     </div>
                     <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                         <span class="text-white font-bold text-sm">JD</span>
@@ -303,7 +303,7 @@
                         </div>
                         
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
+                            <table id="team-members-table" class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member</th>
@@ -315,58 +315,9 @@
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center">
-                                                <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
-                                                    <span class="text-white font-bold text-sm">JD</span>
-                                                </div>
-                                                <div class="ml-4">
-                                                    <div class="text-sm font-medium text-gray-900">John Doe</div>
-                                                    <div class="text-sm text-gray-500">john@example.com</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
-                                                Admin
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                                Active
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2 hours ago</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <span class="text-gray-400">Owner</span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center">
-                                                <div class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
-                                                    <span class="text-white font-bold text-sm">SJ</span>
-                                                </div>
-                                                <div class="ml-4">
-                                                    <div class="text-sm font-medium text-gray-900">Sarah Johnson</div>
-                                                    <div class="text-sm text-gray-500">sarah@example.com</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                                                Analyst
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                                Active
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1 day ago</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <button onclick="editMember('sarah')" class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
-                                            <button onclick="removeMember('sarah')" class="text-red-600 hover:text-red-900">Remove</button>
+                                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                            <i class="fas fa-spinner fa-spin mr-2"></i>
+                                            Loading team members...
                                         </td>
                                     </tr>
                                 </tbody>
@@ -649,7 +600,15 @@
         }
 
         function showInviteModal() {
-            document.getElementById('team-invite-modal').classList.remove('hidden');
+            console.log('showInviteModal called');
+            const modal = document.getElementById('team-invite-modal');
+            console.log('Modal element:', modal);
+            if (modal) {
+                modal.classList.remove('hidden');
+                console.log('Modal shown');
+            } else {
+                console.error('Modal element not found');
+            }
         }
 
         function closeTeamInviteModal() {
@@ -765,9 +724,103 @@
             loadUserData();
         });
 
-        function loadUserData() {
-            // This would typically fetch data from your API
-            console.log('Loading user data...');
+        async function loadUserData() {
+            try {
+                // Load user authentication status
+                const response = await fetch('/api/get-user-status');
+                const userData = await response.json();
+                
+                if (userData.isAuthenticated) {
+                    // Update user info in header
+                    document.getElementById('user-name').textContent = userData.user.name || userData.user.email.split('@')[0];
+                    document.getElementById('user-email').textContent = userData.user.email;
+                    
+                    // Load team data
+                    await loadTeamData();
+                } else {
+                    // Redirect to login if not authenticated
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                document.getElementById('user-name').textContent = 'User';
+                document.getElementById('user-email').textContent = 'user@example.com';
+            }
+        }
+
+        async function loadTeamData() {
+            try {
+                const response = await fetch('/api/team/stats');
+                const teamData = await response.json();
+                
+                if (teamData.success) {
+                    // Update team member list
+                    updateTeamMemberList(teamData.members);
+                    
+                    // Update team stats
+                    updateTeamStats(teamData.stats);
+                }
+            } catch (error) {
+                console.error('Error loading team data:', error);
+            }
+        }
+
+        function updateTeamMemberList(members) {
+            const memberTableBody = document.querySelector('#team-members-table tbody');
+            if (!memberTableBody) return;
+            
+            memberTableBody.innerHTML = '';
+            
+            members.forEach(member => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium">
+                                ${member.name ? member.name.charAt(0).toUpperCase() : member.email.charAt(0).toUpperCase()}
+                            </div>
+                            <div class="ml-3">
+                                <div class="text-sm font-medium text-gray-900">${member.name || member.email.split('@')[0]}</div>
+                                <div class="text-sm text-gray-500">${member.email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(member.role)}">
+                            ${member.role.charAt(0).toUpperCase() + member.role.slice(1)}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${member.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${member.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${member.last_active ? new Date(member.last_active).toLocaleDateString() : 'Never'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        ${member.role !== 'owner' ? `
+                            <button onclick="editMember('${member.id}')" class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
+                            <button onclick="removeMember('${member.id}')" class="text-red-600 hover:text-red-900">Remove</button>
+                        ` : '<span class="text-gray-400">Owner</span>'}
+                    </td>
+                `;
+                memberTableBody.appendChild(row);
+            });
+        }
+
+        function getRoleColor(role) {
+            switch(role) {
+                case 'owner': return 'bg-purple-100 text-purple-800';
+                case 'manager': return 'bg-blue-100 text-blue-800';
+                case 'analyst': return 'bg-green-100 text-green-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function updateTeamStats(stats) {
+            // Update any team statistics if needed
+            console.log('Team stats:', stats);
         }
     </script>
 </body>

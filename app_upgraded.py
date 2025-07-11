@@ -22,6 +22,9 @@ from seller_finance_calculator import calculate_seller_finance_offer
 from jv_auto_underwrite import auto_underwrite_deal
 from billing_service import BillingService
 from auth_middleware import require_auth, require_seat, require_role, require_credits
+from billing_models import User
+from sqlalchemy.orm import Session
+from sqlalchemy import create_engine
 from google_places_service import google_places_service, AddressNotFoundError, GooglePlacesAPIError, AddressValidationError
 from require_valid_address import require_valid_address, extract_validated_address_data
 from admin_routes_minimal import admin_bp
@@ -44,6 +47,10 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-2024")
 
 # Initialize billing service
 billing_service = BillingService()
+
+# Database connection
+DATABASE_URL = os.environ.get("DATABASE_URL")
+engine = create_engine(DATABASE_URL)
 
 # Initialize comps service
 comps_service = CompsService()
@@ -120,22 +127,25 @@ def login():
         email = data.get('email')
         password = data.get('password')
         
-        # Simple mock authentication - in production this would check against database
-        if email and password:
-            # Set session for logged in user
-            session['user_id'] = f"user_{email.split('@')[0]}"
-            session['email'] = email
+        # Look up user in database
+        with Session(engine) as db:
+            user = db.query(User).filter(User.email == email).first()
             
-            return jsonify({
-                'success': True,
-                'message': 'Logged in successfully',
-                'user_id': session['user_id']
-            })
-        else:
-            return jsonify({
-                'success': False,
-                'error': 'Email and password required'
-            }), 400
+            if user and user.is_active:
+                # Set session for logged in user
+                session['user_id'] = str(user.id)
+                session['email'] = email
+                
+                return jsonify({
+                    'success': True,
+                    'message': 'Logged in successfully',
+                    'user_id': session['user_id']
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Invalid email or password'
+                }), 401
     except Exception as e:
         logging.error(f"Error logging in: {str(e)}")
         return jsonify({

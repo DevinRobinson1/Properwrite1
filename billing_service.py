@@ -322,6 +322,11 @@ class BillingService:
                     CreditLog.team_id == team_id
                 ).order_by(CreditLog.created_at.desc()).limit(10).all()
                 
+                # Get team members
+                team_members = db.query(User).filter(
+                    User.team_id == team_id
+                ).all()
+                
                 return {
                     'success': True,
                     'team': {
@@ -332,6 +337,22 @@ class BillingService:
                         'seats_max': team.seats_max,
                         'credit_balance': team.credit_balance,
                         'created_at': team.created_at.isoformat()
+                    },
+                    'members': [
+                        {
+                            'id': member.id,
+                            'name': member.name,
+                            'email': member.email,
+                            'role': member.role,
+                            'is_active': member.is_active,
+                            'created_at': member.created_at.isoformat() if member.created_at else None,
+                            'last_active': member.created_at.isoformat() if member.created_at else None
+                        } for member in team_members
+                    ],
+                    'stats': {
+                        'total_members': len(team_members),
+                        'active_members': active_users,
+                        'seats_available': team.seats_max - active_users
                     },
                     'recent_activity': [
                         {
