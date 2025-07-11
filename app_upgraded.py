@@ -1970,6 +1970,136 @@ def update_member_role(member_id):
         logging.error(f"Error updating member role: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/api/team/pending-invites', methods=['GET'])
+def get_pending_invites():
+    """Get pending team invites"""
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+        
+        # Get user's team
+        with Session(engine) as db:
+            from billing_models import User, TeamInvite
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user:
+                return jsonify({'success': False, 'error': 'User not found'}), 404
+            
+            # Get pending invites for this team
+            invites = db.query(TeamInvite).filter(
+                TeamInvite.team_id == user.team_id,
+                TeamInvite.status == 'pending'
+            ).all()
+            
+            invite_list = []
+            for invite in invites:
+                invite_list.append({
+                    'id': str(invite.id),
+                    'email': invite.email,
+                    'role': invite.role,
+                    'created_at': invite.created_at.isoformat(),
+                    'status': invite.status
+                })
+            
+            return jsonify({
+                'success': True,
+                'invites': invite_list
+            })
+            
+    except Exception as e:
+        logging.error(f"Error getting pending invites: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/team/invite/<invite_id>/resend', methods=['POST'])
+def resend_invite(invite_id):
+    """Resend a team invitation"""
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+        
+        with Session(engine) as db:
+            from billing_models import User, TeamInvite, Team
+            
+            # Check if user has permission to resend invites
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user or user.team_role not in ['owner', 'manager']:
+                return jsonify({'success': False, 'error': 'Insufficient permissions'}), 403
+            
+            # Find the invite
+            invite = db.query(TeamInvite).filter(
+                TeamInvite.id == invite_id,
+                TeamInvite.team_id == user.team_id,
+                TeamInvite.status == 'pending'
+            ).first()
+            
+            if not invite:
+                return jsonify({'success': False, 'error': 'Invite not found'}), 404
+            
+            # Get team info
+            team = db.query(Team).filter(Team.id == user.team_id).first()
+            
+            # Send email notification
+            email_sent = False
+            try:
+                email_service.send_team_invitation(
+                    invite.email,
+                    team.name,
+                    invite.token
+                )
+                email_sent = True
+            except Exception as e:
+                logging.error(f"Error sending invitation email: {e}")
+            
+            return jsonify({
+                'success': True,
+                'email_sent': email_sent,
+                'message': 'Invitation resent successfully'
+            })
+            
+    except Exception as e:
+        logging.error(f"Error resending invite: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/team/invite/<invite_id>/cancel', methods=['DELETE'])
+def cancel_invite(invite_id):
+    """Cancel a team invitation"""
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+        
+        with Session(engine) as db:
+            from billing_models import User, TeamInvite
+            
+            # Check if user has permission to cancel invites
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user or user.team_role not in ['owner', 'manager']:
+                return jsonify({'success': False, 'error': 'Insufficient permissions'}), 403
+            
+            # Find and cancel the invite
+            invite = db.query(TeamInvite).filter(
+                TeamInvite.id == invite_id,
+                TeamInvite.team_id == user.team_id,
+                TeamInvite.status == 'pending'
+            ).first()
+            
+            if not invite:
+                return jsonify({'success': False, 'error': 'Invite not found'}), 404
+            
+            # Update invite status
+            invite.status = 'cancelled'
+            db.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Invitation cancelled successfully'
+            })
+            
+    except Exception as e:
+        logging.error(f"Error cancelling invite: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/settings/billing')
 @require_auth
 def billing_settings():

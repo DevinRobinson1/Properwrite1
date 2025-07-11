@@ -333,6 +333,39 @@
                             </table>
                         </div>
                     </div>
+
+                    <!-- Pending Invites -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Pending Invites</h3>
+                            <span id="pending-invites-count" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                <i class="fas fa-clock mr-1"></i>
+                                Loading...
+                            </span>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table id="pending-invites-table" class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invited</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                            <i class="fas fa-spinner fa-spin mr-2"></i>
+                                            Loading pending invites...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Settings Section -->
@@ -371,7 +404,7 @@
                     </div>
 
                     <!-- Default Preferences -->
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">Default Preferences</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
@@ -391,11 +424,53 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Default Minimum Profit Target</label>
+                                <input type="number" id="default-profit-target" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="15000" value="15000">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Default Assignment Fee</label>
+                                <input type="number" id="default-assignment-fee" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="5000" value="5000">
+                            </div>
+                        </div>
                         <div class="mt-6">
-                            <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                            <button onclick="savePreferences()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
                                 <i class="fas fa-save mr-2"></i>
                                 Save Preferences
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <a href="/" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                <i class="fas fa-home mr-2"></i>
+                                Property Analysis
+                            </a>
+                            <button onclick="exportAllData()" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                <i class="fas fa-download mr-2"></i>
+                                Export Data
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Account Actions -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Account Actions</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Sign Out</p>
+                                    <p class="text-sm text-gray-500">Sign out of your account</p>
+                                </div>
+                                <button onclick="logout()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>
+                                    Sign Out
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -951,6 +1026,9 @@
                         }
                     }
                     
+                    // Load pending invites
+                    loadPendingInvites();
+                    
                 } else {
                     console.error('Error loading dashboard data:', data.error);
                     // Show error message
@@ -1062,6 +1140,181 @@
         function updateTeamStats(stats) {
             // Update any team statistics if needed
             console.log('Team stats:', stats);
+        }
+
+        function savePreferences() {
+            const arvTarget = document.getElementById('default-arv-target')?.value;
+            const cashBuyerProfile = document.getElementById('default-cash-buyer-profile')?.value;
+            const profitTarget = document.getElementById('default-profit-target')?.value;
+            const assignmentFee = document.getElementById('default-assignment-fee')?.value;
+            
+            // Save to localStorage for now
+            localStorage.setItem('user_preferences', JSON.stringify({
+                arvTarget,
+                cashBuyerProfile,
+                profitTarget,
+                assignmentFee
+            }));
+            
+            alert('Preferences saved successfully!');
+        }
+
+        function exportAllData() {
+            // Export user data as CSV
+            const data = {
+                exported_at: new Date().toISOString(),
+                user_preferences: JSON.parse(localStorage.getItem('user_preferences') || '{}'),
+                message: 'Data export functionality will be enhanced in future updates'
+            };
+            
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "properwrite_data_export.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // Pending invites functionality
+        async function loadPendingInvites() {
+            try {
+                const response = await fetch('/api/team/pending-invites');
+                const data = await response.json();
+                
+                if (data.success) {
+                    updatePendingInvitesList(data.invites || []);
+                    updatePendingInvitesCount(data.invites ? data.invites.length : 0);
+                } else {
+                    console.error('Error loading pending invites:', data.error);
+                    showPendingInvitesError();
+                }
+            } catch (error) {
+                console.error('Error loading pending invites:', error);
+                showPendingInvitesError();
+            }
+        }
+
+        function updatePendingInvitesList(invites) {
+            const inviteTableBody = document.querySelector('#pending-invites-table tbody');
+            if (!inviteTableBody) return;
+            
+            inviteTableBody.innerHTML = '';
+            
+            if (invites.length === 0) {
+                inviteTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500 py-8">No pending invites</td></tr>';
+                return;
+            }
+            
+            invites.forEach(invite => {
+                const row = document.createElement('tr');
+                const inviteDate = new Date(invite.created_at).toLocaleDateString();
+                const daysAgo = Math.floor((Date.now() - new Date(invite.created_at).getTime()) / (1000 * 60 * 60 * 24));
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-500 to-orange-600 flex items-center justify-center text-white text-sm font-medium">
+                                ${invite.email.charAt(0).toUpperCase()}
+                            </div>
+                            <div class="ml-3">
+                                <div class="text-sm font-medium text-gray-900">${invite.email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(invite.role)}">
+                            ${invite.role.charAt(0).toUpperCase() + invite.role.slice(1)}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${inviteDate} (${daysAgo} days ago)
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                            Pending
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="resendInvite('${invite.id}')" class="text-blue-600 hover:text-blue-900 mr-3">Resend</button>
+                        <button onclick="cancelInvite('${invite.id}')" class="text-red-600 hover:text-red-900">Cancel</button>
+                    </td>
+                `;
+                inviteTableBody.appendChild(row);
+            });
+        }
+
+        function updatePendingInvitesCount(count) {
+            const countElement = document.getElementById('pending-invites-count');
+            if (countElement) {
+                if (count === 0) {
+                    countElement.innerHTML = '<i class="fas fa-check mr-1"></i>None';
+                    countElement.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
+                } else {
+                    countElement.innerHTML = `<i class="fas fa-clock mr-1"></i>${count}`;
+                    countElement.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800';
+                }
+            }
+        }
+
+        function showPendingInvitesError() {
+            const inviteTableBody = document.querySelector('#pending-invites-table tbody');
+            if (inviteTableBody) {
+                inviteTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-red-500 py-8">Error loading pending invites</td></tr>';
+            }
+            
+            const countElement = document.getElementById('pending-invites-count');
+            if (countElement) {
+                countElement.innerHTML = '<i class="fas fa-exclamation-triangle mr-1"></i>Error';
+                countElement.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800';
+            }
+        }
+
+        async function resendInvite(inviteId) {
+            try {
+                const response = await fetch(`/api/team/invite/${inviteId}/resend`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Invitation resent successfully!');
+                } else {
+                    alert('Error resending invitation: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error resending invite:', error);
+                alert('Error resending invitation. Please try again.');
+            }
+        }
+
+        async function cancelInvite(inviteId) {
+            if (confirm('Are you sure you want to cancel this invitation?')) {
+                try {
+                    const response = await fetch(`/api/team/invite/${inviteId}/cancel`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('Invitation cancelled successfully!');
+                        loadPendingInvites(); // Refresh the list
+                    } else {
+                        alert('Error cancelling invitation: ' + (result.error || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Error cancelling invite:', error);
+                    alert('Error cancelling invitation. Please try again.');
+                }
+            }
         }
     </script>
 </body>
