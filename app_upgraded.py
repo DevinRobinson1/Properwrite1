@@ -2095,7 +2095,7 @@ def resend_invite(invite_id):
             
             # Check if user has permission to resend invites
             user = db.query(User).filter(User.id == user_id).first()
-            if not user or user.team_role not in ['owner', 'manager']:
+            if not user or user.role not in ['owner', 'manager']:
                 return jsonify({'success': False, 'error': 'Insufficient permissions'}), 403
             
             # Find the invite
@@ -2111,17 +2111,12 @@ def resend_invite(invite_id):
             # Get team info
             team = db.query(Team).filter(Team.id == user.team_id).first()
             
-            # Send email notification
-            email_sent = False
-            try:
-                email_service.send_team_invitation(
-                    invite.email,
-                    team.name,
-                    invite.token
-                )
-                email_sent = True
-            except Exception as e:
-                logging.error(f"Error sending invitation email: {e}")
+            # Send email notification using billing service
+            email_sent = billing_service._send_invitation_email(
+                invite.email,
+                team.name,
+                invite.token
+            )
             
             return jsonify({
                 'success': True,
@@ -2146,7 +2141,7 @@ def cancel_invite(invite_id):
             
             # Check if user has permission to cancel invites
             user = db.query(User).filter(User.id == user_id).first()
-            if not user or user.team_role not in ['owner', 'manager']:
+            if not user or user.role not in ['owner', 'manager']:
                 return jsonify({'success': False, 'error': 'Insufficient permissions'}), 403
             
             # Find and cancel the invite
