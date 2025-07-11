@@ -181,6 +181,9 @@ class ComprehensiveValuationService:
                             zestimate = self._extract_zillow_data_with_regex(detail_data)
                             images = self._extract_zillow_images(detail_data)
                             
+                            # Extract property details from Zillow response
+                            property_details = self._extract_zillow_property_details(detail_data)
+                            
                             if zestimate:
                                 valuation_data['valuations']['zillow'] = {
                                     'zestimate': int(zestimate),
@@ -188,10 +191,14 @@ class ComprehensiveValuationService:
                                     'confidence': 'high',
                                     'zpid': zpid,
                                     'matched_address': matched_address,
-                                    'images': images
+                                    'images': images,
+                                    'bedrooms': property_details.get('bedrooms'),
+                                    'bathrooms': property_details.get('bathrooms'),
+                                    'square_feet': property_details.get('square_feet'),
+                                    'year_built': property_details.get('year_built')
                                 }
                                 valuation_data['sources_used'].append('Zillow')
-                                logging.info(f"🐛 Zillow success: ZPID {zpid} → ${zestimate:,}, {len(images)} images")
+                                logging.info(f"🐛 Zillow success: ZPID {zpid} → ${zestimate:,}, {len(images)} images, {property_details.get('bedrooms')} beds, {property_details.get('bathrooms')} baths, {property_details.get('square_feet')} sqft, built {property_details.get('year_built')}")
                                 return
                             else:
                                 logging.info(f"No valuation found in Zillow detail data")
@@ -302,6 +309,43 @@ class ComprehensiveValuationService:
                 unique_images.append(img)
                 
         return unique_images
+    
+    def _extract_zillow_property_details(self, detail_data: Dict) -> Dict:
+        """Extract property details (beds, baths, sqft, year built) from Zillow response"""
+        details = {}
+        
+        # Try multiple paths for property details
+        # Look in resoFacts first (most reliable)
+        reso_facts = detail_data.get('resoFacts', {})
+        if reso_facts:
+            details['bedrooms'] = reso_facts.get('bedrooms')
+            details['bathrooms'] = reso_facts.get('bathrooms') or reso_facts.get('bathroomsFull')
+            details['square_feet'] = reso_facts.get('livingArea') or reso_facts.get('sqft')
+            details['year_built'] = reso_facts.get('yearBuilt')
+        
+        # Fallback to other common fields
+        if not details.get('bedrooms'):
+            details['bedrooms'] = detail_data.get('bedrooms') or detail_data.get('beds')
+        if not details.get('bathrooms'):
+            details['bathrooms'] = detail_data.get('bathrooms') or detail_data.get('baths')
+        if not details.get('square_feet'):
+            details['square_feet'] = detail_data.get('livingArea') or detail_data.get('sqft') or detail_data.get('square_feet')
+        if not details.get('year_built'):
+            details['year_built'] = detail_data.get('yearBuilt') or detail_data.get('year_built')
+        
+        # Clean up the data
+        cleaned_details = {}
+        for key, value in details.items():
+            if value is not None:
+                try:
+                    if key in ['bedrooms', 'bathrooms']:
+                        cleaned_details[key] = float(value)
+                    else:
+                        cleaned_details[key] = int(value)
+                except (ValueError, TypeError):
+                    pass
+        
+        return cleaned_details
     
     def _try_rentcast_valuation(self, valuation_data: Dict, address: str, city: str, state: str):
         """Try RentCast API for property valuation"""

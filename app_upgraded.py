@@ -407,17 +407,34 @@ def analyze_property():
             # Extract individual platform estimates for frontend display
             valuations = valuation_data.get('valuations', {})
             if 'zillow' in valuations:
-                property_data['zillow_estimate'] = valuations['zillow'].get('estimate') or valuations['zillow'].get('zestimate')
+                zillow_data = valuations['zillow']
+                property_data['zillow_estimate'] = zillow_data.get('estimate') or zillow_data.get('zestimate')
+                # Extract property details from Zillow if available
+                if zillow_data.get('bedrooms') is not None:
+                    property_data['bedrooms'] = zillow_data['bedrooms']
+                if zillow_data.get('bathrooms') is not None:
+                    property_data['bathrooms'] = zillow_data['bathrooms']
+                if zillow_data.get('square_feet') is not None:
+                    property_data['square_feet'] = zillow_data['square_feet']
+                if zillow_data.get('year_built') is not None:
+                    property_data['year_built'] = zillow_data['year_built']
+                    
+                # Log what we extracted
+                logging.info(f"Extracted from Zillow - Beds: {zillow_data.get('bedrooms')}, Baths: {zillow_data.get('bathrooms')}, Sqft: {zillow_data.get('square_feet')}, Year: {zillow_data.get('year_built')}")
+                    
             if 'redfin' in valuations:
                 property_data['redfin_estimate'] = valuations['redfin'].get('estimate')
             if 'realtor' in valuations:
                 property_data['realtor_estimate'] = valuations['realtor'].get('estimate')
             if 'rentcast' in valuations:
                 property_data['rentcast_estimate'] = valuations['rentcast'].get('estimate')
-                # Extract property details from RentCast
-                property_data['bedrooms'] = valuations['rentcast'].get('bedrooms')
-                property_data['bathrooms'] = valuations['rentcast'].get('bathrooms')
-                property_data['square_feet'] = valuations['rentcast'].get('square_feet')
+                # Extract property details from RentCast as fallback
+                if property_data.get('bedrooms') is None and valuations['rentcast'].get('bedrooms') is not None:
+                    property_data['bedrooms'] = valuations['rentcast'].get('bedrooms')
+                if property_data.get('bathrooms') is None and valuations['rentcast'].get('bathrooms') is not None:
+                    property_data['bathrooms'] = valuations['rentcast'].get('bathrooms')
+                if property_data.get('square_feet') is None and valuations['rentcast'].get('square_feet') is not None:
+                    property_data['square_feet'] = valuations['rentcast'].get('square_feet')
             if 'rentcast_rental' in valuations:
                 property_data['rental_estimate'] = valuations['rentcast_rental'].get('rent_estimate')
                 
