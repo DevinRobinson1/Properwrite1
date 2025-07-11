@@ -114,41 +114,86 @@
             </div>
         </div>
 
-        <!-- Affiliate Code Generator -->
-        <div class="bg-white rounded-lg shadow p-6 mb-8">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Generate Affiliate Code</h2>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Affiliate Name</label>
-                    <input type="text" id="affiliateName" placeholder="Enter affiliate name" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Commission Rate (%)</label>
-                    <input type="number" id="commissionRate" value="20" min="0" max="100" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tier</label>
-                    <select id="affiliateTier" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                        <option value="basic">Basic (20%)</option>
-                        <option value="premium">Premium (25%)</option>
-                        <option value="top">Top (30%)</option>
-                    </select>
-                </div>
-                <div class="flex items-end">
+        <!-- Code Generators -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Affiliate Code Generator -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Generate Affiliate Code</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Affiliate Name</label>
+                        <input type="text" id="affiliateName" placeholder="Enter affiliate name" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Commission Rate (%)</label>
+                            <input type="number" id="commissionRate" value="20" min="0" max="100" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tier</label>
+                            <select id="affiliateTier" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="basic">Basic (20%)</option>
+                                <option value="premium">Premium (25%)</option>
+                                <option value="top">Top (30%)</option>
+                            </select>
+                        </div>
+                    </div>
                     <button onclick="generateAffiliateCode()" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                        <i class="fas fa-code mr-2"></i>Generate Code
+                        <i class="fas fa-code mr-2"></i>Generate Affiliate Code
                     </button>
+                </div>
+                <div id="generatedCode" class="mt-4 p-4 bg-gray-50 rounded-lg hidden">
+                    <p class="text-sm text-gray-600">Generated Affiliate Code:</p>
+                    <div class="flex items-center mt-2">
+                        <code id="affiliateCode" class="bg-gray-800 text-green-400 px-3 py-2 rounded font-mono text-sm flex-1"></code>
+                        <button onclick="copyAffiliateCode()" class="ml-2 bg-gray-600 text-white px-3 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div id="generatedCode" class="mt-4 p-4 bg-gray-50 rounded-lg hidden">
-                <p class="text-sm text-gray-600">Generated Affiliate Code:</p>
-                <div class="flex items-center mt-2">
-                    <code id="affiliateCode" class="bg-gray-800 text-green-400 px-3 py-2 rounded font-mono text-sm flex-1"></code>
-                    <button onclick="copyAffiliateCode()" class="ml-2 bg-gray-600 text-white px-3 py-2 rounded hover:bg-gray-700">
-                        <i class="fas fa-copy"></i>
+
+            <!-- Credit Code Generator -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Generate Credit Code</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Credit Amount</label>
+                        <input type="number" id="creditAmount" value="10" min="1" max="1000" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Max Uses</label>
+                            <input type="number" id="maxUses" value="1" min="1" max="1000" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Expires (Days)</label>
+                            <input type="number" id="expiresDays" value="30" min="0" max="365" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
+                        <input type="text" id="creditDescription" placeholder="e.g., Welcome bonus, Promotion code" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                    </div>
+                    <button onclick="generateCreditCode()" class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                        <i class="fas fa-gift mr-2"></i>Generate Credit Code
                     </button>
+                </div>
+                <div id="generatedCreditCode" class="mt-4 p-4 bg-gray-50 rounded-lg hidden">
+                    <p class="text-sm text-gray-600">Generated Credit Code:</p>
+                    <div class="flex items-center mt-2">
+                        <code id="creditCode" class="bg-gray-800 text-green-400 px-3 py-2 rounded font-mono text-sm flex-1"></code>
+                        <button onclick="copyCreditCode()" class="ml-2 bg-gray-600 text-white px-3 py-2 rounded hover:bg-gray-700">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <div id="creditCodeDetails" class="mt-2 text-sm text-gray-600"></div>
                 </div>
             </div>
         </div>
@@ -226,6 +271,23 @@
             {% endif %}
         </div>
 
+        <!-- Credit Code Management -->
+        <div class="mt-8 bg-white rounded-lg shadow overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-gray-800">Active Credit Codes</h2>
+                <button onclick="refreshCreditCodes()" class="text-blue-600 hover:text-blue-800 text-sm">
+                    <i class="fas fa-refresh mr-1"></i>Refresh
+                </button>
+            </div>
+            <div id="creditCodesTable">
+                <div class="text-center py-12">
+                    <i class="fas fa-gift text-gray-400 text-4xl mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Credit Codes Found</h3>
+                    <p class="text-gray-500">Generate your first credit code to start offering free credits to users.</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Referral Analytics -->
         <div class="mt-8 bg-white rounded-lg shadow p-6">
             <h2 class="text-xl font-bold text-gray-800 mb-4">Referral Analytics</h2>
@@ -290,6 +352,172 @@
             navigator.clipboard.writeText(code).then(() => {
                 alert('Affiliate code copied to clipboard!');
             });
+        }
+        
+        function generateCreditCode() {
+            const creditAmount = parseInt(document.getElementById('creditAmount').value);
+            const maxUses = parseInt(document.getElementById('maxUses').value);
+            const expiresDays = parseInt(document.getElementById('expiresDays').value);
+            const description = document.getElementById('creditDescription').value;
+            
+            if (!creditAmount || creditAmount <= 0) {
+                alert('Please enter a valid credit amount');
+                return;
+            }
+            
+            if (!maxUses || maxUses <= 0) {
+                alert('Please enter a valid max uses amount');
+                return;
+            }
+            
+            // Call API to generate credit code
+            fetch('/admin/api/credit-code/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    credit_amount: creditAmount,
+                    max_uses: maxUses,
+                    expires_days: expiresDays,
+                    description: description
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('creditCode').textContent = data.credit_code.code;
+                    document.getElementById('generatedCreditCode').classList.remove('hidden');
+                    
+                    // Show details
+                    const details = `${creditAmount} credits • Max ${maxUses} uses • ${expiresDays > 0 ? `Expires in ${expiresDays} days` : 'Never expires'}`;
+                    document.getElementById('creditCodeDetails').textContent = details;
+                    
+                    alert(data.message);
+                    refreshCreditCodes();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to generate credit code');
+            });
+        }
+        
+        function copyCreditCode() {
+            const code = document.getElementById('creditCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Credit code copied to clipboard!');
+            });
+        }
+        
+        function refreshCreditCodes() {
+            fetch('/admin/api/credit-codes')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayCreditCodes(data.credit_codes);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        function displayCreditCodes(creditCodes) {
+            const container = document.getElementById('creditCodesTable');
+            
+            if (!creditCodes || creditCodes.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <i class="fas fa-gift text-gray-400 text-4xl mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Credit Codes Found</h3>
+                        <p class="text-gray-500">Generate your first credit code to start offering free credits to users.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let tableHTML = `
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Credits</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usage</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expires</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+            `;
+            
+            creditCodes.forEach(code => {
+                tableHTML += `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <code class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">${code.code}</code>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm font-medium text-gray-900">${code.credit_amount}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm text-gray-900">${code.current_uses}/${code.max_uses}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm text-gray-900">${code.expires_at ? new Date(code.expires_at).toLocaleDateString() : 'Never'}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full ${code.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                ${code.status.charAt(0).toUpperCase() + code.status.slice(1)}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="copyCreditCodeToClipboard('${code.code}')" class="text-blue-600 hover:text-blue-900 mr-3">Copy</button>
+                            <button onclick="disableCreditCode('${code.code}')" class="text-red-600 hover:text-red-900">Disable</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = tableHTML;
+        }
+        
+        function copyCreditCodeToClipboard(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Credit code copied to clipboard!');
+            });
+        }
+        
+        function disableCreditCode(code) {
+            if (confirm(`Are you sure you want to disable credit code ${code}?`)) {
+                fetch(`/admin/api/credit-code/${code}/disable`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        refreshCreditCodes();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to disable credit code');
+                });
+            }
         }
         
         function createAffiliateCode() {

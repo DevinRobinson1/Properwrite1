@@ -107,3 +107,38 @@ class AffiliateCommission(Base):
     affiliate = relationship('Affiliate', backref='commissions')
     referral = relationship('AffiliateReferral', backref='commissions')
     payout = relationship('AffiliatePayout', backref='commissions')
+
+
+class AffiliateCreditCode(Base):
+    """Credit codes for giving free credits to users"""
+    __tablename__ = 'affiliate_credit_codes'
+    
+    id = Column(Integer, primary_key=True)
+    code = Column(String(50), unique=True, nullable=False)
+    credit_amount = Column(Integer, nullable=False)  # Number of credits to grant
+    max_uses = Column(Integer, default=1)  # Maximum number of times code can be used
+    current_uses = Column(Integer, default=0)  # Current number of uses
+    expires_at = Column(DateTime, nullable=True)  # Optional expiration date
+    created_by = Column(String, nullable=False)  # Admin who created the code
+    status = Column(String(20), default='active')  # 'active', 'expired', 'disabled'
+    description = Column(String(200))  # Optional description
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    redemptions = relationship('AffiliateCreditRedemption', back_populates='credit_code')
+
+
+class AffiliateCreditRedemption(Base):
+    """Track credit code redemptions"""
+    __tablename__ = 'affiliate_credit_redemptions'
+    
+    id = Column(Integer, primary_key=True)
+    credit_code_id = Column(Integer, ForeignKey('affiliate_credit_codes.id'), nullable=False)
+    user_id = Column(String, ForeignKey('users.id'), nullable=False)
+    credits_granted = Column(Integer, nullable=False)
+    redeemed_at = Column(DateTime, default=datetime.utcnow)
+    ip_address = Column(String(45))
+    
+    # Relationships
+    credit_code = relationship('AffiliateCreditCode', back_populates='redemptions')
+    user = relationship('User', backref='credit_redemptions')

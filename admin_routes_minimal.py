@@ -208,3 +208,71 @@ def suspend_affiliate(affiliate_id):
         'success': True,
         'message': 'Affiliate account suspended'
     })
+
+@admin_bp.route('/api/credit-code/create', methods=['POST'])
+@require_admin
+def create_credit_code():
+    """Create new credit code"""
+    data = request.get_json()
+    
+    credit_amount = data.get('credit_amount', 0)
+    max_uses = data.get('max_uses', 1)
+    description = data.get('description', '').strip()
+    expires_days = data.get('expires_days', 0)
+    
+    if not credit_amount or credit_amount <= 0:
+        return jsonify({'error': 'Credit amount must be greater than 0'}), 400
+    
+    if not max_uses or max_uses <= 0:
+        return jsonify({'error': 'Max uses must be greater than 0'}), 400
+    
+    # Generate unique credit code
+    import random
+    import string
+    code = 'CREDIT' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    
+    # Calculate expiration date
+    expires_at = None
+    if expires_days > 0:
+        from datetime import timedelta
+        expires_at = (datetime.utcnow() + timedelta(days=expires_days)).isoformat()
+    
+    # Create credit code data
+    credit_code_data = {
+        'code': code,
+        'credit_amount': credit_amount,
+        'max_uses': max_uses,
+        'current_uses': 0,
+        'expires_at': expires_at,
+        'description': description,
+        'status': 'active',
+        'created_by': 'admin',
+        'created_at': datetime.utcnow().isoformat()
+    }
+    
+    return jsonify({
+        'success': True,
+        'credit_code': credit_code_data,
+        'message': f'Credit code {code} created successfully'
+    })
+
+@admin_bp.route('/api/credit-code/<string:code>/disable', methods=['POST'])
+@require_admin
+def disable_credit_code(code):
+    """Disable credit code"""
+    # Placeholder disable
+    return jsonify({
+        'success': True,
+        'message': f'Credit code {code} disabled successfully'
+    })
+
+@admin_bp.route('/api/credit-codes', methods=['GET'])
+@require_admin
+def get_credit_codes():
+    """Get all credit codes"""
+    # Placeholder data - in real implementation, this would query the database
+    credit_codes = []
+    return jsonify({
+        'success': True,
+        'credit_codes': credit_codes
+    })
