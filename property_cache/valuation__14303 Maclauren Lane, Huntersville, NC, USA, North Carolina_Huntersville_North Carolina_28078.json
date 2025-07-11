@@ -1,0 +1,44 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 611700,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 65003322,
+      "matched_address": "14303 Maclauren Lane, Huntersville, NC, USA, North Carolina, Huntersville, North Carolina 28078",
+      "images": [
+        "https://photos.zillowstatic.com/fp/e5bcc137039d1b2a907dd32853927810-p_d.jpg"
+      ]
+    },
+    "rentcast": {
+      "estimate": 315000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": "14303 Maclauren Ln, Huntersville, NC 28078",
+      "bedrooms": 3,
+      "bathrooms": 2.5,
+      "square_feet": 2881,
+      "property_type": "Single Family",
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin"
+  ],
+  "sources_used": [
+    "Zillow",
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "14303 Maclauren Lane, Huntersville, NC, USA, North Carolina",
+    "city": "Huntersville",
+    "state": "North Carolina",
+    "zip_code": "28078",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-11T11:58:03.438279"
+}

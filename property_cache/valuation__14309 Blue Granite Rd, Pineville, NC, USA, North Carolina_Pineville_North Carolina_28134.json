@@ -1,0 +1,44 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 499800,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 6314717,
+      "matched_address": "14309 Blue Granite Rd, Pineville, NC, USA, North Carolina, Pineville, North Carolina 28134",
+      "images": [
+        "https://photos.zillowstatic.com/fp/80841105c08cd970c33873fb4ef5342e-p_d.jpg"
+      ]
+    },
+    "rentcast": {
+      "estimate": 225000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": "14309 Blue Granite Rd, Pineville, NC 28134",
+      "bedrooms": 4,
+      "bathrooms": 2.5,
+      "square_feet": 2548,
+      "property_type": "Single Family",
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin"
+  ],
+  "sources_used": [
+    "Zillow",
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "14309 Blue Granite Rd, Pineville, NC, USA, North Carolina",
+    "city": "Pineville",
+    "state": "North Carolina",
+    "zip_code": "28134",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-11T11:59:37.738694"
+}

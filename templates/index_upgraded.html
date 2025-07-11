@@ -3810,18 +3810,19 @@
         }
         
         function updateMaxProfitFlipperPrice() {
-            const slider = document.getElementById('max-profit-slider');
+            const percentInput = document.getElementById('max-profit-slider');
             const priceDisplay = document.getElementById('max-profit-flipper-price');
             
-            if (!slider || !priceDisplay) return;
+            if (!percentInput || !priceDisplay) return;
             
-            const percent = parseFloat(slider.value) || 60;
+            const percent = parseFloat(percentInput.value) || 60;
             
             // Calculate price: (ARV × percent) - Repairs - get values from property header
             const arv = parseFloat(document.getElementById('arv')?.value?.replace(/,/g, '')) || 415000;
             const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/,/g, '')) || 30000;
             const price = (arv * (percent / 100)) - repairs;
             
+            console.log('Max-Profit Flipper calculation:', { arv, percent, repairs, price });
             priceDisplay.textContent = '$' + Math.round(price).toLocaleString();
         }
         
@@ -3842,10 +3843,11 @@
                 updateElementIfExists('rent-rule-price', '$' + Math.round(rentRulePrice).toLocaleString());
                 updateElementIfExists('rent-rule-ratio', ((rent / rentRulePrice) * 100).toFixed(1) + '%');
                 
-                // Update Volume Flipper - NEW FORMULA: (ARV × 0.70) − Repairs − $3,500 buffer − Min Flip Amount
+                // Update Volume Flipper - CORRECTED FORMULA: (ARV × 0.70) − Repairs − Min Flip Amount − Buffer
                 const volumeFlipperMinFlip = parseFloat(document.getElementById('volume-flipper-min-flip')?.value?.replace(/,/g, '')) || 25000;
-                const volumeFlipperPrice = (arv * 0.70) - repairs - closingCosts - volumeFlipperMinFlip;
-                console.log('Volume Flipper calculation:', { arv, repairs, closingCosts, volumeFlipperMinFlip, volumeFlipperPrice });
+                const buffer = 3500; // Fixed buffer amount
+                const volumeFlipperPrice = (arv * 0.70) - repairs - volumeFlipperMinFlip - buffer;
+                console.log('Volume Flipper calculation:', { arv70: arv * 0.70, repairs, volumeFlipperMinFlip, buffer, volumeFlipperPrice });
                 console.log('Updating volume flipper price to:', '$' + Math.round(volumeFlipperPrice).toLocaleString());
                 updateElementIfExists('volume-flipper-price', '$' + Math.round(volumeFlipperPrice).toLocaleString());
                 
@@ -3856,7 +3858,10 @@
                 updateElementIfExists('brrr-investor-arv', '$' + Math.round(brrrARV).toLocaleString());
                 
                 // Update Max-Profit Flipper
-                updateMaxProfitFlipperPrice();
+                const maxProfitPercent = parseFloat(document.getElementById('max-profit-slider')?.value) || 60;
+                const maxProfitPrice = (arv * (maxProfitPercent / 100)) - repairs;
+                console.log('Max-Profit Flipper calculation:', { arv, maxProfitPercent, repairs, maxProfitPrice });
+                updateElementIfExists('max-profit-flipper-price', '$' + Math.round(maxProfitPrice).toLocaleString());
             
                 // Update other strategies
                 updateNovationCalculation();
