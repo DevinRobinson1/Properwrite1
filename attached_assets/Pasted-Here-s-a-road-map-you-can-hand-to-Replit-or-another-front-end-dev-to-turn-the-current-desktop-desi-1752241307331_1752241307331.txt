@@ -1,0 +1,86 @@
+Here’s a road-map you can hand to Replit (or another front-end dev) to turn the current desktop design into a slick, phone-first experience without touching the Acquisitions / Dispositions logic.
+
+1. Layout strategy 📐
+Area	Desktop treatment	Mobile treatment (≤ 640 px)
+Global header	full-width bar	keep height ≤ 56 px; collapse rarely-used links into a “⋮” menu
+Primary KPI cards (Total Committed, Annualized Return, Active Deals)	3-column grid	single horizontal swipeable carousel (snap-scroll) or a 3-row stack
+“Portfolio Diversification Opportunity” banner	full-row banner with CTA buttons	reduce copy-length, move CTAs beneath text, allow horizontal scroll if copy wraps
+Tabs (Portfolio / Opportunities / Docs)	inline pill tabs	stick them horizontally scrollable just below header; use overflow-x-auto
+Side-panel mockup (new compact design)	sidebar icons	swap for a bottom nav bar with 4–5 icons (position: fixed; bottom: 0)
+Quick Actions	row of 4 buttons	convert to vertical list or 2 × 2 grid; keep the same IDs so JS hooks don’t break
+Table-like “Your Investments” rows	four numeric columns	two-line card:
+line 1 → deal name + status badge
+line 2 → small grid: Committed
+
+Implementation tip: Tailwind’s responsive prefixes (sm:, md:, lg:) let you keep the existing classes and simply add mobile overrides.
+
+2. Interaction polish ⚡
+Concern	Mobile UX fix
+Tap targets	ensure buttons & chips ≥ 44 × 44 px
+Scrolling fatigue	Collapsible “Portfolio Health”, “Your Investments”, etc. via <details>/<summary> or a custom accordion
+Sticky feedback	Use Toast notifications (toast.bottom-center) instead of banners that push content down
+Data-dense tables	Offer a “Compact / Expanded” toggle; compact mode hides less-used columns behind a “…” chevron
+API latency (field use)	skeleton loaders & optimistic UI; cache last-used property locally so results show instantly offline
+
+3. CSS / Component tweaks 🛠
+Set a max-width and center everything above md:
+
+html
+Copy
+Edit
+<main class="mx-auto max-w-[1150px] px-4 sm:px-6">
+Card wrapper
+
+html
+Copy
+Edit
+<div class="rounded-xl bg-surface/80 backdrop-blur-sm ring-1 ring-white/10
+            p-4 sm:p-6 shadow-lg">
+Primary KPIs – carousel
+
+html
+Copy
+Edit
+<div class="flex sm:grid sm:grid-cols-3 gap-4 overflow-x-auto snap-x">
+  <section class="min-w-[250px] snap-center …">…</section>
+  …
+</div>
+Bottom nav bar (fixed)
+
+html
+Copy
+Edit
+<nav class="sm:hidden fixed bottom-0 inset-x-0 flex justify-around
+            bg-surface/80 backdrop-blur-md border-t border-white/10 py-2">
+  <button>🏠</button><button>📊</button>…
+</nav>
+Media queries for font scaling
+Use Tailwind’s text-sm, md:text-base, lg:text-lg so totals remain legible.
+
+4. Performance & field reliability 📶
+Install Service Worker → cache CSS/JS shell & last valuation call for offline viewing.
+
+Lazy-load images with loading="lazy" + a blurred placeholder.
+
+Compress JS bundle with esbuild --target=es2019.
+
+5. QA checklist ✅
+iPhone SE / Pixel 4 – no horizontal scroll.
+
+Tap any KPI card → ripple feedback within 100 ms.
+
+Rotate phone → grid re-flows, no overlap.
+
+Offline mode (DevTools ⇢ Network ⇢ Offline) still shows last finished valuation page.
+
+200 ms throttled network → skeletons appear, toast on API errors.
+
+Hand this spec to Replit / Ghostwriter and ask them to:
+
+Add the Tailwind mobile classes & bottom nav bar.
+
+Keep existing IDs, hooks, and Acquisitions / Dispositions JS untouched.
+
+Verify the responsive breakpoints with Storybook or Chrome Device Mode.
+
+Once merged, you’ll have a tight, elegant mobile dashboard your teams can trust in the field.

@@ -79,36 +79,38 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
     
-    <!-- Properwrite Header -->
-    <div class="bg-white border-b border-gray-200">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
+    <!-- Properwrite Header - Mobile Optimized -->
+    <div class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-[1150px] mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-14 sm:h-16">
                 <!-- Properwrite Brand -->
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-amber-600 to-amber-800 flex items-center justify-center">
-                        <span class="text-white font-bold text-lg">P</span>
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-amber-600 to-amber-800 flex items-center justify-center">
+                        <span class="text-white font-bold text-sm sm:text-lg">P</span>
                     </div>
                     <div>
-                        <h1 class="text-2xl font-bold bg-gradient-to-r from-gray-800 to-amber-600 bg-clip-text text-transparent">
+                        <h1 class="text-lg sm:text-2xl font-bold bg-gradient-to-r from-gray-800 to-amber-600 bg-clip-text text-transparent">
                             Properwrite
                         </h1>
-                        <p class="text-xs text-gray-500">Real Estate Investment Analysis</p>
+                        <p class="text-xs text-gray-500 hidden sm:block">Real Estate Investment Analysis</p>
                     </div>
                 </div>
                 
                 <!-- Credit Status & Actions -->
-                <div class="flex items-center space-x-4">
-                    <div class="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg">
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <div class="flex items-center space-x-1 sm:space-x-2 bg-gray-50 px-2 sm:px-3 py-1 sm:py-2 rounded-lg">
                         <div class="w-2 h-2 bg-green-400 rounded-full"></div>
-                        <span class="text-sm text-gray-600">Credits:</span>
-                        <span class="font-semibold text-gray-800" id="credit-balance">--</span>
+                        <span class="text-xs sm:text-sm text-gray-600">Credits:</span>
+                        <span class="font-semibold text-gray-800 text-sm sm:text-base" id="credit-balance">--</span>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="showBillingModal()" class="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition-all duration-300 text-sm">
-                            <i class="fas fa-credit-card mr-2"></i>Upgrade
+                    <div class="flex items-center space-x-1 sm:space-x-2">
+                        <button onclick="showBillingModal()" class="bg-amber-600 text-white px-2 sm:px-4 py-1 sm:py-2 rounded-lg hover:bg-amber-700 transition-all duration-300 text-xs sm:text-sm">
+                            <i class="fas fa-credit-card sm:mr-2"></i>
+                            <span class="hidden sm:inline">Upgrade</span>
                         </button>
-                        <a href="/jv-submit" target="_blank" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-all duration-300 text-sm">
-                            <i class="fas fa-handshake mr-2"></i>JV Submit
+                        <a href="/jv-submit" target="_blank" class="bg-gray-600 text-white px-2 sm:px-4 py-1 sm:py-2 rounded-lg hover:bg-gray-700 transition-all duration-300 text-xs sm:text-sm">
+                            <i class="fas fa-handshake sm:mr-2"></i>
+                            <span class="hidden sm:inline">JV Submit</span>
                         </a>
                     </div>
                 </div>
@@ -116,23 +118,23 @@
         </div>
     </div>
     
-    <!-- Hero Section -->
-    <div class="gradient-bg text-white py-12 mb-8">
-        <div class="container mx-auto px-4 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold mb-4">Professional Real Estate Analysis Platform</h2>
-            <p class="text-xl text-center opacity-90">Smart Property Analysis with External Data Integration</p>
+    <!-- Hero Section - Mobile Optimized -->
+    <div class="gradient-bg text-white py-6 sm:py-12 mb-4 sm:mb-8">
+        <div class="max-w-[1150px] mx-auto px-4 sm:px-6 text-center">
+            <h2 class="text-xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-4">Professional Real Estate Analysis Platform</h2>
+            <p class="text-sm sm:text-xl opacity-90">Smart Property Analysis with External Data Integration</p>
         </div>
     </div>
 
-    <div class="container mx-auto px-4 max-w-7xl">
+    <div class="max-w-[1150px] mx-auto px-4 sm:px-6">
         
-        <!-- Property Input Section -->
-        <div class="bg-white rounded-xl shadow-lg p-8 mb-8 card-hover transition-all duration-300">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+        <!-- Property Input Section - Mobile Optimized -->
+        <div class="rounded-xl bg-white backdrop-blur-sm ring-1 ring-gray-200 p-4 sm:p-8 mb-4 sm:mb-8 shadow-lg card-hover transition-all duration-300">
+            <h2 class="text-lg sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">
                 <i class="fas fa-search text-blue-600 mr-2"></i>Property Analysis
             </h2>
             
-            <form id="property-form" class="space-y-6">
+            <form id="property-form" class="space-y-4 sm:space-y-6">
                 <div class="max-w-2xl mx-auto">
                     <div class="address-input-container">
                         <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -142,7 +144,7 @@
                         <input type="text" id="address" required
                                data-enhanced-address="true"
                                data-auto-submit="false"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                               class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-lg"
                                placeholder="Start typing a complete address...">
                     </div>
                     <!-- Hidden fields for backend compatibility -->
@@ -152,7 +154,7 @@
                 </div>
                 
                 <div class="flex justify-center">
-                    <button type="submit" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-semibold">
+                    <button type="submit" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-semibold text-sm sm:text-base min-h-[44px] min-w-[180px]">
                         <i class="fas fa-rocket mr-2"></i>Analyze Property
                     </button>
                 </div>
@@ -5875,19 +5877,58 @@
                 const data = await response.json();
                 
                 const creditBalance = document.getElementById('credit-balance');
+                const mobileCreditBalance = document.getElementById('mobile-credit-balance');
+                
+                let displayValue;
                 if (data.logged_in) {
                     if (data.unlimited_credits) {
-                        creditBalance.textContent = '∞';
+                        displayValue = '∞';
                     } else {
-                        creditBalance.textContent = data.credits;
+                        displayValue = data.credits;
                     }
                 } else {
-                    creditBalance.textContent = data.remaining_uses;
+                    displayValue = data.remaining_uses;
                 }
+                
+                // Update both desktop and mobile credit displays
+                if (creditBalance) creditBalance.textContent = displayValue;
+                if (mobileCreditBalance) mobileCreditBalance.textContent = displayValue;
+                
             } catch (error) {
                 console.error('Error loading user status:', error);
                 document.getElementById('credit-balance').textContent = '--';
+                const mobileCreditBalance = document.getElementById('mobile-credit-balance');
+                if (mobileCreditBalance) mobileCreditBalance.textContent = '--';
             }
+        }
+
+        // Show loading skeleton for mobile
+        function showSkeletonLoader(containerId) {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="skeleton h-4 w-3/4 rounded"></div>
+                        <div class="skeleton h-4 w-1/2 rounded"></div>
+                        <div class="skeleton h-4 w-5/6 rounded"></div>
+                    </div>
+                `;
+            }
+        }
+
+        // Show mobile-optimized toast
+        function showMobileToast(message, type = 'error') {
+            const toast = document.createElement('div');
+            toast.className = `toast-mobile px-4 py-3 rounded-lg text-white shadow-lg ${
+                type === 'error' ? 'bg-red-500' : 'bg-green-500'
+            }`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
         }
 
         // Function to show billing modal
@@ -5899,6 +5940,85 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadUserStatus();
         });
+
+        // Bottom navigation functions
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function showMobileMenu() {
+            // Toggle mobile menu visibility
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu) {
+                mobileMenu.classList.toggle('hidden');
+            }
+        }
     </script>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="sm:hidden fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-md border-t border-gray-200 z-50">
+        <div class="flex justify-around py-2">
+            <button onclick="scrollToSection('analysis-results')" class="flex flex-col items-center py-2 px-3 text-xs text-gray-600 hover:text-blue-600 transition-colors min-h-[44px] min-w-[44px]">
+                <i class="fas fa-home text-lg mb-1"></i>
+                <span>Home</span>
+            </button>
+            <button onclick="scrollToSection('acquisitions-section')" class="flex flex-col items-center py-2 px-3 text-xs text-gray-600 hover:text-blue-600 transition-colors min-h-[44px] min-w-[44px]">
+                <i class="fas fa-chart-line text-lg mb-1"></i>
+                <span>Acquire</span>
+            </button>
+            <button onclick="scrollToSection('dispositions-section')" class="flex flex-col items-center py-2 px-3 text-xs text-gray-600 hover:text-blue-600 transition-colors min-h-[44px] min-w-[44px]">
+                <i class="fas fa-dollar-sign text-lg mb-1"></i>
+                <span>Sell</span>
+            </button>
+            <button onclick="showBillingModal()" class="flex flex-col items-center py-2 px-3 text-xs text-gray-600 hover:text-amber-600 transition-colors min-h-[44px] min-w-[44px]">
+                <i class="fas fa-credit-card text-lg mb-1"></i>
+                <span>Upgrade</span>
+            </button>
+            <button onclick="showMobileMenu()" class="flex flex-col items-center py-2 px-3 text-xs text-gray-600 hover:text-gray-800 transition-colors min-h-[44px] min-w-[44px]">
+                <i class="fas fa-ellipsis-v text-lg mb-1"></i>
+                <span>More</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="sm:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden" onclick="showMobileMenu()">
+        <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-xl p-6" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Menu</h3>
+                <button onclick="showMobileMenu()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <a href="/jv-submit" target="_blank" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-handshake text-gray-600"></i>
+                    <span>JV Submit</span>
+                </a>
+                <button onclick="scrollToSection('property-form')" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors w-full text-left">
+                    <i class="fas fa-search text-gray-600"></i>
+                    <span>New Analysis</span>
+                </button>
+                <div class="pt-3 border-t border-gray-200">
+                    <div class="flex items-center space-x-3 p-3">
+                        <i class="fas fa-coins text-green-600"></i>
+                        <span class="text-sm text-gray-600">Credits: <span id="mobile-credit-balance" class="font-semibold">--</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add mobile padding to prevent content from hiding behind bottom nav -->
+    <style>
+        @media (max-width: 640px) {
+            body {
+                padding-bottom: 70px;
+            }
+        }
+    </style>
 </body>
 </html>
