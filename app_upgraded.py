@@ -54,7 +54,21 @@ def analyze_property():
     """
     Analyze property with external data enrichment from multiple sources
     Pulls data from Zillow, Redfin, Realtor.com and other sources
+    Includes credit consumption and usage limiting
     """
+    # Import here to avoid circular import
+    from main import db
+    from auth_service import check_usage_limit, consume_credit
+    
+    # Check if user can use the analyzer
+    can_use, message, redirect_url = check_usage_limit(db)
+    if not can_use:
+        return jsonify({
+            'error': True,
+            'message': message,
+            'redirect_url': redirect_url
+        }), 403
+    
     try:
         # Extract validated address data from middleware
         validated_address_data = extract_validated_address_data(request)
@@ -245,8 +259,18 @@ def analyze_property():
         
         session['current_property'] = property_data
         
+        # Consume credit after successful analysis
+        success, credit_message = consume_credit(db)
+        if not success:
+            # This shouldn't happen since we checked at the start, but just in case
+            return jsonify({
+                'success': False,
+                'error': credit_message
+            }), 403
+        
         return jsonify({
             'success': True,
+            'credit_message': credit_message,
             **property_data
         })
         

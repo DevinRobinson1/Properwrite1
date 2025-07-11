@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Credits - properwrite.com</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-gray-900">properwrite.com</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-700">{{ user.credits }} credits remaining</span>
+                    <a href="/" class="text-blue-600 hover:text-blue-500">
+                        <i class="fas fa-arrow-left mr-1"></i>Back to Analyzer
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-900">Purchase More Credits</h2>
+            <p class="mt-2 text-gray-600">Get more property analysis credits to continue using the platform</p>
+        </div>
+
+        <!-- Current Status -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <div class="flex items-center">
+                <i class="fas fa-info-circle text-blue-600 text-xl mr-3"></i>
+                <div>
+                    <h3 class="font-semibold text-blue-900">Current Status</h3>
+                    <p class="text-blue-800">You have {{ user.credits }} credits remaining</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subscription Plans -->
+        <div class="mb-12">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">Monthly Subscription Plans</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Starter Plan -->
+                <div class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+                    <div class="text-center">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">{{ subscription_plans.starter.name }}</h4>
+                        <div class="text-3xl font-bold text-blue-600 mb-2">${{ "%.0f"|format(subscription_plans.starter.price / 100) }}</div>
+                        <div class="text-gray-600 mb-2">per month</div>
+                        <div class="text-sm text-gray-500 mb-4">{{ subscription_plans.starter.description }}</div>
+                        <button onclick="purchaseSubscription('starter')" 
+                                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                            Subscribe
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Pro Plan -->
+                <div class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+                    <div class="text-center">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">{{ subscription_plans.pro.name }}</h4>
+                        <div class="text-3xl font-bold text-green-600 mb-2">${{ "%.0f"|format(subscription_plans.pro.price / 100) }}</div>
+                        <div class="text-gray-600 mb-2">per month</div>
+                        <div class="text-sm text-gray-500 mb-4">{{ subscription_plans.pro.description }}</div>
+                        <button onclick="purchaseSubscription('pro')" 
+                                class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors">
+                            Subscribe
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Team5 Plan -->
+                <div class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow border-purple-400">
+                    <div class="text-center">
+                        <div class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full mb-2 inline-block">
+                            TEAM
+                        </div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">{{ subscription_plans.team5.name }}</h4>
+                        <div class="text-3xl font-bold text-purple-600 mb-2">${{ "%.0f"|format(subscription_plans.team5.price / 100) }}</div>
+                        <div class="text-gray-600 mb-2">per month</div>
+                        <div class="text-sm text-gray-500 mb-4">{{ subscription_plans.team5.description }}</div>
+                        <button onclick="purchaseSubscription('team5')" 
+                                class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors">
+                            Subscribe
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Growth10 Plan -->
+                <div class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow border-orange-400">
+                    <div class="text-center">
+                        <div class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full mb-2 inline-block">
+                            UNLIMITED
+                        </div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">{{ subscription_plans.growth10.name }}</h4>
+                        <div class="text-3xl font-bold text-orange-600 mb-2">${{ "%.0f"|format(subscription_plans.growth10.price / 100) }}</div>
+                        <div class="text-gray-600 mb-2">per month</div>
+                        <div class="text-sm text-gray-500 mb-4">{{ subscription_plans.growth10.description }}</div>
+                        <button onclick="purchaseSubscription('growth10')" 
+                                class="w-full bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition-colors">
+                            Subscribe
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- One-Time Credit Packs -->
+        <div class="mb-12">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">One-Time Credit Packs</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {% for pack_id, pack_info in credit_packs.items() %}
+                <div class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+                    <div class="text-center">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">{{ pack_info.name }}</h4>
+                        <div class="text-3xl font-bold text-blue-600 mb-2">${{ "%.2f"|format(pack_info.price / 100) }}</div>
+                        <div class="text-gray-600 mb-4">{{ pack_info.credits }} Credits</div>
+                        <div class="text-sm text-gray-500 mb-4">${{ "%.2f"|format(pack_info.price / 100 / pack_info.credits) }} per analysis</div>
+                        <button onclick="purchaseCredits('{{ pack_id }}')" 
+                                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                            Purchase
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Comping Credits (Admin Feature) -->
+        {% if comping_enabled %}
+        <div class="mb-8">
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                <div class="flex items-center">
+                    <i class="fas fa-gift text-yellow-600 text-xl mr-3"></i>
+                    <div>
+                        <h3 class="font-semibold text-yellow-900">Comping Credits</h3>
+                        <p class="text-yellow-800">Admin feature for granting complimentary credits - Coming Soon</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Features -->
+        <div class="mt-12 bg-white rounded-lg shadow-sm p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">What's included with every credit:</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-center">
+                    <i class="fas fa-check text-green-600 mr-3"></i>
+                    <span class="text-gray-700">Complete property analysis</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-check text-green-600 mr-3"></i>
+                    <span class="text-gray-700">4 acquisition strategies</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-check text-green-600 mr-3"></i>
+                    <span class="text-gray-700">5 exit strategies</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-check text-green-600 mr-3"></i>
+                    <span class="text-gray-700">AI-powered insights</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-check text-green-600 mr-3"></i>
+                    <span class="text-gray-700">Risk analysis & heatmaps</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-check text-green-600 mr-3"></i>
+                    <span class="text-gray-700">Listing generation</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function purchaseCredits(packageType) {
+            try {
+                const response = await fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ package: packageType, type: 'credit_pack' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.checkout_url) {
+                    window.location.href = data.checkout_url;
+                } else {
+                    alert('Error creating checkout session: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        async function purchaseSubscription(planType) {
+            try {
+                const response = await fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ package: planType, type: 'subscription' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.checkout_url) {
+                    window.location.href = data.checkout_url;
+                } else {
+                    alert('Error creating checkout session: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,7 +1,69 @@
 """
 Billing Configuration
-Simple configuration for subscription plans and credit packs
+Updated subscription plans with new credit allocations
 """
+
+SUBSCRIPTION_PLANS = {
+    'starter': {
+        'name': 'Starter',
+        'price': 3900,  # $39/month
+        'credits_per_month': 300,
+        'seats': 1,
+        'description': '300 credits per month, 1 user'
+    },
+    'pro': {
+        'name': 'Pro',
+        'price': 7900,  # $79/month
+        'credits_per_month': 300,
+        'seats': 1,
+        'description': '300 credits per month, 1 user'
+    },
+    'team5': {
+        'name': 'Team5',
+        'price': 19900,  # $199/month
+        'credits_per_month': 1000,
+        'seats': 5,
+        'description': '1,000 credits per month, 5 users'
+    },
+    'growth10': {
+        'name': 'Growth10',
+        'price': 39900,  # $399/month
+        'credits_per_month': -1,  # Unlimited
+        'seats': 10,
+        'description': 'Unlimited credits, 10 users'
+    }
+}
+
+CREDIT_PACKS = {
+    '10-credits': {
+        'name': '10 Credits',
+        'credits': 10,
+        'price': 1999,  # $19.99
+        'description': '10 additional analysis credits'
+    },
+    '25-credits': {
+        'name': '25 Credits',
+        'credits': 25,
+        'price': 4499,  # $44.99
+        'description': '25 additional analysis credits'
+    },
+    '50-credits': {
+        'name': '50 Credits',
+        'credits': 50,
+        'price': 7999,  # $79.99
+        'description': '50 additional analysis credits'
+    },
+    '100-credits': {
+        'name': '100 Credits',
+        'credits': 100,
+        'price': 14999,  # $149.99
+        'description': '100 additional analysis credits'
+    }
+}
+
+# Comping Credits - Admin feature
+COMPING_CREDITS_ENABLED = True
+COMPING_CREDITS_FEATURE_STATUS = "Coming Soon"
 
 # Stripe Price IDs - These would be configured in Stripe Dashboard
 STRIPE_PRICES = {

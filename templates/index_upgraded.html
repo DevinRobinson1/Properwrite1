@@ -5866,5 +5866,39 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Load user status on page load
+        async function loadUserStatus() {
+            try {
+                const response = await fetch('/api/user-status');
+                const data = await response.json();
+                
+                const creditBalance = document.getElementById('credit-balance');
+                if (data.logged_in) {
+                    if (data.unlimited_credits) {
+                        creditBalance.textContent = '∞';
+                    } else {
+                        creditBalance.textContent = data.credits;
+                    }
+                } else {
+                    creditBalance.textContent = data.remaining_uses;
+                }
+            } catch (error) {
+                console.error('Error loading user status:', error);
+                document.getElementById('credit-balance').textContent = '--';
+            }
+        }
+
+        // Function to show billing modal
+        function showBillingModal() {
+            window.location.href = '/purchase-credits';
+        }
+
+        // Initialize user status on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserStatus();
+        });
+    </script>
 </body>
 </html>
