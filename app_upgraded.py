@@ -26,6 +26,7 @@ from google_places_service import google_places_service, AddressNotFoundError, G
 from require_valid_address import require_valid_address, extract_validated_address_data
 from admin_routes_minimal import admin_bp
 from comps_service import CompsService
+from email_service import email_service
 
 # Load environment variables from .env file
 if os.path.exists('.env'):
@@ -1739,7 +1740,152 @@ def team_settings():
                          user=g.current_user, 
                          team=g.current_team)
 
-# Billing endpoints will be added later when authentication is properly configured
+# ==================== EMAIL SERVICE ENDPOINTS ====================
+
+@app.route('/api/send-welcome-email', methods=['POST'])
+@require_auth
+def send_welcome_email():
+    """Send welcome email to user"""
+    try:
+        data = request.get_json()
+        user_email = data.get('email')
+        user_name = data.get('name', 'User')
+        
+        if not user_email:
+            return jsonify({'error': 'Email is required'}), 400
+        
+        success = email_service.send_welcome_email(user_email, user_name)
+        
+        if success:
+            return jsonify({'message': 'Welcome email sent successfully'})
+        else:
+            return jsonify({'error': 'Failed to send welcome email'}), 500
+            
+    except Exception as e:
+        logger.error(f"Error sending welcome email: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/send-test-email', methods=['POST'])
+@require_auth
+def send_test_email():
+    """Send test email to verify email configuration"""
+    try:
+        data = request.get_json()
+        to_email = data.get('email')
+        
+        if not to_email:
+            return jsonify({'error': 'Email is required'}), 400
+        
+        from datetime import datetime
+        
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: #667eea; padding: 40px; text-align: center;">
+                <h1 style="color: white; margin: 0;">Email Test Successful!</h1>
+            </div>
+            
+            <div style="padding: 40px;">
+                <h2 style="color: #333;">Email Configuration Working</h2>
+                
+                <p style="color: #666; line-height: 1.6;">
+                    This test email confirms that your Properwrite email service is configured correctly 
+                    and can send emails from support@fundflowos.com.
+                </p>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                    <h3 style="color: #333; margin-top: 0;">Test Details:</h3>
+                    <p style="color: #666; margin: 5px 0;"><strong>From:</strong> support@fundflowos.com</p>
+                    <p style="color: #666; margin: 5px 0;"><strong>Service:</strong> Properwrite Email Service</p>
+                    <p style="color: #666; margin: 5px 0;"><strong>Date:</strong> {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
+                </div>
+                
+                <p style="color: #666;">
+                    Best regards,<br>
+                    The Properwrite Team
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        success = email_service.send_email(
+            to_email=to_email,
+            subject="Email Test - Properwrite Configuration",
+            html_content=html_content
+        )
+        
+        if success:
+            return jsonify({'message': 'Test email sent successfully'})
+        else:
+            return jsonify({'error': 'Failed to send test email'}), 500
+            
+    except Exception as e:
+        logger.error(f"Error sending test email: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/send-support-email', methods=['POST'])
+@require_auth
+def send_support_email():
+    """Send support email notification"""
+    try:
+        data = request.get_json()
+        user_email = data.get('user_email')
+        user_name = data.get('user_name', 'User')
+        subject = data.get('subject', 'Support Request')
+        message = data.get('message', '')
+        
+        if not user_email or not message:
+            return jsonify({'error': 'Email and message are required'}), 400
+        
+        from datetime import datetime
+        
+        # Send notification to support team
+        support_html = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: #dc3545; padding: 40px; text-align: center;">
+                <h1 style="color: white; margin: 0;">New Support Request</h1>
+            </div>
+            
+            <div style="padding: 40px;">
+                <h2 style="color: #333;">Support Request Details</h2>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                    <h3 style="color: #333; margin-top: 0;">User Information:</h3>
+                    <p style="color: #666; margin: 5px 0;"><strong>Name:</strong> {user_name}</p>
+                    <p style="color: #666; margin: 5px 0;"><strong>Email:</strong> {user_email}</p>
+                    <p style="color: #666; margin: 5px 0;"><strong>Subject:</strong> {subject}</p>
+                    <p style="color: #666; margin: 5px 0;"><strong>Date:</strong> {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
+                </div>
+                
+                <div style="background: #fff; border: 1px solid #ddd; padding: 20px; border-radius: 5px;">
+                    <h4 style="color: #333; margin-top: 0;">Message:</h4>
+                    <p style="color: #666; line-height: 1.6;">{message}</p>
+                </div>
+                
+                <p style="color: #666; margin-top: 20px;">
+                    Please respond to this support request as soon as possible.
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        success = email_service.send_email(
+            to_email='support@fundflowos.com',
+            subject=f'Support Request: {subject}',
+            html_content=support_html
+        )
+        
+        if success:
+            return jsonify({'message': 'Support request sent successfully'})
+        else:
+            return jsonify({'error': 'Failed to send support request'}), 500
+            
+    except Exception as e:
+        logger.error(f"Error sending support email: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
