@@ -3923,8 +3923,12 @@
         }
         
         function updateNovationCalculation() {
+            console.log('updateNovationCalculation called');
+            
             const arv = parseFloat(document.getElementById('arv')?.value?.replace(/,/g, '')) || 415000;
             const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/,/g, '')) || 30000;
+            
+            console.log('Input values:', { arv, repairs });
             
             // List Price = (ARV - Repairs) - MAX(10% of (ARV-Repairs), 20000)
             const afterRepairs = arv - repairs;
@@ -3938,14 +3942,22 @@
             const ourFee = 20475;
             const netToUs = listPrice - totalCommissions - ourFee;
             
-            console.log('Novation calculation:', { 
+            console.log('Novation calculation results:', { 
+                arv,
+                repairs,
+                afterRepairs,
+                discount,
                 listPrice, 
                 listingCommission, 
                 buyerCommission, 
                 totalCommissionRate, 
-                totalCommissions 
+                totalCommissions,
+                ourFee,
+                netToUs
             });
             
+            // Update all the display elements
+            console.log('Updating novation-list-price to:', '$' + Math.round(listPrice).toLocaleString());
             updateElementIfExists('novation-list-price', '$' + Math.round(listPrice).toLocaleString());
             updateElementIfExists('novation-gross-sale', '$' + Math.round(listPrice).toLocaleString());
             updateElementIfExists('novation-commissions', '$' + totalCommissions.toLocaleString());
@@ -5025,8 +5037,15 @@
             // Initialize tab and recalculate values
             setTimeout(() => {
                 if (tabName === 'mls-novation') {
+                    console.log('Calling updateNovationCalculation for MLS/Novation tab');
                     updateNovationCalculation();
-                } else {
+                } else if (tabName === 'cash-sale') {
+                    recalculateAllDispositionStrategies();
+                } else if (tabName === 'subject-to-wrap') {
+                    formatAndRecalculateSubjectTo(null);
+                } else if (tabName === 'seller-finance-wrap') {
+                    updateWrapConfiguration();
+                } else if (tabName === 'compare-all') {
                     recalculateAllDispositionStrategies();
                 }
             }, 100);
@@ -5038,6 +5057,13 @@
                 updateAllDispositionCards();
             }
             formatAllNumbers();
+            
+            // Initialize all disposition calculations
+            setTimeout(() => {
+                console.log('Initializing all disposition calculations on page load');
+                recalculateAllDispositionStrategies();
+                updateNovationCalculation();
+            }, 500);
             
             // Initialize default disposition tab (cash-sale)
             showDispositionTab('cash-sale');
