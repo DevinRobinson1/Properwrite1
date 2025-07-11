@@ -2327,58 +2327,100 @@
                         <div id="mls-novation-content" class="disposition-tab-content hidden">
                             <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
                                 <h3 class="text-lg font-semibold text-blue-800 mb-4">🏠 Novation/Installment (MLS Listing)</h3>
-                                <div class="text-sm text-blue-700 mb-4">Calculate net proceeds after MLS listing and commission costs:</div>
+                                <div class="text-sm text-blue-700 mb-4">Calculate Maximum Allowable Offer using MLS listing strategy:</div>
+                                
+                                <!-- Variables Button -->
+                                <div class="mb-4">
+                                    <button onclick="openNovationVariablesPopup()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                        ⚙️ Adjust Variables
+                                    </button>
+                                </div>
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <!-- Commission Structure -->
+                                    <!-- MAO Calculation Breakdown -->
                                     <div class="bg-white border border-blue-200 p-4 rounded-lg">
-                                        <h4 class="font-semibold text-blue-800 mb-3">Commission Structure</h4>
-                                        <div class="space-y-4">
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                    Listing Agent Commission (%)
-                                                </label>
-                                                <input type="number" min="1" max="5" value="3.0" step="0.1" id="listing-commission-slider" 
-                                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateMLSNovation()">
+                                        <h4 class="font-semibold text-blue-800 mb-3">MAO Calculation Breakdown</h4>
+                                        <div class="space-y-3 text-sm">
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">ARV:</span>
+                                                <span class="font-bold text-blue-600" id="mls-arv-display">$315,000</span>
                                             </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                    Buyer Agent Commission (%)
-                                                </label>
-                                                <input type="number" min="1" max="5" value="3.0" step="0.1" id="buyer-commission-slider" 
-                                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg" onchange="recalculateMLSNovation()">
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">- Estimated Repairs:</span>
+                                                <span class="text-red-600" id="mls-repairs-display">-$20,000</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">- Discount to Sell Fast:</span>
+                                                <span class="text-red-600" id="mls-discount-display">-$10,000</span>
+                                            </div>
+                                            <div class="border-t pt-2 flex justify-between">
+                                                <span class="text-gray-700 font-medium">List Price on MLS:</span>
+                                                <span class="font-bold text-blue-600" id="mls-list-price">$285,000</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">+ End-Buyer Over Ask:</span>
+                                                <span class="text-green-600" id="mls-over-ask-display">+$0</span>
+                                            </div>
+                                            <div class="border-t pt-2 flex justify-between">
+                                                <span class="text-gray-700 font-medium">Final Sales Price:</span>
+                                                <span class="font-bold text-blue-600" id="mls-final-sales-price">$285,000</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">- Closing Fees & OOP:</span>
+                                                <span class="text-red-600" id="mls-closing-fees-display">-$18,783</span>
+                                            </div>
+                                            <div class="border-t pt-2 flex justify-between">
+                                                <span class="text-gray-700 font-medium">Gross Sales Price:</span>
+                                                <span class="font-bold text-blue-600" id="mls-gross-sales-price">$266,238</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">- Min Acceptable Profit:</span>
+                                                <span class="text-red-600" id="mls-min-profit-display">-$30,000</span>
+                                            </div>
+                                            <div class="border-t pt-2 flex justify-between bg-yellow-50 p-2 rounded">
+                                                <span class="text-gray-800 font-bold">Novation MAO:</span>
+                                                <span class="font-bold text-green-700 text-lg" id="mls-novation-mao">$236,238</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- Net Proceeds Analysis -->
+                                    <!-- Ackerman Offers -->
                                     <div class="bg-white border border-blue-200 p-4 rounded-lg">
-                                        <h4 class="font-semibold text-blue-800 mb-3">Net Proceeds Analysis</h4>
-                                        <div class="space-y-3 text-sm">
-                                            <div class="flex justify-between">
-                                                <span class="text-gray-600">List Price (95% ARV):</span>
-                                                <span class="font-bold text-blue-600" id="mls-list-price">$393,750</span>
+                                        <h4 class="font-semibold text-blue-800 mb-3">Ackerman Offer Structure</h4>
+                                        <div class="space-y-3">
+                                            <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-sm font-medium text-yellow-800">1st Offer - 65% of MAO:</span>
+                                                    <span class="font-bold text-yellow-900 text-lg" id="ackerman-offer-1">$153,554</span>
+                                                </div>
                                             </div>
-                                            <div class="flex justify-between">
-                                                <span class="text-gray-600">Total Commissions:</span>
-                                                <span class="text-red-600" id="total-commissions">-$23,625</span>
+                                            <div class="bg-orange-50 p-3 rounded-lg border border-orange-200">
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-sm font-medium text-orange-800">2nd Offer - 85% of MAO:</span>
+                                                    <span class="font-bold text-orange-900 text-lg" id="ackerman-offer-2">$200,802</span>
+                                                </div>
                                             </div>
-                                            <div class="flex justify-between">
-                                                <span class="text-gray-600">Closing Costs:</span>
-                                                <span class="text-red-600" id="mls-closing-costs">-$3,500</span>
+                                            <div class="bg-green-50 p-3 rounded-lg border border-green-200">
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-sm font-medium text-green-800">3rd Offer - 95% of MAO:</span>
+                                                    <span class="font-bold text-green-900 text-lg" id="ackerman-offer-3">$224,426</span>
+                                                </div>
                                             </div>
-                                            <div class="border-t pt-2 flex justify-between">
-                                                <span class="text-gray-700 font-medium">Net Proceeds:</span>
-                                                <span class="font-bold text-blue-600" id="mls-net-proceeds">$366,625</span>
+                                            <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-sm font-medium text-blue-800">Max Offer - 100% of MAO:</span>
+                                                    <span class="font-bold text-blue-900 text-lg" id="ackerman-offer-4">$236,238</span>
+                                                </div>
                                             </div>
-                                            <div class="flex justify-between">
-                                                <span class="text-gray-600">Less Acquisition:</span>
-                                                <span class="text-red-600" id="mls-acquisition-cost">-$140,000</span>
+                                        </div>
+                                        
+                                        <!-- Split with Seller Option -->
+                                        <div class="mt-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm text-gray-700">Amount to Split with Seller:</span>
+                                                <span class="font-bold text-gray-900" id="mls-split-amount-display">$0</span>
                                             </div>
-                                            <div class="border-t pt-2 flex justify-between">
-                                                <span class="text-gray-700 font-medium">Total Profit:</span>
-                                                <span class="font-bold text-green-600" id="mls-total-profit">$226,625</span>
-                                            </div>
+                                            <div class="text-xs text-gray-500 mt-1">Reduces all offers by this amount</div>
                                         </div>
                                     </div>
                                 </div>
@@ -4203,32 +4245,69 @@
         }
 
         function recalculateMLSNovation() {
-            // Calculate MLS/Novation listing analysis
-            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 415000;
-            const acquisitionPrice = parseFloat(document.getElementById('global-acquisitions-price-header')?.value?.replace(/[^\d]/g, '')) || 140000;
-            const closingCosts = parseFloat(document.getElementById('dispositions-closing-costs')?.value?.replace(/[^\d]/g, '')) || 3500;
+            // Get values from header and variables
+            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 315000;
+            const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/[^\d]/g, '')) || 20000;
             
-            // Get commission values from inputs
-            const listingCommission = parseFloat(document.getElementById('listing-commission-slider')?.value) || 3.0;
-            const buyerCommission = parseFloat(document.getElementById('buyer-commission-slider')?.value) || 3.0;
+            // Get Acquisitions Price from header
+            const acquisitionsPrice = parseFloat(document.getElementById('global-acquisitions-price-header')?.value?.replace(/[^\d]/g, '')) || 140000;
             
-            // Calculate MLS listing (95% of ARV)
-            const listPrice = arv * 0.95;
-            const totalCommissionPercent = listingCommission + buyerCommission;
-            const totalCommissions = listPrice * (totalCommissionPercent / 100);
-            const netProceeds = listPrice - totalCommissions - closingCosts;
-            const totalProfit = netProceeds - acquisitionPrice;
+            // Variables for the novation calculation (using defaults from image)
+            const negativeAppraisalFactors = 0;
+            const positiveAppraisalFactors = 0; 
+            const discountToSellFast = 10000;
+            const endBuyerOverAsk = 0;
+            const closingFeesAndOutOfPocket = 18783;
+            const minAcceptableProfit = 30000;
+            const splitWithSeller = 0;
             
-            // Update display elements
-            updateElementIfExists('mls-list-price', '$' + Math.round(listPrice).toLocaleString());
+            // Calculate List Price on MLS
+            const listPriceOnMLS = arv - negativeAppraisalFactors + positiveAppraisalFactors - discountToSellFast;
+            
+            // Calculate Final Sales Price to End-Buyer
+            const finalSalesPrice = listPriceOnMLS + endBuyerOverAsk;
+            
+            // Calculate Gross Sales Price (this is the sale price, not net)
+            const grossSalesPrice = finalSalesPrice;
+            
+            // Calculate Net to Us using new formula:
+            // Gross Sales Price - Total Commissions & Fees - Acquisitions Price = Net to us
+            const netToUs = grossSalesPrice - closingFeesAndOutOfPocket - acquisitionsPrice;
+            
+            // For simplified display in existing UI
+            const totalCommissions = closingFeesAndOutOfPocket * 0.6; // Approximate commission portion
+            const otherClosingCosts = closingFeesAndOutOfPocket - totalCommissions;
+            
+            // Update display elements with calculated values
+            updateElementIfExists('mls-list-price', '$' + Math.round(listPriceOnMLS).toLocaleString());
             updateElementIfExists('total-commissions', '-$' + Math.round(totalCommissions).toLocaleString());
-            updateElementIfExists('mls-closing-costs', '-$' + Math.round(closingCosts).toLocaleString());
-            updateElementIfExists('mls-net-proceeds', '$' + Math.round(netProceeds).toLocaleString());
-            updateElementIfExists('mls-acquisition-cost', '-$' + Math.round(acquisitionPrice).toLocaleString());
-            updateElementIfExists('mls-total-profit', '$' + Math.round(totalProfit).toLocaleString());
+            updateElementIfExists('mls-closing-costs', '-$' + Math.round(otherClosingCosts).toLocaleString());
+            updateElementIfExists('mls-net-proceeds', '$' + Math.round(grossSalesPrice - closingFeesAndOutOfPocket).toLocaleString());
+            updateElementIfExists('mls-acquisition-cost', '-$' + Math.round(acquisitionsPrice).toLocaleString());
+            updateElementIfExists('mls-total-profit', '$' + Math.round(netToUs).toLocaleString());
             
-            // Update commission displays if they exist
-            updateElementIfExists('listing-commission-display', listingCommission.toFixed(1) + '%');
+            // Update new display elements if they exist
+            updateElementIfExists('mls-arv-display', '$' + arv.toLocaleString());
+            updateElementIfExists('mls-repairs-display', '-$' + repairs.toLocaleString());
+            updateElementIfExists('mls-discount-display', '-$' + discountToSellFast.toLocaleString());
+            updateElementIfExists('mls-over-ask-display', '+$' + endBuyerOverAsk.toLocaleString());
+            updateElementIfExists('mls-final-sales-price', '$' + Math.round(finalSalesPrice).toLocaleString());
+            updateElementIfExists('mls-closing-fees-display', '-$' + closingFeesAndOutOfPocket.toLocaleString());
+            updateElementIfExists('mls-gross-sales-price', '$' + Math.round(grossSalesPrice).toLocaleString());
+            updateElementIfExists('mls-min-profit-display', '-$' + minAcceptableProfit.toLocaleString());
+            updateElementIfExists('mls-novation-mao', '$' + Math.round(acquisitionsPrice).toLocaleString());
+            updateElementIfExists('mls-split-amount-display', '$' + splitWithSeller.toLocaleString());
+            
+            // Calculate and update Ackerman offers based on acquisitions price (they negotiate the purchase price)
+            const offer1 = acquisitionsPrice * 0.65;
+            const offer2 = acquisitionsPrice * 0.85;
+            const offer3 = acquisitionsPrice * 0.95;
+            const offer4 = acquisitionsPrice;
+            
+            updateElementIfExists('ackerman-offer-1', '$' + Math.round(offer1).toLocaleString());
+            updateElementIfExists('ackerman-offer-2', '$' + Math.round(offer2).toLocaleString());
+            updateElementIfExists('ackerman-offer-3', '$' + Math.round(offer3).toLocaleString());
+            updateElementIfExists('ackerman-offer-4', '$' + Math.round(offer4).toLocaleString());
         }
 
         function recalculateNovationMAO() {
