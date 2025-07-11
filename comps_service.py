@@ -11,6 +11,7 @@ from typing import Dict, List, Optional, Tuple
 import requests
 from math import radians, cos, sin, asin, sqrt
 import openai
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -86,9 +87,17 @@ class CompsService:
                     
                     response = requests.get(search_url, headers=self.zillow_headers, params=params)
                     
-                    if response.status_code == 200:
+                    if response.status_code == 429:
+                        logger.warning(f"Rate limit hit for search, waiting before retry...")
+                        time.sleep(1)  # Wait 1 second before continuing
+                        continue
+                    elif response.status_code == 200:
                         data = response.json()
-                        properties = data.get('props', [])
+                        # Handle both list and dict responses
+                        if isinstance(data, list):
+                            properties = data
+                        else:
+                            properties = data.get('props', [])
                         
                         # Filter by distance if we have coordinates
                         if lat and lng:
@@ -149,7 +158,11 @@ class CompsService:
             
             response = requests.get(url, headers=self.zillow_headers, params=params)
             
-            if response.status_code == 200:
+            if response.status_code == 429:
+                logger.warning(f"Rate limit hit for property details {zpid}, waiting...")
+                time.sleep(1)  # Wait 1 second
+                return None
+            elif response.status_code == 200:
                 return response.json()
             
         except Exception as e:
@@ -204,7 +217,8 @@ class CompsService:
             total_adjustment += adjustment
         
         # Location adjustments (would need more data in real implementation)
-        if comp.get('address', '').lower().count('main') or comp.get('address', '').lower().count('highway'):
+        comp_address = comp.get('address', '') or comp.get('streetAddress', '') or ''
+        if isinstance(comp_address, str) and (comp_address.lower().count('main') or comp_address.lower().count('highway')):
             adjustment = -comp.get('price', 0) * self.adjustments['main_road_penalty']
             adjustments.append({
                 'type': 'Location',
@@ -274,7 +288,10 @@ Format the response as a brief professional paragraph followed by:
 - Confidence: High/Medium/Low
 """
             
-            response = openai.ChatCompletion.create(
+            from openai import OpenAI
+            client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+            
+            response = client.chat.completions.create(
                 model="gpt-4",
                 messages=[
                     {"role": "system", "content": "You are a professional real estate appraiser providing conservative, data-driven valuations."},
@@ -284,7 +301,7 @@ Format the response as a brief professional paragraph followed by:
                 temperature=0.7
             )
             
-            ai_response = response.choices[0].message['content']
+            ai_response = response.choices[0].message.content
             
             # Parse out key values from response
             lines = ai_response.split('\n')
