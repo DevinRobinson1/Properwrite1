@@ -21,8 +21,8 @@ class RentCastAPIService:
     
     def get_property_value(self, address: str, city: str = None, state: str = None) -> Optional[Dict]:
         """
-        Get property value estimate from RentCast API
-        Returns property value, confidence score, and additional details
+        Get property value estimate from RentCast AVM API
+        Returns current property value estimate with confidence bounds
         """
         if not self.api_key:
             self.logger.warning("RentCast API key not found")
@@ -35,8 +35,67 @@ class RentCastAPIService:
         if state:
             full_address += f", {state}"
         
-        self.logger.info(f"Getting RentCast property value for: {full_address}")
+        self.logger.info(f"Getting RentCast AVM property value for: {full_address}")
         
+        try:
+            # RentCast AVM value endpoint
+            url = f"{self.base_url}/avm/value"
+            
+            params = {
+                'address': full_address
+            }
+            
+            headers = {
+                'X-Api-Key': self.api_key
+            }
+            
+            response = requests.get(url, params=params, headers=headers, timeout=30)
+            self.logger.info(f"RentCast AVM API response status: {response.status_code}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                self.logger.info(f"RentCast AVM API response: {data}")
+                
+                # Extract estimated value from AVM response
+                if data:
+                    value = data.get('price') or data.get('value')
+                    
+                    if value and value > 0:
+                        return {
+                            'value': value,
+                            'confidence': 0.95,  # AVM estimates have high confidence
+                            'low_estimate': data.get('priceLow'),
+                            'high_estimate': data.get('priceHigh'),
+                            'bedrooms': data.get('bedrooms'),
+                            'bathrooms': data.get('bathrooms'),
+                            'square_feet': data.get('squareFootage'),
+                            'property_type': data.get('propertyType'),
+                            'address': data.get('address'),
+                            'city': data.get('city'),
+                            'state': data.get('state'),
+                            'zip_code': data.get('zipCode'),
+                            'source': 'RentCast AVM',
+                            'updated': datetime.now().strftime('%Y-%m-%d')
+                        }
+                    else:
+                        # Fallback to property details if AVM fails
+                        return self._get_property_details_fallback(address, city, state)
+                else:
+                    self.logger.warning("No data in RentCast AVM response")
+                    return self._get_property_details_fallback(address, city, state)
+            else:
+                self.logger.error(f"RentCast AVM API error: {response.status_code} - {response.text}")
+                # Try fallback method
+                return self._get_property_details_fallback(address, city, state)
+                
+        except Exception as e:
+            self.logger.error(f"Error calling RentCast AVM API: {str(e)}")
+            return self._get_property_details_fallback(address, city, state)
+    
+    def _get_property_details_fallback(self, address: str, city: str = None, state: str = None) -> Optional[Dict]:
+        """
+        Fallback method using property details endpoint
+        """
         try:
             # RentCast property details endpoint
             url = f"{self.base_url}/properties"
@@ -60,15 +119,13 @@ class RentCastAPIService:
                         break
             
             headers = {
-                'X-Api-Key': self.api_key  # Note: uppercase X-Api-Key
+                'X-Api-Key': self.api_key
             }
             
             response = requests.get(url, params=params, headers=headers, timeout=30)
-            self.logger.info(f"RentCast API response status: {response.status_code}")
             
             if response.status_code == 200:
                 data = response.json()
-                self.logger.info(f"RentCast API response: {data}")
                 
                 if data and len(data) > 0:
                     property_data = data[0]  # Take first match
@@ -113,7 +170,7 @@ class RentCastAPIService:
                 return None
                 
         except Exception as e:
-            self.logger.error(f"Error calling RentCast API: {str(e)}")
+            self.logger.error(f"Error calling RentCast fallback API: {str(e)}")
             return None
     
     def get_rental_estimate(self, address: str, city: str = None, state: str = None) -> Optional[Dict]:

@@ -1,0 +1,32 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 221600,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 5821707,
+      "matched_address": "6543 Spanish Oak Dr, Cayce, SC, USA, South Carolina, Cayce, South Carolina 29033",
+      "images": [
+        "https://maps.googleapis.com/maps/api/streetview?location=6543+Spanish+Oak+Dr%2C+Rural+Hall%2C+NC+27045&size=400x300&key=AIzaSyARFMLB1na-BBWf7_R3-5YOQQaHqEJf6RQ&source=outdoor&&signature=T79yjHAM9OIJXUr6W78DQ0jhWig="
+      ]
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin"
+  ],
+  "sources_used": [
+    "Zillow"
+  ],
+  "address_info": {
+    "address": "6543 Spanish Oak Dr, Cayce, SC, USA, South Carolina",
+    "city": "Cayce",
+    "state": "South Carolina",
+    "zip_code": "29033",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-11T12:06:17.037138"
+}
