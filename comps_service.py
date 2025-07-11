@@ -133,6 +133,9 @@ class CompsService:
                         # Log first comp details for debugging
                         if len(detailed_comps) == 0:
                             logger.info(f"First comp detail fields: {list(detail.keys())[:20]}")
+                            logger.info(f"Address fields in comp: address={comp.get('address')}, streetAddress={comp.get('streetAddress')}, city={comp.get('city')}, state={comp.get('state')}")
+                            if isinstance(comp.get('address'), dict):
+                                logger.info(f"Address object fields: {comp.get('address')}")
                         # Merge data
                         comp.update(detail)
                         # Ensure we have the correct fields for display
@@ -156,24 +159,49 @@ class CompsService:
                                                 comp.get('resoFacts', {}).get('livingArea') or 
                                                 comp.get('livingAreaSqFt') or 0)
                         
-                        # Handle address
-                        if not comp.get('address'):
-                            comp['address'] = comp.get('streetAddress', '') + ', ' + comp.get('city', '') + ', ' + comp.get('state', '')
+                        # Handle address - check for nested address object first
+                        if not comp.get('address') or isinstance(comp.get('address'), dict):
+                            # Check if address is a nested object
+                            if isinstance(comp.get('address'), dict):
+                                addr_obj = comp.get('address', {})
+                                comp['address'] = f"{addr_obj.get('streetAddress', '')} {addr_obj.get('city', '')} {addr_obj.get('state', '')}"
+                            else:
+                                # Build from individual fields
+                                street = comp.get('streetAddress', '') or comp.get('streetLine', '') or ''
+                                city = comp.get('city', '') or comp.get('addressCity', '') or ''
+                                state = comp.get('state', '') or comp.get('addressState', '') or ''
+                                comp['address'] = f"{street} {city} {state}".strip()
                         
-                        # Get sold date
-                        if not comp.get('dateSold') and comp.get('priceHistory'):
-                            for history in comp.get('priceHistory', []):
-                                if history.get('event') == 'Sold':
-                                    comp['dateSold'] = history.get('date')
-                                    break
+                        # Get sold date - check multiple sources
+                        if not comp.get('dateSold'):
+                            # Check price history
+                            if comp.get('priceHistory'):
+                                for history in comp.get('priceHistory', []):
+                                    if history.get('event') == 'Sold':
+                                        comp['dateSold'] = history.get('date')
+                                        break
+                            # Check other date fields
+                            if not comp.get('dateSold'):
+                                comp['dateSold'] = comp.get('lastSoldDate') or comp.get('soldDate') or comp.get('datePosted')
                         
                         # Calculate days on market
                         if comp.get('dateSold'):
                             try:
-                                sold_date = datetime.fromtimestamp(comp['dateSold'] / 1000)
+                                # Handle different date formats
+                                if isinstance(comp['dateSold'], (int, float)):
+                                    # Unix timestamp in milliseconds
+                                    sold_date = datetime.fromtimestamp(comp['dateSold'] / 1000)
+                                elif isinstance(comp['dateSold'], str):
+                                    # Try parsing string date
+                                    sold_date = datetime.strptime(comp['dateSold'], '%Y-%m-%d')
+                                else:
+                                    sold_date = datetime.now()
+                                
                                 comp['days_old'] = (datetime.now() - sold_date).days
                             except:
                                 comp['days_old'] = 0
+                        else:
+                            comp['days_old'] = 0
                         detailed_comps.append(comp)
             
             return {

@@ -4607,9 +4607,127 @@
             });
         }
 
+        // Global variable to store comps data
+        window.compsData = null;
+        
+        // Function to update comp data when user edits
+        function updateCompData(index, field, value) {
+            if (!window.compsData || !window.compsData.comps || !window.compsData.comps[index]) {
+                console.error('Comp data not found for index:', index);
+                return;
+            }
+            
+            // Update the comp data
+            window.compsData.comps[index][field] = parseFloat(value) || 0;
+            
+            // Recalculate adjustments
+            recalculateCompAdjustments(index);
+        }
+        
+        // Function to recalculate adjustments for a specific comp
+        function recalculateCompAdjustments(index) {
+            if (!window.compsData || !window.compsData.subject) return;
+            
+            const comp = window.compsData.comps[index];
+            const subject = window.compsData.subject;
+            
+            // Recalculate adjustments based on new values
+            const adjustments = [];
+            let totalAdjustment = 0;
+            
+            // Bedroom adjustments
+            const bedDiff = subject.beds - (comp.bedrooms || 0);
+            if (bedDiff !== 0) {
+                const adjustment = bedDiff * 15000; // $15k per bedroom
+                adjustments.push({
+                    type: 'Bedrooms',
+                    difference: bedDiff,
+                    adjustment: adjustment,
+                    description: `${adjustment > 0 ? 'Added' : 'Reduced'} $${Math.abs(adjustment).toLocaleString()} for ${Math.abs(bedDiff)} bedroom${Math.abs(bedDiff) !== 1 ? 's' : ''}`
+                });
+                totalAdjustment += adjustment;
+            }
+            
+            // Bathroom adjustments
+            const bathDiff = subject.baths - (comp.bathrooms || 0);
+            if (bathDiff !== 0) {
+                const adjustment = bathDiff * 12500; // $12.5k per full bath
+                adjustments.push({
+                    type: 'Bathrooms',
+                    difference: bathDiff,
+                    adjustment: adjustment,
+                    description: `${adjustment > 0 ? 'Added' : 'Reduced'} $${Math.abs(adjustment).toLocaleString()} for ${Math.abs(bathDiff)} bathroom${Math.abs(bathDiff) !== 1 ? 's' : ''}`
+                });
+                totalAdjustment += adjustment;
+            }
+            
+            // Square footage adjustments
+            const sqftDiff = subject.sqft - (comp.livingArea || 0);
+            if (sqftDiff !== 0 && comp.livingArea > 0) {
+                // Calculate price per sqft
+                const ppsf = comp.price / comp.livingArea;
+                const adjustment = sqftDiff * ppsf * 0.5; // 50% of price per sqft
+                adjustments.push({
+                    type: 'Square Footage',
+                    difference: sqftDiff,
+                    adjustment: adjustment,
+                    description: `${adjustment > 0 ? 'Added' : 'Reduced'} $${Math.abs(adjustment).toLocaleString()} for ${Math.abs(sqftDiff)} sqft difference`
+                });
+                totalAdjustment += adjustment;
+            }
+            
+            // Update the adjustments in our data
+            window.compsData.adjustments[index] = {
+                adjustments: adjustments,
+                total_adjustment: totalAdjustment,
+                adjusted_price: comp.price + totalAdjustment
+            };
+            
+            // Update the adjusted price display
+            const adjustedPriceElement = document.getElementById(`adjusted-price-${index}`);
+            if (adjustedPriceElement) {
+                adjustedPriceElement.textContent = (comp.price + totalAdjustment).toLocaleString();
+            }
+            
+            // Refresh the AI summary display if needed
+            updateCompsAISummary();
+        }
+        
+        function updateCompsAISummary() {
+            // Update the average adjusted price and ARV range
+            if (window.compsData && window.compsData.comps.length > 0) {
+                const adjustedPrices = window.compsData.comps.map((comp, index) => {
+                    const adjustment = window.compsData.adjustments[index];
+                    return comp.price + (adjustment?.total_adjustment || 0);
+                });
+                
+                const avgAdjusted = adjustedPrices.reduce((a, b) => a + b, 0) / adjustedPrices.length;
+                const minArv = Math.min(...adjustedPrices);
+                const maxArv = Math.max(...adjustedPrices);
+                
+                document.getElementById('comps-avg-adjusted').textContent = `$${Math.round(avgAdjusted).toLocaleString()}`;
+                document.getElementById('comps-arv-range').textContent = `Range: $${minArv.toLocaleString()} - $${maxArv.toLocaleString()}`;
+            }
+        }
+        
+        // Function to recalculate all comparables
+        function recalculateAllComps() {
+            if (!window.compsData || !window.compsData.comps) return;
+            
+            // Recalculate adjustments for all comps
+            window.compsData.comps.forEach((comp, index) => {
+                recalculateCompAdjustments(index);
+            });
+            
+            showToast('All comparable adjustments recalculated!', 'success');
+        }
+        
         function displayCompsResults(data) {
             console.log('Displaying comps results:', data);
             document.getElementById('comps-results').classList.remove('hidden');
+            
+            // Store comps data globally
+            window.compsData = data;
             
             // Display comparable properties
             const compsGrid = document.getElementById('comps-grid');
@@ -4617,6 +4735,7 @@
             
             if (data.comps && data.comps.length > 0) {
                 data.comps.forEach((comp, index) => {
+                    comp.index = index; // Add index to each comp
                     const adjustment = data.adjustments && data.adjustments[index] ? data.adjustments[index] : null;
                     const compCard = createCompCard(comp, adjustment);
                     compsGrid.appendChild(compCard);
@@ -4645,30 +4764,66 @@
             const distance = comp.distance?.toFixed(2) || '0';
             const daysOld = comp.days_old || 0;
             
+            // Add index to comp for tracking
+            if (!comp.hasOwnProperty('index')) {
+                comp.index = window.compsData ? window.compsData.comps.indexOf(comp) : 0;
+            }
+            
+            // Extract address from nested object if needed
+            let displayAddress = 'Unknown Address';
+            if (comp.address) {
+                if (typeof comp.address === 'string') {
+                    displayAddress = comp.address;
+                } else if (typeof comp.address === 'object') {
+                    displayAddress = `${comp.address.streetAddress || ''} ${comp.address.city || ''}, ${comp.address.state || ''}`.trim();
+                }
+            }
+            
             div.innerHTML = `
                 <div class="flex justify-between items-start mb-2">
                     <div class="flex-1">
-                        <h4 class="font-semibold text-gray-800">${comp.address || comp.formattedAddress || 'Unknown Address'}</h4>
+                        <h4 class="font-semibold text-gray-800">${displayAddress}</h4>
                         <p class="text-sm text-gray-600">${distance} miles away • Sold ${daysOld} days ago</p>
                     </div>
                     <div class="text-right">
                         <p class="text-lg font-bold text-gray-800">$${comp.price?.toLocaleString() || 0}</p>
-                        <p class="text-sm text-teal-600">Adj: $${adjustedPrice.toLocaleString()}</p>
+                        <p class="text-sm text-teal-600">Adj: $<span id="adjusted-price-${comp.index}">${adjustedPrice.toLocaleString()}</span></p>
                     </div>
                 </div>
                 
-                <div class="grid grid-cols-3 gap-2 text-sm">
-                    <div>
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div class="flex items-center gap-1">
                         <span class="text-gray-600">Beds:</span>
-                        <span class="font-medium">${comp.bedrooms || '-'}</span>
+                        <input type="number" 
+                               class="comp-beds w-12 px-1 py-0.5 border border-gray-300 rounded text-sm font-medium"
+                               value="${comp.bedrooms || 0}"
+                               data-comp-index="${comp.index}"
+                               onchange="updateCompData(${comp.index}, 'bedrooms', this.value)">
                     </div>
-                    <div>
+                    <div class="flex items-center gap-1">
                         <span class="text-gray-600">Baths:</span>
-                        <span class="font-medium">${comp.bathrooms || '-'}</span>
+                        <input type="number" 
+                               step="0.5"
+                               class="comp-baths w-12 px-1 py-0.5 border border-gray-300 rounded text-sm font-medium"
+                               value="${comp.bathrooms || 0}"
+                               data-comp-index="${comp.index}"
+                               onchange="updateCompData(${comp.index}, 'bathrooms', this.value)">
                     </div>
-                    <div>
+                    <div class="flex items-center gap-1">
                         <span class="text-gray-600">Sqft:</span>
-                        <span class="font-medium">${(comp.livingArea || comp.squareFootage || comp.square_feet)?.toLocaleString() || '-'}</span>
+                        <input type="number" 
+                               class="comp-sqft w-16 px-1 py-0.5 border border-gray-300 rounded text-sm font-medium"
+                               value="${comp.livingArea || comp.squareFootage || comp.square_feet || 0}"
+                               data-comp-index="${comp.index}"
+                               onchange="updateCompData(${comp.index}, 'livingArea', this.value)">
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <span class="text-gray-600">Year:</span>
+                        <input type="number" 
+                               class="comp-year w-16 px-1 py-0.5 border border-gray-300 rounded text-sm font-medium"
+                               value="${comp.yearBuilt || comp.year_built || comp.year || new Date().getFullYear()}"
+                               data-comp-index="${comp.index}"
+                               onchange="updateCompData(${comp.index}, 'yearBuilt', this.value)">
                     </div>
                 </div>
                 
