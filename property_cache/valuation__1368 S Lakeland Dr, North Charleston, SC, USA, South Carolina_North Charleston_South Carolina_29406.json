@@ -1,0 +1,44 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 408800,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 10914771,
+      "matched_address": "1368 S Lakeland Dr, North Charleston, SC, USA, South Carolina, North Charleston, South Carolina 29406",
+      "images": [
+        "https://photos.zillowstatic.com/fp/6efb413e41a76ce8b5ef17cdb086782e-p_d.jpg"
+      ]
+    },
+    "rentcast": {
+      "estimate": 77900,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": "1368 S Lakeland Dr, North Charleston, SC 29406",
+      "bedrooms": 3,
+      "bathrooms": 2,
+      "square_feet": 1166,
+      "property_type": "Single Family",
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin"
+  ],
+  "sources_used": [
+    "Zillow",
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "1368 S Lakeland Dr, North Charleston, SC, USA, South Carolina",
+    "city": "North Charleston",
+    "state": "South Carolina",
+    "zip_code": "29406",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-11T12:04:57.057096"
+}

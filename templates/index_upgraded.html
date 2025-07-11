@@ -3891,15 +3891,23 @@
             const listingCommission = parseFloat(document.getElementById('mls-listing-commission')?.value) || 2;
             const buyerCommission = parseFloat(document.getElementById('buyer-commission')?.value) || 2;
             const totalCommissionRate = (listingCommission + buyerCommission) / 100;
-            const totalCommissions = listPrice * totalCommissionRate;
+            const totalCommissions = Math.round(listPrice * totalCommissionRate);
             const ourFee = 20475;
             const netToUs = listPrice - totalCommissions - ourFee;
             
-            updateElementIfExists('novation-list-price', '$' + listPrice.toLocaleString());
-            updateElementIfExists('novation-gross-sale', '$' + listPrice.toLocaleString());
+            console.log('Novation calculation:', { 
+                listPrice, 
+                listingCommission, 
+                buyerCommission, 
+                totalCommissionRate, 
+                totalCommissions 
+            });
+            
+            updateElementIfExists('novation-list-price', '$' + Math.round(listPrice).toLocaleString());
+            updateElementIfExists('novation-gross-sale', '$' + Math.round(listPrice).toLocaleString());
             updateElementIfExists('novation-commissions', '$' + totalCommissions.toLocaleString());
             updateElementIfExists('novation-our-fee', '$' + ourFee.toLocaleString());
-            updateElementIfExists('novation-net-to-us', '$' + netToUs.toLocaleString());
+            updateElementIfExists('novation-net-to-us', '$' + Math.round(netToUs).toLocaleString());
             updateElementIfExists('listing-commission-value', listingCommission.toFixed(1) + '%');
             updateElementIfExists('buyer-commission-value', buyerCommission.toFixed(1) + '%');
         }
