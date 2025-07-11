@@ -24,6 +24,7 @@ from billing_service import BillingService
 from auth_middleware import require_auth, require_seat, require_role, require_credits
 from google_places_service import google_places_service, AddressNotFoundError, GooglePlacesAPIError, AddressValidationError
 from require_valid_address import require_valid_address, extract_validated_address_data
+from admin_routes import admin_bp
 
 # Load environment variables from .env file
 if os.path.exists('.env'):
@@ -41,6 +42,9 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-2024")
 
 # Initialize billing service
 billing_service = BillingService()
+
+# Register admin blueprint
+app.register_blueprint(admin_bp)
 
 @app.route('/')
 def index():

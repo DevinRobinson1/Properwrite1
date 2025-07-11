@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Properwrite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Admin Navigation -->
+    <nav class="bg-gray-900 text-white sticky top-0 z-50">
+        <div class="container mx-auto px-6">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-8">
+                    <div class="flex items-center space-x-3">
+                        <img src="/static/properwrite-logo.png" alt="Properwrite" class="h-8 w-8">
+                        <span class="text-xl font-bold">Admin Panel</span>
+                    </div>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="/admin" class="hover:text-amber-400 transition-colors">Dashboard</a>
+                        <a href="/admin/users" class="hover:text-amber-400 transition-colors">Users</a>
+                        <a href="/admin/teams" class="hover:text-amber-400 transition-colors">Teams</a>
+                        <a href="/admin/affiliates" class="hover:text-amber-400 transition-colors">Affiliates</a>
+                        <a href="/admin/jv-deals" class="hover:text-amber-400 transition-colors">JV Deals</a>
+                        <a href="/admin/billing" class="hover:text-amber-400 transition-colors">Billing</a>
+                        <a href="/admin/api-health" class="hover:text-amber-400 transition-colors">API Health</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-300">Admin</span>
+                    <a href="/admin/logout" class="text-sm hover:text-amber-400 transition-colors">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-6 py-8">
+        <!-- Dashboard Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
+            <p class="text-gray-600 mt-2">Platform overview and key metrics</p>
+        </div>
+
+        <!-- Key Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Users -->
+            <div class="stat-card bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Users</p>
+                        <p class="text-3xl font-bold text-gray-800">{{ stats.total_users }}</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-users text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Subscriptions -->
+            <div class="stat-card bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Active Subscriptions</p>
+                        <p class="text-3xl font-bold text-gray-800">{{ stats.active_subscriptions }}</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-credit-card text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Revenue -->
+            <div class="stat-card bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Revenue</p>
+                        <p class="text-3xl font-bold text-gray-800">${{ "%.2f"|format(stats.total_revenue) }}</p>
+                    </div>
+                    <div class="bg-amber-100 p-3 rounded-full">
+                        <i class="fas fa-dollar-sign text-amber-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Properties Today -->
+            <div class="stat-card bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Properties Today</p>
+                        <p class="text-3xl font-bold text-gray-800">{{ stats.properties_analyzed_today }}</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-home text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats Row -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Total Teams</p>
+                        <p class="text-2xl font-semibold">{{ stats.total_teams }}</p>
+                    </div>
+                    <i class="fas fa-building text-gray-400"></i>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Pending JV Deals</p>
+                        <p class="text-2xl font-semibold">{{ stats.pending_jv_deals }}</p>
+                    </div>
+                    <i class="fas fa-handshake text-gray-400"></i>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">API Errors Today</p>
+                        <p class="text-2xl font-semibold text-red-600">{{ stats.api_errors_today }}</p>
+                    </div>
+                    <i class="fas fa-exclamation-triangle text-red-400"></i>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">Open Tickets</p>
+                        <p class="text-2xl font-semibold">{{ stats.open_tickets }}</p>
+                    </div>
+                    <i class="fas fa-ticket-alt text-gray-400"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Recent Users -->
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-800">Recent Users</h2>
+                </div>
+                <div class="p-6">
+                    {% if recent_users %}
+                        <div class="space-y-4">
+                            {% for user in recent_users %}
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium text-gray-800">{{ user.email }}</p>
+                                    <p class="text-sm text-gray-500">{{ user.created_at.strftime('%b %d, %Y') }}</p>
+                                </div>
+                                <a href="/admin/users/{{ user.id }}" class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-gray-500">No recent users</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent JV Deals -->
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-800">Recent JV Deals</h2>
+                </div>
+                <div class="p-6">
+                    {% if recent_deals %}
+                        <div class="space-y-4">
+                            {% for deal in recent_deals %}
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium text-gray-800">{{ deal.address[:30] }}...</p>
+                                    <p class="text-sm text-gray-500">{{ deal.final_status }}</p>
+                                </div>
+                                <a href="/admin/jv-deals" class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-gray-500">No recent deals</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent API Errors -->
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-800">Recent API Errors</h2>
+                </div>
+                <div class="p-6">
+                    {% if recent_errors %}
+                        <div class="space-y-4">
+                            {% for error in recent_errors %}
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium text-gray-800">{{ error.error_type }}</p>
+                                    <p class="text-sm text-gray-500">{{ error.created_at.strftime('%H:%M') }}</p>
+                                </div>
+                                <button onclick="resolveError({{ error.id }})" class="text-green-600 hover:text-green-800">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-gray-500">No recent errors</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8 bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
+            <div class="flex flex-wrap gap-4">
+                <button onclick="showGrantCreditsModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    <i class="fas fa-coins mr-2"></i>Grant Credits
+                </button>
+                <button onclick="clearCache()" class="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700">
+                    <i class="fas fa-sync mr-2"></i>Clear Cache
+                </button>
+                <a href="/admin/activity-logs" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                    <i class="fas fa-history mr-2"></i>View Audit Logs
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function resolveError(errorId) {
+            if (confirm('Mark this error as resolved?')) {
+                fetch(`/admin/api/errors/${errorId}/resolve`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    }
+                });
+            }
+        }
+
+        function clearCache() {
+            if (confirm('Clear all application cache?')) {
+                fetch('/admin/api/cache/clear', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Cache cleared successfully');
+                    }
+                });
+            }
+        }
+
+        function showGrantCreditsModal() {
+            const userId = prompt('Enter user ID:');
+            if (userId) {
+                const credits = prompt('Enter number of credits to grant:');
+                if (credits) {
+                    const reason = prompt('Enter reason (optional):') || 'Admin grant';
+                    
+                    fetch(`/admin/api/users/${userId}/grant-credits`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ credits: parseInt(credits), reason: reason })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Credits granted successfully');
+                        } else {
+                            alert('Error: ' + (data.error || 'Unknown error'));
+                        }
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
