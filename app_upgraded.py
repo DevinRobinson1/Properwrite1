@@ -140,6 +140,17 @@ def analyze_property():
                     'sources_tried': valuation_data.get('sources_tried', []),
                     'last_updated': valuation_data.get('fetch_timestamp')
                 })
+                
+                # Extract images from valuation data
+                images = []
+                for source_name, source_data in valuation_data.get('valuations', {}).items():
+                    if 'images' in source_data and source_data['images']:
+                        images.extend(source_data['images'])
+                
+                if images:
+                    property_data['images'] = images
+                    logging.info(f"Retrieved {len(images)} property images from {best_estimate['source']}")
+                
                 logging.info(f"Retrieved property valuation: ${best_estimate['estimate']:,} from {best_estimate['source']}")
             else:
                 # All valuation sources failed

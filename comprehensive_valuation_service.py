@@ -173,6 +173,7 @@ class ComprehensiveValuationService:
                             
                             # Enhanced extraction with multiple fallback methods
                             zestimate = self._extract_zillow_data_with_regex(detail_data)
+                            images = self._extract_zillow_images(detail_data)
                             
                             if zestimate:
                                 valuation_data['valuations']['zillow'] = {
@@ -180,10 +181,11 @@ class ComprehensiveValuationService:
                                     'source': 'Zillow Property Data',
                                     'confidence': 'high',
                                     'zpid': zpid,
-                                    'matched_address': matched_address
+                                    'matched_address': matched_address,
+                                    'images': images
                                 }
                                 valuation_data['sources_used'].append('Zillow')
-                                logging.info(f"🐛 Zillow success: ZPID {zpid} → ${zestimate:,}")
+                                logging.info(f"🐛 Zillow success: ZPID {zpid} → ${zestimate:,}, {len(images)} images")
                                 return
                             else:
                                 logging.info(f"No valuation found in Zillow detail data")
@@ -264,6 +266,36 @@ class ComprehensiveValuationService:
                     continue
         
         return None
+    
+    def _extract_zillow_images(self, detail_data: Dict) -> List[str]:
+        """
+        Extract property images from Zillow API response
+        """
+        images = []
+        
+        if not detail_data:
+            return images
+            
+        # Primary image source
+        if 'imgSrc' in detail_data and detail_data['imgSrc']:
+            images.append(detail_data['imgSrc'])
+            
+        # Check for photo arrays or other image fields
+        for field_name in ['photos', 'images', 'photoUrls', 'imageUrls']:
+            if field_name in detail_data and isinstance(detail_data[field_name], list):
+                for img in detail_data[field_name]:
+                    if isinstance(img, str) and img.startswith('http'):
+                        images.append(img)
+                    elif isinstance(img, dict) and 'url' in img:
+                        images.append(img['url'])
+        
+        # Remove duplicates while preserving order
+        unique_images = []
+        for img in images:
+            if img not in unique_images:
+                unique_images.append(img)
+                
+        return unique_images
     
     def _try_redfin_valuation(self, valuation_data: Dict, address: str, city: str, state: str, zip_code: str):
         """Try Redfin valuation via RapidAPI with enhanced error handling"""

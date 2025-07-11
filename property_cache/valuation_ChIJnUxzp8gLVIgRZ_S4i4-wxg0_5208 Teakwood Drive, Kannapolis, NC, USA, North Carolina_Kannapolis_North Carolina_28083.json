@@ -1,0 +1,32 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 318500,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 5698057,
+      "matched_address": "5208 Teakwood Drive, Kannapolis, NC, USA, North Carolina, Kannapolis, North Carolina 28083",
+      "images": [
+        "https://photos.zillowstatic.com/fp/cdb12a0d684cd771293652b984d33536-p_d.jpg"
+      ]
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "Redfin",
+    "Realtor.com"
+  ],
+  "sources_used": [
+    "Zillow"
+  ],
+  "address_info": {
+    "address": "5208 Teakwood Drive, Kannapolis, NC, USA, North Carolina",
+    "city": "Kannapolis",
+    "state": "North Carolina",
+    "zip_code": "28083",
+    "latitude": 35.4881,
+    "longitude": -80.6217
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-11T10:42:36.273519"
+}
