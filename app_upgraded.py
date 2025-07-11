@@ -1,5 +1,5 @@
 """
-Upgraded Real Estate Investment Analyzer
+properwrite.com - Real Estate Investment Analysis Platform
 Enhanced with external data pulling, cleaner UI, and comprehensive strategy comparison
 """
 import os

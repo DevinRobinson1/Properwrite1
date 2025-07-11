@@ -1,8 +1,8 @@
-# Real Estate Investment Analyzer
+# properwrite.com
 
 ## Overview
 
-This is a Flask-based web application that generates professional property presentations for real estate investors. The application allows users to input property details and generates comprehensive investment analysis reports with financial projections, neighborhood insights, and presentation-ready formatting.
+properwrite.com is a Flask-based web application that generates professional property presentations for real estate investors. The application allows users to input property details and generates comprehensive investment analysis reports with financial projections, neighborhood insights, and presentation-ready formatting.
 
 ## System Architecture
 
@@ -167,6 +167,7 @@ This is a Flask-based web application that generates professional property prese
 - July 11, 2025. Integrated RentCast API as alternative property valuation source with 50 free API calls per month. Fixed RentCast data extraction to use lastSalePrice field instead of non-existent 'value' field. Updated API parameters to use separate address, city, state fields and corrected header to use 'X-Api-Key'. RentCast provides exact property matching with high confidence scores (0.95 for formatted address matches). System now displays RentCast estimates in the Redfin card slot in Property Valuations section. Cache clearing may be required for fresh API calls when testing
 - July 11, 2025. Fixed dispositions calculator formulas: Volume Flipper now uses correct formula (ARV × 70% - Repairs - Min Flip Amount - Buffer = Target Price) with fixed $3,500 buffer. Max-Profit Flipper now properly recalculates when ARV changes. Added automatic recalculation triggers when property data loads from APIs. Converted all commission sliders to text input boxes for precise value entry
 - July 11, 2025. Completely rebuilt MLS/Novation section in Dispositions tab to fix hardcoded values issue. Created new calculateMLSNovation() function that properly calculates List Price = (ARV - Repairs) - 10% discount (minimum $20,000). Connected calculations to property header changes ensuring real-time updates when ARV or repairs values change
+- July 11, 2025. Complete rebranding from "Real Estate Investment Analyzer" to "properwrite.com". Updated all page titles, CSS comments, documentation headers, and template references across the entire application to reflect the new brand identity
 
 ## User Preferences
 
