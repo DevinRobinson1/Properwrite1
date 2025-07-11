@@ -60,12 +60,7 @@ app.register_blueprint(admin_bp)
 
 @app.route('/')
 def index():
-    """Landing page - redirect to analyze for now"""
-    return redirect('/analyze')
-
-@app.route('/analyze')
-def analyze():
-    """Property analysis tool"""
+    """Enhanced property input form with external data integration"""
     return render_template('index_upgraded.html', 
                          google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY'))
 

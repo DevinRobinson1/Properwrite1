@@ -99,27 +99,22 @@
                 
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center space-x-6">
-                    <!-- Analyze Link -->
-                    <a href="/analyze" class="text-gray-600 hover:text-gray-900 transition-colors">
-                        Analyze
-                    </a>
-                    
-                    <!-- Resources Dropdown -->
-                    <div class="relative" id="resources-dropdown">
-                        <button onclick="toggleResourcesDropdown()" class="flex items-center space-x-1 text-gray-600 hover:text-gray-900 transition-colors">
-                            <span>Resources</span>
+                    <!-- Features Dropdown -->
+                    <div class="relative" id="features-dropdown">
+                        <button onclick="toggleFeaturesDropdown()" class="flex items-center space-x-1 text-gray-600 hover:text-gray-900 transition-colors">
+                            <span>Features</span>
                             <i class="fas fa-chevron-down text-sm"></i>
                         </button>
-                        <div id="resources-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden">
+                        <div id="features-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden">
                             <div class="py-1">
-                                <a href="https://reilegacy.co/wholesale" target="_blank" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-chalkboard-teacher mr-2"></i>Wholesale Coaching
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-brain mr-2"></i>AI Valuations
                                 </a>
-                                <a href="https://pinnexcapital.com/" target="_blank" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-dollar-sign mr-2"></i>Get Funding
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-chart-bar mr-2"></i>Comps Analysis
                                 </a>
-                                <a href="https://www.skool.com/theraiseroom" target="_blank" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-chart-line mr-2"></i>Raise Capital
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-coins mr-2"></i>Credits System
                                 </a>
                             </div>
                         </div>
@@ -128,6 +123,11 @@
                     <!-- Pricing Link -->
                     <a href="#pricing" class="text-gray-600 hover:text-gray-900 transition-colors">
                         Pricing
+                    </a>
+                    
+                    <!-- How It Works Link -->
+                    <a href="#how-it-works" class="text-gray-600 hover:text-gray-900 transition-colors">
+                        How It Works
                     </a>
                     
                     <!-- User Authentication Section -->
@@ -199,20 +199,14 @@
                 <div>
                     <div class="text-sm font-medium text-gray-900 mb-2">Navigation</div>
                     <div class="space-y-2 pl-4">
-                        <a href="/analyze" class="block text-sm text-gray-600 hover:text-gray-900">
-                            <i class="fas fa-search mr-2"></i>Analyze
-                        </a>
-                        <a href="https://reilegacy.co/wholesale" target="_blank" class="block text-sm text-gray-600 hover:text-gray-900">
-                            <i class="fas fa-chalkboard-teacher mr-2"></i>Wholesale Coaching
-                        </a>
-                        <a href="https://pinnexcapital.com/" target="_blank" class="block text-sm text-gray-600 hover:text-gray-900">
-                            <i class="fas fa-dollar-sign mr-2"></i>Get Funding
-                        </a>
-                        <a href="https://www.skool.com/theraiseroom" target="_blank" class="block text-sm text-gray-600 hover:text-gray-900">
-                            <i class="fas fa-chart-line mr-2"></i>Raise Capital
+                        <a href="#" class="block text-sm text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-cog mr-2"></i>Features
                         </a>
                         <a href="#pricing" class="block text-sm text-gray-600 hover:text-gray-900">
                             <i class="fas fa-tag mr-2"></i>Pricing
+                        </a>
+                        <a href="#how-it-works" class="block text-sm text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-info-circle mr-2"></i>How It Works
                         </a>
                     </div>
                 </div>
@@ -5308,26 +5302,10 @@
         }
 
         // Enhanced Navigation Functions
-        function toggleResourcesDropdown() {
-            const menu = document.getElementById('resources-menu');
+        function toggleFeaturesDropdown() {
+            const menu = document.getElementById('features-menu');
             menu.classList.toggle('hidden');
         }
-        
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', function(event) {
-            if (!event.target.closest('#resources-dropdown')) {
-                const resourcesMenu = document.getElementById('resources-menu');
-                if (resourcesMenu && !resourcesMenu.classList.contains('hidden')) {
-                    resourcesMenu.classList.add('hidden');
-                }
-            }
-            if (!event.target.closest('#user-dropdown')) {
-                const userMenu = document.getElementById('user-menu');
-                if (userMenu && !userMenu.classList.contains('hidden')) {
-                    userMenu.classList.add('hidden');
-                }
-            }
-        });
 
         function toggleUserDropdown() {
             const menu = document.getElementById('user-menu');
