@@ -144,7 +144,6 @@ def login():
         }), 500
 
 @app.route('/api/analyze-property', methods=['POST'])
-@require_valid_address
 def analyze_property():
     """
     Analyze property with external data enrichment from multiple sources
@@ -156,20 +155,17 @@ def analyze_property():
     logging.info("Property analysis request received")
     
     try:
-        # Extract validated address data from middleware
-        validated_address_data = extract_validated_address_data(request)
-        
         # Get form data
         data = request.get_json()
         
-        # Use validated address components
-        address = validated_address_data['street_address']
-        city = validated_address_data['city']
-        state = validated_address_data['state']
-        zip_code = validated_address_data['zip_code']
-        formatted_address = validated_address_data['formatted_address']
-        latitude = validated_address_data['latitude']
-        longitude = validated_address_data['longitude']
+        # Extract address components from request data
+        address = data.get('address', '').strip()
+        city = data.get('city', '').strip()
+        state = data.get('state', '').strip()
+        zip_code = data.get('zip_code', '').strip()
+        formatted_address = data.get('formatted_address', f"{address}, {city}, {state} {zip_code}")
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
         
         # Store canonical address data for property analysis (now validated)
         canonical_address = {
