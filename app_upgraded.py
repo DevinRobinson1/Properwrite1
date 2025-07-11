@@ -2112,11 +2112,13 @@ def resend_invite(invite_id):
             team = db.query(Team).filter(Team.id == user.team_id).first()
             
             # Send email notification using billing service
+            logging.info(f"Attempting to resend invitation email to {invite.email} for team {team.name}")
             email_sent = billing_service._send_invitation_email(
                 invite.email,
                 team.name,
                 invite.token
             )
+            logging.info(f"Email send result: {email_sent}")
             
             return jsonify({
                 'success': True,
