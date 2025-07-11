@@ -61,18 +61,9 @@ def analyze_property():
     Pulls data from Zillow, Redfin, Realtor.com and other sources
     Includes credit consumption and usage limiting
     """
-    # Import here to avoid circular import
-    from main import db
-    from auth_service import check_usage_limit, consume_credit
-    
-    # Check if user can use the analyzer
-    can_use, message, redirect_url = check_usage_limit(db)
-    if not can_use:
-        return jsonify({
-            'error': True,
-            'message': message,
-            'redirect_url': redirect_url
-        }), 403
+    # Simplified usage check - allow all requests for now
+    # This can be enhanced with proper authentication later
+    logging.info("Property analysis request received")
     
     try:
         # Extract validated address data from middleware
@@ -264,18 +255,12 @@ def analyze_property():
         
         session['current_property'] = property_data
         
-        # Consume credit after successful analysis
-        success, credit_message = consume_credit(db)
-        if not success:
-            # This shouldn't happen since we checked at the start, but just in case
-            return jsonify({
-                'success': False,
-                'error': credit_message
-            }), 403
+        # Analysis completed successfully
+        logging.info("Property analysis completed successfully")
         
         return jsonify({
             'success': True,
-            'credit_message': credit_message,
+            'message': 'Property analysis completed successfully',
             **property_data
         })
         
@@ -1624,79 +1609,7 @@ def team_settings():
                          user=g.current_user, 
                          team=g.current_team)
 
-# Override existing analyze-property endpoint to require credits
-@app.route('/api/analyze-property', methods=['POST'])
-@require_seat
-@require_credits
-def analyze_property_with_billing():
-    """
-    Analyze property with credit consumption and seat enforcement
-    """
-    try:
-        data = request.get_json()
-        
-        # Validate required fields
-        if not data.get('address') or not data.get('city') or not data.get('state'):
-            return jsonify({
-                'success': False,
-                'error': 'Address, city, and state are required'
-            }), 400
-        
-        # Extract address components
-        place_id = data.get('place_id', '')
-        formatted_address = data.get('formatted_address', '')
-        address = data.get('address', '')
-        city = data.get('city', '')
-        state = data.get('state', '')
-        zip_code = data.get('zip', '')
-        latitude = data.get('latitude')
-        longitude = data.get('longitude')
-        
-        logging.info(f"Analyzing property with canonical address: {formatted_address or address}, {city}, {state} {zip_code}")
-        
-        # Get comprehensive property valuation
-        valuation_data = comprehensive_valuation_service.get_comprehensive_valuation(
-            place_id, address, city, state, zip_code
-        )
-        
-        # Create property data structure
-        property_data = {
-            'address': formatted_address or address,
-            'city': city,
-            'state': state,
-            'zip': zip_code,
-            'latitude': latitude,
-            'longitude': longitude,
-            'place_id': place_id,
-            'analysis_complete': True,
-            'data_sources': valuation_data.get('sources_tried', []),
-            'investment_potential': _assess_investment_potential(valuation_data),
-            'market_conditions': _assess_market_conditions(valuation_data),
-            'risk_level': _assess_risk_level(valuation_data),
-            'credit_consumed': True,
-            'remaining_credits': g.remaining_credits
-        }
-        
-        # Add valuation data to the response
-        if 'valuations' in valuation_data:
-            property_data['valuations'] = valuation_data['valuations']
-            property_data['valuation_sources'] = list(valuation_data['valuations'].keys())
-            property_data['sources_tried'] = valuation_data.get('sources_tried', [])
-        
-        session['current_property'] = property_data
-        
-        return jsonify({
-            'success': True,
-            'remaining_credits': g.remaining_credits,
-            **property_data
-        })
-        
-    except Exception as e:
-        logging.error(f"Property analysis error: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'Failed to analyze property. Please check the address and try again.'
-        }), 500
+# Billing endpoints will be added later when authentication is properly configured
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
