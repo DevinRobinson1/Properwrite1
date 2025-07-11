@@ -65,15 +65,19 @@ CREDIT_PACKS = {
 COMPING_CREDITS_ENABLED = True
 COMPING_CREDITS_FEATURE_STATUS = "Coming Soon"
 
-# Stripe Price IDs - These would be configured in Stripe Dashboard
+# Stripe Price IDs - These are configured in Stripe Dashboard
 STRIPE_PRICES = {
-    'starter_m': 'price_starter_monthly',
-    'pro_m': 'price_pro_monthly', 
-    'team5_m': 'price_team5_monthly',
-    'growth10_m': 'price_growth10_monthly',
-    'credit_pack_100': 'price_credit_pack_100',
-    'credit_pack_500': 'price_credit_pack_500',
-    'credit_pack_1000': 'price_credit_pack_1000'
+    'pro_m': 'price_1RjhMpPWMstJbjAav2Tyy5aR',  # $79/month, 300 credits
+    'team5_m': 'price_1RjhMqPWMstJbjAasyrGqEoB',  # $199/month, 1000 credits, 5 seats
+    'growth10_m': 'price_1RjhMqPWMstJbjAaB7bd7VbK',  # $399/month, unlimited credits, 10 seats
+    
+    # Credit packs (one-time purchases)
+    'credits_25': 'price_1RjhMrPWMstJbjAaBHIImsW3',   # $15
+    'credits_50': 'price_1RjhMrPWMstJbjAaKrBVHVTS',   # $25
+    'credits_100': 'price_1RjhMsPWMstJbjAaw7tHWOqX',  # $45
+    'credits_250': 'price_1RjhMsPWMstJbjAaBMSOvN81',  # $99
+    'credits_500': 'price_1RjhMtPWMstJbjAak8gUKHJ0',  # $175
+    'credits_1000': 'price_1RjhMtPWMstJbjAaiNNiZ50k', # $299
 }
 
 # Tier configuration for subscription enforcement
