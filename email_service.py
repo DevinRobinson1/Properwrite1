@@ -17,11 +17,27 @@ logger = logging.getLogger(__name__)
 
 class EmailService:
     def __init__(self):
-        self.smtp_server = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
-        self.smtp_port = int(os.environ.get('SMTP_PORT', '587'))
-        self.smtp_username = os.environ.get('SMTP_USERNAME')
+        # Auto-detect SMTP server based on email domain
+        smtp_username = os.environ.get('SMTP_USERNAME', '')
+        # Google Workspace uses Gmail SMTP for custom domains
+        if '@gmail.com' in smtp_username.lower() or smtp_username:
+            default_smtp_server = 'smtp.gmail.com'
+            default_smtp_port = '587'
+        elif '@outlook.com' in smtp_username.lower() or '@hotmail.com' in smtp_username.lower():
+            default_smtp_server = 'smtp-mail.outlook.com'
+            default_smtp_port = '587'
+        elif '@yahoo.com' in smtp_username.lower():
+            default_smtp_server = 'smtp.mail.yahoo.com'
+            default_smtp_port = '587'
+        else:
+            default_smtp_server = 'smtp.gmail.com'
+            default_smtp_port = '587'
+        
+        self.smtp_server = os.environ.get('SMTP_SERVER', default_smtp_server)
+        self.smtp_port = int(os.environ.get('SMTP_PORT', default_smtp_port))
+        self.smtp_username = smtp_username
         self.smtp_password = os.environ.get('SMTP_PASSWORD')
-        self.from_email = os.environ.get('FROM_EMAIL', 'devin@pureflairhomes.com')
+        self.from_email = os.environ.get('FROM_EMAIL', smtp_username)
         self.from_name = os.environ.get('FROM_NAME', 'Properwrite Team')
         
         # Alternative: SendGrid API
