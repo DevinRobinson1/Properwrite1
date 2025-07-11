@@ -67,7 +67,78 @@ def index():
 @app.route('/dashboard')
 def dashboard():
     """User Account Dashboard"""
+    # For testing, set up a session for Devin if not already logged in
+    if not session.get('user_id'):
+        session['user_id'] = 'bfac25c4-7081-4eb6-8895-5dc09bb56d0a'
+        session['email'] = 'devin@pfpsolutions.us'
     return render_template('dashboard.html')
+
+@app.route('/api/dashboard-data', methods=['GET'])
+def get_dashboard_data():
+    """Get dashboard data for current user"""
+    try:
+        user_id = session.get('user_id')
+        
+        if not user_id:
+            return jsonify({
+                'success': False,
+                'error': 'Not authenticated'
+            }), 401
+        
+        # Get user data from database
+        with Session(engine) as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            
+            if not user:
+                return jsonify({
+                    'success': False,
+                    'error': 'User not found'
+                }), 404
+            
+            # Get team stats using billing service
+            team_stats = billing_service.get_team_stats(user.team_id)
+            
+            return jsonify({
+                'success': True,
+                'user': {
+                    'id': str(user.id),
+                    'email': user.email,
+                    'name': user.name or user.email.split('@')[0],
+                    'initials': get_user_initials(user.name or user.email),
+                    'role': user.role,
+                    'is_active': user.is_active
+                },
+                'team': {
+                    'id': str(user.team_id),
+                    'name': team_stats.get('team_name', 'My Team'),
+                    'plan': team_stats.get('plan_name', 'Free'),
+                    'credits_remaining': team_stats.get('credits_remaining', 0),
+                    'credits_used_this_month': team_stats.get('credits_used_this_month', 0),
+                    'total_members': team_stats.get('total_members', 1),
+                    'max_members': team_stats.get('max_members', 1),
+                    'subscription_status': team_stats.get('subscription_status', 'active'),
+                    'next_billing_date': team_stats.get('next_billing_date')
+                },
+                'recent_activity': []  # Can be populated later
+            })
+    except Exception as e:
+        logging.error(f"Error getting dashboard data: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Error loading dashboard data'
+        }), 500
+
+def get_user_initials(name):
+    """Generate user initials from name"""
+    if not name:
+        return "U"
+    
+    # Split name and get first letter of each part
+    parts = name.split()
+    if len(parts) >= 2:
+        return f"{parts[0][0]}{parts[1][0]}".upper()
+    else:
+        return parts[0][0].upper() if parts else "U"
 
 @app.route('/api/user-status', methods=['GET'])
 def get_user_status():

@@ -73,7 +73,7 @@
                         <p class="text-xs text-gray-500" id="user-email">Loading...</p>
                     </div>
                     <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <span class="text-white font-bold text-sm">JD</span>
+                        <span class="text-white font-bold text-sm" id="user-initials">JD</span>
                     </div>
                 </div>
             </div>
@@ -844,43 +844,77 @@
 
         async function loadUserData() {
             try {
-                // Load user authentication status
-                const response = await fetch('/api/get-user-status');
-                const userData = await response.json();
+                // Load dashboard data
+                const response = await fetch('/api/dashboard-data');
+                const data = await response.json();
                 
-                if (userData.isAuthenticated) {
+                if (data.success) {
                     // Update user info in header
-                    document.getElementById('user-name').textContent = userData.user.name || userData.user.email.split('@')[0];
-                    document.getElementById('user-email').textContent = userData.user.email;
+                    document.getElementById('user-name').textContent = data.user.name;
+                    document.getElementById('user-email').textContent = data.user.email;
+                    document.getElementById('user-initials').textContent = data.user.initials;
                     
-                    // Load team data
-                    await loadTeamData();
+                    // Update team stats
+                    document.getElementById('current-plan').textContent = data.team.plan;
+                    document.getElementById('credits-remaining').textContent = data.team.credits_remaining.toLocaleString();
+                    document.getElementById('team-size').textContent = `${data.team.total_members} / ${data.team.max_members}`;
+                    
+                    // Update renewal date
+                    if (data.team.next_billing_date) {
+                        const date = new Date(data.team.next_billing_date);
+                        document.getElementById('renewal-date').textContent = date.toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric' 
+                        });
+                    }
+                    
+                    // Update credit usage stats in Credits section
+                    const creditsSection = document.getElementById('credits-section');
+                    if (creditsSection) {
+                        const creditsRemainingElements = creditsSection.querySelectorAll('.text-3xl');
+                        if (creditsRemainingElements[0]) {
+                            creditsRemainingElements[0].textContent = data.team.credits_remaining.toLocaleString();
+                        }
+                        if (creditsRemainingElements[1]) {
+                            creditsRemainingElements[1].textContent = data.team.credits_used_this_month.toLocaleString();
+                        }
+                    }
+                    
+                    // Update team member count in team section
+                    const teamSectionHeaders = document.querySelectorAll('h3');
+                    teamSectionHeaders.forEach(header => {
+                        if (header.textContent.includes('Team Members')) {
+                            header.textContent = `Team Members (${data.team.total_members}/${data.team.max_members})`;
+                        }
+                    });
+                    
                 } else {
-                    // Redirect to login if not authenticated
-                    window.location.href = '/';
+                    console.error('Error loading dashboard data:', data.error);
+                    // Show error message
+                    showErrorMessage('Failed to load dashboard data. Please try refreshing the page.');
                 }
             } catch (error) {
                 console.error('Error loading user data:', error);
-                document.getElementById('user-name').textContent = 'User';
-                document.getElementById('user-email').textContent = 'user@example.com';
+                showErrorMessage('Failed to load dashboard data. Please try refreshing the page.');
             }
         }
 
+        function showErrorMessage(message) {
+            // Create and show error toast
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md z-50';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+
         async function loadTeamData() {
-            try {
-                const response = await fetch('/api/team/stats');
-                const teamData = await response.json();
-                
-                if (teamData.success) {
-                    // Update team member list
-                    updateTeamMemberList(teamData.members);
-                    
-                    // Update team stats
-                    updateTeamStats(teamData.stats);
-                }
-            } catch (error) {
-                console.error('Error loading team data:', error);
-            }
+            // This function is now handled by loadUserData()
+            // Keeping for backward compatibility but functionality moved above
+            console.log('Team data loading is now handled by loadUserData()');
         }
 
         function updateTeamMemberList(members) {
