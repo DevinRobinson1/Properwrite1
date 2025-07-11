@@ -48,6 +48,11 @@ def index():
     return render_template('index_upgraded.html', 
                          google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY'))
 
+@app.route('/dashboard')
+def dashboard():
+    """User Account Dashboard"""
+    return render_template('dashboard.html')
+
 @app.route('/api/analyze-property', methods=['POST'])
 @require_valid_address
 def analyze_property():
