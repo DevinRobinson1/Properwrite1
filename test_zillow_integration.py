@@ -89,15 +89,18 @@ def test_backend_api():
     """Test our backend API"""
     print("\n=== Testing Backend API ===")
     
+    # Test with the problematic address that has duplicates
     test_payload = {
-        "place_id": "ChIJHTYugoEcVIgRbBTaWn4ekKc",
-        "address": "14303 Evening Flight Lane",
-        "city": "Charlotte",
-        "state": "North Carolina",
-        "zip_code": "28262",
-        "formatted_address": "14303 Evening Flight Lane, Charlotte, NC, USA",
-        "latitude": 35.2271,
-        "longitude": -80.8431
+        "place_id": "ChIJ_8oVzT-1IIgRGJjOzCcdrW0",
+        "address": "9 Catawba Trail",
+        "city": "Myrtle Beach",
+        "state": "South Carolina",
+        "zip_code": "29588",
+        "formatted_address": "9 Catawba Trail, Myrtle Beach, SC, USA, Myrtle Beach, South Carolina 29588",
+        "formattedAddress": "9 Catawba Trail, Myrtle Beach, SC, USA, Myrtle Beach, South Carolina 29588",
+        "placeId": "ChIJ_8oVzT-1IIgRGJjOzCcdrW0",
+        "latitude": 33.689,
+        "longitude": -78.887
     }
     
     try:

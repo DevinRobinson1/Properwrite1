@@ -109,9 +109,17 @@ def analyze_property():
         
         # Get comprehensive property valuation from multiple sources
         try:
+            # Clean up the formatted address to remove duplicates before sending to APIs
+            from address_utils import to_zillow_search_string, normalize_address_for_apis
+            
+            # Use the normalized address for API calls
+            clean_address = normalize_address_for_apis(canonical_address['formatted_address'])
+            
+            logging.info(f"🐛 Cleaned address for APIs: {clean_address}")
+            
             valuation_data = comprehensive_valuation_service.get_comprehensive_valuation(
                 place_id=canonical_address.get('place_id', ''),
-                address=canonical_address['formatted_address'],  # Use full formatted address
+                address=clean_address,  # Use cleaned address without duplicates
                 city=canonical_address['city'],
                 state=canonical_address['state'],
                 zip_code=canonical_address['zip'],

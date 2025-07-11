@@ -54,7 +54,10 @@ class ComprehensiveValuationService:
             cached_data = self._get_cached_valuation(cache_key)
             if cached_data:
                 cached_data['cache_used'] = True
+                logging.info(f"🐛 Using cached valuation data for {address}")
                 return cached_data
+        
+        logging.info(f"🐛 No cache found, proceeding with API calls for {address}")
         
         # Get coordinates if not provided
         if not latitude or not longitude:
@@ -104,7 +107,10 @@ class ComprehensiveValuationService:
     
     def _try_zillow_valuation(self, valuation_data: Dict, address: str, city: str, state: str, zip_code: str):
         """Try Zillow Deep Search API with enhanced address normalization"""
+        logging.info(f"🐛 Starting Zillow valuation for: {address}")
+        
         if not self.rapidapi_key:
+            logging.warning("🐛 No RapidAPI key found, skipping Zillow")
             return
             
         try:
@@ -131,18 +137,29 @@ class ComprehensiveValuationService:
             
             search_response = requests.get(search_url, headers=headers, timeout=10)
             
+            logging.info(f"🐛 Zillow response status: {search_response.status_code}")
+            
             if search_response.status_code == 200:
                 search_data = search_response.json()
+                logging.info(f"🐛 Zillow response: {json.dumps(search_data[:2] if isinstance(search_data, list) else search_data, indent=2)[:500]}")
                 logging.info(f"Zillow API response type: {type(search_data)}, length: {len(search_data) if isinstance(search_data, list) else 'N/A'}")
                 
-                # Handle array response format (free tier)
+                # Handle both array and object response formats
                 if isinstance(search_data, list) and len(search_data) > 0:
-                    # Use first match from array response
+                    # Array response format
                     property_match = search_data[0]
                     zpid = property_match.get('zpid')
                     matched_address = property_match.get('address', '')
+                elif isinstance(search_data, dict) and 'zpid' in search_data:
+                    # Single object response format
+                    zpid = search_data.get('zpid')
+                    matched_address = f"{address}, {city}, {state} {zip_code}"
+                    logging.info(f"🐛 Zillow returned single ZPID format: {zpid}")
+                else:
+                    zpid = None
+                    matched_address = ''
                     
-                    if zpid:
+                if zpid:
                         logging.info(f"Found ZPID {zpid} for {matched_address}")
                         
                         # Get detailed property information
@@ -185,10 +202,8 @@ class ComprehensiveValuationService:
                             return
                         else:
                             logging.warning(f"Zillow detail API failed: {detail_response.status_code}")
-                    else:
-                        logging.warning("No ZPID found in Zillow search result")
                 else:
-                    logging.warning("No properties found in Zillow search or invalid response format")
+                    logging.warning("No ZPID found in Zillow search result")
             else:
                 logging.warning(f"Zillow search API failed: {search_response.status_code}")
                 if search_response.status_code == 400:
