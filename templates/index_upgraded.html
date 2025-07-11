@@ -787,7 +787,7 @@
                                         id="cash-sale-tab">
                                     Cash Sale
                                 </button>
-                                <button onclick="showDispositionTab('mls-novation'); setTimeout(() => updateNovationCalculation(), 200);" 
+                                <button onclick="showDispositionTab('mls-novation')" 
                                         class="disposition-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50"
                                         id="mls-novation-tab">
                                     MLS / Novation
@@ -932,24 +932,24 @@
                                 <div class="space-y-4">
                                     <div class="flex justify-between items-center">
                                         <span class="text-gray-700">List Price:</span>
-                                        <span class="font-bold text-blue-600 text-lg" id="novation-list-price">$365,000</span>
+                                        <span class="font-bold text-blue-600 text-lg" id="mls-novation-list-price">$0</span>
                                     </div>
                                     <div class="space-y-2">
                                         <div class="flex justify-between">
                                             <span>Listing Commission:</span>
                                             <div class="flex items-center">
-                                                <input type="text" id="mls-listing-commission" value="2.0" 
+                                                <input type="text" id="mls-listing-commission-input" value="2.0" 
                                                        class="w-16 px-2 py-1 border border-blue-300 rounded text-right mr-1"
-                                                       onchange="formatAndRecalculateDispositions(this)">
+                                                       onchange="calculateMLSNovation()">
                                                 <span>%</span>
                                             </div>
                                         </div>
                                         <div class="flex justify-between">
                                             <span>Buyer Agent Commission:</span>
                                             <div class="flex items-center">
-                                                <input type="text" id="buyer-commission" value="2.0" 
+                                                <input type="text" id="mls-buyer-commission-input" value="2.0" 
                                                        class="w-16 px-2 py-1 border border-blue-300 rounded text-right mr-1"
-                                                       onchange="formatAndRecalculateDispositions(this)">
+                                                       onchange="calculateMLSNovation()">
                                                 <span>%</span>
                                             </div>
                                         </div>
@@ -960,20 +960,20 @@
                                     <div class="space-y-1 text-sm">
                                         <div class="flex justify-between">
                                             <span>Gross Sale Price:</span>
-                                            <span id="novation-gross-sale">$365,000</span>
+                                            <span id="mls-novation-gross-sale">$0</span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span>Total Commissions:</span>
-                                            <span id="novation-commissions">$14,600</span>
+                                            <span id="mls-novation-commissions">$0</span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span>Our Fee:</span>
-                                            <span id="novation-our-fee">$20,475</span>
+                                            <span id="mls-novation-our-fee">$20,475</span>
                                         </div>
                                         <hr class="my-2">
                                         <div class="flex justify-between font-bold">
                                             <span>Net to Us:</span>
-                                            <span class="text-blue-600" id="novation-net-to-us">$329,925</span>
+                                            <span class="text-blue-600" id="mls-novation-net-to-us">$0</span>
                                         </div>
                                     </div>
                                 </div>
@@ -3127,7 +3127,7 @@
             // Update dispositions separately (client-side only, no API calls)
             try {
                 recalculateAllDispositionStrategies();
-                updateNovationCalculation(); // Added this to ensure MLS/Novation updates
+                calculateMLSNovation(); // Calculate MLS/Novation values
             } catch (dispositionError) {
                 console.log('Dispositions calculation in progress...');
             }
@@ -3922,54 +3922,52 @@
             }
         }
         
+        function calculateMLSNovation() {
+            console.log('calculateMLSNovation called');
+            
+            // Get values from property header
+            const arv = parseFloat(document.getElementById('arv')?.value?.replace(/,/g, '')) || 415000;
+            const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/,/g, '')) || 30000;
+            
+            // Calculate list price: (ARV - Repairs) - discount
+            const afterRepairs = arv - repairs;
+            const discount = Math.max(afterRepairs * 0.10, 20000); // 10% discount or minimum $20,000
+            const listPrice = afterRepairs - discount;
+            
+            // Get commission rates
+            const listingCommission = parseFloat(document.getElementById('mls-listing-commission-input')?.value) || 2;
+            const buyerCommission = parseFloat(document.getElementById('mls-buyer-commission-input')?.value) || 2;
+            const totalCommissionRate = (listingCommission + buyerCommission) / 100;
+            const totalCommissions = Math.round(listPrice * totalCommissionRate);
+            
+            // Fixed our fee
+            const ourFee = 20475;
+            
+            // Calculate net
+            const netToUs = listPrice - totalCommissions - ourFee;
+            
+            console.log('MLS/Novation calculation:', {
+                arv,
+                repairs,
+                afterRepairs,
+                discount,
+                listPrice,
+                totalCommissions,
+                ourFee,
+                netToUs
+            });
+            
+            // Update the display elements
+            document.getElementById('mls-novation-list-price').textContent = '$' + listPrice.toLocaleString();
+            document.getElementById('mls-novation-gross-sale').textContent = '$' + listPrice.toLocaleString();
+            document.getElementById('mls-novation-commissions').textContent = '$' + totalCommissions.toLocaleString();
+            document.getElementById('mls-novation-our-fee').textContent = '$' + ourFee.toLocaleString();
+            document.getElementById('mls-novation-net-to-us').textContent = '$' + netToUs.toLocaleString();
+        }
+        
         function updateNovationCalculation() {
-            try {
-                console.log('updateNovationCalculation called');
-                
-                const arv = parseFloat(document.getElementById('arv')?.value?.replace(/,/g, '')) || 415000;
-                const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/,/g, '')) || 30000;
-                
-                console.log('Input values:', { arv, repairs });
-                
-                // List Price = (ARV - Repairs) - MAX(10% of (ARV-Repairs), 20000)
-                const afterRepairs = arv - repairs;
-                const discount = Math.max(afterRepairs * 0.10, 20000);
-                const listPrice = afterRepairs - discount;
-                
-                const listingCommission = parseFloat(document.getElementById('mls-listing-commission')?.value) || 2;
-                const buyerCommission = parseFloat(document.getElementById('buyer-commission')?.value) || 2;
-                const totalCommissionRate = (listingCommission + buyerCommission) / 100;
-                const totalCommissions = Math.round(listPrice * totalCommissionRate);
-                const ourFee = 20475;
-                const netToUs = listPrice - totalCommissions - ourFee;
-                
-                console.log('Novation calculation results:', { 
-                    arv,
-                    repairs,
-                    afterRepairs,
-                    discount,
-                    listPrice, 
-                    listingCommission, 
-                    buyerCommission, 
-                    totalCommissionRate, 
-                    totalCommissions,
-                    ourFee,
-                    netToUs
-                });
-                
-                // Update all the display elements
-                console.log('Updating novation-list-price to:', '$' + Math.round(listPrice).toLocaleString());
-                updateElementIfExists('novation-list-price', '$' + Math.round(listPrice).toLocaleString());
-                updateElementIfExists('novation-gross-sale', '$' + Math.round(listPrice).toLocaleString());
-                updateElementIfExists('novation-commissions', '$' + totalCommissions.toLocaleString());
-                updateElementIfExists('novation-our-fee', '$' + ourFee.toLocaleString());
-                updateElementIfExists('novation-net-to-us', '$' + Math.round(netToUs).toLocaleString());
-                updateElementIfExists('listing-commission-value', listingCommission.toFixed(1) + '%');
-                updateElementIfExists('buyer-commission-value', buyerCommission.toFixed(1) + '%');
-            } catch (error) {
-                console.error('Error in updateNovationCalculation:', error);
-                console.error('Stack trace:', error.stack);
-            }
+            // This function is kept for backward compatibility
+            calculateMLSNovation();
         }
         
         function formatAndRecalculateSubjectTo(input) {
@@ -5042,8 +5040,8 @@
             // Initialize tab and recalculate values
             setTimeout(() => {
                 if (tabName === 'mls-novation') {
-                    console.log('Calling updateNovationCalculation for MLS/Novation tab');
-                    updateNovationCalculation();
+                    console.log('Calling calculateMLSNovation for MLS/Novation tab');
+                    calculateMLSNovation();
                 } else if (tabName === 'cash-sale') {
                     recalculateAllDispositionStrategies();
                 } else if (tabName === 'subject-to-wrap') {
@@ -5067,7 +5065,7 @@
             setTimeout(() => {
                 console.log('Initializing all disposition calculations on page load');
                 recalculateAllDispositionStrategies();
-                updateNovationCalculation();
+                calculateMLSNovation();
             }, 500);
             
             // Initialize default disposition tab (cash-sale)
