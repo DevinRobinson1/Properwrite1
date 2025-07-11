@@ -108,7 +108,7 @@ def analyze_property():
         try:
             valuation_data = comprehensive_valuation_service.get_comprehensive_valuation(
                 place_id=canonical_address.get('place_id', ''),
-                address=canonical_address['street'],
+                address=canonical_address['formatted_address'],  # Use full formatted address
                 city=canonical_address['city'],
                 state=canonical_address['state'],
                 zip_code=canonical_address['zip'],

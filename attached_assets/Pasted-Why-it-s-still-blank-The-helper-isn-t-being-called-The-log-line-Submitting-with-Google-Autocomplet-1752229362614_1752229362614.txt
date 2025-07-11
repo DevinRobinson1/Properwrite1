@@ -1,0 +1,68 @@
+Why it’s still blank
+The helper isn’t being called
+
+The log line “Submitting with Google Autocomplete (New) data” still shows the raw, duplicated address.
+
+That means the new to_zillow_search_string() function was added but not wired in before the API call.
+
+No HTTP request is leaving the browser
+Open the Network tab ⇒ filter by propertyExtendedSearch. If you see zero rows, the fetch is never triggered (likely because the backend returned early with INCOMPLETE_ADDRESS).
+
+Backend can’t see the RapidAPI credentials in prod
+A 400 from your own /property-analysis route combined with ERR_BLOCKED_BY_CLIENT for the RapidAPI URL means the server-side call never happened—often an empty process.env.RAPIDAPI_KEY.
+
+One quick sanity test (run in Replit Shell)
+bash
+Copy
+Edit
+python - <<'PY'
+from utils.address_utils import to_zillow_search_string
+addr = "14303 Six Oaks Cir, Carnes Crossroads, SC, USA"
+print("Sanitised for Zillow  ➜", to_zillow_search_string(addr))
+PY
+Expected output:
+
+rust
+Copy
+Edit
+Sanitised for Zillow  ➜ 14303+Six+Oaks+Cir+Carnes+Crossroads+SC
+If you don’t see that, the helper file isn’t imported correctly.
+
+Ghostwriter patch (drop this verbatim)
+diff
+Copy
+Edit
+# routes/property_analysis.py  (or wherever the Zillow search is fired)
+
+-from_address = quote_plus(raw_address)            # ❌ still raw
+-search_url  = f"{ZILLOW_BASE}/propertyExtendedSearch?location={from_address}&status_type=RecentlySold&home_type=Houses"
++from utils.address_utils import to_zillow_search_string
++
++clean = to_zillow_search_string(raw_address)
++search_url = (
++    f"{ZILLOW_BASE}/propertyExtendedSearch"
++    f"?location={clean}"
++    f"&status_type=RecentlySold"
++    f"&home_type=Houses"
++)
++logger.debug("🐛 Zillow search URL ➜ %s", search_url)
+diff
+Copy
+Edit
+# server/.env  (Replit secrets panel)
+-RAPIDAPI_KEY=
++RAPIDAPI_KEY=be3e296439msh2693e44b9d2433fp17bebbjsn9aa77716b131
+diff
+Copy
+Edit
+# valuation_frontend.ts  (better user feedback so you know the helper ran)
+
+-console.log('Submitting with Google Autocomplete (New) data:', response)
++console.log('[Zillow] sending location string:', cleanAddress)
+Re-deploy → open DevTools → Network
+You should now see a …propertyExtendedSearch?location=14303+Six+Oaks+Cir+Carnes+Crossroads+SC… request with 200 and a JSON array containing a zpid.
+
+If the next call to /property?zpid= returns 401 or “not subscribed”
+that’s expected until you upgrade the RapidAPI plan—your front-end will now say
+“Found on Zillow – upgrade plan for detailed valuations.”
+

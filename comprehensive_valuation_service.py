@@ -114,8 +114,8 @@ class ComprehensiveValuationService:
             }
             
             # Normalize address to prevent duplicate tokens and remove subdivision noise
-            full_address = f"{address}, {city}, {state} {zip_code}".strip()
-            normalized_location = to_zillow_search_string(full_address)
+            # The address already contains city/state from Google Places, so use it directly
+            normalized_location = to_zillow_search_string(address)
             
             # Build search URL with normalized address
             search_url = (
@@ -429,7 +429,17 @@ class ComprehensiveValuationService:
         # Priority order: Zillow > Redfin > Realtor.com
         for source in ['zillow', 'redfin', 'realtor']:
             if source in valuations:
-                return valuations[source]
+                valuation = valuations[source].copy()
+                # Standardize the estimate key for consistent access
+                if 'zestimate' in valuation:
+                    valuation['estimate'] = valuation['zestimate']
+                elif 'estimate' not in valuation:
+                    # Try other common estimate keys
+                    for key in ['price', 'value', 'list_price']:
+                        if key in valuation:
+                            valuation['estimate'] = valuation[key]
+                            break
+                return valuation
         
         return None
     
