@@ -6,6 +6,7 @@
     <title>properwrite.com - Real Estate Investment Analysis Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         .gradient-bg {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -478,6 +479,9 @@
                         </button>
                         <button id="dispositions-section-btn" class="section-toggle-btn px-8 py-3 font-bold text-lg rounded-lg transition-all duration-300 bg-gray-300 text-gray-700 hover:bg-purple-500 hover:text-white" onclick="showSection('dispositions')">
                             <i class="fas fa-chart-line mr-3"></i>🏠 Dispositions
+                        </button>
+                        <button id="comps-section-btn" class="section-toggle-btn px-8 py-3 font-bold text-lg rounded-lg transition-all duration-300 bg-gray-300 text-gray-700 hover:bg-teal-500 hover:text-white" onclick="showSection('comps')">
+                            <i class="fas fa-chart-area mr-3"></i>📊 Comps
                         </button>
                     </div>
                 </div>
@@ -1383,6 +1387,129 @@
 
 
 
+                </div>
+
+                <!-- Comps Section -->
+                <div id="comps-section" class="section-content hidden">
+                    <div class="bg-teal-50 border-b-4 border-teal-500 p-6 mb-6">
+                        <h2 class="text-2xl font-bold text-teal-800">
+                            <i class="fas fa-chart-area mr-2"></i>📊 Comparable Properties Analysis
+                        </h2>
+                        <p class="text-gray-700 mt-2">AI-powered analysis of comparable sales to determine accurate property valuation</p>
+                    </div>
+
+                    <!-- Main Content Area -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+                        <!-- Subject Property Overview -->
+                        <div class="lg:col-span-1">
+                            <div class="bg-white rounded-lg shadow-lg p-6">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-home mr-2 text-teal-500"></i>Subject Property
+                                </h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="text-sm text-gray-600">Address</label>
+                                        <p class="font-medium text-gray-800" id="comps-subject-address">Loading...</p>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="text-sm text-gray-600">Beds</label>
+                                            <p class="font-medium text-gray-800" id="comps-subject-beds">-</p>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm text-gray-600">Baths</label>
+                                            <p class="font-medium text-gray-800" id="comps-subject-baths">-</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm text-gray-600">Square Feet</label>
+                                        <p class="font-medium text-gray-800" id="comps-subject-sqft">-</p>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm text-gray-600">Year Built</label>
+                                        <p class="font-medium text-gray-800" id="comps-subject-year">-</p>
+                                    </div>
+                                </div>
+
+                                <!-- Analysis Controls -->
+                                <div class="mt-6 pt-6 border-t border-gray-200">
+                                    <h4 class="text-sm font-semibold text-gray-700 mb-3">Analysis Parameters</h4>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label class="text-sm text-gray-600">Max Distance (miles)</label>
+                                            <input type="number" id="comps-max-distance" value="0.5" step="0.1" min="0.1" max="5" 
+                                                   class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                                        </div>
+                                        <div>
+                                            <label class="text-sm text-gray-600">Days on Market</label>
+                                            <select id="comps-days-filter" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                                                <option value="90">Last 90 days</option>
+                                                <option value="180" selected>Last 180 days</option>
+                                                <option value="365">Last 365 days</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <button onclick="runCompsAnalysis()" 
+                                            class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                                        <i class="fas fa-search mr-2"></i>
+                                        Analyze Comparables
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Comparables Results -->
+                        <div class="lg:col-span-2">
+                            <div id="comps-loading" class="hidden">
+                                <div class="bg-white rounded-lg shadow-lg p-8 text-center">
+                                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
+                                    <p class="text-gray-600">Analyzing comparable properties...</p>
+                                </div>
+                            </div>
+
+                            <div id="comps-results" class="hidden">
+                                <!-- Comparable Properties Grid -->
+                                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                        <i class="fas fa-building mr-2 text-teal-500"></i>Comparable Properties
+                                    </h3>
+                                    <div id="comps-grid" class="space-y-4">
+                                        <!-- Comparable cards will be inserted here -->
+                                    </div>
+                                </div>
+
+                                <!-- AI Analysis Summary -->
+                                <div class="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg shadow-lg p-6">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                        <i class="fas fa-robot mr-2 text-teal-600"></i>AI Valuation Analysis
+                                    </h3>
+                                    <div id="comps-ai-summary" class="prose prose-sm max-w-none text-gray-700">
+                                        <!-- AI summary will be inserted here -->
+                                    </div>
+                                    
+                                    <div class="mt-6 p-4 bg-white rounded-lg">
+                                        <h4 class="font-semibold text-gray-800 mb-2">Recommended ARV</h4>
+                                        <div class="text-3xl font-bold text-teal-600" id="comps-recommended-arv">-</div>
+                                        <p class="text-sm text-gray-600 mt-1" id="comps-arv-range">-</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Error State -->
+                            <div id="comps-error" class="hidden">
+                                <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-exclamation-circle text-red-500 text-2xl mr-3"></i>
+                                        <div>
+                                            <h3 class="font-semibold text-red-800">Analysis Error</h3>
+                                            <p class="text-red-700 mt-1" id="comps-error-message">Unable to analyze comparable properties</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Acquisitions Tab Content -->
@@ -4295,6 +4422,162 @@
             }
         }
 
+        // Comps Analysis Functions
+        function populateCompsSubjectProperty() {
+            // Get current property data
+            const address = document.getElementById('street-address')?.value || '';
+            const beds = document.getElementById('beds')?.value || '-';
+            const baths = document.getElementById('baths')?.value || '-';
+            const sqft = document.getElementById('sqft')?.value || '-';
+            
+            // Update subject property display
+            updateElementIfExists('comps-subject-address', address || 'No address provided');
+            updateElementIfExists('comps-subject-beds', beds);
+            updateElementIfExists('comps-subject-baths', baths);
+            updateElementIfExists('comps-subject-sqft', sqft);
+            
+            // Year built will come from API data if available
+            const yearBuilt = window.lastPropertyData?.year_built || '-';
+            updateElementIfExists('comps-subject-year', yearBuilt);
+        }
+
+        // Toast notification function
+        function showToast(message, type = 'error', duration = 5000) {
+            // For now, use alert as fallback
+            alert(message);
+        }
+
+        function runCompsAnalysis() {
+            const address = document.getElementById('street-address')?.value;
+            if (!address) {
+                showToast('Please enter a property address first', 'error');
+                return;
+            }
+
+            const beds = parseInt(document.getElementById('beds')?.value) || 3;
+            const baths = parseFloat(document.getElementById('baths')?.value) || 2;
+            const sqft = parseInt(document.getElementById('sqft')?.value?.replace(/,/g, '')) || 1500;
+            const maxDistance = parseFloat(document.getElementById('comps-max-distance')?.value) || 0.5;
+            const daysFilter = parseInt(document.getElementById('comps-days-filter')?.value) || 180;
+
+            // Show loading state
+            document.getElementById('comps-loading').classList.remove('hidden');
+            document.getElementById('comps-results').classList.add('hidden');
+            document.getElementById('comps-error').classList.add('hidden');
+
+            // Get property coordinates if available
+            const lat = window.lastPropertyData?.latitude;
+            const lng = window.lastPropertyData?.longitude;
+
+            fetch('/api/analyze-comps', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    address: address,
+                    beds: beds,
+                    baths: baths,
+                    sqft: sqft,
+                    lat: lat,
+                    lng: lng,
+                    max_distance: maxDistance,
+                    days_filter: daysFilter
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('comps-loading').classList.add('hidden');
+                
+                if (data.error) {
+                    document.getElementById('comps-error').classList.remove('hidden');
+                    document.getElementById('comps-error-message').textContent = data.error;
+                } else {
+                    displayCompsResults(data);
+                }
+            })
+            .catch(error => {
+                console.error('Comps analysis error:', error);
+                document.getElementById('comps-loading').classList.add('hidden');
+                document.getElementById('comps-error').classList.remove('hidden');
+                document.getElementById('comps-error-message').textContent = 'Failed to analyze comparable properties';
+            });
+        }
+
+        function displayCompsResults(data) {
+            document.getElementById('comps-results').classList.remove('hidden');
+            
+            // Display comparable properties
+            const compsGrid = document.getElementById('comps-grid');
+            compsGrid.innerHTML = '';
+            
+            if (data.comparables && data.comparables.length > 0) {
+                data.comparables.forEach((comp, index) => {
+                    const compCard = createCompCard(comp, data.adjustments[index]);
+                    compsGrid.appendChild(compCard);
+                });
+            } else {
+                compsGrid.innerHTML = '<p class="text-gray-600">No comparable properties found</p>';
+            }
+            
+            // Display AI summary
+            if (data.ai_summary) {
+                document.getElementById('comps-ai-summary').innerHTML = marked.parse(data.ai_summary.summary || '');
+                document.getElementById('comps-recommended-arv').textContent = '$' + (data.ai_summary.recommended_arv || 0).toLocaleString();
+                
+                const minArv = data.ai_summary.arv_range?.min || 0;
+                const maxArv = data.ai_summary.arv_range?.max || 0;
+                document.getElementById('comps-arv-range').textContent = `Range: $${minArv.toLocaleString()} - $${maxArv.toLocaleString()}`;
+            }
+        }
+
+        function createCompCard(comp, adjustments) {
+            const div = document.createElement('div');
+            div.className = 'bg-gray-50 border border-gray-200 rounded-lg p-4';
+            
+            const adjustedPrice = comp.price + (adjustments?.total_adjustment || 0);
+            const distance = comp.distance?.toFixed(2) || '0';
+            const daysOld = comp.days_old || 0;
+            
+            div.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-800">${comp.address || 'Unknown Address'}</h4>
+                        <p class="text-sm text-gray-600">${distance} miles away • Sold ${daysOld} days ago</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-lg font-bold text-gray-800">$${comp.price?.toLocaleString() || 0}</p>
+                        <p class="text-sm text-teal-600">Adj: $${adjustedPrice.toLocaleString()}</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-2 text-sm">
+                    <div>
+                        <span class="text-gray-600">Beds:</span>
+                        <span class="font-medium">${comp.bedrooms || '-'}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">Baths:</span>
+                        <span class="font-medium">${comp.bathrooms || '-'}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-600">Sqft:</span>
+                        <span class="font-medium">${comp.square_feet?.toLocaleString() || '-'}</span>
+                    </div>
+                </div>
+                
+                ${adjustments ? `
+                <div class="mt-2 pt-2 border-t border-gray-200 text-xs text-gray-600">
+                    <p>Adjustments: Beds (${adjustments.bedroom_adjustment > 0 ? '+' : ''}$${adjustments.bedroom_adjustment.toLocaleString()}) • 
+                    Baths (${adjustments.bathroom_adjustment > 0 ? '+' : ''}$${adjustments.bathroom_adjustment.toLocaleString()}) • 
+                    Size (${adjustments.size_adjustment > 0 ? '+' : ''}$${adjustments.size_adjustment.toLocaleString()})</p>
+                </div>
+                ` : ''}
+            `;
+            
+            return div;
+        }
+
         // [REMOVED DUPLICATE FUNCTION - using main implementation below]
         
         // Format and recalculate dispositions
@@ -4643,34 +4926,34 @@
             // Hide all sections
             document.getElementById('acquisitions-section').classList.toggle('hidden', sectionName !== 'acquisitions');
             document.getElementById('dispositions-section').classList.toggle('hidden', sectionName !== 'dispositions');
+            document.getElementById('comps-section').classList.toggle('hidden', sectionName !== 'comps');
             document.getElementById('acquisitions-tab-content').classList.toggle('hidden', sectionName !== 'acquisitions');
             document.getElementById('dispositions-tab-content').classList.toggle('hidden', sectionName !== 'dispositions');
             
-            // Show/hide divider and AI Control Center
-            document.getElementById('section-divider').classList.toggle('hidden', sectionName === 'acquisitions');
-            document.getElementById('ai-control-center-wrapper').classList.toggle('hidden', sectionName === 'acquisitions');
+            // Show/hide divider and AI Control Center based on section
+            const showDivider = sectionName !== 'acquisitions' && sectionName !== 'comps';
+            document.getElementById('section-divider').classList.toggle('hidden', !showDivider);
+            document.getElementById('ai-control-center-wrapper').classList.toggle('hidden', !showDivider);
             
             // Update section toggle buttons
             document.querySelectorAll('.section-toggle-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (sectionName === 'acquisitions') {
-                    btn.classList.remove('bg-purple-500', 'bg-green-500', 'text-white');
-                    btn.classList.add('bg-gray-300', 'text-gray-700');
-                } else {
-                    btn.classList.remove('bg-blue-500', 'text-white');
-                    btn.classList.add('bg-gray-300', 'text-gray-700');
-                }
+                btn.classList.remove('active', 'bg-blue-500', 'bg-purple-500', 'bg-teal-500', 'text-white');
+                btn.classList.add('bg-gray-300', 'text-gray-700');
             });
             
             if (sectionName === 'acquisitions') {
                 document.getElementById('acquisitions-section-btn').classList.remove('bg-gray-300', 'text-gray-700');
                 document.getElementById('acquisitions-section-btn').classList.add('bg-blue-500', 'text-white', 'active');
-            } else {
+            } else if (sectionName === 'dispositions') {
                 document.getElementById('dispositions-section-btn').classList.remove('bg-gray-300', 'text-gray-700');
                 document.getElementById('dispositions-section-btn').classList.add('bg-purple-500', 'text-white', 'active');
-                
                 // Update reference values when switching to dispositions
                 updateDispositionsReference();
+            } else if (sectionName === 'comps') {
+                document.getElementById('comps-section-btn').classList.remove('bg-gray-300', 'text-gray-700');
+                document.getElementById('comps-section-btn').classList.add('bg-teal-500', 'text-white', 'active');
+                // Populate subject property data when switching to comps
+                populateCompsSubjectProperty();
             }
         }
 

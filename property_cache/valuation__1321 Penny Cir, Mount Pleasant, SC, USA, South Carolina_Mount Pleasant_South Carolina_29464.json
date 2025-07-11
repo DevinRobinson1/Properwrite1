@@ -1,0 +1,44 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 1129000,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 10924961,
+      "matched_address": "1321 Penny Cir, Mount Pleasant, SC, USA, South Carolina, Mount Pleasant, South Carolina 29464",
+      "images": [
+        "https://maps.googleapis.com/maps/api/streetview?location=1321+Penny+Cir%2C+Mount+Pleasant%2C+SC+29464&size=400x300&key=AIzaSyARFMLB1na-BBWf7_R3-5YOQQaHqEJf6RQ&source=outdoor&&signature=5js0xxAUDT1ejZELtjhtvra9qOQ="
+      ]
+    },
+    "rentcast": {
+      "estimate": 769000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin"
+  ],
+  "sources_used": [
+    "Zillow",
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "1321 Penny Cir, Mount Pleasant, SC, USA, South Carolina",
+    "city": "Mount Pleasant",
+    "state": "South Carolina",
+    "zip_code": "29464",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-11T15:08:50.596642"
+}

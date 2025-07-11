@@ -25,6 +25,7 @@ from auth_middleware import require_auth, require_seat, require_role, require_cr
 from google_places_service import google_places_service, AddressNotFoundError, GooglePlacesAPIError, AddressValidationError
 from require_valid_address import require_valid_address, extract_validated_address_data
 from admin_routes_minimal import admin_bp
+from comps_service import CompsService
 
 # Load environment variables from .env file
 if os.path.exists('.env'):
@@ -42,6 +43,9 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-2024")
 
 # Initialize billing service
 billing_service = BillingService()
+
+# Initialize comps service
+comps_service = CompsService()
 
 # Register admin blueprint
 app.register_blueprint(admin_bp)
@@ -1251,6 +1255,47 @@ def analyze_property_risk():
             'status': 'error',
             'error': str(e)
         })
+
+@app.route('/api/comps/analyze', methods=['POST'])
+def analyze_comps():
+    """
+    Analyze comparable properties using Zillow API and OpenAI
+    """
+    try:
+        data = request.get_json()
+        
+        # Get property details from request or session
+        address = data.get('address') or session.get('current_property', {}).get('address')
+        beds = data.get('beds') or session.get('current_property', {}).get('beds') or 3
+        baths = data.get('baths') or session.get('current_property', {}).get('baths') or 2
+        sqft = data.get('sqft') or session.get('current_property', {}).get('sqft') or 1500
+        lat = data.get('latitude') or session.get('current_property', {}).get('latitude')
+        lng = data.get('longitude') or session.get('current_property', {}).get('longitude')
+        
+        if not address:
+            return jsonify({
+                'success': False,
+                'error': 'Property address is required'
+            }), 400
+        
+        # Analyze comparables
+        result = comps_service.analyze_comparables(
+            subject_address=address,
+            beds=int(beds),
+            baths=float(baths),
+            sqft=int(sqft),
+            lat=lat,
+            lng=lng
+        )
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logging.error(f"Error analyzing comparables: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 # ===============================
 # JV Deal Submit Routes
