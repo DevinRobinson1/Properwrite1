@@ -2858,6 +2858,9 @@
                     document.getElementById('loading-state').classList.add('hidden');
                     document.getElementById('analysis-results').classList.remove('hidden');
                     
+                    // Show mobile footer after successful analysis
+                    showMobileFooter();
+                    
                     // Smooth scroll to results after a brief delay
                     setTimeout(() => {
                         const resultsElement = document.getElementById('analysis-results');
@@ -3262,6 +3265,11 @@
             
             // Add active class to clicked button
             event.target.classList.add('active');
+            
+            // Auto-populate comps data when switching to comps tab
+            if (tabName === 'comps') {
+                autoPopulateCompsData();
+            }
         }
 
         // Real-time recalculation when property values change
@@ -4424,7 +4432,7 @@
 
         // Comps Analysis Functions
         function populateCompsSubjectProperty() {
-            // Get current property data
+            // Get current property data from form inputs
             const address = document.getElementById('street-address')?.value || '';
             const beds = document.getElementById('beds')?.value || '-';
             const baths = document.getElementById('baths')?.value || '-';
@@ -4439,6 +4447,15 @@
             // Year built will come from API data if available
             const yearBuilt = window.lastPropertyData?.year_built || '-';
             updateElementIfExists('comps-subject-year', yearBuilt);
+        }
+
+        // Auto-populate comps when switching to comps tab
+        function autoPopulateCompsData() {
+            // Only populate if we have property data
+            const address = document.getElementById('street-address')?.value;
+            if (address) {
+                populateCompsSubjectProperty();
+            }
         }
 
         // Toast notification function
@@ -6034,6 +6051,8 @@
                             // Display analysis results
                             displayPropertyAnalysis(result);
                             hideLoadingState();
+                            // Show mobile footer after successful analysis
+                            showMobileFooter();
                         } else {
                             throw new Error(result.error || 'Analysis failed');
                         }
@@ -6493,10 +6512,27 @@
                 mobileMenu.classList.toggle('hidden');
             }
         }
+
+        function navigateToDispositions() {
+            // Switch to dispositions section and show first tab
+            showSection('dispositions');
+            scrollToSection('dispositions-section');
+            // Show first dispositions tab
+            showDispositionTab('cash-sale');
+        }
+
+        function showMobileFooter() {
+            // Show mobile footer after property is submitted
+            const mobileNav = document.getElementById('mobile-bottom-nav');
+            if (mobileNav) {
+                mobileNav.classList.remove('hidden');
+                document.body.classList.add('mobile-footer-visible');
+            }
+        }
     </script>
 
-    <!-- Mobile Bottom Navigation -->
-    <nav class="sm:hidden fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-md border-t border-gray-200 z-50">
+    <!-- Mobile Bottom Navigation (hidden until property submitted) -->
+    <nav id="mobile-bottom-nav" class="sm:hidden fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur-md border-t border-gray-200 z-50 hidden">
         <div class="flex justify-around py-2">
             <button onclick="scrollToSection('analysis-results')" class="flex flex-col items-center py-2 px-3 text-xs text-gray-600 hover:text-blue-600 transition-colors min-h-[44px] min-w-[44px]">
                 <i class="fas fa-home text-lg mb-1"></i>
@@ -6506,11 +6542,11 @@
                 <i class="fas fa-chart-line text-lg mb-1"></i>
                 <span>Acquire</span>
             </button>
-            <button onclick="scrollToSection('dispositions-section')" class="flex flex-col items-center py-2 px-3 text-xs text-gray-600 hover:text-blue-600 transition-colors min-h-[44px] min-w-[44px]">
+            <button onclick="navigateToDispositions()" class="flex flex-col items-center py-2 px-3 text-xs text-gray-600 hover:text-blue-600 transition-colors min-h-[44px] min-w-[44px]">
                 <i class="fas fa-dollar-sign text-lg mb-1"></i>
                 <span>Sell</span>
             </button>
-            <button onclick="showBillingModal()" class="flex flex-col items-center py-2 px-3 text-xs text-gray-600 hover:text-amber-600 transition-colors min-h-[44px] min-w-[44px]">
+            <button onclick="window.open('/settings/billing', '_blank')" class="flex flex-col items-center py-2 px-3 text-xs text-gray-600 hover:text-amber-600 transition-colors min-h-[44px] min-w-[44px]">
                 <i class="fas fa-credit-card text-lg mb-1"></i>
                 <span>Upgrade</span>
             </button>
@@ -6552,7 +6588,7 @@
     <!-- Add mobile padding to prevent content from hiding behind bottom nav -->
     <style>
         @media (max-width: 640px) {
-            body {
+            body.mobile-footer-visible {
                 padding-bottom: 70px;
             }
         }

@@ -1,0 +1,33 @@
+{
+  "valuations": {
+    "rentcast": {
+      "estimate": 318000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin"
+  ],
+  "sources_used": [
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "2133 North Boland Circle, North Charleston, SC, USA, South Carolina",
+    "city": "North Charleston",
+    "state": "South Carolina",
+    "zip_code": "29406",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-11T15:14:14.149346"
+}
