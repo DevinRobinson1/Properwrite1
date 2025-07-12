@@ -1,0 +1,48 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 264900,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 11156168,
+      "matched_address": "9 Catawba Trail, Myrtle Beach, SC, ,  ",
+      "images": [
+        "https://maps.googleapis.com/maps/api/streetview?location=9+Catawba+Trl%2C+Myrtle+Beach%2C+SC+29588&size=400x300&key=AIzaSyARFMLB1na-BBWf7_R3-5YOQQaHqEJf6RQ&source=outdoor&&signature=mBEjoEXjaCAyffitmDSRMtUR99E="
+      ],
+      "bedrooms": 3.0,
+      "bathrooms": 2.0,
+      "square_feet": null,
+      "year_built": 1986
+    },
+    "rentcast": {
+      "estimate": 323000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin"
+  ],
+  "sources_used": [
+    "Zillow",
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "9 Catawba Trail, Myrtle Beach, SC",
+    "city": "",
+    "state": "",
+    "zip_code": "",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-12T02:29:08.395239"
+}
