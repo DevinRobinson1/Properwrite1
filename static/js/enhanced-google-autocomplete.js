@@ -283,12 +283,15 @@ class EnhancedGoogleAutocomplete {
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize for main property analysis form
-    if (document.getElementById('address-input')) {
-        window.addressAutocomplete = new EnhancedGoogleAutocomplete('address-input');
+    const addressInput = document.getElementById('address');
+    if (addressInput) {
+        console.log('Initializing Google Autocomplete (New) on address input');
+        window.addressAutocomplete = new EnhancedGoogleAutocomplete('address');
     }
     
     // Initialize for JV form if present
-    if (document.getElementById('jv-address-input')) {
-        window.jvAddressAutocomplete = new EnhancedGoogleAutocomplete('jv-address-input');
+    const jvAddressInput = document.getElementById('jv-address');
+    if (jvAddressInput) {
+        window.jvAddressAutocomplete = new EnhancedGoogleAutocomplete('jv-address');
     }
 });

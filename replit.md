@@ -104,6 +104,7 @@ properwrite.com is a Flask-based web application that generates professional pro
 
 ## Changelog
 
+- July 12, 2025. Fixed critical JavaScript errors preventing property analysis submission: added null checks to showValuation() and showValuationError() functions, corrected Google Autocomplete initialization by updating element ID from 'address-input' to 'address', and enhanced error handling in google-autocomplete-new.js to prevent null reference errors
 - July 12, 2025. Removed "Estimated Market Value" section from property details per user request, made interface cleaner and more focused
 - July 12, 2025. Enhanced property details section with clear messaging that all fields are editable, added hover effects to indicate interactivity, and ensured bedrooms, bathrooms, and square feet are auto-populated from API data when available
 - July 12, 2025. Fixed acquisition price calculation to be dynamically based on wholesale MAO calculation instead of hardcoded values, added visual indicators to show when price is auto-calculated vs manually overridden

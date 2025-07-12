@@ -7290,50 +7290,70 @@
             
             if (estimates.length > 0) {
                 const average = Math.round(estimates.reduce((a, b) => a + b, 0) / estimates.length);
-                document.getElementById('average-estimate').textContent = '$' + average.toLocaleString();
-                document.getElementById('estimate-count').textContent = estimates.length + ' sources';
+                const avgEl = document.getElementById('average-estimate');
+                if (avgEl) avgEl.textContent = '$' + average.toLocaleString();
+                const countEl = document.getElementById('estimate-count');
+                if (countEl) countEl.textContent = estimates.length + ' sources';
             } else if (data.average_estimate) {
                 // Use pre-calculated average if available
-                document.getElementById('average-estimate').textContent = '$' + data.average_estimate.toLocaleString();
-                document.getElementById('estimate-count').textContent = (data.data_sources ? data.data_sources.length : 0) + ' sources';
+                const avgEl = document.getElementById('average-estimate');
+                if (avgEl) avgEl.textContent = '$' + data.average_estimate.toLocaleString();
+                const countEl = document.getElementById('estimate-count');
+                if (countEl) countEl.textContent = (data.data_sources ? data.data_sources.length : 0) + ' sources';
             } else {
-                document.getElementById('average-estimate').textContent = 'Not available';
-                document.getElementById('estimate-count').textContent = 'All sources failed';
+                const avgEl = document.getElementById('average-estimate');
+                if (avgEl) avgEl.textContent = 'Not available';
+                const countEl = document.getElementById('estimate-count');
+                if (countEl) countEl.textContent = 'All sources failed';
             }
         }
         
         function showValuation(platform, value, source) {
             // Hide loading and error states
-            document.getElementById(`${platform}-loading`).classList.add('hidden');
-            document.getElementById(`${platform}-error`).classList.add('hidden');
+            const loadingEl = document.getElementById(`${platform}-loading`);
+            if (loadingEl) loadingEl.classList.add('hidden');
+            
+            const errorEl = document.getElementById(`${platform}-error`);
+            if (errorEl) errorEl.classList.add('hidden');
             
             // Show estimate
-            document.getElementById(`${platform}-estimate`).classList.remove('hidden');
+            const estimateEl = document.getElementById(`${platform}-estimate`);
+            if (estimateEl) estimateEl.classList.remove('hidden');
             
             // For input fields, set numeric value without dollar sign
             const valueInput = document.getElementById(`${platform}-value`);
-            if (valueInput.type === 'number') {
-                valueInput.value = value; // Just the number for input fields
-            } else {
-                valueInput.textContent = '$' + value.toLocaleString(); // Formatted for display elements
+            if (valueInput) {
+                if (valueInput.type === 'number') {
+                    valueInput.value = value; // Just the number for input fields
+                } else {
+                    valueInput.textContent = '$' + value.toLocaleString(); // Formatted for display elements
+                }
             }
             
-            document.getElementById(`${platform}-updated`).textContent = `Source: ${source}`;
+            const updatedEl = document.getElementById(`${platform}-updated`);
+            if (updatedEl) {
+                updatedEl.textContent = `Source: ${source}`;
+            }
             
             console.log(`Successfully displayed ${platform} valuation: $${value.toLocaleString()}`);
         }
         
         function showValuationError(platform, message) {
             // Hide loading and estimate states
-            document.getElementById(`${platform}-loading`).classList.add('hidden');
-            document.getElementById(`${platform}-estimate`).classList.add('hidden');
+            const loadingEl = document.getElementById(`${platform}-loading`);
+            if (loadingEl) loadingEl.classList.add('hidden');
+            
+            const estimateEl = document.getElementById(`${platform}-estimate`);
+            if (estimateEl) estimateEl.classList.add('hidden');
             
             // Show error with custom message
             const errorDiv = document.getElementById(`${platform}-error`);
-            errorDiv.classList.remove('hidden');
-            const messageDiv = errorDiv.querySelector('div:last-child div');
-            if (messageDiv) {
-                messageDiv.textContent = message;
+            if (errorDiv) {
+                errorDiv.classList.remove('hidden');
+                const messageDiv = errorDiv.querySelector('div:last-child div');
+                if (messageDiv) {
+                    messageDiv.textContent = message;
+                }
             }
             
             console.log(`${platform} valuation failed: ${message}`);

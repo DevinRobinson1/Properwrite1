@@ -24,6 +24,12 @@ class GoogleAutocompleteNew {
     }
     
     init() {
+        // Check if input element exists
+        if (!this.input) {
+            console.error('GoogleAutocompleteNew: Input element not found');
+            return;
+        }
+        
         // Create suggestions dropdown container
         this.createSuggestionsContainer();
         
@@ -41,6 +47,11 @@ class GoogleAutocompleteNew {
     }
     
     createSuggestionsContainer() {
+        if (!this.input || !this.input.parentNode) {
+            console.error('GoogleAutocompleteNew: Cannot create suggestions container - input or parent not found');
+            return;
+        }
+        
         this.suggestionsContainer = document.createElement('div');
         this.suggestionsContainer.className = 'google-autocomplete-suggestions';
         this.suggestionsContainer.style.cssText = `
