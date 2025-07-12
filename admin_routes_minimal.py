@@ -91,13 +91,15 @@ def dashboard():
             total_revenue = 0
             teams = db.query(Team).all()
             for team in teams:
-                if team.subscription_tier == 'pro':
+                # Safe attribute access for subscription_tier
+                tier = getattr(team, 'subscription_tier', 'free')
+                if tier == 'pro':
                     total_revenue += 79
-                elif team.subscription_tier == 'team5':
+                elif tier == 'team5':
                     total_revenue += 199
-                elif team.subscription_tier == 'growth10':
+                elif tier == 'growth10':
                     total_revenue += 399
-                elif team.subscription_tier == 'individual':
+                elif tier == 'individual':
                     total_revenue += 37
             
             # Get recent users (last 10)
@@ -117,13 +119,20 @@ def dashboard():
             # Convert users to display format
             recent_users_display = []
             for user in recent_users:
+                # Safe attribute access
+                team_name = 'No Team'
+                if hasattr(user, 'team_id') and user.team_id:
+                    team = db.query(Team).filter(Team.id == user.team_id).first()
+                    if team:
+                        team_name = team.name
+                
                 recent_users_display.append({
                     'id': str(user.id),
                     'email': user.email,
-                    'role': user.role,
-                    'team_name': db.query(Team).filter(Team.id == user.team_id).first().name if user.team_id else 'No Team',
+                    'role': getattr(user, 'role', 'user'),
+                    'team_name': team_name,
                     'created_at': user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else 'Unknown',
-                    'subscription_tier': user.subscription_tier or 'free'
+                    'subscription_tier': getattr(user, 'subscription_tier', 'free')
                 })
             
             # Recent activity placeholders
@@ -176,11 +185,19 @@ def users():
                     cast(User.id, String).ilike(f'%{search_query}%')
                 ))
             
-            # Apply filter
+            # Apply filter with safe attribute access
             if filter_type == 'subscribed':
-                query = query.filter(User.subscription_tier != 'free')
+                try:
+                    query = query.filter(User.subscription_tier != 'free')
+                except AttributeError:
+                    # If subscription_tier doesn't exist, skip filtering
+                    pass
             elif filter_type == 'free':
-                query = query.filter(User.subscription_tier == 'free')
+                try:
+                    query = query.filter(User.subscription_tier == 'free')
+                except AttributeError:
+                    # If subscription_tier doesn't exist, skip filtering
+                    pass
             
             # Order by creation date, newest first
             query = query.order_by(desc(User.created_at))
@@ -193,8 +210,9 @@ def users():
             # Convert users to display format
             users_display = []
             for user in users:
+                # Safe attribute access
                 team_name = 'No Team'
-                if user.team_id:
+                if hasattr(user, 'team_id') and user.team_id:
                     team = db.query(Team).filter(Team.id == user.team_id).first()
                     if team:
                         team_name = team.name
@@ -202,11 +220,11 @@ def users():
                 users_display.append({
                     'id': str(user.id),
                     'email': user.email,
-                    'role': user.role,
+                    'role': getattr(user, 'role', 'user'),
                     'team_name': team_name,
                     'created_at': user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else 'Unknown',
-                    'subscription_tier': user.subscription_tier or 'free',
-                    'is_active': user.is_active
+                    'subscription_tier': getattr(user, 'subscription_tier', 'free'),
+                    'is_active': getattr(user, 'is_active', True)
                 })
             
             # Create pagination object

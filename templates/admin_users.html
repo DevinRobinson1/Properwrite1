@@ -115,22 +115,22 @@
 
         <!-- Pagination -->
         <div class="mt-6">
-            {% if users.pages > 1 %}
+            {% if pagination.pages > 1 %}
             <div class="flex justify-center space-x-2">
-                {% if users.has_prev %}
-                <a href="?page={{ users.prev_num }}&search={{ search }}&filter={{ filter_type }}" 
+                {% if pagination.has_prev %}
+                <a href="?page={{ pagination.prev_num }}&search={{ search }}&filter={{ filter_type }}" 
                    class="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">Previous</a>
                 {% endif %}
                 
-                <span class="px-3 py-2">Page {{ users.page }} of {{ users.pages }}</span>
+                <span class="px-3 py-2">Page {{ pagination.page }} of {{ pagination.pages }}</span>
                 
-                {% if users.has_next %}
-                <a href="?page={{ users.next_num }}&search={{ search }}&filter={{ filter_type }}"
+                {% if pagination.has_next %}
+                <a href="?page={{ pagination.next_num }}&search={{ search }}&filter={{ filter_type }}"
                    class="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300">Next</a>
                 {% endif %}
             </div>
             {% endif %}
-            <p class="text-gray-500 text-sm text-center mt-2">Showing {{ users.total }} user(s)</p>
+            <p class="text-gray-500 text-sm text-center mt-2">Showing {{ pagination.total }} user(s)</p>
         </div>
     </div>
 
