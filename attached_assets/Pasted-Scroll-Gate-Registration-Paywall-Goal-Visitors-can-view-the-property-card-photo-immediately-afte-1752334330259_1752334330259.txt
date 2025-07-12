@@ -1,0 +1,108 @@
+Scroll-Gate Registration Paywall”
+Goal:
+Visitors can view the property card + photo immediately after submitting an address.
+When they scroll into the Offers section, the entire page blurs and a modal prompts them to Register / Log In to unlock calculated offers.
+
+Do not modify any calculation logic inside Acquisitions / Dispositions — only add the gating overlay and scroll detection.
+
+1 UI/UX Specification
+State	Behaviour
+Unauthenticated visitor	• Property summary + image visible
+• As soon as the Offers section enters viewport → background content gets backdrop-blur-sm brightness-75 and pointer-events:none.
+• Modal pops up:
+Headline: “Unlock Your Offers”
+Copy: “Create a free account to see your max allowable offers, AI comps, and full calculators.”
+Buttons: “Sign Up”, “Log In”, “Maybe later” (closes modal but keeps blur).
+Authenticated user	No blur, no modal; offers render normally.
+Mobile	Same behaviour; modal is full-screen with scroll-lock.
+
+2 Implementation Steps
+2.1 IntersectionObserver Gate
+tsx
+Copy
+Edit
+// /components/OfferGate.tsx
+import { useEffect, useRef, useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+
+export default function OfferGate() {
+  const { user } = useAuth();         // null if not logged in
+  const offersRef = useRef<HTMLDivElement>(null);
+  const [locked, setLocked] = useState(false);
+
+  useEffect(() => {
+    if (!offersRef.current || user) return; // skip if logged in
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setLocked(true);
+    }, { threshold: 0.2 });
+    io.observe(offersRef.current);
+    return () => io.disconnect();
+  }, [user]);
+
+  return (
+    <>
+      <div ref={offersRef} />
+      {locked && !user && <GateModal onClose={() => setLocked(false)} />}
+      {locked && !user && (
+        <div className="fixed inset-0 z-20 backdrop-blur-sm brightness-75 pointer-events-none" />
+      )}
+    </>
+  );
+}
+2.2 GateModal Component
+tsx
+Copy
+Edit
+function GateModal({ onClose }) {
+  return (
+    <div className="fixed inset-0 z-30 grid place-items-center">
+      <div className="bg-card rounded-xl p-6 w-[90%] max-w-md text-center space-y-4 shadow-xl">
+        <h2 className="text-xl font-semibold">Unlock Your Offers</h2>
+        <p className="text-muted">Register free to calculate wholesale, novation, and wrap offers for this property.</p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <a href="/signup" className="btn btn-primary flex-1">Sign Up</a>
+          <a href="/login"  className="btn btn-outline flex-1">Log In</a>
+        </div>
+        <button onClick={onClose} className="text-xs text-muted hover:underline mt-2">Maybe later</button>
+      </div>
+    </div>
+  );
+}
+2.3 Inject Gate
+In the page component that renders offers:
+
+tsx
+Copy
+Edit
+import OfferGate from '@/components/OfferGate';
+
+export default function PropertyPage() {
+  return (
+    <>
+      {/* Property header / image section */}
+      …
+      {/* Offers section wrapper */}
+      <div id="offers">
+          <OfferGate />   {/* scroll-lock gate */}
+          {/* existing offers components here */}
+      </div>
+    </>
+  );
+}
+3 Styling Tokens
+btn / btn-primary use existing Tailwind utility classes.
+
+bg-card, text-muted already defined in your dark & light theme tokens.
+
+Use backdrop-blur-sm and brightness-75 for the blur/ dim overlay.
+
+4 Edge Cases / QA
+SEO crawl: Gate only triggers after intersection (client-side), so bots still see base HTML.
+
+Performance: IntersectionObserver disconnects on cleanup.
+
+Auth flow: After user completes sign-up, redirect back to property page, blur removed automatically.
+
+Escape Hatch: “Maybe later” removes modal but leaves blur (cannot interact); ensures gating persists.
+
+Deliver a PR named feat/scroll-gate-registration that includes OfferGate.tsx, GateModal.tsx, and minimal imports—no changes to calculator logic.

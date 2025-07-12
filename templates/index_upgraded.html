@@ -3411,6 +3411,9 @@
                     // Show mobile footer after successful analysis
                     showMobileFooter();
                     
+                    // Initialize scroll gate for unauthenticated users
+                    initializeScrollGate();
+                    
                     // Smooth scroll to results after a brief delay
                     setTimeout(() => {
                         const resultsElement = document.getElementById('analysis-results');
@@ -7518,6 +7521,50 @@
                 closeRegistrationModal();
             }
         });
+
+        // Scroll-gate registration paywall
+        let scrollGateTriggered = false;
+        let isAuthenticated = {{ 'true' if session.get('user_id') else 'false' }};
+        
+        function initializeScrollGate() {
+            if (isAuthenticated || scrollGateTriggered) return;
+            
+            const acquisitionsSection = document.getElementById('acquisitions-section');
+            if (!acquisitionsSection) return;
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !scrollGateTriggered && !isAuthenticated) {
+                        scrollGateTriggered = true;
+                        // Add blur overlay to content
+                        const blurOverlay = document.createElement('div');
+                        blurOverlay.id = 'scroll-gate-blur';
+                        blurOverlay.className = 'fixed inset-0 z-20 backdrop-blur-sm brightness-75 pointer-events-none';
+                        document.body.appendChild(blurOverlay);
+                        
+                        // Show the scroll-gate modal
+                        showScrollGateModal();
+                    }
+                });
+            }, { threshold: 0.2 });
+            
+            observer.observe(acquisitionsSection);
+        }
+        
+        function showScrollGateModal() {
+            const modal = document.getElementById('scroll-gate-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+        }
+        
+        function closeScrollGateModal() {
+            const modal = document.getElementById('scroll-gate-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+            // Keep blur overlay active even after closing modal
+        }
     </script>
     
     <!-- Features Modal -->
@@ -7773,6 +7820,19 @@
                     No credit card required • 5 free credits to get started
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Scroll-Gate Modal -->
+    <div id="scroll-gate-modal" class="fixed inset-0 z-30 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl p-6 w-[90%] max-w-md text-center space-y-4 shadow-xl">
+            <h2 class="text-xl font-semibold">Unlock Your Offers</h2>
+            <p class="text-gray-600">Create a free account to see your max allowable offers, AI comps, and full calculators.</p>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <a href="/signup" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex-1">Sign Up</a>
+                <a href="/login" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex-1">Log In</a>
+            </div>
+            <button onclick="closeScrollGateModal()" class="text-xs text-gray-500 hover:underline mt-2">Maybe later</button>
         </div>
     </div>
 </body>
