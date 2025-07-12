@@ -19,7 +19,36 @@ def create_products_and_prices():
     
     print("Creating Stripe products and prices for properwrite.com...")
     
-    # 1. Pro Plan - 300 credits/month
+    # 1. Individual Plan - 100 credits/month
+    try:
+        individual_product = stripe.Product.create(
+            name="Individual Plan",
+            description="100 property analyses per month for individual investors",
+            metadata={
+                "credits_per_month": "100",
+                "max_users": "1",
+                "tier": "individual"
+            }
+        )
+        print(f"✓ Created Individual Plan product: {individual_product.id}")
+        
+        # Individual Plan Price - $27/month
+        individual_price = stripe.Price.create(
+            product=individual_product.id,
+            unit_amount=2700,  # $27.00 in cents
+            currency="usd",
+            recurring={"interval": "month"},
+            metadata={
+                "credits_per_month": "100",
+                "max_users": "1"
+            }
+        )
+        print(f"✓ Created Individual Plan price: {individual_price.id} - $27/month")
+        
+    except Exception as e:
+        print(f"✗ Error creating Individual Plan: {e}")
+    
+    # 2. Pro Plan - 300 credits/month
     try:
         pro_product = stripe.Product.create(
             name="Pro Plan",

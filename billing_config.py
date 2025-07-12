@@ -6,7 +6,7 @@ Updated subscription plans with new credit allocations
 SUBSCRIPTION_PLANS = {
     'individual': {
         'name': 'Individual',
-        'price': 3700,  # $37/month
+        'price': 2700,  # $27/month
         'credits_per_month': 100,
         'seats': 1,
         'description': '100 credits per month, 1 user'
@@ -79,7 +79,7 @@ COMPING_CREDITS_FEATURE_STATUS = "Coming Soon"
 
 # Stripe Price IDs - These are configured in Stripe Dashboard
 STRIPE_PRICES = {
-    'individual_m': 'price_individual_37',  # $37/month, 100 credits - To be configured in Stripe
+    'individual_m': 'price_individual_27',  # $27/month, 100 credits - To be configured in Stripe
     'pro_m': 'price_1RjhMpPWMstJbjAav2Tyy5aR',  # $79/month, 300 credits
     'team5_m': 'price_1RjhMqPWMstJbjAasyrGqEoB',  # $199/month, 1000 credits, 5 seats
     'growth10_m': 'price_1RjhMqPWMstJbjAaB7bd7VbK',  # $399/month, unlimited credits, 10 seats
@@ -98,7 +98,7 @@ SUBSCRIPTION_TIERS = {
     'individual': {
         'max_seats': 1,
         'monthly_credits': 100,
-        'price': 37
+        'price': 27
     },
     'pro': {
         'max_seats': 1, 

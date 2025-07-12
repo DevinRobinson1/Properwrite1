@@ -71,25 +71,31 @@ class TeamInvite(Base):
 TIER_CONFIG = {
     'starter': {
         'seats_max': 1,
-        'monthly_credits': 50,
-        'price_monthly': 39,
-        'stripe_lookup_key': 'starter_m'
+        'monthly_credits': 5,  # Free tier - 5 credits total on registration
+        'price_monthly': 0,
+        'stripe_lookup_key': 'starter_free'
+    },
+    'individual': {
+        'seats_max': 1,
+        'monthly_credits': 100,
+        'price_monthly': 27,
+        'stripe_lookup_key': 'individual_m'
     },
     'pro': {
         'seats_max': 1,
-        'monthly_credits': 150,
+        'monthly_credits': 300,
         'price_monthly': 79,
         'stripe_lookup_key': 'pro_m'
     },
     'team5': {
         'seats_max': 5,
-        'monthly_credits': 450,
+        'monthly_credits': 1000,
         'price_monthly': 199,
         'stripe_lookup_key': 'team5_m'
     },
     'growth10': {
         'seats_max': 10,
-        'monthly_credits': 1000,
+        'monthly_credits': -1,  # Unlimited
         'price_monthly': 399,
         'stripe_lookup_key': 'growth10_m'
     }
