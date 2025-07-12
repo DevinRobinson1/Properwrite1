@@ -250,14 +250,24 @@ class EnhancedGoogleAutocomplete {
             type === 'success' ? 'bg-green-500 text-white' : 
             'bg-blue-500 text-white'
         }`;
-        toast.innerHTML = `
-            <div class="flex items-center">
-                <span class="flex-1">${message}</span>
-                <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
-                    ×
-                </button>
-            </div>
-        `;
+        // Create content safely using DOM methods to prevent XSS
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'flex items-center';
+        
+        const messageSpan = document.createElement('span');
+        messageSpan.className = 'flex-1';
+        messageSpan.textContent = message; // Use textContent instead of innerHTML
+        
+        const closeButton = document.createElement('button');
+        closeButton.className = 'ml-2 text-white hover:text-gray-200';
+        closeButton.textContent = '×';
+        closeButton.onclick = function() {
+            this.parentElement.parentElement.remove();
+        };
+        
+        contentDiv.appendChild(messageSpan);
+        contentDiv.appendChild(closeButton);
+        toast.appendChild(contentDiv);
 
         document.body.appendChild(toast);
 
