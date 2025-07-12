@@ -310,9 +310,7 @@ def analyze_property():
     Requires authentication and consumes 1 credit
     """
     # Check authentication first
-    from auth_middleware import get_current_user
-    user_data = get_current_user()
-    if not user_data or not user_data.get('success'):
+    if 'user_id' not in session:
         return jsonify({
             'success': False,
             'error': 'authentication_required',
@@ -321,8 +319,8 @@ def analyze_property():
     
     # Check if user has sufficient credits
     billing_service = BillingService()
-    with billing_service.get_session() as session:
-        user = session.query(User).filter_by(id=user_data['user']['id']).first()
+    with billing_service.get_session() as db_session:
+        user = db_session.query(User).filter_by(id=int(session['user_id'])).first()
         if not user or not user.team:
             return jsonify({
                 'success': False,
@@ -560,7 +558,7 @@ def analyze_property():
         try:
             billing_service = BillingService()
             with billing_service.get_session() as db_session:
-                user = db_session.query(User).filter_by(id=user_data['user']['id']).first()
+                user = db_session.query(User).filter_by(id=int(session['user_id'])).first()
                 if user and user.team:
                     user.team.credit_balance -= 1
                     db_session.commit()
