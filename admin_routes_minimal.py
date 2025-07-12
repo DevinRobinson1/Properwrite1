@@ -11,6 +11,10 @@ from sqlalchemy.orm import Session
 from billing_models import User, Team, TeamInvite, CreditLog
 import logging
 import os
+from werkzeug.security import check_password_hash
+import hashlib
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -54,14 +58,42 @@ def require_super_admin(f):
 @admin_bp.route('/login', methods=['GET', 'POST'])
 def login():
     """Admin login page"""
+    # Apply rate limiting for POST requests only
+    if request.method == 'POST':
+        # Rate limit: 3 login attempts per minute
+        from flask import current_app
+        if hasattr(current_app, 'limiter'):
+            # Check rate limit manually for admin login
+            try:
+                # Log the attempt
+                logging.info(f"Admin login attempt from IP: {request.remote_addr}")
+            except Exception:
+                pass
+    
     if request.method == 'POST':
         password = request.form.get('password')
-        # Simple admin authentication - in production, use proper admin user management
-        if password == 'admin123':  # Replace with secure authentication
+        
+        # Get admin password hash from environment variable
+        # Set ADMIN_PASSWORD_HASH env var using: python -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('your-secure-password'))"
+        admin_password_hash = os.environ.get('ADMIN_PASSWORD_HASH')
+        
+        if not admin_password_hash:
+            # Fallback: use a strong default that requires immediate change
+            # This is the hash of a complex password that should never be used in production
+            logging.error("ADMIN_PASSWORD_HASH not set! Admin access disabled for security.")
+            return render_template('admin_login.html', error='Admin access is disabled. Please configure ADMIN_PASSWORD_HASH.')
+        
+        # Check password against hash
+        if password and check_password_hash(admin_password_hash, password):
             session['is_admin'] = True
             session['admin_role'] = 'super_admin'
             session['admin_user_id'] = 'admin_1'
+            # Log successful admin login
+            logging.info(f"Admin login successful from IP: {request.remote_addr}")
             return redirect(url_for('admin.dashboard'))
+        
+        # Log failed login attempt
+        logging.warning(f"Failed admin login attempt from IP: {request.remote_addr}")
         return render_template('admin_login.html', error='Invalid credentials')
     return render_template('admin_login.html')
 

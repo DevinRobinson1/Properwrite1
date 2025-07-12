@@ -8,6 +8,9 @@ import json
 import uuid
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, session, redirect, g, url_for, flash
+from flask_wtf.csrf import CSRFProtect, generate_csrf
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from property_data_service import property_service
 from comprehensive_valuation_service import comprehensive_valuation_service
 from ai_strategy_assistant import ai_strategy_assistant
@@ -47,7 +50,26 @@ if os.path.exists('.env'):
 logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-2024")
+
+# Generate a strong random secret key if not set in environment
+if not os.environ.get("SESSION_SECRET"):
+    # Generate a cryptographically strong random key
+    import secrets
+    app.secret_key = secrets.token_hex(32)
+    logging.warning("SESSION_SECRET not set! Using generated secret key. Set SESSION_SECRET env var in production.")
+else:
+    app.secret_key = os.environ.get("SESSION_SECRET")
+
+# Initialize CSRF protection
+csrf = CSRFProtect(app)
+
+# Initialize rate limiter
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per hour", "50 per minute"],
+    storage_uri="memory://"
+)
 
 # Initialize billing service
 billing_service = BillingService()
@@ -482,6 +504,7 @@ def logout():
         }), 500
 
 @app.route('/api/login', methods=['POST'])
+@limiter.limit("5 per minute")
 def login():
     """Simple login endpoint for testing"""
     try:
@@ -516,6 +539,7 @@ def login():
         }), 500
 
 @app.route('/api/analyze-property', methods=['POST'])
+@limiter.limit("10 per minute, 100 per hour")
 def analyze_property():
     """
     Analyze property with external data enrichment from multiple sources
@@ -2026,6 +2050,7 @@ def jv_submit_page():
                          google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY'))
 
 @app.route('/api/jv-submit', methods=['POST'])
+@limiter.limit("5 per hour")  # Limit JV submissions to prevent spam
 def jv_submit_deal():
     """
     Submit and auto-underwrite JV deal with partner information

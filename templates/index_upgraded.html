@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>properwrite.com - Real Estate Investment Analysis Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -3333,6 +3334,12 @@
     </div>
 
     <script>
+        // CSRF token helper
+        function getCSRFToken() {
+            const token = document.querySelector('meta[name="csrf-token"]');
+            return token ? token.getAttribute('content') : '';
+        }
+        
         // Form submission and property analysis
         const propertyForm = document.getElementById('property-form');
         if (propertyForm) {
@@ -3398,7 +3405,10 @@
                 // Analyze property with external data
                 const response = await fetch('/api/analyze-property', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
                     body: JSON.stringify(payload)
                 });
                 
@@ -3667,7 +3677,10 @@
             try {
                 const response = await fetch('/api/calculate-strategies', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
                     body: JSON.stringify(strategyData)
                 });
                 
@@ -4462,6 +4475,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
                     },
                     body: JSON.stringify({
                         objection_text: objectionText,
