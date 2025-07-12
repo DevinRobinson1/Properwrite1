@@ -13,7 +13,9 @@ import time
 class RapidAPIPropertyService:
     def __init__(self):
         self.session = requests.Session()
-        self.rapidapi_key = os.environ.get('RAPIDAPI_KEY', 'be3e296439msh2693e44b9d2433fp17bebbjsn9aa77716b131')
+        self.rapidapi_key = os.environ.get('RAPIDAPI_KEY')
+        if not self.rapidapi_key:
+            logging.warning("RAPIDAPI_KEY environment variable not set. Property data APIs will not function.")
         
         # Base headers for all RapidAPI requests
         self.base_headers = {
@@ -91,9 +93,10 @@ class RapidAPIPropertyService:
             return results
     
     def _get_zillow_data(self, address: str, city: str, state: str, zip_code: str) -> Optional[Dict]:
-        """
-        Get property data from Zillow via RapidAPI
-        """
+        """Get property data from Zillow API"""
+        if not self.rapidapi_key:
+            logging.warning("RAPIDAPI_KEY not available, skipping Zillow API call")
+            return None
         try:
             headers = self.base_headers.copy()
             headers['X-RapidAPI-Host'] = self.apis['zillow']['host']
@@ -132,6 +135,10 @@ class RapidAPIPropertyService:
         """
         Get property data from Realtor.com via RapidAPI using search-url endpoint
         """
+        if not self.rapidapi_key:
+            logging.warning("RAPIDAPI_KEY not available, skipping Realtor.com API call")
+            return None
+            
         try:
             logging.info(f"Calling Realtor.com API for: {address}")
             
@@ -520,6 +527,10 @@ class RapidAPIPropertyService:
         """
         Get property data from Redfin.com via RapidAPI
         """
+        if not self.rapidapi_key:
+            logging.warning("RAPIDAPI_KEY not available, skipping Redfin.com API call")
+            return None
+            
         try:
             logging.info(f"Calling Redfin.com API for: {address}")
             
