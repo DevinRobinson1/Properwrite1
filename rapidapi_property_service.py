@@ -13,7 +13,7 @@ import time
 class RapidAPIPropertyService:
     def __init__(self):
         self.session = requests.Session()
-        self.rapidapi_key = "be3e296439msh2693e44b9d2433fp17bebbjsn9aa77716b131"
+        self.rapidapi_key = os.environ.get('RAPIDAPI_KEY', 'be3e296439msh2693e44b9d2433fp17bebbjsn9aa77716b131')
         
         # Base headers for all RapidAPI requests
         self.base_headers = {

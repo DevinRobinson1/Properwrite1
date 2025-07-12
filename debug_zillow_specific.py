@@ -3,8 +3,9 @@ Debug Zillow API with specific address
 """
 import requests
 import json
+import os
 
-rapidapi_key = "be3e296439msh2693e44b9d2433fp17bebbjsn9aa77716b131"
+rapidapi_key = os.environ.get('RAPIDAPI_KEY', 'your_rapidapi_key_here')
 
 def test_zillow_with_specific_address():
     """Test Zillow API with the failing address"""
