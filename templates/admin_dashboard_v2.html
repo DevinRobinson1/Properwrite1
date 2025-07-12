@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - properwrite.com</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .metric-card { transition: all 0.3s ease; }
+        .metric-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <a href="/" class="text-2xl font-bold text-blue-600">properwrite</a>
+                    <span class="ml-3 text-gray-500">Admin Dashboard</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-500">Admin</span>
+                    <a href="/admin/logout" class="text-sm text-red-600 hover:text-red-800">Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- KPI Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Active Users -->
+            <div class="metric-card bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Total Active Users</p>
+                        <p id="metric-users" class="text-3xl font-bold text-gray-900 mt-1">
+                            <span class="skeleton inline-block w-20 h-8 rounded"></span>
+                        </p>
+                    </div>
+                    <div class="text-blue-500">
+                        <i class="fas fa-users text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MRR -->
+            <div class="metric-card bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">MRR (Monthly)</p>
+                        <p id="metric-mrr" class="text-3xl font-bold text-green-600 mt-1">
+                            <span class="skeleton inline-block w-24 h-8 rounded"></span>
+                        </p>
+                    </div>
+                    <div class="text-green-500">
+                        <i class="fas fa-dollar-sign text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credits Consumed -->
+            <div class="metric-card bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Credits (30 days)</p>
+                        <p id="metric-credits" class="text-3xl font-bold text-purple-600 mt-1">
+                            <span class="skeleton inline-block w-20 h-8 rounded"></span>
+                        </p>
+                    </div>
+                    <div class="text-purple-500">
+                        <i class="fas fa-coins text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending JV Deals -->
+            <div class="metric-card bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Pending JV Deals</p>
+                        <p id="metric-jv-deals" class="text-3xl font-bold text-orange-600 mt-1">
+                            <span class="skeleton inline-block w-16 h-8 rounded"></span>
+                        </p>
+                    </div>
+                    <div class="text-orange-500">
+                        <i class="fas fa-handshake text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Feed -->
+        <div class="bg-white rounded-lg shadow mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Recent Activity</h2>
+            </div>
+            <div id="activity-feed" class="divide-y divide-gray-200">
+                <!-- Loading skeleton -->
+                <div class="px-6 py-4">
+                    <div class="skeleton h-4 w-3/4 rounded mb-2"></div>
+                    <div class="skeleton h-3 w-1/2 rounded"></div>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="skeleton h-4 w-3/4 rounded mb-2"></div>
+                    <div class="skeleton h-3 w-1/2 rounded"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-8 px-6">
+                    <button onclick="showTab('users')" class="tab-button active py-4 px-1 border-b-2 font-medium text-sm">
+                        Users
+                    </button>
+                    <button onclick="showTab('teams')" class="tab-button py-4 px-1 border-b-2 font-medium text-sm">
+                        Teams
+                    </button>
+                    <button onclick="showTab('subscriptions')" class="tab-button py-4 px-1 border-b-2 font-medium text-sm">
+                        Subscriptions
+                    </button>
+                    <button onclick="showTab('jv-deals')" class="tab-button py-4 px-1 border-b-2 font-medium text-sm">
+                        JV Deals
+                    </button>
+                    <button onclick="showTab('errors')" class="tab-button py-4 px-1 border-b-2 font-medium text-sm">
+                        Error Logs
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="p-6">
+                <!-- Users Tab -->
+                <div id="users-tab" class="tab-content">
+                    <div class="mb-4">
+                        <input type="text" id="user-search" placeholder="Search users..." 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Email</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Team</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Plan</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Credits</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Last Active</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table">
+                                <!-- Loading skeleton -->
+                                <tr>
+                                    <td colspan="6" class="text-center py-8">
+                                        <div class="skeleton h-4 w-32 rounded mx-auto"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Teams Tab -->
+                <div id="teams-tab" class="tab-content hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Team Name</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Plan</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Seats</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Credits</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Usage (30d)</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Created</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teams-table">
+                                <!-- Loading skeleton -->
+                                <tr>
+                                    <td colspan="6" class="text-center py-8">
+                                        <div class="skeleton h-4 w-32 rounded mx-auto"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Subscriptions Tab -->
+                <div id="subscriptions-tab" class="tab-content hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Team</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Owner</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Plan</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Status</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Next Billing</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Total Paid</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subscriptions-table">
+                                <!-- Loading skeleton -->
+                                <tr>
+                                    <td colspan="6" class="text-center py-8">
+                                        <div class="skeleton h-4 w-32 rounded mx-auto"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- JV Deals Tab -->
+                <div id="jv-deals-tab" class="tab-content hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Partner</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Property</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Asking</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">ARV</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Status</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Submitted</th>
+                                </tr>
+                            </thead>
+                            <tbody id="jv-deals-table">
+                                <!-- Loading skeleton -->
+                                <tr>
+                                    <td colspan="6" class="text-center py-8">
+                                        <div class="skeleton h-4 w-32 rounded mx-auto"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Error Logs Tab -->
+                <div id="errors-tab" class="tab-content hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Time</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Type</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Message</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">User</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Endpoint</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="errors-table">
+                                <!-- Loading skeleton -->
+                                <tr>
+                                    <td colspan="6" class="text-center py-8">
+                                        <div class="skeleton h-4 w-32 rounded mx-auto"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Tab management
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active', 'border-blue-600', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Show selected tab
+            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+            
+            // Mark button as active
+            event.target.classList.add('active', 'border-blue-600', 'text-blue-600');
+            event.target.classList.remove('border-transparent', 'text-gray-500');
+            
+            // Load tab data
+            loadTabData(tabName);
+        }
+
+        // Load dashboard stats
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch('/admin/api/dashboard/stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('metric-users').textContent = data.stats.total_active_users.toLocaleString();
+                    document.getElementById('metric-mrr').textContent = `$${data.stats.mrr.toLocaleString()}`;
+                    document.getElementById('metric-credits').textContent = data.stats.credits_consumed_30d.toLocaleString();
+                    document.getElementById('metric-jv-deals').textContent = data.stats.pending_jv_deals.toLocaleString();
+                }
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+
+        // Load recent activity
+        async function loadRecentActivity() {
+            try {
+                const response = await fetch('/admin/api/activity/recent');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const feedHtml = data.activities.map(activity => {
+                        const icon = activity.type === 'credit_event' ? 'fa-coins' : 
+                                   activity.type === 'new_user' ? 'fa-user-plus' : 
+                                   activity.type === 'jv_deal' ? 'fa-handshake' : 'fa-circle';
+                        
+                        const color = activity.type === 'credit_event' && activity.delta < 0 ? 'text-red-500' :
+                                    activity.type === 'credit_event' && activity.delta > 0 ? 'text-green-500' :
+                                    activity.type === 'new_user' ? 'text-blue-500' :
+                                    activity.type === 'jv_deal' ? 'text-orange-500' : 'text-gray-500';
+                        
+                        return `
+                            <div class="px-6 py-4 flex items-start">
+                                <div class="${color} mr-3">
+                                    <i class="fas ${icon}"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm text-gray-900">${activity.description}</p>
+                                    <p class="text-xs text-gray-500 mt-1">${formatTimeAgo(activity.timestamp)}</p>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    document.getElementById('activity-feed').innerHTML = feedHtml || '<div class="px-6 py-8 text-center text-gray-500">No recent activity</div>';
+                }
+            } catch (error) {
+                console.error('Error loading activity:', error);
+            }
+        }
+
+        // Load tab data
+        async function loadTabData(tabName) {
+            switch (tabName) {
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'teams':
+                    loadTeams();
+                    break;
+                case 'subscriptions':
+                    loadSubscriptions();
+                    break;
+                case 'jv-deals':
+                    loadJVDeals();
+                    break;
+                case 'errors':
+                    loadErrors();
+                    break;
+            }
+        }
+
+        // Load users
+        async function loadUsers(search = '') {
+            try {
+                const response = await fetch(`/admin/api/users?search=${encodeURIComponent(search)}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tableHtml = data.users.map(user => `
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-3 px-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">${user.email}</p>
+                                    <p class="text-xs text-gray-500">${user.name}</p>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4 text-sm text-gray-900">${user.team}</td>
+                            <td class="py-3 px-4">
+                                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full 
+                                    ${user.plan === 'growth10' ? 'bg-purple-100 text-purple-800' :
+                                      user.plan === 'team5' ? 'bg-blue-100 text-blue-800' :
+                                      user.plan === 'pro' ? 'bg-green-100 text-green-800' :
+                                      'bg-gray-100 text-gray-800'}">
+                                    ${user.plan}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-sm text-gray-900">${user.credits}</td>
+                            <td class="py-3 px-4 text-sm text-gray-500">${user.last_login ? formatTimeAgo(user.last_login) : 'Never'}</td>
+                            <td class="py-3 px-4">
+                                <button class="text-blue-600 hover:text-blue-900 text-sm">View</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                    
+                    document.getElementById('users-table').innerHTML = tableHtml || '<tr><td colspan="6" class="text-center py-8 text-gray-500">No users found</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        // Load teams
+        async function loadTeams() {
+            try {
+                const response = await fetch('/admin/api/teams');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tableHtml = data.teams.map(team => `
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-3 px-4 text-sm font-medium text-gray-900">${team.name}</td>
+                            <td class="py-3 px-4">
+                                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full 
+                                    ${team.tier === 'growth10' ? 'bg-purple-100 text-purple-800' :
+                                      team.tier === 'team5' ? 'bg-blue-100 text-blue-800' :
+                                      team.tier === 'pro' ? 'bg-green-100 text-green-800' :
+                                      'bg-gray-100 text-gray-800'}">
+                                    ${team.tier}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-sm text-gray-900">${team.seats_used}/${team.seats_max}</td>
+                            <td class="py-3 px-4 text-sm text-gray-900">${team.credit_balance}</td>
+                            <td class="py-3 px-4 text-sm text-gray-900">${team.credits_used_30d}</td>
+                            <td class="py-3 px-4 text-sm text-gray-500">${formatDate(team.created_at)}</td>
+                        </tr>
+                    `).join('');
+                    
+                    document.getElementById('teams-table').innerHTML = tableHtml || '<tr><td colspan="6" class="text-center py-8 text-gray-500">No teams found</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading teams:', error);
+            }
+        }
+
+        // Load subscriptions
+        async function loadSubscriptions() {
+            try {
+                const response = await fetch('/admin/api/subscriptions/active');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tableHtml = data.subscriptions.map(sub => `
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-3 px-4 text-sm font-medium text-gray-900">${sub.team_name}</td>
+                            <td class="py-3 px-4 text-sm text-gray-900">${sub.owner_email}</td>
+                            <td class="py-3 px-4">
+                                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full 
+                                    ${sub.plan === 'growth10' ? 'bg-purple-100 text-purple-800' :
+                                      sub.plan === 'team5' ? 'bg-blue-100 text-blue-800' :
+                                      sub.plan === 'pro' ? 'bg-green-100 text-green-800' :
+                                      'bg-gray-100 text-gray-800'}">
+                                    ${sub.plan}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4">
+                                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full 
+                                    ${sub.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                    ${sub.status}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-sm text-gray-900">${sub.next_billing ? formatDate(sub.next_billing) : 'N/A'}</td>
+                            <td class="py-3 px-4 text-sm text-gray-900">$${sub.total_paid}</td>
+                        </tr>
+                    `).join('');
+                    
+                    document.getElementById('subscriptions-table').innerHTML = tableHtml || '<tr><td colspan="6" class="text-center py-8 text-gray-500">No active subscriptions</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading subscriptions:', error);
+            }
+        }
+
+        // Load JV deals
+        async function loadJVDeals() {
+            try {
+                const response = await fetch('/admin/api/jv-deals');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tableHtml = data.deals.map(deal => `
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-3 px-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">${deal.partner.name}</p>
+                                    <p class="text-xs text-gray-500">${deal.partner.email}</p>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4">
+                                <div>
+                                    <p class="text-sm text-gray-900">${deal.property.address}</p>
+                                    <p class="text-xs text-gray-500">${deal.property.city}, ${deal.property.state}</p>
+                                </div>
+                            </td>
+                            <td class="py-3 px-4 text-sm text-gray-900">$${(deal.financials.asking_price || 0).toLocaleString()}</td>
+                            <td class="py-3 px-4 text-sm text-gray-900">$${(deal.financials.arv || 0).toLocaleString()}</td>
+                            <td class="py-3 px-4">
+                                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full 
+                                    ${deal.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                                      deal.status === 'denied' ? 'bg-red-100 text-red-800' : 
+                                      'bg-yellow-100 text-yellow-800'}">
+                                    ${deal.status || 'pending'}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-sm text-gray-500">${formatDate(deal.created_at)}</td>
+                        </tr>
+                    `).join('');
+                    
+                    document.getElementById('jv-deals-table').innerHTML = tableHtml || '<tr><td colspan="6" class="text-center py-8 text-gray-500">No JV deals found</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading JV deals:', error);
+            }
+        }
+
+        // Load errors
+        async function loadErrors() {
+            try {
+                const response = await fetch('/admin/api/errors/recent');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tableHtml = data.errors.map(error => `
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-3 px-4 text-sm text-gray-500">${formatTimeAgo(error.timestamp)}</td>
+                            <td class="py-3 px-4">
+                                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
+                                    ${error.type}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-sm text-gray-900">${error.message}</td>
+                            <td class="py-3 px-4 text-sm text-gray-500">${error.user}</td>
+                            <td class="py-3 px-4 text-sm text-gray-500">${error.endpoint || 'N/A'}</td>
+                            <td class="py-3 px-4">
+                                <button class="text-blue-600 hover:text-blue-900 text-sm">Resolve</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                    
+                    document.getElementById('errors-table').innerHTML = tableHtml || '<tr><td colspan="6" class="text-center py-8 text-gray-500">No errors found</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading errors:', error);
+            }
+        }
+
+        // Utility functions
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function formatTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            
+            if (seconds < 60) return 'just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+            if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+            return formatDate(dateString);
+        }
+
+        // User search
+        document.getElementById('user-search').addEventListener('input', (e) => {
+            clearTimeout(window.searchTimeout);
+            window.searchTimeout = setTimeout(() => {
+                loadUsers(e.target.value);
+            }, 300);
+        });
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboardStats();
+            loadRecentActivity();
+            loadUsers();
+            
+            // Refresh stats every 30 seconds
+            setInterval(() => {
+                loadDashboardStats();
+                loadRecentActivity();
+            }, 30000);
+        });
+    </script>
+</body>
+</html>

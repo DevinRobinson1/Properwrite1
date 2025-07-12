@@ -14,6 +14,9 @@ import os
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
+# Import and register admin API blueprint
+from admin_api import admin_api_bp
+
 # Database connection
 DATABASE_URL = os.environ.get("DATABASE_URL")
 engine = create_engine(
@@ -73,6 +76,8 @@ def logout():
 @admin_bp.route('/')
 @require_admin
 def dashboard():
+    """Main admin dashboard with live data"""
+    return render_template('admin_dashboard_v2.html')
     """Main admin dashboard"""
     try:
         with Session(engine) as db:

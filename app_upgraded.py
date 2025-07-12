@@ -28,6 +28,7 @@ from sqlalchemy import create_engine
 from google_places_service import google_places_service, AddressNotFoundError, GooglePlacesAPIError, AddressValidationError
 from require_valid_address import require_valid_address, extract_validated_address_data
 from admin_routes_minimal import admin_bp
+from admin_api import admin_api_bp
 from comps_service import CompsService
 from email_service import email_service
 
@@ -71,6 +72,7 @@ comps_service = CompsService()
 
 # Register admin blueprint
 app.register_blueprint(admin_bp)
+app.register_blueprint(admin_api_bp)
 
 @app.route('/')
 def index():
