@@ -30,6 +30,7 @@ from require_valid_address import require_valid_address, extract_validated_addre
 from admin_routes_minimal import admin_bp
 from admin_api import admin_api_bp
 from zapier_api import zapier_api_bp
+from bitcoin_payment_service import bitcoin_service
 from comps_service import CompsService
 from email_service import email_service
 
@@ -73,6 +74,89 @@ comps_service = CompsService()
 
 # Register admin blueprint
 app.register_blueprint(admin_bp)
+
+# Bitcoin Payment Routes
+@app.route('/bitcoin/subscription/<plan_key>')
+def bitcoin_subscription(plan_key):
+    """Create Bitcoin payment for subscription plan"""
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    
+    try:
+        user_email = session.get('user_email', '')
+        team_id = session.get('team_id', '')
+        
+        charge = bitcoin_service.create_subscription_charge(
+            plan_key=plan_key,
+            user_email=user_email,
+            team_id=team_id
+        )
+        
+        # Redirect to Coinbase Commerce checkout
+        return redirect(charge['data']['hosted_url'])
+        
+    except Exception as e:
+        flash(f"Error creating Bitcoin payment: {str(e)}", 'error')
+        return redirect(url_for('dashboard'))
+
+@app.route('/bitcoin/credits/<int:credits>')
+def bitcoin_credits(credits):
+    """Create Bitcoin payment for credit pack"""
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    
+    try:
+        user_email = session.get('user_email', '')
+        team_id = session.get('team_id', '')
+        
+        charge = bitcoin_service.create_credit_pack_charge(
+            credits=credits,
+            user_email=user_email,
+            team_id=team_id
+        )
+        
+        # Redirect to Coinbase Commerce checkout
+        return redirect(charge['data']['hosted_url'])
+        
+    except Exception as e:
+        flash(f"Error creating Bitcoin payment: {str(e)}", 'error')
+        return redirect(url_for('dashboard'))
+
+@app.route('/api/bitcoin/webhook', methods=['POST'])
+def bitcoin_webhook():
+    """Handle Coinbase Commerce webhook events"""
+    try:
+        payload = request.get_data(as_text=True)
+        signature = request.headers.get('X-CC-Webhook-Signature')
+        
+        if not bitcoin_service.verify_webhook_signature(payload, signature):
+            return jsonify({"error": "Invalid signature"}), 401
+        
+        event_data = json.loads(payload)
+        result = bitcoin_service.process_webhook_event(event_data)
+        
+        if result.get('status') == 'success':
+            # Process successful payment
+            if result.get('type') == 'subscription':
+                # Handle subscription activation
+                billing_service.activate_subscription(
+                    user_email=result.get('user_email'),
+                    plan_key=result.get('plan_key'),
+                    payment_method='bitcoin'
+                )
+            elif result.get('type') == 'credit_pack':
+                # Handle credit pack purchase
+                billing_service.add_credits(
+                    user_email=result.get('user_email'),
+                    credits=result.get('credits'),
+                    payment_method='bitcoin'
+                )
+        
+        return jsonify(result), 200
+        
+    except Exception as e:
+        logging.error(f"Bitcoin webhook error: {str(e)}")
+        return jsonify({"error": "Webhook processing failed"}), 500
 app.register_blueprint(admin_api_bp)
 app.register_blueprint(zapier_api_bp)
 

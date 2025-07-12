@@ -1,0 +1,318 @@
+<!-- Billing Modal with Bitcoin Support -->
+<div id="billing-modal" class="fixed inset-0 z-50 hidden">
+    <div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+    <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl w-[95%] max-w-4xl max-h-[90vh] overflow-y-auto">
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-white border-b border-gray-200 p-6 rounded-t-xl">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-gray-800">Choose Your Plan</h2>
+                    <button onclick="closeBillingModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-6">
+                <!-- Payment Method Tabs -->
+                <div class="mb-8">
+                    <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg max-w-md mx-auto">
+                        <button class="payment-tab flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 bg-white text-blue-700 shadow-sm" 
+                                onclick="showPaymentMethod('card')" data-method="card">
+                            <i class="fas fa-credit-card mr-2"></i>Credit Card
+                        </button>
+                        <button class="payment-tab flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 text-gray-600 hover:text-blue-700" 
+                                onclick="showPaymentMethod('bitcoin')" data-method="bitcoin">
+                            <i class="fab fa-bitcoin mr-2"></i>Bitcoin (Save 25%)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Subscription Plans Section -->
+                <div id="subscription-plans" class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6 text-center">Subscription Plans</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Individual Plan -->
+                        <div class="relative border-2 border-gray-200 rounded-lg p-6 hover:border-blue-500 transition-all duration-200">
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold text-gray-800 mb-2">Individual</h4>
+                                <div class="mb-4">
+                                    <span class="text-3xl font-bold text-blue-600 card-price">$27</span>
+                                    <span class="text-3xl font-bold text-blue-600 bitcoin-price hidden">$20.25</span>
+                                    <span class="text-gray-600 text-sm">/month</span>
+                                </div>
+                                <div class="bitcoin-discount hidden text-green-600 text-sm font-medium mb-2">
+                                    Save $6.75/month
+                                </div>
+                                <ul class="text-sm text-gray-600 mb-6 space-y-2">
+                                    <li><i class="fas fa-check text-green-600 mr-2"></i>100 credits/month</li>
+                                    <li><i class="fas fa-check text-green-600 mr-2"></i>1 user seat</li>
+                                    <li><i class="fas fa-check text-green-600 mr-2"></i>All features</li>
+                                </ul>
+                                <button onclick="selectPlan('individual')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200">
+                                    Select Plan
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Pro Plan -->
+                        <div class="relative border-2 border-blue-500 rounded-lg p-6 bg-blue-50">
+                            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                                <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">Popular</span>
+                            </div>
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold text-gray-800 mb-2">Pro</h4>
+                                <div class="mb-4">
+                                    <span class="text-3xl font-bold text-blue-600 card-price">$79</span>
+                                    <span class="text-3xl font-bold text-blue-600 bitcoin-price hidden">$59.25</span>
+                                    <span class="text-gray-600 text-sm">/month</span>
+                                </div>
+                                <div class="bitcoin-discount hidden text-green-600 text-sm font-medium mb-2">
+                                    Save $19.75/month
+                                </div>
+                                <ul class="text-sm text-gray-600 mb-6 space-y-2">
+                                    <li><i class="fas fa-check text-green-600 mr-2"></i>300 credits/month</li>
+                                    <li><i class="fas fa-check text-green-600 mr-2"></i>1 user seat</li>
+                                    <li><i class="fas fa-check text-green-600 mr-2"></i>Priority support</li>
+                                </ul>
+                                <button onclick="selectPlan('pro')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200">
+                                    Select Plan
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Team5 Plan -->
+                        <div class="relative border-2 border-gray-200 rounded-lg p-6 hover:border-blue-500 transition-all duration-200">
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold text-gray-800 mb-2">Team5</h4>
+                                <div class="mb-4">
+                                    <span class="text-3xl font-bold text-blue-600 card-price">$199</span>
+                                    <span class="text-3xl font-bold text-blue-600 bitcoin-price hidden">$149.25</span>
+                                    <span class="text-gray-600 text-sm">/month</span>
+                                </div>
+                                <div class="bitcoin-discount hidden text-green-600 text-sm font-medium mb-2">
+                                    Save $49.75/month
+                                </div>
+                                <ul class="text-sm text-gray-600 mb-6 space-y-2">
+                                    <li><i class="fas fa-check text-green-600 mr-2"></i>1,000 credits/month</li>
+                                    <li><i class="fas fa-check text-green-600 mr-2"></i>5 user seats</li>
+                                    <li><i class="fas fa-check text-green-600 mr-2"></i>Team management</li>
+                                </ul>
+                                <button onclick="selectPlan('team5')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200">
+                                    Select Plan
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Growth10 Plan -->
+                        <div class="relative border-2 border-gray-200 rounded-lg p-6 hover:border-blue-500 transition-all duration-200">
+                            <div class="text-center">
+                                <h4 class="text-lg font-semibold text-gray-800 mb-2">Growth10</h4>
+                                <div class="mb-4">
+                                    <span class="text-3xl font-bold text-blue-600 card-price">$399</span>
+                                    <span class="text-3xl font-bold text-blue-600 bitcoin-price hidden">$299.25</span>
+                                    <span class="text-gray-600 text-sm">/month</span>
+                                </div>
+                                <div class="bitcoin-discount hidden text-green-600 text-sm font-medium mb-2">
+                                    Save $99.75/month
+                                </div>
+                                <ul class="text-sm text-gray-600 mb-6 space-y-2">
+                                    <li><i class="fas fa-check text-green-600 mr-2"></i>Unlimited credits</li>
+                                    <li><i class="fas fa-check text-green-600 mr-2"></i>10 user seats</li>
+                                    <li><i class="fas fa-check text-green-600 mr-2"></i>White-label options</li>
+                                </ul>
+                                <button onclick="selectPlan('growth10')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200">
+                                    Select Plan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Credit Packs Section -->
+                <div id="credit-packs" class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6 text-center">One-Time Credit Packs</h3>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                        <!-- 25 Credits -->
+                        <div class="border-2 border-gray-200 rounded-lg p-4 text-center hover:border-blue-500 transition-all duration-200">
+                            <div class="text-lg font-bold text-gray-800 mb-2">25 Credits</div>
+                            <div class="mb-2">
+                                <span class="text-xl font-bold text-blue-600 card-price">$15</span>
+                                <span class="text-xl font-bold text-blue-600 bitcoin-price hidden">$11.25</span>
+                            </div>
+                            <div class="bitcoin-discount hidden text-green-600 text-xs font-medium mb-2">
+                                Save $3.75
+                            </div>
+                            <button onclick="selectCreditPack('25')" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-3 rounded transition-all duration-200">
+                                Buy Now
+                            </button>
+                        </div>
+
+                        <!-- 50 Credits -->
+                        <div class="border-2 border-gray-200 rounded-lg p-4 text-center hover:border-blue-500 transition-all duration-200">
+                            <div class="text-lg font-bold text-gray-800 mb-2">50 Credits</div>
+                            <div class="mb-2">
+                                <span class="text-xl font-bold text-blue-600 card-price">$25</span>
+                                <span class="text-xl font-bold text-blue-600 bitcoin-price hidden">$18.75</span>
+                            </div>
+                            <div class="bitcoin-discount hidden text-green-600 text-xs font-medium mb-2">
+                                Save $6.25
+                            </div>
+                            <button onclick="selectCreditPack('50')" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-3 rounded transition-all duration-200">
+                                Buy Now
+                            </button>
+                        </div>
+
+                        <!-- 100 Credits -->
+                        <div class="border-2 border-blue-500 rounded-lg p-4 text-center bg-blue-50">
+                            <div class="text-lg font-bold text-gray-800 mb-2">100 Credits</div>
+                            <div class="mb-2">
+                                <span class="text-xl font-bold text-blue-600 card-price">$45</span>
+                                <span class="text-xl font-bold text-blue-600 bitcoin-price hidden">$33.75</span>
+                            </div>
+                            <div class="bitcoin-discount hidden text-green-600 text-xs font-medium mb-2">
+                                Save $11.25
+                            </div>
+                            <button onclick="selectCreditPack('100')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded transition-all duration-200">
+                                Buy Now
+                            </button>
+                        </div>
+
+                        <!-- 250 Credits -->
+                        <div class="border-2 border-gray-200 rounded-lg p-4 text-center hover:border-blue-500 transition-all duration-200">
+                            <div class="text-lg font-bold text-gray-800 mb-2">250 Credits</div>
+                            <div class="mb-2">
+                                <span class="text-xl font-bold text-blue-600 card-price">$99</span>
+                                <span class="text-xl font-bold text-blue-600 bitcoin-price hidden">$74.25</span>
+                            </div>
+                            <div class="bitcoin-discount hidden text-green-600 text-xs font-medium mb-2">
+                                Save $24.75
+                            </div>
+                            <button onclick="selectCreditPack('250')" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-3 rounded transition-all duration-200">
+                                Buy Now
+                            </button>
+                        </div>
+
+                        <!-- 500 Credits -->
+                        <div class="border-2 border-gray-200 rounded-lg p-4 text-center hover:border-blue-500 transition-all duration-200">
+                            <div class="text-lg font-bold text-gray-800 mb-2">500 Credits</div>
+                            <div class="mb-2">
+                                <span class="text-xl font-bold text-blue-600 card-price">$175</span>
+                                <span class="text-xl font-bold text-blue-600 bitcoin-price hidden">$131.25</span>
+                            </div>
+                            <div class="bitcoin-discount hidden text-green-600 text-xs font-medium mb-2">
+                                Save $43.75
+                            </div>
+                            <button onclick="selectCreditPack('500')" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-3 rounded transition-all duration-200">
+                                Buy Now
+                            </button>
+                        </div>
+
+                        <!-- 1000 Credits -->
+                        <div class="border-2 border-gray-200 rounded-lg p-4 text-center hover:border-blue-500 transition-all duration-200">
+                            <div class="text-lg font-bold text-gray-800 mb-2">1000 Credits</div>
+                            <div class="mb-2">
+                                <span class="text-xl font-bold text-blue-600 card-price">$299</span>
+                                <span class="text-xl font-bold text-blue-600 bitcoin-price hidden">$224.25</span>
+                            </div>
+                            <div class="bitcoin-discount hidden text-green-600 text-xs font-medium mb-2">
+                                Save $74.75
+                            </div>
+                            <button onclick="selectCreditPack('1000')" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-3 rounded transition-all duration-200">
+                                Buy Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bitcoin Info -->
+                <div id="bitcoin-info" class="hidden bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+                    <div class="flex items-start">
+                        <i class="fab fa-bitcoin text-orange-600 text-xl mr-3 mt-1"></i>
+                        <div>
+                            <h4 class="font-semibold text-orange-800 mb-2">Bitcoin Payment Benefits</h4>
+                            <ul class="text-sm text-orange-700 space-y-1">
+                                <li>• 25% discount on all plans and credit packs</li>
+                                <li>• Instant processing with Coinbase Commerce</li>
+                                <li>• Secure, decentralized payments</li>
+                                <li>• No personal information required</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Billing Modal JavaScript
+function showBillingModal() {
+    document.getElementById('billing-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeBillingModal() {
+    document.getElementById('billing-modal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+function showPaymentMethod(method) {
+    // Update tab styles
+    document.querySelectorAll('.payment-tab').forEach(tab => {
+        tab.classList.remove('bg-white', 'text-blue-700', 'shadow-sm');
+        tab.classList.add('text-gray-600');
+    });
+    
+    document.querySelector(`[data-method="${method}"]`).classList.remove('text-gray-600');
+    document.querySelector(`[data-method="${method}"]`).classList.add('bg-white', 'text-blue-700', 'shadow-sm');
+    
+    // Show/hide pricing
+    if (method === 'bitcoin') {
+        document.querySelectorAll('.card-price').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.bitcoin-price').forEach(el => el.classList.remove('hidden'));
+        document.querySelectorAll('.bitcoin-discount').forEach(el => el.classList.remove('hidden'));
+        document.getElementById('bitcoin-info').classList.remove('hidden');
+    } else {
+        document.querySelectorAll('.card-price').forEach(el => el.classList.remove('hidden'));
+        document.querySelectorAll('.bitcoin-price').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.bitcoin-discount').forEach(el => el.classList.add('hidden'));
+        document.getElementById('bitcoin-info').classList.add('hidden');
+    }
+    
+    // Store selected payment method
+    window.selectedPaymentMethod = method;
+}
+
+function selectPlan(planType) {
+    const paymentMethod = window.selectedPaymentMethod || 'card';
+    
+    if (paymentMethod === 'bitcoin') {
+        // Redirect to Bitcoin payment
+        window.location.href = `/bitcoin/subscription/${planType}`;
+    } else {
+        // Redirect to Stripe checkout
+        window.location.href = `/api/billing/create-checkout?plan=${planType}`;
+    }
+}
+
+function selectCreditPack(credits) {
+    const paymentMethod = window.selectedPaymentMethod || 'card';
+    
+    if (paymentMethod === 'bitcoin') {
+        // Redirect to Bitcoin payment
+        window.location.href = `/bitcoin/credits/${credits}`;
+    } else {
+        // Redirect to Stripe checkout
+        window.location.href = `/api/billing/create-checkout?credits=${credits}`;
+    }
+}
+
+// Initialize payment method
+document.addEventListener('DOMContentLoaded', function() {
+    showPaymentMethod('card');
+});
+</script>

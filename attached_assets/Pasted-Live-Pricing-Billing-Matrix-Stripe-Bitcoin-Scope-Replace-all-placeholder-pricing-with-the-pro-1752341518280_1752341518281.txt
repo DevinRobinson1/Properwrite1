@@ -1,0 +1,102 @@
+Live Pricing & Billing Matrix (Stripe + Bitcoin)
+Scope
+
+Replace all placeholder pricing with the production plans & credit packs listed below.
+
+Wire each plan to its Stripe Price ID (card checkout) and a -25 % Bitcoin checkout via Coinbase Commerce.
+
+Keep all Acquisitions / Dispositions logic intact—only billing and credit-ledger code should change.
+
+1 – Plans & Stripe IDs
+Plan Key	Seats	Credits / mo	USD Price	Stripe Price ID
+free_starter	1	5 (one-time)	$0	(none)
+individual	1	100	$27	price_live_individual (create)
+pro	1	300	$79	price_1RjhMpPWMstJbjAav2Tyy5aR
+team5	5	1 000	$199	price_1RjhMqPWMstJbjAasyrGqEoB
+growth10	10	∞ (unlimited)	$399	price_1RjhMqPWMstJbjAaB7bd7VbK
+
+Bitcoin Prices (25 % off)
+Plan Key	USD BTC Price	Coinbase charge.name
+individual_btc	$20.25	individual_btc
+pro_btc	$59.25	pro_btc
+team5_btc	$149.25	team5_btc
+growth10_btc	$299.25	growth10_btc
+
+2 – One-Time Credit Packs
+Pack ID	Credits	USD	Bitcoin (-25 %)
+credits25	25	$15	$11.25
+credits50	50	$25	$18.75
+credits100	100	$45	$33.75
+credits250	250	$99	$74.25
+credits500	500	$175	$131.25
+credits1000	1000	$299	$224.25
+
+Create Stripe Price IDs for each pack (one_time=true).
+Mirror them in Coinbase Commerce with 25 % reduced USD amount.
+
+3 – Front-End Flow (No Calculator Changes)
+Guest
+
+1 free analysis → blur-gate → signup modal.
+
+New User
+
+Auto-assigned free_starter plan (5 credits total).
+
+Credit Depletion
+
+If credit_balance ≤ 0, show Upgrade or Buy Credits modal.
+
+Three tabs: “Subscription Plans”, “Credit Packs”, “Pay with Bitcoin (save 25 %)”.
+
+Header Dropdown
+
+Show current plan name + remaining credits.
+
+“Upgrade / Add Credits” opens same modal.
+
+4 – Backend Tasks
+4.1 Stripe updates
+Insert new Price IDs for individual plan & all credit packs.
+
+Webhook checkout.session.completed →
+
+For subscriptions → set plan_key, credit_quota, next_refresh.
+
+For credit packs → increment credit_balance by pack size.
+
+4.2 Coinbase Commerce
+Charges pre-created with matching metadata.plan_key or pack_id.
+
+Webhook charge:confirmed → same credit/subscription handler but set payment_method='bitcoin'.
+
+4.3 Credit Refresh Cron
+sql
+Copy
+Edit
+if NOW() >= next_refresh then
+   credit_balance = credit_quota
+   next_refresh = next_refresh + interval '1 month'
+end if;
+5 – Testing Checklist
+ Sign-up → sees 5 starter credits.
+
+ Drop to 0 → modal triggers.
+
+ Buy 25-credit pack (Stripe) → balance +25.
+
+ Subscribe to pro via Bitcoin → balance = 300, plan set to pro_btc.
+
+ Webhook logs appear in billing_events.
+
+ Admin dashboard reflects real dollar + BTC revenue.
+
+Environment Variables
+makefile
+Copy
+Edit
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+COINBASE_COMMERCE_API_KEY=
+COINBASE_WEBHOOK_SECRET=
+Deliverable: PR feat/live-pricing-stripe-btc integrating these plans, price IDs, credit logic, and modal UI—no changes to deal-analysis logic.

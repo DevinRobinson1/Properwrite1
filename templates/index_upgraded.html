@@ -907,6 +907,9 @@
                     </div>
                 </div>
 
+                <!-- Scroll Gate Detection Point -->
+                <div id="offers-gate-trigger" class="scroll-gate-trigger"></div>
+                
                 <!-- Acquisitions Section -->
                 <div id="acquisitions-section" class="section-content">
                     <!-- Acquisitions Header -->
@@ -8104,16 +8107,143 @@
     </div>
 
     <!-- Scroll-Gate Modal -->
-    <div id="scroll-gate-modal" class="fixed inset-0 z-30 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl p-6 w-[90%] max-w-md text-center space-y-4 shadow-xl">
-            <h2 class="text-xl font-semibold">Unlock Your Offers</h2>
-            <p class="text-gray-600">Create a free account to see your max allowable offers, AI comps, and full calculators.</p>
-            <div class="flex flex-col sm:flex-row gap-3">
-                <a href="/signup" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex-1">Sign Up</a>
-                <a href="/login" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex-1">Log In</a>
+    <div id="scroll-gate-modal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+        <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl p-8 w-[90%] max-w-lg text-center space-y-6 shadow-2xl">
+                <div class="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <i class="fas fa-lock text-white text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">Unlock Your Investment Analysis</h2>
+                <p class="text-gray-600 text-lg leading-relaxed">Get instant access to max allowable offers, AI-powered comparable sales, and complete investment calculators.</p>
+                
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 space-y-2">
+                    <div class="flex items-center justify-center text-sm text-gray-700">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        <span>5 free property analyses</span>
+                    </div>
+                    <div class="flex items-center justify-center text-sm text-gray-700">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        <span>AI-powered offer strategies</span>
+                    </div>
+                    <div class="flex items-center justify-center text-sm text-gray-700">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        <span>Complete disposition analysis</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <a href="/signup" class="block w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105">
+                        Create Free Account
+                    </a>
+                    <a href="/login" class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-all duration-200">
+                        Sign In
+                    </a>
+                </div>
+                
+                <div class="text-center">
+                    <button onclick="closeScrollGateModal()" class="text-sm text-gray-500 hover:text-gray-700 underline">
+                        Continue as guest (limited access)
+                    </button>
+                </div>
+                
+                <div class="text-center text-xs text-gray-400 border-t pt-4">
+                    No credit card required • Instant access
+                </div>
             </div>
-            <button onclick="closeScrollGateModal()" class="text-xs text-gray-500 hover:underline mt-2">Maybe later</button>
         </div>
     </div>
+    
+    <!-- Scroll Gate JavaScript -->
+    <script>
+        let scrollGateTriggered = false;
+        let isUserAuthenticated = {{ 'true' if session.get('user_id') else 'false' }};
+        
+        // Initialize scroll gate
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!isUserAuthenticated) {
+                initializeScrollGate();
+            }
+        });
+        
+        function initializeScrollGate() {
+            const trigger = document.getElementById('offers-gate-trigger');
+            const modal = document.getElementById('scroll-gate-modal');
+            const acquisitionsSection = document.getElementById('acquisitions-section');
+            const dispositionsSection = document.getElementById('dispositions-section');
+            const compsSection = document.getElementById('comps-section');
+            
+            // Create intersection observer
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !scrollGateTriggered) {
+                        scrollGateTriggered = true;
+                        showScrollGateModal();
+                        
+                        // Blur the offers sections
+                        if (acquisitionsSection) acquisitionsSection.style.filter = 'blur(5px)';
+                        if (dispositionsSection) dispositionsSection.style.filter = 'blur(5px)';
+                        if (compsSection) compsSection.style.filter = 'blur(5px)';
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+            
+            if (trigger) {
+                observer.observe(trigger);
+            }
+        }
+        
+        function showScrollGateModal() {
+            const modal = document.getElementById('scroll-gate-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        function closeScrollGateModal() {
+            const modal = document.getElementById('scroll-gate-modal');
+            const acquisitionsSection = document.getElementById('acquisitions-section');
+            const dispositionsSection = document.getElementById('dispositions-section');
+            const compsSection = document.getElementById('comps-section');
+            
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+                
+                // Remove blur temporarily (limited access)
+                if (acquisitionsSection) acquisitionsSection.style.filter = 'none';
+                if (dispositionsSection) dispositionsSection.style.filter = 'none';
+                if (compsSection) compsSection.style.filter = 'none';
+                
+                // Show limited access notice
+                showLimitedAccessNotice();
+            }
+        }
+        
+        function showLimitedAccessNotice() {
+            const notice = document.createElement('div');
+            notice.className = 'fixed top-4 right-4 bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded-lg shadow-lg z-40';
+            notice.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <span class="text-sm">Limited access mode. <a href="/signup" class="underline font-medium">Sign up</a> for full features.</span>
+                </div>
+            `;
+            document.body.appendChild(notice);
+            
+            // Auto-remove notice after 5 seconds
+            setTimeout(() => {
+                if (notice.parentNode) {
+                    notice.parentNode.removeChild(notice);
+                }
+            }, 5000);
+        }
+    </script>
+    
+    <!-- Include Billing Modal -->
+    {% include 'billing_modal.html' %}
 </body>
 </html>

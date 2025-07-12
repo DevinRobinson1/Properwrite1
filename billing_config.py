@@ -77,20 +77,36 @@ CREDIT_PACKS = {
 COMPING_CREDITS_ENABLED = True
 COMPING_CREDITS_FEATURE_STATUS = "Coming Soon"
 
-# Stripe Price IDs - These are configured in Stripe Dashboard
+# Stripe Price IDs - Live Production Prices
 STRIPE_PRICES = {
-    'individual_m': 'price_individual_27',  # $27/month, 100 credits - To be configured in Stripe
-    'pro_m': 'price_1RjhMpPWMstJbjAav2Tyy5aR',  # $79/month, 300 credits
-    'team5_m': 'price_1RjhMqPWMstJbjAasyrGqEoB',  # $199/month, 1000 credits, 5 seats
-    'growth10_m': 'price_1RjhMqPWMstJbjAaB7bd7VbK',  # $399/month, unlimited credits, 10 seats
+    'individual_m': 'price_1Rk7HzPWMstJbjAaYgpfG3W2',  # $27/month, 100 credits ✅ LIVE
+    'pro_m': 'price_1Rk7I0PWMstJbjAaHeEmxNKC',  # $79/month, 300 credits ✅ LIVE
+    'team5_m': 'price_1Rk7I0PWMstJbjAaNkWF5566',  # $199/month, 1000 credits, 5 seats ✅ LIVE
+    'growth10_m': 'price_1Rk7I1PWMstJbjAanDo5w6B4',  # $399/month, unlimited credits, 10 seats ✅ LIVE
     
-    # Credit packs (one-time purchases)
-    'credits_25': 'price_1RjhMrPWMstJbjAaBHIImsW3',   # $15
-    'credits_50': 'price_1RjhMrPWMstJbjAaKrBVHVTS',   # $25
-    'credits_100': 'price_1RjhMsPWMstJbjAaw7tHWOqX',  # $45
-    'credits_250': 'price_1RjhMsPWMstJbjAaBMSOvN81',  # $99
-    'credits_500': 'price_1RjhMtPWMstJbjAak8gUKHJ0',  # $175
-    'credits_1000': 'price_1RjhMtPWMstJbjAaiNNiZ50k', # $299
+    # Credit packs (one-time purchases) - Live Production Prices
+    'credits_25': 'price_1Rk7I1PWMstJbjAa9oTuYUa8',   # $15 ✅ LIVE
+    'credits_50': 'price_1Rk7I2PWMstJbjAajspO9IbC',   # $25 ✅ LIVE
+    'credits_100': 'price_1Rk7I2PWMstJbjAaWdAl8pjB',  # $45 ✅ LIVE
+    'credits_250': 'price_1Rk7I3PWMstJbjAa0hkfRdSu',  # $99 ✅ LIVE
+    'credits_500': 'price_1Rk7I3PWMstJbjAamanEHqdc',  # $175 ✅ LIVE
+    'credits_1000': 'price_1Rk7I4PWMstJbjAaY8UiKHvJ', # $299 ✅ LIVE
+}
+
+# Bitcoin Pricing Matrix (25% discount from USD prices)
+BITCOIN_PRICES = {
+    'individual_btc': 20.25,    # $27 - 25% = $20.25
+    'pro_btc': 59.25,          # $79 - 25% = $59.25
+    'team5_btc': 149.25,       # $199 - 25% = $149.25
+    'growth10_btc': 299.25,    # $399 - 25% = $299.25
+    
+    # Bitcoin Credit Packs (25% discount)
+    'credits_25_btc': 11.25,   # $15 - 25% = $11.25
+    'credits_50_btc': 18.75,   # $25 - 25% = $18.75
+    'credits_100_btc': 33.75,  # $45 - 25% = $33.75
+    'credits_250_btc': 74.25,  # $99 - 25% = $74.25
+    'credits_500_btc': 131.25, # $175 - 25% = $131.25
+    'credits_1000_btc': 224.25 # $299 - 25% = $224.25
 }
 
 # Tier configuration for subscription enforcement
