@@ -4949,20 +4949,191 @@
         // [REMOVED DUPLICATE - keeping only the final version]
         
         // AI Assistant Functions
-        function suggestBestBuyerPersona() {
-            showToast('AI Buyer Persona Analysis coming soon!');
+        async function suggestBestBuyerPersona() {
+            try {
+                // Gather current property and strategy data
+                const propertyData = {
+                    address: document.getElementById('property-address')?.value || '',
+                    arv: parseFloat(document.getElementById('after-repair-value')?.value?.replace(/[^\d]/g, '') || 0),
+                    repairs: parseFloat(document.getElementById('repairs-amount')?.value?.replace(/[^\d]/g, '') || 0),
+                    rent: parseFloat(document.getElementById('property-rent')?.value?.replace(/[^\d]/g, '') || 0),
+                    bedrooms: parseInt(document.getElementById('bedrooms-count')?.value || 3),
+                    bathrooms: parseFloat(document.getElementById('bathrooms-count')?.value || 2),
+                    sqft: parseInt(document.getElementById('square-feet')?.value?.replace(/[^\d]/g, '') || 1200),
+                    acquisitionPrice: parseFloat(document.getElementById('global-acquisitions-price-header')?.value?.replace(/[^\d]/g, '') || 0)
+                };
+
+                showToast('Analyzing best buyer personas for your deal...');
+
+                const response = await fetch('/api/ai_buyer_persona', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ propertyData })
+                });
+
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Display the AI analysis in a modal
+                    showAIAnalysisModal('Best Buyer Personas', result.analysis);
+                } else {
+                    showToast(result.error || 'Unable to generate buyer persona analysis');
+                }
+            } catch (error) {
+                console.error('Error generating buyer persona:', error);
+                showToast('Error generating buyer persona analysis');
+            }
         }
         
-        function draftBuyerFacingPitch() {
-            showToast('AI Buyer Pitch Generator coming soon!');
+        async function draftBuyerPitch() {
+            try {
+                // Gather current property and strategy data
+                const propertyData = {
+                    address: document.getElementById('property-address')?.value || '',
+                    arv: parseFloat(document.getElementById('after-repair-value')?.value?.replace(/[^\d]/g, '') || 0),
+                    repairs: parseFloat(document.getElementById('repairs-amount')?.value?.replace(/[^\d]/g, '') || 0),
+                    rent: parseFloat(document.getElementById('property-rent')?.value?.replace(/[^\d]/g, '') || 0),
+                    acquisitionPrice: parseFloat(document.getElementById('global-acquisitions-price-header')?.value?.replace(/[^\d]/g, '') || 0)
+                };
+
+                // Get selected tab to know which strategy
+                const activeTab = document.querySelector('.tab-button.bg-blue-600')?.textContent?.trim() || 'Cash Sale';
+
+                showToast('Generating buyer pitch...');
+
+                const response = await fetch('/api/ai_buyer_pitch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ propertyData, strategy: activeTab })
+                });
+
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    showAIAnalysisModal('Buyer Pitch', result.pitch);
+                } else {
+                    showToast(result.error || 'Unable to generate buyer pitch');
+                }
+            } catch (error) {
+                console.error('Error generating buyer pitch:', error);
+                showToast('Error generating buyer pitch');
+            }
         }
         
-        function openBuyerObjectionHandler() {
-            showToast('Buyer Objection Handler coming soon!');
+        async function handleBuyerObjections() {
+            // Create a modal for buyer objections input
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                    <h3 class="text-xl font-bold mb-4">Handle Buyer Objections</h3>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Enter Buyer Objection:</label>
+                        <textarea id="buyer-objection-input" class="w-full p-3 border rounded-lg" rows="3" 
+                                  placeholder="Example: The price seems too high for the condition of the property..."></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Objection Type (optional):</label>
+                        <select id="buyer-objection-type" class="w-full p-2 border rounded-lg">
+                            <option value="">Select category...</option>
+                            <option value="price">Price Too High</option>
+                            <option value="condition">Property Condition</option>
+                            <option value="location">Location Concerns</option>
+                            <option value="roi">ROI Questions</option>
+                            <option value="timeline">Timeline Issues</option>
+                            <option value="competition">Other Offers</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button onclick="this.closest('.fixed').remove()" 
+                                class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg">Cancel</button>
+                        <button onclick="processBuyerObjection()" 
+                                class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg">Get Response</button>
+                    </div>
+                    <div id="buyer-objection-response" class="mt-4 hidden"></div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        async function processBuyerObjection() {
+            const objection = document.getElementById('buyer-objection-input')?.value?.trim();
+            const type = document.getElementById('buyer-objection-type')?.value;
+            
+            if (!objection) {
+                showToast('Please enter a buyer objection');
+                return;
+            }
+
+            const propertyData = {
+                arv: parseFloat(document.getElementById('after-repair-value')?.value?.replace(/[^\d]/g, '') || 0),
+                repairs: parseFloat(document.getElementById('repairs-amount')?.value?.replace(/[^\d]/g, '') || 0),
+                acquisitionPrice: parseFloat(document.getElementById('global-acquisitions-price-header')?.value?.replace(/[^\d]/g, '') || 0)
+            };
+
+            showToast('Generating objection response...');
+
+            try {
+                const response = await fetch('/api/ai_buyer_objection', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ objection, type, propertyData })
+                });
+
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    const responseDiv = document.getElementById('buyer-objection-response');
+                    responseDiv.innerHTML = `
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-purple-800 mb-2">AI-Generated Response:</h4>
+                            <div class="prose prose-sm max-w-none">${result.response}</div>
+                            <button onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent); showToast('Copied to clipboard!')" 
+                                    class="mt-3 px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded">
+                                Copy Response
+                            </button>
+                        </div>
+                    `;
+                    responseDiv.classList.remove('hidden');
+                } else {
+                    showToast(result.error || 'Unable to generate objection response');
+                }
+            } catch (error) {
+                console.error('Error handling buyer objection:', error);
+                showToast('Error generating objection response');
+            }
         }
         
         function suggestBestExitStrategy() {
             showToast('AI Exit Strategy Recommendation coming soon!');
+        }
+
+        // Helper function to show AI analysis in a modal
+        function showAIAnalysisModal(title, content) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-lg p-6 max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold">${title}</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    <div class="prose prose-sm max-w-none">${content}</div>
+                    <div class="mt-4 flex justify-end space-x-2">
+                        <button onclick="navigator.clipboard.writeText(this.closest('.bg-white').querySelector('.prose').textContent); showToast('Copied to clipboard!')" 
+                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
+                            Copy to Clipboard
+                        </button>
+                        <button onclick="this.closest('.fixed').remove()" 
+                                class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
         }
 
         function formatAndRecalculateInstallment(input) {

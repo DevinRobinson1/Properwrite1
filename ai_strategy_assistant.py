@@ -66,11 +66,11 @@ FORMAT RESPONSE AS:
 - Rationale: [explanation]
 
 ## Strategic Advantages
-**For Investor:**
+For Investor:
 - [advantage 1]
 - [advantage 2]
 
-**For Seller:**
+For Seller:
 - [advantage 1] 
 - [advantage 2]
 
@@ -79,6 +79,8 @@ FORMAT RESPONSE AS:
 
 ## Execution Notes
 [Key considerations for implementing this strategy]
+
+IMPORTANT: Do not use asterisks (*) anywhere in your response. Use regular text formatting only.
 """
 
             response = self.client.chat.completions.create(
@@ -153,6 +155,7 @@ PROVIDE:
 4. Suggest next steps for implementation
 
 Keep response concise and actionable.
+IMPORTANT: Do not use asterisks (*) anywhere in your response. Use regular text formatting only.
 """
 
             response = self.client.chat.completions.create(

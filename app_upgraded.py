@@ -1531,6 +1531,226 @@ def get_place_details():
             'message': 'An unexpected error occurred'
         }), 500
 
+@app.route('/api/ai_buyer_persona', methods=['POST'])
+def ai_buyer_persona():
+    """
+    AI-powered buyer persona analysis
+    """
+    try:
+        from openai import OpenAI
+        import os
+        
+        data = request.get_json()
+        property_data = data.get('propertyData', {})
+        
+        # Initialize OpenAI client
+        client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+        
+        prompt = f"""You are a real estate investment expert analyzing a deal to identify the best buyer personas.
+
+PROPERTY DATA:
+- ARV: ${property_data.get('arv', 0):,}
+- Repairs: ${property_data.get('repairs', 0):,}
+- Monthly Rent: ${property_data.get('rent', 0):,}
+- Bedrooms: {property_data.get('bedrooms', 3)}
+- Bathrooms: {property_data.get('bathrooms', 2)}
+- Square Feet: {property_data.get('sqft', 1200):,}
+- Acquisition Price: ${property_data.get('acquisitionPrice', 0):,}
+
+TASK: Identify and rank the top 3 buyer personas for this deal:
+
+## 1. Primary Buyer Persona
+- Type: [e.g., Fix-and-Flip Investor, Buy-and-Hold Landlord, etc.]
+- Why They're Interested: [Key motivations]
+- Price Range: $[their likely offer range]
+- Timeline: [their typical closing timeline]
+- Marketing Approach: [how to reach them]
+
+## 2. Secondary Buyer Persona
+- Type: [buyer type]
+- Why They're Interested: [motivations]
+- Price Range: $[offer range]
+- Timeline: [closing timeline]
+- Marketing Approach: [how to reach]
+
+## 3. Tertiary Buyer Persona
+- Type: [buyer type]
+- Why They're Interested: [motivations]
+- Price Range: $[offer range]
+- Timeline: [closing timeline]
+- Marketing Approach: [how to reach]
+
+## Quick Action Plan
+[3-4 bullet points on immediate next steps to find these buyers]
+
+IMPORTANT: Do not use asterisks (*) in your response. Use regular text formatting only."""
+
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=800
+        )
+        
+        return jsonify({
+            'status': 'success',
+            'analysis': response.choices[0].message.content
+        })
+        
+    except Exception as e:
+        logging.error(f"AI buyer persona error: {e}")
+        return jsonify({
+            'status': 'error',
+            'error': str(e)
+        }), 500
+
+@app.route('/api/ai_buyer_pitch', methods=['POST'])
+def ai_buyer_pitch():
+    """
+    AI-powered buyer pitch generator
+    """
+    try:
+        from openai import OpenAI
+        import os
+        
+        data = request.get_json()
+        property_data = data.get('propertyData', {})
+        strategy = data.get('strategy', 'Cash Sale')
+        
+        # Initialize OpenAI client
+        client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+        
+        prompt = f"""You are a real estate wholesaler creating a compelling buyer pitch.
+
+PROPERTY DATA:
+- Address: {property_data.get('address', 'Investment Property')}
+- ARV: ${property_data.get('arv', 0):,}
+- Repairs: ${property_data.get('repairs', 0):,}
+- Monthly Rent: ${property_data.get('rent', 0):,}
+- Your Acquisition Price: ${property_data.get('acquisitionPrice', 0):,}
+- Exit Strategy: {strategy}
+
+Create a compelling buyer pitch that includes:
+
+## Subject Line
+[Attention-grabbing email/text subject]
+
+## Opening Hook
+[1-2 sentences that create urgency and interest]
+
+## Property Highlights
+[3-4 bullet points showcasing the best features]
+
+## The Numbers
+[Present the financial opportunity clearly]
+
+## Call to Action
+[Strong closing with next steps]
+
+## SMS/Text Version
+[Shorter 2-3 sentence version for text messaging]
+
+Keep the tone professional but exciting. Focus on ROI and profit potential.
+IMPORTANT: Do not use asterisks (*) in your response. Use dashes (-) for bullet points."""
+
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.8,
+            max_tokens=600
+        )
+        
+        return jsonify({
+            'status': 'success',
+            'pitch': response.choices[0].message.content
+        })
+        
+    except Exception as e:
+        logging.error(f"AI buyer pitch error: {e}")
+        return jsonify({
+            'status': 'error',
+            'error': str(e)
+        }), 500
+
+@app.route('/api/ai_buyer_objection', methods=['POST'])
+def ai_buyer_objection():
+    """
+    AI-powered buyer objection handler
+    """
+    try:
+        from openai import OpenAI
+        import os
+        
+        data = request.get_json()
+        objection = data.get('objection', '')
+        objection_type = data.get('type', '')
+        property_data = data.get('propertyData', {})
+        
+        # Initialize OpenAI client
+        client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+        
+        context = ""
+        if objection_type:
+            contexts = {
+                'price': "Focus on demonstrating value and ROI.",
+                'condition': "Address repair concerns and profit potential after repairs.",
+                'location': "Highlight neighborhood strengths and rental demand.",
+                'roi': "Break down the numbers and show multiple exit strategies.",
+                'timeline': "Emphasize quick closing and easy transaction.",
+                'competition': "Differentiate this deal from others on the market."
+            }
+            context = contexts.get(objection_type, '')
+        
+        prompt = f"""You are an experienced real estate wholesaler handling a buyer objection.
+
+BUYER'S OBJECTION: "{objection}"
+
+PROPERTY NUMBERS:
+- ARV: ${property_data.get('arv', 0):,}
+- Repairs: ${property_data.get('repairs', 0):,}
+- Your Price: ${property_data.get('acquisitionPrice', 0):,}
+
+{context}
+
+Provide a professional response that:
+
+## Acknowledge
+[Show you understand their concern]
+
+## Reframe
+[Present a different perspective]
+
+## Provide Evidence
+[Use numbers, comparisons, or market data]
+
+## Offer Solution
+[Suggest a way forward]
+
+## Close
+[End with a question or next step]
+
+Keep the response conversational and focused on moving the deal forward.
+IMPORTANT: Do not use asterisks (*) in your response."""
+
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=500
+        )
+        
+        return jsonify({
+            'status': 'success',
+            'response': response.choices[0].message.content
+        })
+        
+    except Exception as e:
+        logging.error(f"AI buyer objection error: {e}")
+        return jsonify({
+            'status': 'error',
+            'error': str(e)
+        }), 500
+
 @app.route('/api/objection_handler', methods=['POST'])
 def objection_handler():
     """
@@ -1587,10 +1807,12 @@ INSTRUCTIONS:
 5. End with a soft close that invites the seller to talk further
 
 Output in markdown with sections:
-**Empathy** – [Empathetic acknowledgment]
-**Questions** – [2-3 bullet points with calibrated questions]
-**Suggested Solution** – [One compelling solution]
-**Soft Close** – [Invitation to continue conversation]"""
+Empathy – [Empathetic acknowledgment]
+Questions – [2-3 bullet points with calibrated questions]
+Suggested Solution – [One compelling solution]
+Soft Close – [Invitation to continue conversation]
+
+IMPORTANT: Do not use asterisks (*) anywhere in your response. Use dashes (-) for bullet points and regular text for emphasis."""
 
         # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
         # do not change this unless explicitly requested by the user
