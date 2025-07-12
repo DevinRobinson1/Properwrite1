@@ -91,6 +91,119 @@ def dashboard():
         session['email'] = 'devin@pfpsolutions.us'
     return render_template('dashboard.html')
 
+@app.route('/accept-invitation')
+def accept_invitation():
+    """Handle team invitation acceptance"""
+    token = request.args.get('token')
+    if not token:
+        flash('Invalid invitation link', 'error')
+        return redirect(url_for('index'))
+    
+    # Store the token in session for use after registration
+    session['team_invite_token'] = token
+    
+    # Check if user is already logged in
+    if session.get('user_id'):
+        # Process the invitation for logged-in user
+        billing_service = BillingService()
+        result = billing_service.accept_team_invite(token, session.get('user_id'))
+        if result.get('success'):
+            flash('Successfully joined the team!', 'success')
+            return redirect(url_for('dashboard'))
+        else:
+            flash(result.get('error', 'Failed to accept invitation'), 'error')
+            return redirect(url_for('index'))
+    else:
+        # Redirect to signup page with the token
+        return redirect(url_for('signup', invite_token=token))
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    """Signup page with optional team invite token"""
+    if request.method == 'GET':
+        invite_token = request.args.get('invite_token')
+        
+        # If there's an invite token, verify it and get team info
+        team_info = None
+        if invite_token:
+            billing_service = BillingService()
+            invite_data = billing_service.get_team_invite_info(invite_token)
+            if invite_data.get('success'):
+                team_info = invite_data.get('team_info')
+                session['team_invite_token'] = invite_token
+        
+        return render_template('auth/register.html', team_info=team_info)
+    
+    elif request.method == 'POST':
+        # Handle registration
+        email = request.form.get('email')
+        password = request.form.get('password')
+        name = request.form.get('name')
+        
+        if not email or not password:
+            flash('Email and password are required', 'error')
+            return render_template('auth/register.html')
+        
+        # Create user with billing service
+        billing_service = BillingService()
+        result = billing_service.create_user({
+            'email': email,
+            'name': name or email.split('@')[0],
+            'password': password
+        })
+        
+        if result.get('success'):
+            user_id = result.get('user_id')
+            
+            # Set up session
+            session['user_id'] = user_id
+            session['email'] = email
+            
+            # If there's a team invite token, accept it
+            invite_token = session.get('team_invite_token')
+            if invite_token:
+                invite_result = billing_service.accept_team_invite(invite_token, user_id)
+                if invite_result.get('success'):
+                    flash(f'Successfully joined {invite_result.get("team_name")}!', 'success')
+                else:
+                    flash('Account created but failed to join team: ' + invite_result.get('error'), 'warning')
+                session.pop('team_invite_token', None)
+            else:
+                flash('Registration successful!', 'success')
+            
+            return redirect(url_for('dashboard'))
+        else:
+            flash(result.get('error', 'Registration failed'), 'error')
+            return render_template('auth/register.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login_page():
+    """Login page"""
+    if request.method == 'GET':
+        return render_template('auth/login.html')
+    
+    elif request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        if not email or not password:
+            flash('Email and password are required', 'error')
+            return render_template('auth/login.html')
+        
+        billing_service = BillingService()
+        result = billing_service.authenticate_user(email, password)
+        
+        if result.get('success'):
+            # Set up session
+            session['user_id'] = result.get('user_id')
+            session['email'] = email
+            
+            flash('Login successful!', 'success')
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid email or password', 'error')
+            return render_template('auth/login.html')
+
 @app.route('/api/dashboard-data', methods=['GET'])
 def get_dashboard_data():
     """Get dashboard data for current user"""

@@ -473,6 +473,162 @@ class BillingService:
             logging.error(f"Error creating team invite: {e}")
             return {'success': False, 'error': str(e)}
     
+    def get_team_invite_info(self, token: str) -> Dict:
+        """
+        Get information about a team invite
+        """
+        try:
+            with self.db_session() as db:
+                invite = db.query(TeamInvite).filter(TeamInvite.token == token).first()
+                
+                if not invite:
+                    return {'success': False, 'error': 'Invalid invitation'}
+                
+                if invite.expires_at < datetime.utcnow():
+                    return {'success': False, 'error': 'Invitation has expired'}
+                
+                team = db.query(Team).filter(Team.id == invite.team_id).first()
+                
+                return {
+                    'success': True,
+                    'team_info': {
+                        'name': team.name,
+                        'email': invite.email,
+                        'role': invite.role
+                    }
+                }
+        except Exception as e:
+            logging.error(f"Error getting team invite info: {e}")
+            return {'success': False, 'error': str(e)}
+    
+    def authenticate_user(self, email: str, password: str) -> Dict:
+        """
+        Authenticate a user with email and password
+        """
+        try:
+            with self.db_session() as db:
+                user = db.query(User).filter(User.email == email).first()
+                
+                if not user:
+                    return {'success': False, 'error': 'Invalid credentials'}
+                
+                # Check password
+                from werkzeug.security import check_password_hash
+                if not user.password_hash or not check_password_hash(user.password_hash, password):
+                    return {'success': False, 'error': 'Invalid credentials'}
+                
+                if not user.is_active:
+                    return {'success': False, 'error': 'Account is inactive'}
+                
+                return {
+                    'success': True,
+                    'user_id': str(user.id),
+                    'email': user.email,
+                    'name': user.name
+                }
+                
+        except Exception as e:
+            logging.error(f"Error authenticating user: {e}")
+            return {'success': False, 'error': str(e)}
+    
+    def create_user(self, user_data: Dict) -> Dict:
+        """
+        Create a new user account
+        """
+        try:
+            with self.db_session() as db:
+                # Check if user already exists
+                existing_user = db.query(User).filter(User.email == user_data['email']).first()
+                if existing_user:
+                    return {'success': False, 'error': 'User with this email already exists'}
+                
+                # Create new user
+                user = User(
+                    id=str(uuid.uuid4()),
+                    email=user_data['email'],
+                    name=user_data.get('name', user_data['email'].split('@')[0]),
+                    credits=5,  # Starting credits
+                    is_active=True,
+                    created_at=datetime.utcnow()
+                )
+                
+                # Hash password if provided
+                if 'password' in user_data:
+                    from werkzeug.security import generate_password_hash
+                    user.password_hash = generate_password_hash(user_data['password'])
+                
+                db.add(user)
+                db.commit()
+                db.refresh(user)
+                
+                # Fire webhook for new user
+                self._fire_webhook('new_user_signup', {
+                    'user_id': str(user.id),
+                    'email': user.email,
+                    'name': user.name
+                })
+                
+                return {
+                    'success': True,
+                    'user_id': str(user.id),
+                    'email': user.email
+                }
+                
+        except Exception as e:
+            logging.error(f"Error creating user: {e}")
+            return {'success': False, 'error': str(e)}
+    
+    def accept_team_invite(self, token: str, user_id: str) -> Dict:
+        """
+        Accept a team invitation and add user to the team
+        """
+        try:
+            with self.db_session() as db:
+                # Find the invite
+                invite = db.query(TeamInvite).filter(TeamInvite.token == token).first()
+                
+                if not invite:
+                    return {'success': False, 'error': 'Invalid invitation'}
+                
+                if invite.expires_at < datetime.utcnow():
+                    return {'success': False, 'error': 'Invitation has expired'}
+                
+                # Get the team
+                team = db.query(Team).filter(Team.id == invite.team_id).first()
+                if not team:
+                    return {'success': False, 'error': 'Team not found'}
+                
+                # Check team capacity
+                active_users = db.query(User).filter(
+                    and_(User.team_id == team.id, User.is_active == True)
+                ).count()
+                
+                if active_users >= team.seats_max:
+                    return {'success': False, 'error': 'Team is at maximum capacity'}
+                
+                # Get the user
+                user = db.query(User).filter(User.id == user_id).first()
+                if not user:
+                    return {'success': False, 'error': 'User not found'}
+                
+                # Add user to team
+                user.team_id = team.id
+                user.team_role = invite.role
+                
+                # Delete the invite
+                db.delete(invite)
+                db.commit()
+                
+                return {
+                    'success': True,
+                    'team_name': team.name,
+                    'role': invite.role
+                }
+                
+        except Exception as e:
+            logging.error(f"Error accepting team invite: {e}")
+            return {'success': False, 'error': str(e)}
+    
     def remove_team_member(self, team_id: str, member_id: str) -> Dict:
         """
         Remove a team member
