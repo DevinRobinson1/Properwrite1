@@ -40,7 +40,8 @@ class GoogleAutocompleteNew {
         
         // Close suggestions when clicking outside
         document.addEventListener('click', (e) => {
-            if (!this.input.contains(e.target) && !this.suggestionsContainer.contains(e.target)) {
+            if (this.input && this.suggestionsContainer && 
+                !this.input.contains(e.target) && !this.suggestionsContainer.contains(e.target)) {
                 this.hideSuggestions();
             }
         });
@@ -291,11 +292,15 @@ class GoogleAutocompleteNew {
     }
     
     showSuggestions() {
-        this.suggestionsContainer.style.display = 'block';
+        if (this.suggestionsContainer) {
+            this.suggestionsContainer.style.display = 'block';
+        }
     }
     
     hideSuggestions() {
-        this.suggestionsContainer.style.display = 'none';
+        if (this.suggestionsContainer) {
+            this.suggestionsContainer.style.display = 'none';
+        }
     }
     
     handleAPINotEnabled() {

@@ -7706,6 +7706,40 @@
         // Initialize user status on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadUserStatus();
+            
+            // Initialize Google Autocomplete safely
+            const addressInput = document.getElementById('address');
+            if (addressInput) {
+                try {
+                    // Check if GoogleAutocompleteNew is available
+                    if (typeof GoogleAutocompleteNew !== 'undefined') {
+                        window.autocompleteInstance = new GoogleAutocompleteNew(addressInput, {
+                            onSelect: function(prediction) {
+                                console.log('Address selected:', prediction);
+                                // Auto-populate city, state, zip fields
+                                if (prediction.city) {
+                                    const cityField = document.getElementById('city');
+                                    if (cityField) cityField.value = prediction.city;
+                                }
+                                if (prediction.state) {
+                                    const stateField = document.getElementById('state');
+                                    if (stateField) stateField.value = prediction.state;
+                                }
+                                if (prediction.zip) {
+                                    const zipField = document.getElementById('zip');
+                                    if (zipField) zipField.value = prediction.zip;
+                                }
+                            },
+                            onError: function(error) {
+                                console.log('Autocomplete error:', error);
+                                console.log('Error details:', error.message || 'Autocomplete request failed');
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.log('Google Autocomplete error:', error);
+                }
+            }
         });
 
         // Bottom navigation functions
@@ -8038,58 +8072,151 @@
             </div>
             <div class="modal-body">
                 <div class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <!-- Pro Plan -->
-                        <div class="border-2 border-blue-200 rounded-lg p-6 bg-blue-50">
-                            <div class="text-center">
-                                <h3 class="font-bold text-xl text-blue-600 mb-2">Pro</h3>
-                                <div class="text-3xl font-bold text-gray-900 mb-1">$79<span class="text-lg font-normal text-gray-500">/month</span></div>
-                                <p class="text-sm text-gray-600 mb-4">Perfect for individual investors</p>
-                                <ul class="text-left space-y-2 text-sm text-gray-600">
-                                    <li><i class="fas fa-check text-green-500 mr-2"></i>300 credits/month</li>
-                                    <li><i class="fas fa-check text-green-500 mr-2"></i>1 user account</li>
-                                    <li><i class="fas fa-check text-green-500 mr-2"></i>All analysis tools</li>
-                                    <li><i class="fas fa-check text-green-500 mr-2"></i>Email support</li>
-                                </ul>
+                    <!-- Subscription Plans -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4 text-center">Monthly Subscriptions</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <!-- Individual Plan -->
+                            <div class="border-2 border-gray-200 rounded-lg p-4 bg-gray-50">
+                                <div class="text-center">
+                                    <h3 class="font-bold text-lg text-gray-600 mb-2">Individual</h3>
+                                    <div class="text-2xl font-bold text-gray-900 mb-1">$27<span class="text-sm font-normal text-gray-500">/month</span></div>
+                                    <p class="text-xs text-gray-600 mb-3">Perfect for beginners</p>
+                                    <ul class="text-left space-y-1 text-xs text-gray-600">
+                                        <li><i class="fas fa-check text-green-500 mr-1"></i>100 credits/month</li>
+                                        <li><i class="fas fa-check text-green-500 mr-1"></i>1 user account</li>
+                                        <li><i class="fas fa-check text-green-500 mr-1"></i>All analysis tools</li>
+                                        <li><i class="fas fa-check text-green-500 mr-1"></i>Email support</li>
+                                    </ul>
+                                    <button class="mt-3 w-full bg-gray-600 text-white py-2 px-3 rounded text-sm hover:bg-gray-700 transition-colors" onclick="startBillingFlow('individual')">
+                                        Choose Individual
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <!-- Team5 Plan -->
-                        <div class="border-2 border-purple-200 rounded-lg p-6 bg-purple-50 relative">
-                            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                                Most Popular
+                            
+                            <!-- Pro Plan -->
+                            <div class="border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
+                                <div class="text-center">
+                                    <h3 class="font-bold text-lg text-blue-600 mb-2">Pro</h3>
+                                    <div class="text-2xl font-bold text-gray-900 mb-1">$79<span class="text-sm font-normal text-gray-500">/month</span></div>
+                                    <p class="text-xs text-gray-600 mb-3">Perfect for individual investors</p>
+                                    <ul class="text-left space-y-1 text-xs text-gray-600">
+                                        <li><i class="fas fa-check text-green-500 mr-1"></i>300 credits/month</li>
+                                        <li><i class="fas fa-check text-green-500 mr-1"></i>1 user account</li>
+                                        <li><i class="fas fa-check text-green-500 mr-1"></i>All analysis tools</li>
+                                        <li><i class="fas fa-check text-green-500 mr-1"></i>Email support</li>
+                                    </ul>
+                                    <button class="mt-3 w-full bg-blue-600 text-white py-2 px-3 rounded text-sm hover:bg-blue-700 transition-colors" onclick="startBillingFlow('pro')">
+                                        Choose Pro
+                                    </button>
+                                </div>
                             </div>
-                            <div class="text-center">
-                                <h3 class="font-bold text-xl text-purple-600 mb-2">Team5</h3>
-                                <div class="text-3xl font-bold text-gray-900 mb-1">$199<span class="text-lg font-normal text-gray-500">/month</span></div>
-                                <p class="text-sm text-gray-600 mb-4">Great for small teams</p>
-                                <ul class="text-left space-y-2 text-sm text-gray-600">
-                                    <li><i class="fas fa-check text-green-500 mr-2"></i>1,000 credits/month</li>
-                                    <li><i class="fas fa-check text-green-500 mr-2"></i>5 user accounts</li>
-                                    <li><i class="fas fa-check text-green-500 mr-2"></i>Team collaboration</li>
-                                    <li><i class="fas fa-check text-green-500 mr-2"></i>Priority support</li>
-                                </ul>
+                            
+                            <!-- Team5 Plan -->
+                            <div class="border-2 border-purple-200 rounded-lg p-4 bg-purple-50 relative">
+                                <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                                    Most Popular
+                                </div>
+                                <div class="text-center">
+                                    <h3 class="font-bold text-lg text-purple-600 mb-2">Team5</h3>
+                                    <div class="text-2xl font-bold text-gray-900 mb-1">$199<span class="text-sm font-normal text-gray-500">/month</span></div>
+                                    <p class="text-xs text-gray-600 mb-3">Great for small teams</p>
+                                    <ul class="text-left space-y-1 text-xs text-gray-600">
+                                        <li><i class="fas fa-check text-green-500 mr-1"></i>1,000 credits/month</li>
+                                        <li><i class="fas fa-check text-green-500 mr-1"></i>5 user accounts</li>
+                                        <li><i class="fas fa-check text-green-500 mr-1"></i>Team collaboration</li>
+                                        <li><i class="fas fa-check text-green-500 mr-1"></i>Priority support</li>
+                                    </ul>
+                                    <button class="mt-3 w-full bg-purple-600 text-white py-2 px-3 rounded text-sm hover:bg-purple-700 transition-colors" onclick="startBillingFlow('team5')">
+                                        Choose Team5
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <!-- Growth10 Plan -->
-                        <div class="border-2 border-green-200 rounded-lg p-6 bg-green-50">
-                            <div class="text-center">
-                                <h3 class="font-bold text-xl text-green-600 mb-2">Growth10</h3>
-                                <div class="text-3xl font-bold text-gray-900 mb-1">$399<span class="text-lg font-normal text-gray-500">/month</span></div>
-                                <p class="text-sm text-gray-600 mb-4">For growing businesses</p>
-                                <ul class="text-left space-y-2 text-sm text-gray-600">
-                                    <li><i class="fas fa-check text-green-500 mr-2"></i>Unlimited credits</li>
-                                    <li><i class="fas fa-check text-green-500 mr-2"></i>10 user accounts</li>
-                                    <li><i class="fas fa-check text-green-500 mr-2"></i>Advanced analytics</li>
-                                    <li><i class="fas fa-check text-green-500 mr-2"></i>Dedicated support</li>
-                                </ul>
+                            
+                            <!-- Growth10 Plan -->
+                            <div class="border-2 border-green-200 rounded-lg p-4 bg-green-50">
+                                <div class="text-center">
+                                    <h3 class="font-bold text-lg text-green-600 mb-2">Growth10</h3>
+                                    <div class="text-2xl font-bold text-gray-900 mb-1">$399<span class="text-sm font-normal text-gray-500">/month</span></div>
+                                    <p class="text-xs text-gray-600 mb-3">For growing businesses</p>
+                                    <ul class="text-left space-y-1 text-xs text-gray-600">
+                                        <li><i class="fas fa-check text-green-500 mr-1"></i>Unlimited credits</li>
+                                        <li><i class="fas fa-check text-green-500 mr-1"></i>10 user accounts</li>
+                                        <li><i class="fas fa-check text-green-500 mr-1"></i>Advanced analytics</li>
+                                        <li><i class="fas fa-check text-green-500 mr-1"></i>Dedicated support</li>
+                                    </ul>
+                                    <button class="mt-3 w-full bg-green-600 text-white py-2 px-3 rounded text-sm hover:bg-green-700 transition-colors" onclick="startBillingFlow('growth10')">
+                                        Choose Growth10
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
+                    <!-- Credit Packs -->
+                    <div class="border-t border-gray-200 pt-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4 text-center">One-Time Credit Packs</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
+                            <div class="border border-gray-200 rounded-lg p-3 text-center bg-white hover:bg-gray-50 transition-colors">
+                                <div class="font-bold text-gray-900">25 Credits</div>
+                                <div class="text-sm text-gray-600">$15</div>
+                                <button class="mt-2 w-full bg-blue-500 text-white py-1 px-2 rounded text-xs hover:bg-blue-600 transition-colors" onclick="startBillingFlow('25-credits')">
+                                    Buy Now
+                                </button>
+                            </div>
+                            <div class="border border-gray-200 rounded-lg p-3 text-center bg-white hover:bg-gray-50 transition-colors">
+                                <div class="font-bold text-gray-900">50 Credits</div>
+                                <div class="text-sm text-gray-600">$25</div>
+                                <button class="mt-2 w-full bg-blue-500 text-white py-1 px-2 rounded text-xs hover:bg-blue-600 transition-colors" onclick="startBillingFlow('50-credits')">
+                                    Buy Now
+                                </button>
+                            </div>
+                            <div class="border border-gray-200 rounded-lg p-3 text-center bg-white hover:bg-gray-50 transition-colors">
+                                <div class="font-bold text-gray-900">100 Credits</div>
+                                <div class="text-sm text-gray-600">$45</div>
+                                <button class="mt-2 w-full bg-blue-500 text-white py-1 px-2 rounded text-xs hover:bg-blue-600 transition-colors" onclick="startBillingFlow('100-credits')">
+                                    Buy Now
+                                </button>
+                            </div>
+                            <div class="border border-gray-200 rounded-lg p-3 text-center bg-white hover:bg-gray-50 transition-colors">
+                                <div class="font-bold text-gray-900">250 Credits</div>
+                                <div class="text-sm text-gray-600">$99</div>
+                                <button class="mt-2 w-full bg-blue-500 text-white py-1 px-2 rounded text-xs hover:bg-blue-600 transition-colors" onclick="startBillingFlow('250-credits')">
+                                    Buy Now
+                                </button>
+                            </div>
+                            <div class="border border-gray-200 rounded-lg p-3 text-center bg-white hover:bg-gray-50 transition-colors">
+                                <div class="font-bold text-gray-900">500 Credits</div>
+                                <div class="text-sm text-gray-600">$175</div>
+                                <button class="mt-2 w-full bg-blue-500 text-white py-1 px-2 rounded text-xs hover:bg-blue-600 transition-colors" onclick="startBillingFlow('500-credits')">
+                                    Buy Now
+                                </button>
+                            </div>
+                            <div class="border border-gray-200 rounded-lg p-3 text-center bg-white hover:bg-gray-50 transition-colors">
+                                <div class="font-bold text-gray-900">1000 Credits</div>
+                                <div class="text-sm text-gray-600">$299</div>
+                                <button class="mt-2 w-full bg-blue-500 text-white py-1 px-2 rounded text-xs hover:bg-blue-600 transition-colors" onclick="startBillingFlow('1000-credits')">
+                                    Buy Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bitcoin Payment Option -->
+                    <div class="border-t border-gray-200 pt-6 mt-6">
+                        <div class="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-lg border border-orange-200 mb-6">
+                            <div class="flex items-center justify-center space-x-2 mb-2">
+                                <i class="fab fa-bitcoin text-orange-500 text-lg"></i>
+                                <span class="font-semibold text-orange-800">Bitcoin Payments Available</span>
+                            </div>
+                            <p class="text-sm text-orange-700 text-center">
+                                Pay with Bitcoin or other cryptocurrencies and get 25% off all plans and credit packs!
+                            </p>
+                        </div>
+                    </div>
+                    
                     <div class="text-center pt-4">
-                        <p class="text-sm text-gray-600 mb-4">Need more credits? Purchase additional credit packs anytime.</p>
+                        <p class="text-sm text-gray-600 mb-4">Choose your payment method to get started.</p>
                         <button onclick="showSignupModal()" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-semibold">
                             Get Started Today
                         </button>
