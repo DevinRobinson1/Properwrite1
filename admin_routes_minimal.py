@@ -6,11 +6,30 @@ Basic admin interface for platform management
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, session
 from functools import wraps
 from datetime import datetime, timedelta
-from sqlalchemy import func, desc, or_, String, cast
-from models import User, CreditPurchase, CompingCredit, GuestUsage
+from sqlalchemy import func, desc, or_, String, cast, create_engine
+from sqlalchemy.orm import Session
+from billing_models import User, Team, TeamInvite, CreditLog
 import logging
+import os
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
+# Database connection
+DATABASE_URL = os.environ.get("DATABASE_URL")
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    pool_recycle=300,
+    pool_size=5,
+    max_overflow=10,
+    connect_args={
+        "sslmode": "require",
+        "connect_timeout": 10,
+        "keepalives_idle": 30,
+        "keepalives_interval": 10,
+        "keepalives_count": 5
+    }
+)
 
 # Admin authentication decorator
 def require_admin(f):
@@ -55,28 +74,81 @@ def logout():
 @require_admin
 def dashboard():
     """Main admin dashboard"""
-    # Basic statistics - will be enhanced once proper models are implemented
-    stats = {
-        'total_users': 0,
-        'active_subscriptions': 0,
-        'total_teams': 0,
-        'pending_jv_deals': 0,
-        'total_revenue': 0,
-        'properties_analyzed_today': 0,
-        'api_errors_today': 0,
-        'open_tickets': 0
-    }
-    
-    # Recent activity placeholders
-    recent_users = []
-    recent_deals = []
-    recent_errors = []
-    
-    return render_template('admin_dashboard.html', 
-                         stats=stats,
-                         recent_users=recent_users,
-                         recent_deals=recent_deals,
-                         recent_errors=recent_errors)
+    try:
+        with Session(engine) as db:
+            # Get real statistics from database
+            total_users = db.query(User).count()
+            active_subscriptions = db.query(User).filter(User.subscription_tier != 'free').count()
+            total_teams = db.query(Team).count()
+            pending_invites = db.query(TeamInvite).filter(TeamInvite.status == 'pending').count()
+            
+            # Calculate total revenue from teams
+            total_revenue = 0
+            teams = db.query(Team).all()
+            for team in teams:
+                if team.subscription_tier == 'pro':
+                    total_revenue += 79
+                elif team.subscription_tier == 'team5':
+                    total_revenue += 199
+                elif team.subscription_tier == 'growth10':
+                    total_revenue += 399
+                elif team.subscription_tier == 'individual':
+                    total_revenue += 37
+            
+            # Get recent users (last 10)
+            recent_users = db.query(User).order_by(desc(User.created_at)).limit(10).all()
+            
+            stats = {
+                'total_users': total_users,
+                'active_subscriptions': active_subscriptions,
+                'total_teams': total_teams,
+                'pending_jv_deals': pending_invites,  # Using pending invites as placeholder
+                'total_revenue': f"${total_revenue:,}.00",
+                'properties_analyzed_today': 0,  # Would need usage tracking
+                'api_errors_today': 0,  # Would need error logging
+                'open_tickets': 0  # Would need ticket system
+            }
+            
+            # Convert users to display format
+            recent_users_display = []
+            for user in recent_users:
+                recent_users_display.append({
+                    'id': str(user.id),
+                    'email': user.email,
+                    'role': user.role,
+                    'team_name': db.query(Team).filter(Team.id == user.team_id).first().name if user.team_id else 'No Team',
+                    'created_at': user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else 'Unknown',
+                    'subscription_tier': user.subscription_tier or 'free'
+                })
+            
+            # Recent activity placeholders
+            recent_deals = []
+            recent_errors = []
+            
+            return render_template('admin_dashboard.html', 
+                                 stats=stats,
+                                 recent_users=recent_users_display,
+                                 recent_deals=recent_deals,
+                                 recent_errors=recent_errors)
+                                 
+    except Exception as e:
+        logging.error(f"Error loading admin dashboard: {e}")
+        # Fallback to empty stats if database error
+        stats = {
+            'total_users': 0,
+            'active_subscriptions': 0,
+            'total_teams': 0,
+            'pending_jv_deals': 0,
+            'total_revenue': '$0.00',
+            'properties_analyzed_today': 0,
+            'api_errors_today': 0,
+            'open_tickets': 0
+        }
+        return render_template('admin_dashboard.html', 
+                             stats=stats,
+                             recent_users=[],
+                             recent_deals=[],
+                             recent_errors=[])
 
 @admin_bp.route('/users')
 @require_admin
@@ -87,32 +159,76 @@ def users():
     search_query = request.args.get('search', '')
     filter_type = request.args.get('filter', 'all')
     
-    # Build query
-    query = User.query
-    
-    # Apply search filter
-    if search_query:
-        query = query.filter(or_(
-            User.email.ilike(f'%{search_query}%'),
-            cast(User.id, String).ilike(f'%{search_query}%')
-        ))
-    
-    # Apply filter
-    if filter_type == 'subscribed':
-        query = query.filter(User.subscription_tier != 'free')
-    elif filter_type == 'free':
-        query = query.filter(User.subscription_tier == 'free')
-    
-    # Order by creation date, newest first
-    query = query.order_by(desc(User.created_at))
-    
-    # Paginate results
-    users = query.paginate(page=page, per_page=per_page, error_out=False)
-    
-    return render_template('admin_users.html', 
-                         users=users, 
-                         search=search_query,
-                         filter_type=filter_type)
+    try:
+        with Session(engine) as db:
+            # Build query
+            query = db.query(User)
+            
+            # Apply search filter
+            if search_query:
+                query = query.filter(or_(
+                    User.email.ilike(f'%{search_query}%'),
+                    cast(User.id, String).ilike(f'%{search_query}%')
+                ))
+            
+            # Apply filter
+            if filter_type == 'subscribed':
+                query = query.filter(User.subscription_tier != 'free')
+            elif filter_type == 'free':
+                query = query.filter(User.subscription_tier == 'free')
+            
+            # Order by creation date, newest first
+            query = query.order_by(desc(User.created_at))
+            
+            # Get results with pagination
+            offset = (page - 1) * per_page
+            users = query.offset(offset).limit(per_page).all()
+            total_users = query.count()
+            
+            # Convert users to display format
+            users_display = []
+            for user in users:
+                team_name = 'No Team'
+                if user.team_id:
+                    team = db.query(Team).filter(Team.id == user.team_id).first()
+                    if team:
+                        team_name = team.name
+                
+                users_display.append({
+                    'id': str(user.id),
+                    'email': user.email,
+                    'role': user.role,
+                    'team_name': team_name,
+                    'created_at': user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else 'Unknown',
+                    'subscription_tier': user.subscription_tier or 'free',
+                    'is_active': user.is_active
+                })
+            
+            # Create pagination object
+            pagination = {
+                'page': page,
+                'per_page': per_page,
+                'total': total_users,
+                'pages': (total_users + per_page - 1) // per_page,
+                'has_prev': page > 1,
+                'has_next': page < ((total_users + per_page - 1) // per_page),
+                'prev_num': page - 1 if page > 1 else None,
+                'next_num': page + 1 if page < ((total_users + per_page - 1) // per_page) else None
+            }
+            
+            return render_template('admin_users.html', 
+                                 users=users_display, 
+                                 pagination=pagination,
+                                 search=search_query,
+                                 filter_type=filter_type)
+                                 
+    except Exception as e:
+        logging.error(f"Error loading users page: {e}")
+        return render_template('admin_users.html', 
+                             users=[], 
+                             pagination={'page': 1, 'pages': 0, 'total': 0},
+                             search=search_query,
+                             filter_type=filter_type)
 
 @admin_bp.route('/affiliates')
 @require_admin
