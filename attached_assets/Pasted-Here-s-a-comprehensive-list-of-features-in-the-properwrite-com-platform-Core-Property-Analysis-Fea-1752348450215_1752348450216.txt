@@ -1,0 +1,105 @@
+Here's a comprehensive list of features in the properwrite.com platform:
+
+Core Property Analysis Features
+Property Data Integration
+
+Google Places autocomplete with address validation
+Real-time property data from Zillow, Redfin, and RentCast APIs
+Automated property value estimates and comparables
+Property images and detailed specifications
+Neighborhood data and market analysis
+Investment Strategy Calculator
+
+Wholesale/MAO Calculator with Ackerman Method
+Installment/Novation Calculator with seller psychology
+Subject-To Calculator with cash flow analysis
+Seller Finance Calculator with balloon payment projections
+Dynamic fee structures and profit calculations
+Advanced Analytics Features
+AI-Powered Tools
+
+Deal Analysis with buyer persona suggestions
+Objection Handler for seller negotiations
+Listing Generator (off-market, MLS, variations)
+Strategy recommendations based on property data
+Market context and risk assessment
+Dispositions Management
+
+Wholesale buyer persona matrix (4 buyer types)
+MLS/Novation listing calculator
+Subject-To cash-to-close builder
+Seller finance wrap configurator
+Lease-option sub-buyer calculator
+User Management & Billing
+Subscription Plans
+
+Individual Plan: $27/month (100 credits)
+Pro Plan: $79/month (300 credits)
+Team5 Plan: $199/month (1,000 credits, 5 users)
+Growth10 Plan: $399/month (unlimited credits, 10 users)
+Payment Options
+
+Stripe credit card processing
+Bitcoin payments with 25% discount
+One-time credit packs ($15-$299)
+Automatic billing and subscription management
+Team Collaboration
+
+Multi-user team management
+Role-based access control (owner/manager/analyst)
+Team invitations with email integration
+Credit sharing and usage tracking
+Admin Dashboard Features
+Real-Time Analytics
+
+Live user statistics and engagement metrics
+Revenue tracking and subscription analytics
+Credit usage monitoring
+Team performance insights
+Management Tools
+
+User account management
+Billing event tracking
+Error monitoring and resolution
+JV deal submission review
+Mobile & User Experience
+Responsive Design
+
+Mobile-first interface with touch optimization
+Sticky navigation and bottom action bar
+Horizontally scrollable tabs
+Backdrop blur effects and modern styling
+Security & Access Control
+
+Scroll-gate registration for guest users
+Credit-based usage limiting
+Secure authentication with JWT tokens
+Address validation before analysis
+Integration Features
+External Services
+
+Google Places API for address validation
+Stripe for payment processing
+Coinbase Commerce for Bitcoin payments
+Zapier webhooks for workflow automation
+SendGrid/SMTP for email notifications
+JV Partner System
+
+Partner profile management
+Deal submission and auto-evaluation
+Geographic market tracking
+Admin approval workflows
+Data & Performance
+Caching System
+
+30-day property data caching
+Google Places response caching
+Optimized API call management
+Performance monitoring
+Property Risk Analysis
+
+Interactive risk heatmap
+6-category risk assessment
+Mitigation strategy recommendations
+Color-coded risk zones
+The platform combines professional real estate underwriting with modern user experience design, providing comprehensive tools for property analysis, deal structuring, and team collaboration.

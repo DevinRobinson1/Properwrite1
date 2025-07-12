@@ -104,6 +104,9 @@ properwrite.com is a Flask-based web application that generates professional pro
 
 ## Changelog
 
+- July 12, 2025. Removed "Estimated Market Value" section from property details per user request, made interface cleaner and more focused
+- July 12, 2025. Enhanced property details section with clear messaging that all fields are editable, added hover effects to indicate interactivity, and ensured bedrooms, bathrooms, and square feet are auto-populated from API data when available
+- July 12, 2025. Fixed acquisition price calculation to be dynamically based on wholesale MAO calculation instead of hardcoded values, added visual indicators to show when price is auto-calculated vs manually overridden
 - June 19, 2025. Initial setup
 - June 19, 2025. Enhanced comparable sales analysis with professional underwriting rules including time-based filtering, geographic boundaries, property matching, and monetary adjustments
 - June 19, 2025. Fixed XSS vulnerability in notification system and identified RapidAPI subscription requirements for additional data sources
