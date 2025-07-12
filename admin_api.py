@@ -372,12 +372,16 @@ def get_users():
                     )
                 )
             
-            users = query.order_by(User.created_at.desc()).paginate(
-                page=page, per_page=per_page, error_out=False
-            )
+            # Manual pagination since SQLAlchemy Query doesn't have paginate() method
+            offset = (page - 1) * per_page
+            users = query.order_by(User.created_at.desc()).offset(offset).limit(per_page).all()
+            
+            # Get total count for pagination info
+            total_users = query.count()
+            total_pages = (total_users + per_page - 1) // per_page
             
             user_data = []
-            for user in users.items:
+            for user in users:
                 # Get last login from billing events or credit logs
                 last_activity = db.query(CreditLog.created_at).filter(
                     CreditLog.user_id == user.id
@@ -402,8 +406,8 @@ def get_users():
                 'pagination': {
                     'page': page,
                     'per_page': per_page,
-                    'total': users.total,
-                    'pages': users.pages
+                    'total': total_users,
+                    'pages': total_pages
                 }
             })
             
@@ -420,12 +424,16 @@ def get_teams():
         per_page = request.args.get('per_page', 20, type=int)
         
         with get_db_session() as db:
-            teams = db.query(Team).order_by(
-                Team.created_at.desc()
-            ).paginate(page=page, per_page=per_page, error_out=False)
+            # Manual pagination since SQLAlchemy Query doesn't have paginate() method
+            offset = (page - 1) * per_page
+            teams = db.query(Team).order_by(Team.created_at.desc()).offset(offset).limit(per_page).all()
+            
+            # Get total count for pagination info
+            total_teams = db.query(Team).count()
+            total_pages = (total_teams + per_page - 1) // per_page
             
             team_data = []
-            for team in teams.items:
+            for team in teams:
                 # Get member count
                 member_count = db.query(func.count(User.id)).filter(
                     and_(User.team_id == team.id, User.is_active == True)
@@ -462,8 +470,8 @@ def get_teams():
                 'pagination': {
                     'page': page,
                     'per_page': per_page,
-                    'total': teams.total,
-                    'pages': teams.pages
+                    'total': total_teams,
+                    'pages': total_pages
                 }
             })
             

@@ -95,23 +95,7 @@
             </div>
         </div>
 
-        <!-- Recent Activity Feed -->
-        <div class="bg-white rounded-lg shadow mb-8">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h2 class="text-lg font-semibold text-gray-900">Recent Activity</h2>
-            </div>
-            <div id="activity-feed" class="divide-y divide-gray-200">
-                <!-- Loading skeleton -->
-                <div class="px-6 py-4">
-                    <div class="skeleton h-4 w-3/4 rounded mb-2"></div>
-                    <div class="skeleton h-3 w-1/2 rounded"></div>
-                </div>
-                <div class="px-6 py-4">
-                    <div class="skeleton h-4 w-3/4 rounded mb-2"></div>
-                    <div class="skeleton h-3 w-1/2 rounded"></div>
-                </div>
-            </div>
-        </div>
+
 
         <!-- Tabs -->
         <div class="bg-white rounded-lg shadow">
@@ -128,6 +112,9 @@
                     </button>
                     <button onclick="showTab('jv-deals')" class="tab-button py-4 px-1 border-b-2 font-medium text-sm">
                         JV Deals
+                    </button>
+                    <button onclick="showTab('activity')" class="tab-button py-4 px-1 border-b-2 font-medium text-sm">
+                        Recent Activity
                     </button>
                     <button onclick="showTab('errors')" class="tab-button py-4 px-1 border-b-2 font-medium text-sm">
                         Error Logs
@@ -242,6 +229,21 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Tab -->
+                <div id="activity-tab" class="tab-content hidden">
+                    <div id="activity-feed" class="divide-y divide-gray-200">
+                        <!-- Loading skeleton -->
+                        <div class="py-4">
+                            <div class="skeleton h-4 w-3/4 rounded mb-2"></div>
+                            <div class="skeleton h-3 w-1/2 rounded"></div>
+                        </div>
+                        <div class="py-4">
+                            <div class="skeleton h-4 w-3/4 rounded mb-2"></div>
+                            <div class="skeleton h-3 w-1/2 rounded"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -367,6 +369,9 @@
                     break;
                 case 'jv-deals':
                     loadJVDeals();
+                    break;
+                case 'activity':
+                    loadRecentActivity();
                     break;
                 case 'errors':
                     loadErrors();
@@ -587,13 +592,11 @@
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', () => {
             loadDashboardStats();
-            loadRecentActivity();
             loadUsers();
             
             // Refresh stats every 30 seconds
             setInterval(() => {
                 loadDashboardStats();
-                loadRecentActivity();
             }, 30000);
         });
     </script>
