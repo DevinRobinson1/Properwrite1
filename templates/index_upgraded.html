@@ -3468,16 +3468,29 @@
                 longitude: data.longitude
             };
             
-            // Update property overview
-            document.getElementById('property-title').textContent = `${data.address}, ${data.city}`;
-            document.getElementById('property-address').textContent = `${data.city}, ${data.state} ${data.zip}`;
+            // Update property overview with null checks
+            const propertyTitle = document.getElementById('property-title');
+            const propertyAddress = document.getElementById('property-address');
             
-            // Populate editable fields with API data
+            if (propertyTitle) {
+                propertyTitle.textContent = `${data.address}, ${data.city}`;
+            }
+            if (propertyAddress) {
+                propertyAddress.textContent = `${data.city}, ${data.state} ${data.zip}`;
+            }
+            
+            // Populate editable fields with API data - with null checks
             if (data.bedrooms && data.bedrooms > 0) {
-                document.getElementById('bedrooms').value = data.bedrooms;
+                const bedroomsInput = document.getElementById('bedrooms');
+                if (bedroomsInput) {
+                    bedroomsInput.value = data.bedrooms;
+                }
             }
             if (data.bathrooms && data.bathrooms > 0) {
-                document.getElementById('bathrooms').value = data.bathrooms;
+                const bathroomsInput = document.getElementById('bathrooms');
+                if (bathroomsInput) {
+                    bathroomsInput.value = data.bathrooms;
+                }
             }
             if (data.square_feet && data.square_feet > 0) {
                 const sqftInput = document.getElementById('square_feet');
@@ -3486,23 +3499,35 @@
                 }
             }
             if (data.estimated_value) {
-                document.getElementById('arv').value = data.estimated_value;
-                // Trigger dispositions recalculation after property data is loaded
-                setTimeout(() => {
-                    recalculateAllDispositionStrategies();
-                }, 100);
+                const arvInput = document.getElementById('arv');
+                if (arvInput) {
+                    arvInput.value = data.estimated_value;
+                    // Trigger dispositions recalculation after property data is loaded
+                    setTimeout(() => {
+                        if (typeof recalculateAllDispositionStrategies === 'function') {
+                            recalculateAllDispositionStrategies();
+                        }
+                    }, 100);
+                }
             }
             if (data.rent_estimate) {
-                document.getElementById('rent').value = data.rent_estimate;
-                // Also trigger recalculation when rent is set
-                setTimeout(() => {
-                    recalculateAllDispositionStrategies();
-                }, 100);
+                const rentInput = document.getElementById('rent');
+                if (rentInput) {
+                    rentInput.value = data.rent_estimate;
+                    // Also trigger recalculation when rent is set
+                    setTimeout(() => {
+                        if (typeof recalculateAllDispositionStrategies === 'function') {
+                            recalculateAllDispositionStrategies();
+                        }
+                    }, 100);
+                }
             }
             
-            // Update data sources
+            // Update data sources with null check
             const dataSourcesContainer = document.getElementById('data-sources');
-            dataSourcesContainer.innerHTML = '';
+            if (dataSourcesContainer) {
+                dataSourcesContainer.innerHTML = '';
+            }
             
             if (data.data_sources && data.data_sources.length > 0) {
                 data.data_sources.forEach(source => {
