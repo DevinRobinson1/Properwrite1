@@ -7323,16 +7323,16 @@
         }
         
         function showValuation(platform, value, source) {
-            // Hide loading and error states
+            // Hide loading and error states with null checks
             const loadingEl = document.getElementById(`${platform}-loading`);
-            if (loadingEl) loadingEl.classList.add('hidden');
+            if (loadingEl && loadingEl.classList) loadingEl.classList.add('hidden');
             
             const errorEl = document.getElementById(`${platform}-error`);
-            if (errorEl) errorEl.classList.add('hidden');
+            if (errorEl && errorEl.classList) errorEl.classList.add('hidden');
             
-            // Show estimate
+            // Show estimate with null checks
             const estimateEl = document.getElementById(`${platform}-estimate`);
-            if (estimateEl) estimateEl.classList.remove('hidden');
+            if (estimateEl && estimateEl.classList) estimateEl.classList.remove('hidden');
             
             // For input fields, set numeric value without dollar sign
             const valueInput = document.getElementById(`${platform}-value`);
@@ -7353,16 +7353,16 @@
         }
         
         function showValuationError(platform, message) {
-            // Hide loading and estimate states
+            // Hide loading and estimate states with null checks
             const loadingEl = document.getElementById(`${platform}-loading`);
-            if (loadingEl) loadingEl.classList.add('hidden');
+            if (loadingEl && loadingEl.classList) loadingEl.classList.add('hidden');
             
             const estimateEl = document.getElementById(`${platform}-estimate`);
-            if (estimateEl) estimateEl.classList.add('hidden');
+            if (estimateEl && estimateEl.classList) estimateEl.classList.add('hidden');
             
             // Show error with custom message
             const errorDiv = document.getElementById(`${platform}-error`);
-            if (errorDiv) {
+            if (errorDiv && errorDiv.classList) {
                 errorDiv.classList.remove('hidden');
                 const messageDiv = errorDiv.querySelector('div:last-child div');
                 if (messageDiv) {
