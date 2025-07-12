@@ -3334,17 +3334,22 @@
 
     <script>
         // Form submission and property analysis
-        document.getElementById('property-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const address = document.getElementById('address').value;
-            const city = document.getElementById('city').value;
-            const state = document.getElementById('state').value;
-            const zip = document.getElementById('zip').value;
-            
-            // Show loading state
-            document.getElementById('loading-state').classList.remove('hidden');
-            document.getElementById('analysis-results').classList.add('hidden');
+        const propertyForm = document.getElementById('property-form');
+        if (propertyForm) {
+            propertyForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const address = document.getElementById('address')?.value || '';
+                const city = document.getElementById('city')?.value || '';
+                const state = document.getElementById('state')?.value || '';
+                const zip = document.getElementById('zip')?.value || '';
+                
+                // Show loading state
+                const loadingState = document.getElementById('loading-state');
+                const analysisResults = document.getElementById('analysis-results');
+                
+                if (loadingState) loadingState.classList.remove('hidden');
+                if (analysisResults) analysisResults.classList.add('hidden');
             
             try {
                 // Prepare payload with Google Autocomplete data if available
@@ -3412,8 +3417,8 @@
                     populateCompsSubjectProperty();
                     
                     // Show results
-                    document.getElementById('loading-state').classList.add('hidden');
-                    document.getElementById('analysis-results').classList.remove('hidden');
+                    if (loadingState) loadingState.classList.add('hidden');
+                    if (analysisResults) analysisResults.classList.remove('hidden');
                     
                     // Post-analysis resources removed - they're now in dashboard
                     
@@ -3440,7 +3445,7 @@
                 
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('loading-state').classList.add('hidden');
+                if (loadingState) loadingState.classList.add('hidden');
                 
                 // Use toast notification instead of alert
                 let errorMessage = 'Unable to analyze property. Please check your address and try again.';
@@ -3455,6 +3460,7 @@
                 showToast(errorMessage, 'error');
             }
         });
+        }
 
         function populatePropertyData(data) {
             // Store property data for later use (e.g., comps analysis)
@@ -3878,7 +3884,10 @@
             });
             
             // Show selected tab content
-            document.getElementById(tabName + '-tab').classList.add('active');
+            const tabElement = document.getElementById(tabName + '-tab');
+            if (tabElement) {
+                tabElement.classList.add('active');
+            }
             
             // Add active class to clicked button
             event.target.classList.add('active');
@@ -3901,7 +3910,10 @@
         // Tab-specific calculation functions
         function updateWholesalePercent() {
             const percent = document.getElementById('wholesale-arv-percent').value;
-            document.getElementById('wholesale-arv-display').textContent = percent + '%';
+            const wholesaleArvDisplay = document.getElementById('wholesale-arv-display');
+            if (wholesaleArvDisplay) {
+                wholesaleArvDisplay.textContent = percent + '%';
+            }
             recalculateWholesale();
         }
 
@@ -4574,11 +4586,11 @@
             generateInvestorListingAcq('mls');
         }
 
-        function suggestBestBuyerPersona() {
+        function suggestBestBuyerPersonaWrapper() {
             showAIFeature('disposition');
-            // Call existing function
-            if (typeof window.suggestBestBuyerPersona !== 'undefined') {
-                window.suggestBestBuyerPersona();
+            // Call the actual function defined later
+            if (typeof suggestBestBuyerPersona !== 'undefined') {
+                suggestBestBuyerPersona();
             }
         }
 
@@ -4883,10 +4895,10 @@
             });
             
             // Update the display elements
-            document.getElementById('mls-novation-gross-sale').textContent = '$' + listPrice.toLocaleString();
-            document.getElementById('mls-novation-commissions').textContent = '$' + totalCommissions.toLocaleString();
-            document.getElementById('mls-novation-our-fee').textContent = '$' + ourFee.toLocaleString();
-            document.getElementById('mls-novation-net-to-us').textContent = '$' + netToUs.toLocaleString();
+            updateElementIfExists('mls-novation-gross-sale', '$' + listPrice.toLocaleString());
+            updateElementIfExists('mls-novation-commissions', '$' + totalCommissions.toLocaleString());
+            updateElementIfExists('mls-novation-our-fee', '$' + ourFee.toLocaleString());
+            updateElementIfExists('mls-novation-net-to-us', '$' + netToUs.toLocaleString());
         }
         
         function updateNovationCalculation() {
@@ -8220,7 +8232,7 @@
     
     <!-- Scroll Gate JavaScript -->
     <script>
-        let scrollGateTriggered = false;
+        // Use existing scrollGateTriggered variable from above
         let isUserAuthenticated = {{ 'true' if session.get('user_id') else 'false' }};
         
         // Initialize scroll gate
