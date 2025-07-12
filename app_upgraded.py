@@ -29,6 +29,7 @@ from google_places_service import google_places_service, AddressNotFoundError, G
 from require_valid_address import require_valid_address, extract_validated_address_data
 from admin_routes_minimal import admin_bp
 from admin_api import admin_api_bp
+from zapier_api import zapier_api_bp
 from comps_service import CompsService
 from email_service import email_service
 
@@ -73,6 +74,7 @@ comps_service = CompsService()
 # Register admin blueprint
 app.register_blueprint(admin_bp)
 app.register_blueprint(admin_api_bp)
+app.register_blueprint(zapier_api_bp)
 
 @app.route('/')
 def index():
@@ -1679,6 +1681,19 @@ def jv_submit_deal():
             reasons=underwrite_result.get('reasons', [])
         )
         
+        # Trigger Zapier webhook for new JV submission
+        from zapier_webhook_service import trigger_jv_submission
+        from datetime import datetime
+        trigger_jv_submission({
+            'id': deal_id,
+            'address': data.get('property_address'),
+            'user_id': partner_id,  # Using partner_id as user_id for now
+            'partner_name': data.get('partner_name'),
+            'partner_email': data.get('partner_email'),
+            'status': 'pending',
+            'created_at': datetime.utcnow().isoformat()
+        })
+        
         return jsonify({
             'success': True,
             'submission_id': deal_id,
@@ -1815,6 +1830,24 @@ def jv_admin_update_deal_status(deal_id):
         success = jv_db.update_deal_final_status(deal_id, final_status)
         
         if success:
+            # Trigger Zapier webhook for JV approval if approved
+            if final_status == 'approved':
+                from zapier_webhook_service import trigger_jv_approved
+                from datetime import datetime
+                
+                # Get deal details for webhook
+                deal = jv_db.get_deal_by_id(deal_id)
+                if deal:
+                    deal_json = deal['deal_json']
+                    trigger_jv_approved({
+                        'id': deal_id,
+                        'address': deal_json.get('property_address'),
+                        'user_id': deal['partner_id'],
+                        'partner_name': deal_json.get('partner_info', {}).get('name'),
+                        'partner_email': deal_json.get('partner_info', {}).get('email'),
+                        'approved_at': datetime.utcnow().isoformat()
+                    })
+            
             return jsonify({'success': True})
         else:
             return jsonify({'success': False, 'error': 'Deal not found'}), 404

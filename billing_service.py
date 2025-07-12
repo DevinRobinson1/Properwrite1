@@ -166,6 +166,17 @@ class BillingService:
                             role='owner'
                         )
                         db.add(owner)
+                        db.flush()  # Ensure owner.id is available
+                        
+                        # Trigger Zapier webhook for new user
+                        from zapier_webhook_service import trigger_new_user_signup
+                        trigger_new_user_signup({
+                            'id': owner.id,
+                            'email': owner.email,
+                            'plan': tier,
+                            'team_id': team.id,
+                            'created_at': owner.created_at
+                        })
                         
                         # Log initial credits
                         credit_log = CreditLog(
@@ -205,6 +216,18 @@ class BillingService:
                     )
                     db.add(credit_log)
                     db.commit()
+                    
+                    # Trigger Zapier webhook for payment received
+                    from zapier_webhook_service import trigger_payment_received
+                    trigger_payment_received({
+                        'customer_id': invoice['customer'],
+                        'user_id': None,  # Would need to look up user from team
+                        'amount': invoice['amount_paid'],
+                        'currency': invoice['currency'],
+                        'plan_name': f'{team.tier} Plan',
+                        'invoice_id': invoice['id'],
+                        'subscription_id': invoice['subscription']
+                    })
                 
             return {'success': True, 'message': 'Monthly credits added'}
             
@@ -306,6 +329,22 @@ class BillingService:
                 )
                 db.add(credit_log)
                 db.commit()
+                
+                # Trigger low credits webhook if below threshold
+                if team.credit_balance < 20:  # Low credit threshold
+                    from zapier_webhook_service import trigger_credits_low
+                    # Find a user from this team to report
+                    owner = db.query(User).filter(
+                        User.team_id == team.id,
+                        User.role == 'owner'
+                    ).first()
+                    
+                    if owner:
+                        trigger_credits_low({
+                            'user_id': owner.id,
+                            'email': owner.email,
+                            'credits_remaining': team.credit_balance
+                        }, balance=team.credit_balance)
                 
                 return {
                     'success': True,
