@@ -251,10 +251,14 @@ def get_active_subscriptions():
                 Team.id
             ).order_by(
                 Team.created_at.desc()
-            ).paginate(page=page, per_page=per_page, error_out=False)
+            ).offset((page - 1) * per_page).limit(per_page).all()
+            
+            # Get total count for pagination
+            total_subscriptions = db.query(Team).count()
+            total_pages = (total_subscriptions + per_page - 1) // per_page
             
             subscription_data = []
-            for sub in subscriptions.items:
+            for sub in subscriptions:
                 # Get team owner
                 owner = db.query(User).filter(
                     and_(User.team_id == sub.id, User.role == 'owner')
@@ -286,8 +290,8 @@ def get_active_subscriptions():
                 'pagination': {
                     'page': page,
                     'per_page': per_page,
-                    'total': subscriptions.total,
-                    'pages': subscriptions.pages
+                    'total': total_subscriptions,
+                    'pages': total_pages
                 }
             })
             

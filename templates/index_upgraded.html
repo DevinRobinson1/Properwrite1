@@ -6785,7 +6785,17 @@
                         },
                         body: JSON.stringify(data)
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (response.status === 401) {
+                            // Authentication required
+                            return response.json().then(data => {
+                                hideLoadingState();
+                                showRegistrationModal();
+                                return Promise.reject(new Error('Authentication required'));
+                            });
+                        }
+                        return response.json();
+                    })
                     .then(result => {
                         if (result.success) {
                             // Display analysis results
@@ -6794,14 +6804,22 @@
                             // Post-analysis resources removed - they're now in dashboard
                             // Show mobile footer after successful analysis
                             showMobileFooter();
+                        } else if (result.error === 'authentication_required') {
+                            hideLoadingState();
+                            showRegistrationModal();
+                        } else if (result.error === 'insufficient_credits') {
+                            hideLoadingState();
+                            showToast('You need more credits to analyze properties. Please upgrade your plan or purchase more credits.', 'error');
                         } else {
                             throw new Error(result.error || 'Analysis failed');
                         }
                     })
                     .catch(error => {
                         console.error('Property analysis error:', error);
-                        hideLoadingState();
-                        showToast('Analysis failed: ' + error.message, 'error');
+                        if (error.message !== 'Authentication required') {
+                            hideLoadingState();
+                            showToast('Analysis failed: ' + error.message, 'error');
+                        }
                     });
                 });
             }
@@ -7495,6 +7513,27 @@
                 }
             });
         }
+
+        // Registration modal functions
+        function showRegistrationModal() {
+            document.getElementById('registration-modal').classList.remove('hidden');
+        }
+
+        function closeRegistrationModal() {
+            document.getElementById('registration-modal').classList.add('hidden');
+        }
+
+        function showSignupModal() {
+            showRegistrationModal();
+        }
+
+        // Close registration modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('registration-modal');
+            if (event.target === modal) {
+                closeRegistrationModal();
+            }
+        });
     </script>
     
     <!-- Features Modal -->
@@ -7695,6 +7734,59 @@
                             Start Your Free Trial
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div id="registration-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-900">Get Full Access</h2>
+                    <button onclick="closeRegistrationModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+                        <h3 class="font-semibold text-blue-900 mb-2">To get access to the comps, your wholesale, novation, sub 2 offer and dispo and full buyer features, register for your free account and get 5 free credits!</h3>
+                        <div class="text-sm text-blue-700 space-y-1">
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                <span>Property valuations from Zillow, Redfin & more</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                <span>Complete offer strategy analysis</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                <span>AI-powered investment insights</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                <span>Disposition strategies & buyer targeting</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <button onclick="window.location.href='/register'" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-semibold">
+                        Create Free Account
+                    </button>
+                    
+                    <div class="text-center">
+                        <span class="text-gray-600">Already have an account? </span>
+                        <a href="/login" class="text-blue-600 hover:text-blue-800 font-medium">Sign In</a>
+                    </div>
+                </div>
+                
+                <div class="mt-6 text-center text-xs text-gray-500">
+                    No credit card required • 5 free credits to get started
                 </div>
             </div>
         </div>
