@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from datetime import datetime
 import uuid
-from sqlalchemy import Column, String, Integer, DateTime, Boolean, Text, func, ForeignKey
+from sqlalchemy import Column, String, Integer, DateTime, Boolean, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -74,17 +74,3 @@ class GuestUsage(Base):
     usage_count = Column(Integer, default=1)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
-class PasswordResetToken(Base):
-    __tablename__ = 'password_reset_tokens'
-    
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
-    token_hash = Column(String(255), nullable=False)  # SHA256 hash of the actual token
-    expires_at = Column(DateTime(timezone=True), nullable=False)
-    used = Column(Boolean, default=False)
-    used_at = Column(DateTime(timezone=True), nullable=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
-    def __repr__(self):
-        return f'<PasswordResetToken {self.id}>'

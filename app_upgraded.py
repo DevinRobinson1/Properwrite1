@@ -32,7 +32,6 @@ from admin_api import admin_api_bp
 from zapier_api import zapier_api_bp
 from comps_service import CompsService
 from email_service import email_service
-from onboarding_api import onboarding_bp
 
 # Load environment variables from .env file
 if os.path.exists('.env'):
@@ -74,8 +73,6 @@ comps_service = CompsService()
 
 # Register admin blueprint
 app.register_blueprint(admin_bp)
-# Register onboarding blueprint
-app.register_blueprint(onboarding_bp)
 app.register_blueprint(admin_api_bp)
 app.register_blueprint(zapier_api_bp)
 
@@ -313,9 +310,8 @@ def analyze_property():
     Requires authentication and consumes 1 credit
     """
     # Check authentication first
-    from auth_middleware import AuthService
-    auth_service = AuthService()
-    user_data = auth_service.get_current_user()
+    from auth_middleware import get_current_user
+    user_data = get_current_user()
     if not user_data or not user_data.get('success'):
         return jsonify({
             'success': False,
