@@ -348,11 +348,11 @@ def get_teams_data():
     try:
         with Session(engine) as session:
             # Get teams with member counts
-            teams_query = session.query(text("""
+            teams = session.execute(text("""
                 SELECT 
                     t.id,
                     t.name,
-                    t.plan_type,
+                    t.tier as plan_type,
                     t.credits_balance,
                     t.credits_used,
                     t.created_at,
@@ -360,11 +360,9 @@ def get_teams_data():
                     MAX(u.last_login) as last_active
                 FROM teams t
                 LEFT JOIN users u ON t.id = u.team_id
-                GROUP BY t.id, t.name, t.plan_type, t.credits_balance, t.credits_used, t.created_at
+                GROUP BY t.id, t.name, t.tier, t.credits_balance, t.credits_used, t.created_at
                 ORDER BY t.created_at DESC
-            """))
-            
-            teams = teams_query.all()
+            """)).fetchall()
             
             teams_data = []
             for team in teams:
@@ -652,6 +650,228 @@ def create_promo_code():
         
     except Exception as e:
         logger.error(f"Create promo code error: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@admin_bp.route('/api/usage-metrics', methods=['GET'])
+@require_admin
+def get_usage_metrics():
+    """Get comprehensive usage metrics"""
+    try:
+        with Session(engine) as session:
+            # Get usage data from last 30 days
+            thirty_days_ago = datetime.now() - timedelta(days=30)
+            seven_days_ago = datetime.now() - timedelta(days=7)
+            
+            # Daily active users (last 30 days)
+            daily_active_users = session.execute(text("""
+                SELECT 
+                    DATE(last_login) as date,
+                    COUNT(DISTINCT id) as active_users
+                FROM users 
+                WHERE last_login >= :thirty_days_ago
+                GROUP BY DATE(last_login)
+                ORDER BY date DESC
+            """), {"thirty_days_ago": thirty_days_ago}).fetchall()
+            
+            # Credit usage by tier
+            credit_usage_by_tier = session.execute(text("""
+                SELECT 
+                    t.tier,
+                    COUNT(DISTINCT t.id) as team_count,
+                    SUM(CASE WHEN cl.delta < 0 THEN ABS(cl.delta) ELSE 0 END) as credits_used,
+                    AVG(CASE WHEN cl.delta < 0 THEN ABS(cl.delta) ELSE 0 END) as avg_credits_per_team
+                FROM teams t
+                LEFT JOIN credit_logs cl ON t.id = cl.team_id 
+                WHERE cl.created_at >= :thirty_days_ago OR cl.created_at IS NULL
+                GROUP BY t.tier
+            """), {"thirty_days_ago": thirty_days_ago}).fetchall()
+            
+            # Feature usage (property analysis)
+            feature_usage = session.execute(text("""
+                SELECT 
+                    DATE(cl.created_at) as date,
+                    COUNT(*) as property_analyses
+                FROM credit_logs cl
+                WHERE cl.delta < 0 
+                AND cl.created_at >= :thirty_days_ago
+                GROUP BY DATE(cl.created_at)
+                ORDER BY date DESC
+            """), {"thirty_days_ago": thirty_days_ago}).fetchall()
+            
+            # User engagement levels
+            user_engagement = session.execute(text("""
+                SELECT 
+                    CASE 
+                        WHEN last_login >= :seven_days_ago THEN 'highly_active'
+                        WHEN last_login >= :thirty_days_ago THEN 'active'
+                        WHEN last_login IS NOT NULL THEN 'inactive'
+                        ELSE 'never_logged_in'
+                    END as engagement_level,
+                    COUNT(*) as user_count
+                FROM users
+                GROUP BY engagement_level
+            """), {"seven_days_ago": seven_days_ago, "thirty_days_ago": thirty_days_ago}).fetchall()
+            
+            # Convert to JSON-serializable format
+            usage_data = {
+                'daily_active_users': [
+                    {'date': row.date.isoformat(), 'active_users': row.active_users}
+                    for row in daily_active_users
+                ],
+                'credit_usage_by_tier': [
+                    {
+                        'tier': row.tier,
+                        'team_count': row.team_count,
+                        'credits_used': row.credits_used or 0,
+                        'avg_credits_per_team': round(row.avg_credits_per_team or 0, 2)
+                    }
+                    for row in credit_usage_by_tier
+                ],
+                'feature_usage': [
+                    {'date': row.date.isoformat(), 'property_analyses': row.property_analyses}
+                    for row in feature_usage
+                ],
+                'user_engagement': [
+                    {'engagement_level': row.engagement_level, 'user_count': row.user_count}
+                    for row in user_engagement
+                ]
+            }
+            
+            return jsonify({
+                'success': True,
+                'usage_data': usage_data
+            })
+            
+    except Exception as e:
+        logger.error(f"Error getting usage metrics: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@admin_bp.route('/api/churn-metrics', methods=['GET'])
+@require_admin  
+def get_churn_metrics():
+    """Get comprehensive churn analysis"""
+    try:
+        with Session(engine) as session:
+            # Churn analysis - users who haven't logged in for different periods
+            churn_analysis = session.execute(text("""
+                SELECT 
+                    CASE 
+                        WHEN last_login IS NULL THEN 'never_logged_in'
+                        WHEN last_login < :ninety_days_ago THEN 'churned_90_days'
+                        WHEN last_login < :sixty_days_ago THEN 'at_risk_60_days'
+                        WHEN last_login < :thirty_days_ago THEN 'at_risk_30_days'
+                        WHEN last_login < :seven_days_ago THEN 'declining_7_days'
+                        ELSE 'active'
+                    END as churn_status,
+                    COUNT(*) as user_count,
+                    COUNT(*) * 100.0 / (SELECT COUNT(*) FROM users) as percentage
+                FROM users
+                GROUP BY churn_status
+            """), {
+                "ninety_days_ago": datetime.now() - timedelta(days=90),
+                "sixty_days_ago": datetime.now() - timedelta(days=60),
+                "thirty_days_ago": datetime.now() - timedelta(days=30),
+                "seven_days_ago": datetime.now() - timedelta(days=7)
+            }).fetchall()
+            
+            # Team churn by tier
+            team_churn = session.execute(text("""
+                SELECT 
+                    t.tier,
+                    COUNT(*) as total_teams,
+                    COUNT(CASE WHEN u.last_login < :thirty_days_ago THEN 1 END) as inactive_teams,
+                    COUNT(CASE WHEN u.last_login < :thirty_days_ago THEN 1 END) * 100.0 / COUNT(*) as churn_rate
+                FROM teams t
+                LEFT JOIN users u ON t.id = u.team_id
+                GROUP BY t.tier
+            """), {"thirty_days_ago": datetime.now() - timedelta(days=30)}).fetchall()
+            
+            # Monthly churn trend
+            monthly_churn = session.execute(text("""
+                SELECT 
+                    DATE_TRUNC('month', created_at) as month,
+                    COUNT(*) as new_users,
+                    COUNT(CASE WHEN last_login < :thirty_days_ago THEN 1 END) as churned_users
+                FROM users
+                WHERE created_at >= :six_months_ago
+                GROUP BY DATE_TRUNC('month', created_at)
+                ORDER BY month DESC
+            """), {
+                "thirty_days_ago": datetime.now() - timedelta(days=30),
+                "six_months_ago": datetime.now() - timedelta(days=180)
+            }).fetchall()
+            
+            # At-risk users (high-value users who are becoming inactive)
+            at_risk_users = session.execute(text("""
+                SELECT 
+                    u.id,
+                    u.email,
+                    u.name,
+                    t.tier,
+                    t.name as team_name,
+                    u.last_login,
+                    COALESCE(SUM(CASE WHEN cl.delta < 0 THEN ABS(cl.delta) ELSE 0 END), 0) as total_credits_used
+                FROM users u
+                LEFT JOIN teams t ON u.team_id = t.id
+                LEFT JOIN credit_logs cl ON t.id = cl.team_id
+                WHERE u.last_login BETWEEN :sixty_days_ago AND :thirty_days_ago
+                AND (t.tier IN ('pro', 'team5', 'growth10') OR COALESCE(SUM(CASE WHEN cl.delta < 0 THEN ABS(cl.delta) ELSE 0 END), 0) > 50)
+                GROUP BY u.id, u.email, u.name, t.tier, t.name, u.last_login
+                ORDER BY total_credits_used DESC
+                LIMIT 20
+            """), {
+                "sixty_days_ago": datetime.now() - timedelta(days=60),
+                "thirty_days_ago": datetime.now() - timedelta(days=30)
+            }).fetchall()
+            
+            # Convert to JSON-serializable format
+            churn_data = {
+                'churn_analysis': [
+                    {
+                        'churn_status': row.churn_status,
+                        'user_count': row.user_count,
+                        'percentage': round(row.percentage, 2)
+                    }
+                    for row in churn_analysis
+                ],
+                'team_churn': [
+                    {
+                        'tier': row.tier,
+                        'total_teams': row.total_teams,
+                        'inactive_teams': row.inactive_teams,
+                        'churn_rate': round(row.churn_rate, 2)
+                    }
+                    for row in team_churn
+                ],
+                'monthly_churn': [
+                    {
+                        'month': row.month.isoformat(),
+                        'new_users': row.new_users,
+                        'churned_users': row.churned_users
+                    }
+                    for row in monthly_churn
+                ],
+                'at_risk_users': [
+                    {
+                        'id': str(row.id),
+                        'email': row.email,
+                        'name': row.name or 'Unknown',
+                        'tier': row.tier or 'individual',
+                        'team_name': row.team_name or 'Individual',
+                        'last_login': row.last_login.isoformat() if row.last_login else None,
+                        'total_credits_used': row.total_credits_used
+                    }
+                    for row in at_risk_users
+                ]
+            }
+            
+            return jsonify({
+                'success': True,
+                'churn_data': churn_data
+            })
+            
+    except Exception as e:
+        logger.error(f"Error getting churn metrics: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @admin_bp.route('/users')

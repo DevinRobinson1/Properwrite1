@@ -123,6 +123,12 @@
                 <a href="#" onclick="showTab('affiliates')" id="affiliates-tab" class="tab-button px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">
                     Affiliates
                 </a>
+                <a href="#" onclick="showTab('usage')" id="usage-tab" class="tab-button px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">
+                    Usage Analytics
+                </a>
+                <a href="#" onclick="showTab('churn')" id="churn-tab" class="tab-button px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">
+                    Churn Analytics
+                </a>
             </nav>
         </div>
 
@@ -191,6 +197,74 @@
                             {% endfor %}
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usage Analytics Tab -->
+        <div id="usage-content" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Daily Active Users Chart -->
+                <div class="bg-white rounded-lg shadow card-shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Daily Active Users (Last 30 Days)</h3>
+                    <canvas id="dailyActiveUsersChart" width="400" height="200"></canvas>
+                </div>
+                
+                <!-- User Engagement Distribution -->
+                <div class="bg-white rounded-lg shadow card-shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">User Engagement Levels</h3>
+                    <canvas id="userEngagementChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Credit Usage by Tier -->
+                <div class="bg-white rounded-lg shadow card-shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Credit Usage by Tier</h3>
+                    <div id="creditUsageByTier" class="space-y-4">
+                        <!-- Will be populated by loadUsageMetrics() -->
+                    </div>
+                </div>
+                
+                <!-- Feature Usage Trend -->
+                <div class="bg-white rounded-lg shadow card-shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Property Analysis Usage</h3>
+                    <canvas id="featureUsageChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Churn Analytics Tab -->
+        <div id="churn-content" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Churn Analysis -->
+                <div class="bg-white rounded-lg shadow card-shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">User Churn Analysis</h3>
+                    <canvas id="churnAnalysisChart" width="400" height="200"></canvas>
+                </div>
+                
+                <!-- Team Churn by Tier -->
+                <div class="bg-white rounded-lg shadow card-shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Team Churn by Tier</h3>
+                    <div id="teamChurnByTier" class="space-y-4">
+                        <!-- Will be populated by loadChurnMetrics() -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Monthly Churn Trend -->
+                <div class="bg-white rounded-lg shadow card-shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Monthly Churn Trend</h3>
+                    <canvas id="monthlyChurnChart" width="400" height="200"></canvas>
+                </div>
+                
+                <!-- At-Risk Users -->
+                <div class="bg-white rounded-lg shadow card-shadow p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">At-Risk Users</h3>
+                    <div id="atRiskUsers" class="space-y-3 max-h-96 overflow-y-auto">
+                        <!-- Will be populated by loadChurnMetrics() -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -1091,6 +1165,236 @@
         setTimeout(() => {
             showAIInsights();
         }, 3000);
+        // Load usage metrics
+        function loadUsageMetrics() {
+            fetch('/admin/api/usage-metrics')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayUsageMetrics(data.usage_data);
+                    }
+                })
+                .catch(error => console.error('Error loading usage metrics:', error));
+        }
+
+        // Load churn metrics
+        function loadChurnMetrics() {
+            fetch('/admin/api/churn-metrics')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayChurnMetrics(data.churn_data);
+                    }
+                })
+                .catch(error => console.error('Error loading churn metrics:', error));
+        }
+
+        // Display usage metrics
+        function displayUsageMetrics(usageData) {
+            // Daily Active Users Chart
+            const dauCtx = document.getElementById('dailyActiveUsersChart').getContext('2d');
+            new Chart(dauCtx, {
+                type: 'line',
+                data: {
+                    labels: usageData.daily_active_users.map(d => d.date),
+                    datasets: [{
+                        label: 'Active Users',
+                        data: usageData.daily_active_users.map(d => d.active_users),
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // User Engagement Chart
+            const engagementCtx = document.getElementById('userEngagementChart').getContext('2d');
+            new Chart(engagementCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: usageData.user_engagement.map(d => d.engagement_level.replace('_', ' ')),
+                    datasets: [{
+                        data: usageData.user_engagement.map(d => d.user_count),
+                        backgroundColor: [
+                            '#10B981', '#3B82F6', '#F59E0B', '#EF4444'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+
+            // Credit Usage by Tier
+            const creditUsageHtml = usageData.credit_usage_by_tier.map(tier => `
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <h4 class="font-medium text-gray-900">${tier.tier.toUpperCase()}</h4>
+                        <p class="text-sm text-gray-600">${tier.team_count} teams</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-lg font-semibold text-gray-900">${tier.credits_used}</p>
+                        <p class="text-sm text-gray-600">${tier.avg_credits_per_team} avg/team</p>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('creditUsageByTier').innerHTML = creditUsageHtml;
+
+            // Feature Usage Chart
+            const featureCtx = document.getElementById('featureUsageChart').getContext('2d');
+            new Chart(featureCtx, {
+                type: 'bar',
+                data: {
+                    labels: usageData.feature_usage.map(d => d.date),
+                    datasets: [{
+                        label: 'Property Analyses',
+                        data: usageData.feature_usage.map(d => d.property_analyses),
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                        borderColor: 'rgb(16, 185, 129)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Display churn metrics
+        function displayChurnMetrics(churnData) {
+            // Churn Analysis Chart
+            const churnCtx = document.getElementById('churnAnalysisChart').getContext('2d');
+            new Chart(churnCtx, {
+                type: 'pie',
+                data: {
+                    labels: churnData.churn_analysis.map(d => d.churn_status.replace('_', ' ')),
+                    datasets: [{
+                        data: churnData.churn_analysis.map(d => d.percentage),
+                        backgroundColor: [
+                            '#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#6B7280'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Team Churn by Tier
+            const teamChurnHtml = churnData.team_churn.map(tier => `
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                        <h4 class="font-medium text-gray-900">${tier.tier.toUpperCase()}</h4>
+                        <p class="text-sm text-gray-600">${tier.total_teams} total teams</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-lg font-semibold ${tier.churn_rate > 20 ? 'text-red-600' : 'text-green-600'}">${tier.churn_rate}%</p>
+                        <p class="text-sm text-gray-600">${tier.inactive_teams} inactive</p>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('teamChurnByTier').innerHTML = teamChurnHtml;
+
+            // Monthly Churn Trend
+            const monthlyChurnCtx = document.getElementById('monthlyChurnChart').getContext('2d');
+            new Chart(monthlyChurnCtx, {
+                type: 'line',
+                data: {
+                    labels: churnData.monthly_churn.map(d => d.month),
+                    datasets: [{
+                        label: 'New Users',
+                        data: churnData.monthly_churn.map(d => d.new_users),
+                        borderColor: 'rgb(16, 185, 129)',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.1
+                    }, {
+                        label: 'Churned Users',
+                        data: churnData.monthly_churn.map(d => d.churned_users),
+                        borderColor: 'rgb(239, 68, 68)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // At-Risk Users
+            const atRiskUsersHtml = churnData.at_risk_users.map(user => `
+                <div class="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-200">
+                    <div>
+                        <h4 class="font-medium text-gray-900">${user.name}</h4>
+                        <p class="text-sm text-gray-600">${user.email}</p>
+                        <p class="text-xs text-gray-500">${user.team_name} (${user.tier})</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-medium text-orange-600">${user.total_credits_used} credits used</p>
+                        <p class="text-xs text-gray-500">Last login: ${user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}</p>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('atRiskUsers').innerHTML = atRiskUsersHtml || '<p class="text-gray-500 text-center py-4">No at-risk users found</p>';
+        }
+
+        // Update showTab function to load metrics
+        const originalShowTab = showTab;
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.add('hidden'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab-button');
+            tabs.forEach(tab => {
+                tab.classList.remove('text-blue-600', 'border-blue-600');
+                tab.classList.add('text-gray-500');
+            });
+            
+            // Show selected tab content
+            const selectedContent = document.getElementById(tabName + '-content');
+            if (selectedContent) {
+                selectedContent.classList.remove('hidden');
+            }
+            
+            // Add active class to selected tab
+            const selectedTab = document.getElementById(tabName + '-tab');
+            if (selectedTab) {
+                selectedTab.classList.remove('text-gray-500');
+                selectedTab.classList.add('text-blue-600', 'border-blue-600');
+            }
+            
+            // Load data for specific tabs
+            if (tabName === 'usage') {
+                loadUsageMetrics();
+            } else if (tabName === 'churn') {
+                loadChurnMetrics();
+            }
+        }
+
     </script>
 </body>
 </html>
