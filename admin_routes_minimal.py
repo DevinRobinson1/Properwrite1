@@ -6,7 +6,7 @@ Basic admin interface for platform management
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, session
 from functools import wraps
 from datetime import datetime, timedelta
-from sqlalchemy import func, desc, or_, String, cast, create_engine
+from sqlalchemy import func, desc, or_, String, cast, create_engine, text
 from sqlalchemy.orm import Session
 from billing_models import User, Team, TeamInvite, CreditLog
 import logging
@@ -102,13 +102,15 @@ def dashboard():
             
             # Get credit usage in last 30 days
             thirty_days_ago = datetime.now() - timedelta(days=30)
-            credits_used = db.query(func.sum(CreditLog.credits_used)).filter(
-                CreditLog.created_at >= thirty_days_ago
+            credits_used = db.query(func.sum(CreditLog.delta)).filter(
+                CreditLog.created_at >= thirty_days_ago,
+                CreditLog.delta < 0  # Only count negative deltas (usage)
             ).scalar() or 0
+            credits_used = abs(credits_used)  # Make positive for display
             
             # Get pending JV deals
             pending_jv_deals = db.execute(
-                "SELECT COUNT(*) FROM jv_deals WHERE status = 'pending'"
+                text("SELECT COUNT(*) FROM jv_deals WHERE final_status = 'pending'")
             ).scalar() or 0
             
             # Get recent users
