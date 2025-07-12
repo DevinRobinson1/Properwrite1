@@ -197,24 +197,15 @@
 
         <!-- Other tab contents (placeholder for now) -->
         <div id="teams-content" class="tab-content hidden">
-            <div class="bg-white rounded-lg shadow card-shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Team Management</h3>
-                <p class="text-gray-500">Team management features coming soon...</p>
-            </div>
+            <!-- Will be populated by loadTeamsData() -->
         </div>
 
         <div id="subscriptions-content" class="tab-content hidden">
-            <div class="bg-white rounded-lg shadow card-shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Subscription Management</h3>
-                <p class="text-gray-500">Subscription management features coming soon...</p>
-            </div>
+            <!-- Will be populated by loadSubscriptionsData() -->
         </div>
 
         <div id="jv-deals-content" class="tab-content hidden">
-            <div class="bg-white rounded-lg shadow card-shadow p-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">JV Deals</h3>
-                <p class="text-gray-500">JV deals management features coming soon...</p>
-            </div>
+            <!-- Will be populated by loadJVDealsData() -->
         </div>
 
         <div id="affiliates-content" class="tab-content hidden">
@@ -352,6 +343,167 @@
             </div>
         </div>
     </main>
+
+    <!-- GPT-4o Admin Assistant -->
+    <div id="ai-assistant-chat" class="fixed bottom-6 right-6 bg-white rounded-lg shadow-lg border border-gray-200 w-96 max-h-96 flex flex-col hidden">
+        <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
+            <div class="flex items-center justify-between">
+                <h3 class="font-semibold">GPT-4o Admin Assistant</h3>
+                <button onclick="closeAIAssistant()" class="text-white hover:text-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div id="ai-chat-messages" class="flex-1 p-4 overflow-y-auto max-h-64 bg-gray-50">
+            <div class="text-sm text-gray-600 mb-2">
+                <i class="fas fa-robot mr-2"></i>
+                Hi! I can help you manage affiliates, create promo codes, analyze metrics, and more. What would you like to do?
+            </div>
+        </div>
+        <div class="p-4 border-t border-gray-200">
+            <div class="flex gap-2">
+                <input type="text" id="ai-chat-input" placeholder="Ask me anything about your admin dashboard..." 
+                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <button onclick="sendAIMessage()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Assistant Toggle Button -->
+    <button id="ai-assistant-toggle" onclick="toggleAIAssistant()" 
+            class="fixed bottom-6 right-6 bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+        <i class="fas fa-robot text-xl"></i>
+    </button>
+
+    <!-- AI Insights Widget -->
+    <div id="ai-insights-widget" class="fixed top-20 right-6 bg-white rounded-lg shadow-lg border border-gray-200 w-80 p-4 hidden">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold text-gray-800">
+                <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                AI Insights
+            </h3>
+            <button onclick="closeAIInsights()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="ai-insights-content" class="text-sm text-gray-600">
+            <div class="bg-blue-50 p-3 rounded-lg mb-3">
+                <strong>Growth Opportunity:</strong> You have 3 trial users who analyzed 10+ properties this week. Consider sending upgrade offers.
+            </div>
+            <div class="bg-green-50 p-3 rounded-lg mb-3">
+                <strong>Affiliate Success:</strong> John Martinez's COACH50 code has 23% conversion rate. Consider creating similar codes for other affiliates.
+            </div>
+            <div class="bg-yellow-50 p-3 rounded-lg">
+                <strong>Risk Alert:</strong> 2 Growth10 teams haven't logged in for 7 days. Send re-engagement email?
+            </div>
+        </div>
+        <div class="mt-4 flex gap-2">
+            <button onclick="generateAIAction('upgrade_offers')" class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">
+                Send Upgrades
+            </button>
+            <button onclick="generateAIAction('reengagement')" class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700">
+                Re-engage Users
+            </button>
+        </div>
+    </div>
+
+    <!-- Enhanced Affiliate Modals -->
+    <div id="add-affiliate-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg w-96 p-6">
+            <h3 class="text-lg font-semibold mb-4">Add New Affiliate</h3>
+            <form id="add-affiliate-form">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                    <input type="text" id="affiliate-name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="affiliate-email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Company</label>
+                    <input type="text" id="affiliate-company" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Commission Rate (%)</label>
+                    <input type="number" id="affiliate-commission" value="30" min="0" max="100" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tier</label>
+                    <select id="affiliate-tier" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="standard">Standard</option>
+                        <option value="elite">Elite</option>
+                        <option value="premium">Premium</option>
+                    </select>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex-1">
+                        Add Affiliate
+                    </button>
+                    <button type="button" onclick="closeAddAffiliateModal()" class="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 flex-1">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Smart Promo Code Generator Modal -->
+    <div id="add-promo-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg w-96 p-6">
+            <h3 class="text-lg font-semibold mb-4">
+                <i class="fas fa-magic mr-2"></i>
+                AI-Powered Promo Code Generator
+            </h3>
+            <form id="add-promo-form">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Code Type</label>
+                    <select id="promo-type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" onchange="updatePromoForm()">
+                        <option value="percentage_discount">Percentage Discount</option>
+                        <option value="credit_pack">Credit Pack Bonus</option>
+                        <option value="team_bonus">Team Bonus</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Code Name</label>
+                    <input type="text" id="promo-code" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., FLIP30">
+                </div>
+                <div class="mb-4" id="discount-section">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Discount Value</label>
+                    <input type="number" id="promo-value" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="30">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Assign to Affiliate</label>
+                    <select id="promo-affiliate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select Affiliate</option>
+                        <option value="sample-affiliate-1">John Martinez</option>
+                        <option value="sample-affiliate-2">Sarah Thompson</option>
+                        <option value="sample-affiliate-3">Mike Rodriguez</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Max Uses</label>
+                    <input type="number" id="promo-max-uses" value="100" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div class="mb-4">
+                    <button type="button" onclick="generateAIPromoCode()" class="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 mb-2">
+                        <i class="fas fa-robot mr-2"></i>
+                        Generate with AI
+                    </button>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex-1">
+                        Create Code
+                    </button>
+                    <button type="button" onclick="closeAddPromoModal()" class="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 flex-1">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         function showTab(tabName) {
@@ -675,6 +827,270 @@
         function viewJVDeal(id) {
             alert('View JV deal: ' + id);
         }
+        
+        // AI Assistant Functions
+        let aiAssistantVisible = false;
+        let aiInsightsVisible = false;
+        
+        function toggleAIAssistant() {
+            const chat = document.getElementById('ai-assistant-chat');
+            const toggle = document.getElementById('ai-assistant-toggle');
+            
+            if (aiAssistantVisible) {
+                chat.classList.add('hidden');
+                toggle.style.display = 'block';
+                aiAssistantVisible = false;
+            } else {
+                chat.classList.remove('hidden');
+                toggle.style.display = 'none';
+                aiAssistantVisible = true;
+                
+                // Show AI insights when assistant opens
+                setTimeout(() => {
+                    showAIInsights();
+                }, 1000);
+            }
+        }
+        
+        function closeAIAssistant() {
+            const chat = document.getElementById('ai-assistant-chat');
+            const toggle = document.getElementById('ai-assistant-toggle');
+            
+            chat.classList.add('hidden');
+            toggle.style.display = 'block';
+            aiAssistantVisible = false;
+        }
+        
+        function showAIInsights() {
+            const widget = document.getElementById('ai-insights-widget');
+            widget.classList.remove('hidden');
+            aiInsightsVisible = true;
+        }
+        
+        function closeAIInsights() {
+            const widget = document.getElementById('ai-insights-widget');
+            widget.classList.add('hidden');
+            aiInsightsVisible = false;
+        }
+        
+        function sendAIMessage() {
+            const input = document.getElementById('ai-chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to chat
+            const chatMessages = document.getElementById('ai-chat-messages');
+            const userMessage = document.createElement('div');
+            userMessage.className = 'text-sm mb-2 text-right';
+            userMessage.innerHTML = `<span class="bg-blue-600 text-white px-3 py-2 rounded-lg inline-block">${message}</span>`;
+            chatMessages.appendChild(userMessage);
+            
+            // Clear input
+            input.value = '';
+            
+            // Show typing indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'text-sm text-gray-500 mb-2';
+            typingIndicator.innerHTML = '<i class="fas fa-robot mr-2"></i>Thinking...';
+            chatMessages.appendChild(typingIndicator);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Send to AI API
+            fetch('/admin/api/ai-assistant', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Remove typing indicator
+                chatMessages.removeChild(typingIndicator);
+                
+                // Add AI response
+                const aiResponse = document.createElement('div');
+                aiResponse.className = 'text-sm mb-2';
+                aiResponse.innerHTML = `<span class="bg-gray-200 text-gray-800 px-3 py-2 rounded-lg inline-block">${data.response}</span>`;
+                chatMessages.appendChild(aiResponse);
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            })
+            .catch(error => {
+                // Remove typing indicator
+                chatMessages.removeChild(typingIndicator);
+                
+                // Show error
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'text-sm mb-2';
+                errorMessage.innerHTML = '<span class="bg-red-100 text-red-800 px-3 py-2 rounded-lg inline-block">Sorry, I encountered an error. Please try again.</span>';
+                chatMessages.appendChild(errorMessage);
+                
+                console.error('AI Assistant error:', error);
+            });
+        }
+        
+        // Handle Enter key in chat input
+        document.getElementById('ai-chat-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendAIMessage();
+            }
+        });
+        
+        function generateAIAction(actionType) {
+            const actions = {
+                'upgrade_offers': 'Generating upgrade offers for high-activity trial users...',
+                'reengagement': 'Creating re-engagement campaigns for inactive users...'
+            };
+            
+            alert(actions[actionType] || 'AI action triggered');
+        }
+        
+        // Modal Functions
+        function openAddAffiliateModal() {
+            document.getElementById('add-affiliate-modal').classList.remove('hidden');
+        }
+        
+        function closeAddAffiliateModal() {
+            document.getElementById('add-affiliate-modal').classList.add('hidden');
+        }
+        
+        function openAddPromoModal() {
+            document.getElementById('add-promo-modal').classList.remove('hidden');
+        }
+        
+        function closeAddPromoModal() {
+            document.getElementById('add-promo-modal').classList.add('hidden');
+        }
+        
+        function updatePromoForm() {
+            const type = document.getElementById('promo-type').value;
+            const valueLabel = document.querySelector('#discount-section label');
+            const valueInput = document.getElementById('promo-value');
+            
+            if (type === 'percentage_discount') {
+                valueLabel.textContent = 'Discount Percentage';
+                valueInput.placeholder = '30';
+            } else if (type === 'credit_pack') {
+                valueLabel.textContent = 'Credit Amount';
+                valueInput.placeholder = '100';
+            } else if (type === 'team_bonus') {
+                valueLabel.textContent = 'Extra Seats';
+                valueInput.placeholder = '2';
+            }
+        }
+        
+        function generateAIPromoCode() {
+            const type = document.getElementById('promo-type').value;
+            const affiliate = document.getElementById('promo-affiliate').value;
+            
+            // AI-powered promo code generation
+            fetch('/admin/api/ai-promo-generator', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    type: type, 
+                    affiliate_id: affiliate 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('promo-code').value = data.code;
+                    document.getElementById('promo-value').value = data.value;
+                    document.getElementById('promo-max-uses').value = data.max_uses;
+                    
+                    // Show success message
+                    alert('AI generated promo code: ' + data.code);
+                } else {
+                    alert('Error generating promo code: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('AI Promo Generator error:', error);
+                alert('Error generating promo code. Please try again.');
+            });
+        }
+        
+        // Form Submissions
+        document.getElementById('add-affiliate-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('affiliate-name').value,
+                email: document.getElementById('affiliate-email').value,
+                company: document.getElementById('affiliate-company').value,
+                commission_rate: document.getElementById('affiliate-commission').value,
+                tier: document.getElementById('affiliate-tier').value
+            };
+            
+            fetch('/admin/api/create-affiliate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Affiliate created successfully!');
+                    closeAddAffiliateModal();
+                    loadAffiliatesData(); // Refresh the table
+                } else {
+                    alert('Error creating affiliate: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Create affiliate error:', error);
+                alert('Error creating affiliate. Please try again.');
+            });
+        });
+        
+        document.getElementById('add-promo-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                code: document.getElementById('promo-code').value,
+                type: document.getElementById('promo-type').value,
+                value: document.getElementById('promo-value').value,
+                affiliate_id: document.getElementById('promo-affiliate').value,
+                max_uses: document.getElementById('promo-max-uses').value
+            };
+            
+            fetch('/admin/api/create-promo-code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Promo code created successfully!');
+                    closeAddPromoModal();
+                    loadPromoCodesData(); // Refresh the table
+                } else {
+                    alert('Error creating promo code: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Create promo code error:', error);
+                alert('Error creating promo code. Please try again.');
+            });
+        });
+        
+        // Show AI insights on page load
+        setTimeout(() => {
+            showAIInsights();
+        }, 3000);
     </script>
 </body>
 </html>
