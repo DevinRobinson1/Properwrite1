@@ -76,98 +76,91 @@ def logout():
 @admin_bp.route('/')
 @require_admin
 def dashboard():
-    """Main admin dashboard with live data"""
-    return render_template('admin_dashboard_v2.html')
-    """Main admin dashboard"""
+    """Main admin dashboard with real data"""
     try:
         with Session(engine) as db:
             # Get real statistics from database
             total_users = db.query(User).count()
-            # Use safe query for subscriptions
-            try:
-                active_subscriptions = db.query(User).filter(User.subscription_tier != 'free').count()
-            except AttributeError:
-                # Fallback if subscription_tier column doesn't exist
-                active_subscriptions = 0
-            total_teams = db.query(Team).count()
-            pending_invites = db.query(TeamInvite).filter(TeamInvite.status == 'pending').count()
             
-            # Calculate total revenue from teams
-            total_revenue = 0
-            teams = db.query(Team).all()
-            for team in teams:
-                # Safe attribute access for subscription_tier
-                tier = getattr(team, 'subscription_tier', 'free')
-                if tier == 'pro':
-                    total_revenue += 79
-                elif tier == 'team5':
-                    total_revenue += 199
-                elif tier == 'growth10':
-                    total_revenue += 399
-                elif tier == 'individual':
-                    total_revenue += 37
+            # Get active teams
+            active_teams = db.query(Team).count()
             
-            # Get recent users (last 10)
+            # Calculate MRR from active subscriptions
+            mrr = 0
+            teams_data = db.query(Team).all()
+            for team in teams_data:
+                if hasattr(team, 'tier'):
+                    tier = team.tier
+                    if tier == 'pro':
+                        mrr += 79
+                    elif tier == 'team5':
+                        mrr += 199
+                    elif tier == 'growth10':
+                        mrr += 399
+                    elif tier == 'individual':
+                        mrr += 27
+            
+            # Get credit usage in last 30 days
+            thirty_days_ago = datetime.now() - timedelta(days=30)
+            credits_used = db.query(func.sum(CreditLog.credits_used)).filter(
+                CreditLog.created_at >= thirty_days_ago
+            ).scalar() or 0
+            
+            # Get pending JV deals
+            pending_jv_deals = db.execute(
+                "SELECT COUNT(*) FROM jv_deals WHERE status = 'pending'"
+            ).scalar() or 0
+            
+            # Get recent users
             recent_users = db.query(User).order_by(desc(User.created_at)).limit(10).all()
             
-            stats = {
-                'total_users': total_users,
-                'active_subscriptions': active_subscriptions,
-                'total_teams': total_teams,
-                'pending_jv_deals': pending_invites,  # Using pending invites as placeholder
-                'total_revenue': f"${total_revenue:,}.00",
-                'properties_analyzed_today': 0,  # Would need usage tracking
-                'api_errors_today': 0,  # Would need error logging
-                'open_tickets': 0  # Would need ticket system
-            }
-            
             # Convert users to display format
-            recent_users_display = []
+            users_data = []
             for user in recent_users:
-                # Safe attribute access
-                team_name = 'No Team'
+                team_name = 'Individual'
+                plan = 'individual'
+                
+                # Get team info if user has a team
                 if hasattr(user, 'team_id') and user.team_id:
                     team = db.query(Team).filter(Team.id == user.team_id).first()
                     if team:
                         team_name = team.name
+                        plan = team.tier
                 
-                recent_users_display.append({
+                users_data.append({
                     'id': str(user.id),
                     'email': user.email,
-                    'role': getattr(user, 'role', 'user'),
+                    'name': user.name if hasattr(user, 'name') and user.name else 'Unknown',
                     'team_name': team_name,
-                    'created_at': user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else 'Unknown',
-                    'subscription_tier': getattr(user, 'subscription_tier', 'free')
+                    'plan': plan,
+                    'credits': user.credits if hasattr(user, 'credits') else 0,
+                    'last_active': user.last_login.strftime('%Y-%m-%d') if hasattr(user, 'last_login') and user.last_login else 'Never',
+                    'created_at': user.created_at.strftime('%Y-%m-%d') if user.created_at else 'Unknown'
                 })
             
-            # Recent activity placeholders
-            recent_deals = []
-            recent_errors = []
+            dashboard_data = {
+                'total_users': total_users,
+                'active_teams': active_teams,
+                'mrr': mrr,
+                'credits_used': credits_used,
+                'pending_jv_deals': pending_jv_deals,
+                'users': users_data
+            }
             
-            return render_template('admin_dashboard.html', 
-                                 stats=stats,
-                                 recent_users=recent_users_display,
-                                 recent_deals=recent_deals,
-                                 recent_errors=recent_errors)
-                                 
+            return render_template('admin_dashboard_unified.html', data=dashboard_data)
+            
     except Exception as e:
-        logging.error(f"Error loading admin dashboard: {e}")
-        # Fallback to empty stats if database error
-        stats = {
+        logging.error(f"Admin dashboard error: {str(e)}")
+        # Return default data on error
+        dashboard_data = {
             'total_users': 0,
-            'active_subscriptions': 0,
-            'total_teams': 0,
+            'active_teams': 0,
+            'mrr': 0,
+            'credits_used': 0,
             'pending_jv_deals': 0,
-            'total_revenue': '$0.00',
-            'properties_analyzed_today': 0,
-            'api_errors_today': 0,
-            'open_tickets': 0
+            'users': []
         }
-        return render_template('admin_dashboard.html', 
-                             stats=stats,
-                             recent_users=[],
-                             recent_deals=[],
-                             recent_errors=[])
+        return render_template('admin_dashboard_unified.html', data=dashboard_data, error=str(e))
 
 @admin_bp.route('/users')
 @require_admin

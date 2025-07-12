@@ -73,7 +73,8 @@ engine = create_engine(
 # Initialize comps service
 comps_service = CompsService()
 
-# Register admin blueprint
+# Register admin blueprint (unified admin system)
+from admin_routes_minimal import admin_bp
 app.register_blueprint(admin_bp)
 
 # Register affiliate API blueprint
