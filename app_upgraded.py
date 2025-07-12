@@ -32,6 +32,7 @@ from admin_api import admin_api_bp
 from zapier_api import zapier_api_bp
 from comps_service import CompsService
 from email_service import email_service
+from onboarding_api import onboarding_bp
 
 # Load environment variables from .env file
 if os.path.exists('.env'):
@@ -73,6 +74,8 @@ comps_service = CompsService()
 
 # Register admin blueprint
 app.register_blueprint(admin_bp)
+# Register onboarding blueprint
+app.register_blueprint(onboarding_bp)
 app.register_blueprint(admin_api_bp)
 app.register_blueprint(zapier_api_bp)
 

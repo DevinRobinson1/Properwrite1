@@ -427,6 +427,11 @@
                         How It Works
                     </button>
                     
+                    <!-- Help Button -->
+                    <button onclick="startOnboardingTour()" class="text-gray-600 hover:text-blue-600 transition-colors font-medium">
+                        <i class="fas fa-question-circle mr-1"></i>Help
+                    </button>
+                    
                     <!-- User Authentication Section -->
                     <div id="auth-section-desktop">
                         <!-- Not Logged In State -->
@@ -505,6 +510,9 @@
                         </button>
                         <button onclick="showHowItWorksModal()" class="w-full text-left text-sm text-gray-600 hover:text-blue-600 transition-colors py-2">
                             <i class="fas fa-info-circle mr-3 text-green-500"></i>How It Works
+                        </button>
+                        <button onclick="startOnboardingTour()" class="w-full text-left text-sm text-gray-600 hover:text-blue-600 transition-colors py-2">
+                            <i class="fas fa-question-circle mr-3 text-blue-500"></i>Help & Tour
                         </button>
                     </div>
                 </div>
@@ -7791,5 +7799,56 @@
             </div>
         </div>
     </div>
+
+    <!-- Onboarding Toolkit -->
+    <script src="{{ url_for('static', filename='js/onboarding-toolkit.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/onboarding-progress.js') }}"></script>
+    
+    <script>
+        // Initialize onboarding system
+        function startOnboardingTour() {
+            // Check if user is logged in
+            fetch('/api/user-status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.logged_in) {
+                        // User is logged in, start the onboarding tour
+                        if (window.onboardingToolkit) {
+                            window.onboardingToolkit.startOnboarding();
+                        } else {
+                            // Initialize onboarding toolkit if not already loaded
+                            setTimeout(() => {
+                                if (window.onboardingToolkit) {
+                                    window.onboardingToolkit.startOnboarding();
+                                }
+                            }, 1000);
+                        }
+                    } else {
+                        // User is not logged in, show signup modal
+                        showSignupModal();
+                        setTimeout(() => {
+                            showToast('Please create an account to access the guided tour!', 'info');
+                        }, 500);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking user status:', error);
+                    showToast('Please try again or create an account to access the guided tour.', 'error');
+                });
+        }
+        
+        // Initialize onboarding when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-start onboarding for new users (if enabled)
+            const autoOnboarding = localStorage.getItem('auto_onboarding');
+            if (autoOnboarding === 'true' || autoOnboarding === null) {
+                setTimeout(() => {
+                    if (window.onboardingToolkit) {
+                        window.onboardingToolkit.checkOnboardingStatus();
+                    }
+                }, 2000);
+            }
+        });
+    </script>
 </body>
 </html>
