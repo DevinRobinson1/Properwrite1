@@ -1095,6 +1095,22 @@
                                                 </div>
                                             </button>
                                         </div>
+                                        
+                                        <!-- Generated Listing Display -->
+                                        <div id="generated-listing-acq" class="hidden mt-6">
+                                            <div class="bg-gray-50 rounded-lg p-6">
+                                                <div class="flex justify-between items-start mb-4">
+                                                    <h4 class="text-lg font-semibold text-gray-800">Generated Listing</h4>
+                                                    <button onclick="copyListingToClipboardAcq()" 
+                                                            class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center">
+                                                        <i class="fas fa-copy mr-2"></i>Copy to Clipboard
+                                                    </button>
+                                                </div>
+                                                <div id="listing-content-acq" class="whitespace-pre-wrap bg-white p-6 rounded-lg border border-gray-200 max-h-96 overflow-y-auto">
+                                                    <!-- Listing content will be inserted here -->
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -4494,13 +4510,13 @@
 
         // AI Feature Wrapper Functions
         function generateOffMarketListing() {
-            showAIFeature('listing');
-            generateInvestorListing('off_market');
+            showAIFeatureAcquisitions('listing');
+            generateInvestorListingAcq('off_market');
         }
 
         function generateMLSListing() {
-            showAIFeature('listing');
-            generateInvestorListing('mls');
+            showAIFeatureAcquisitions('listing');
+            generateInvestorListingAcq('mls');
         }
 
         function suggestBestBuyerPersona() {
@@ -6144,6 +6160,99 @@
             const content = document.getElementById('listing-content').textContent;
             navigator.clipboard.writeText(content).then(() => {
                 const button = event.target;
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check mr-1"></i>Copied!';
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('Error copying to clipboard:', err);
+                showToast('Error copying to clipboard. Please copy manually.');
+            });
+        }
+        
+        // Acquisitions AI Listing Generator functions
+        function generateInvestorListingAcq(listingType) {
+            console.log('Generating investor listing (Acquisitions):', listingType);
+            
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+            button.disabled = true;
+            
+            fetch('/generate_investor_listing', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    listing_type: listingType
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('listing-content-acq').textContent = data.listing;
+                    document.getElementById('generated-listing-acq').classList.remove('hidden');
+                } else {
+                    showToast('Error generating listing: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error generating listing:', error);
+                showToast('Error generating listing. Please try again.');
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+        
+        function generateListingVariations() {
+            console.log('Generating listing variations (Acquisitions)');
+            showAIFeatureAcquisitions('listing');
+            
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+            button.disabled = true;
+            
+            fetch('/generate_listing_variations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    let combinedContent = '';
+                    if (data.variations.off_market) {
+                        combinedContent += 'OFF-MARKET VERSION:\n\n' + data.variations.off_market + '\n\n';
+                    }
+                    if (data.variations.mls) {
+                        combinedContent += 'MLS VERSION:\n\n' + data.variations.mls;
+                    }
+                    document.getElementById('listing-content-acq').textContent = combinedContent;
+                    document.getElementById('generated-listing-acq').classList.remove('hidden');
+                } else {
+                    showToast('Error generating variations: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error generating variations:', error);
+                showToast('Error generating variations. Please try again.');
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+        
+        function copyListingToClipboardAcq() {
+            const content = document.getElementById('listing-content-acq').textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                const button = event.target.closest('button');
                 const originalText = button.innerHTML;
                 button.innerHTML = '<i class="fas fa-check mr-1"></i>Copied!';
                 setTimeout(() => {
