@@ -540,6 +540,7 @@ def login():
 
 @app.route('/api/analyze-property', methods=['POST'])
 @limiter.limit("10 per minute, 100 per hour")
+@csrf.exempt
 def analyze_property():
     """
     Analyze property with external data enrichment from multiple sources
