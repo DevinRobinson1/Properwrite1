@@ -246,32 +246,59 @@ class EnhancedAddressInput {
         
         const banner = document.createElement('div');
         banner.className = 'address-confirmation-banner bg-blue-50 border border-blue-200 rounded-lg p-3 mt-2';
-        banner.innerHTML = `
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <i class="fas fa-map-marker-alt text-blue-600"></i>
-                    <span class="text-sm text-gray-700">
-                        We'll analyze: <strong>${this.selectedAddress.formattedAddress}</strong>. Correct?
-                    </span>
-                </div>
-                <div class="flex space-x-2">
-                    <button class="confirm-btn bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
-                        Yes
-                    </button>
-                    <button class="edit-btn bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-400">
-                        Edit
-                    </button>
-                </div>
-            </div>
-        `;
+        
+        // Create elements safely without innerHTML
+        const mainContainer = document.createElement('div');
+        mainContainer.className = 'flex items-center justify-between';
+        
+        // Left side with icon and text
+        const leftContainer = document.createElement('div');
+        leftContainer.className = 'flex items-center space-x-2';
+        
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-map-marker-alt text-blue-600';
+        
+        const textSpan = document.createElement('span');
+        textSpan.className = 'text-sm text-gray-700';
+        textSpan.textContent = "We'll analyze: ";
+        
+        const addressStrong = document.createElement('strong');
+        addressStrong.textContent = this.selectedAddress.formattedAddress; // Safe text assignment
+        
+        const correctText = document.createTextNode('. Correct?');
+        
+        textSpan.appendChild(addressStrong);
+        textSpan.appendChild(correctText);
+        
+        leftContainer.appendChild(icon);
+        leftContainer.appendChild(textSpan);
+        
+        // Right side with buttons
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'flex space-x-2';
+        
+        const confirmBtn = document.createElement('button');
+        confirmBtn.className = 'confirm-btn bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700';
+        confirmBtn.textContent = 'Yes';
+        
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-btn bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-400';
+        editBtn.textContent = 'Edit';
+        
+        buttonContainer.appendChild(confirmBtn);
+        buttonContainer.appendChild(editBtn);
+        
+        mainContainer.appendChild(leftContainer);
+        mainContainer.appendChild(buttonContainer);
+        banner.appendChild(mainContainer);
         
         // Insert banner after input
         this.input.parentNode.insertBefore(banner, this.input.nextSibling);
         this.confirmationBanner = banner;
         
         // Add event listeners
-        banner.querySelector('.confirm-btn').addEventListener('click', this.confirmAddress.bind(this));
-        banner.querySelector('.edit-btn').addEventListener('click', this.editAddress.bind(this));
+        confirmBtn.addEventListener('click', this.confirmAddress.bind(this));
+        editBtn.addEventListener('click', this.editAddress.bind(this));
     }
     
     confirmAddress() {
@@ -321,12 +348,21 @@ class EnhancedAddressInput {
         
         const errorDiv = document.createElement('div');
         errorDiv.className = 'address-validation-error bg-red-50 border border-red-200 rounded-lg p-2 mt-1';
-        errorDiv.innerHTML = `
-            <div class="flex items-center space-x-2">
-                <i class="fas fa-exclamation-triangle text-red-500"></i>
-                <span class="text-sm text-red-700">${message}</span>
-            </div>
-        `;
+        
+        // Create elements safely without innerHTML
+        const containerDiv = document.createElement('div');
+        containerDiv.className = 'flex items-center space-x-2';
+        
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-exclamation-triangle text-red-500';
+        
+        const messageSpan = document.createElement('span');
+        messageSpan.className = 'text-sm text-red-700';
+        messageSpan.textContent = message; // Safe text assignment
+        
+        containerDiv.appendChild(icon);
+        containerDiv.appendChild(messageSpan);
+        errorDiv.appendChild(containerDiv);
         
         this.input.parentNode.insertBefore(errorDiv, this.input.nextSibling);
         
