@@ -6785,17 +6785,7 @@
                         },
                         body: JSON.stringify(data)
                     })
-                    .then(response => {
-                        if (response.status === 401) {
-                            // Authentication required
-                            return response.json().then(data => {
-                                hideLoadingState();
-                                showRegistrationModal();
-                                return Promise.reject(new Error('Authentication required'));
-                            });
-                        }
-                        return response.json();
-                    })
+                    .then(response => response.json())
                     .then(result => {
                         if (result.success) {
                             // Display analysis results
@@ -6804,12 +6794,6 @@
                             // Post-analysis resources removed - they're now in dashboard
                             // Show mobile footer after successful analysis
                             showMobileFooter();
-                        } else if (result.error === 'authentication_required') {
-                            hideLoadingState();
-                            showRegistrationModal();
-                        } else if (result.error === 'insufficient_credits') {
-                            hideLoadingState();
-                            showToast('You need more credits to analyze properties. Please upgrade your plan or purchase more credits.', 'error');
                         } else {
                             throw new Error(result.error || 'Analysis failed');
                         }

@@ -309,31 +309,7 @@ def analyze_property():
     Pulls data from Zillow, Redfin, Realtor.com and other sources
     Requires authentication and consumes 1 credit
     """
-    # Check authentication first
-    if 'user_id' not in session:
-        return jsonify({
-            'success': False,
-            'error': 'authentication_required',
-            'message': 'To get access to the comps, your wholesale, novation, sub 2 offer and dispo and full buyer features, register for your free account and get 5 free credits!'
-        }), 401
-    
-    # Check if user has sufficient credits
-    billing_service = BillingService()
-    with billing_service.get_session() as db_session:
-        user = db_session.query(User).filter_by(id=int(session['user_id'])).first()
-        if not user or not user.team:
-            return jsonify({
-                'success': False,
-                'error': 'team_not_found',
-                'message': 'Please complete your account setup to continue.'
-            }), 403
-            
-        if user.team.credit_balance < 1:
-            return jsonify({
-                'success': False,
-                'error': 'insufficient_credits',
-                'message': 'You need at least 1 credit to analyze properties. Please purchase more credits or upgrade your plan.'
-            }), 403
+    # Authentication is now optional - anyone can analyze properties
     
     logging.info("Property analysis request received")
     
@@ -554,18 +530,19 @@ def analyze_property():
         
         session['current_property'] = property_data
         
-        # Consume 1 credit after successful analysis
-        try:
-            billing_service = BillingService()
-            with billing_service.get_session() as db_session:
-                user = db_session.query(User).filter_by(id=int(session['user_id'])).first()
-                if user and user.team:
-                    user.team.credit_balance -= 1
-                    db_session.commit()
-                    logging.info(f"Credit consumed. New balance: {user.team.credit_balance}")
-        except Exception as e:
-            logging.error(f"Failed to consume credit: {e}")
-            # Don't fail the analysis if credit consumption fails
+        # Consume 1 credit after successful analysis (only if user is logged in)
+        if 'user_id' in session:
+            try:
+                billing_service = BillingService()
+                with billing_service.get_session() as db_session:
+                    user = db_session.query(User).filter_by(id=int(session['user_id'])).first()
+                    if user and user.team:
+                        user.team.credit_balance -= 1
+                        db_session.commit()
+                        logging.info(f"Credit consumed. New balance: {user.team.credit_balance}")
+            except Exception as e:
+                logging.error(f"Failed to consume credit: {e}")
+                # Don't fail the analysis if credit consumption fails
         
         # Analysis completed successfully
         logging.info("Property analysis completed successfully")
