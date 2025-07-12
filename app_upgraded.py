@@ -313,8 +313,9 @@ def analyze_property():
     Requires authentication and consumes 1 credit
     """
     # Check authentication first
-    from auth_middleware import get_current_user
-    user_data = get_current_user()
+    from auth_middleware import AuthService
+    auth_service = AuthService()
+    user_data = auth_service.get_current_user()
     if not user_data or not user_data.get('success'):
         return jsonify({
             'success': False,

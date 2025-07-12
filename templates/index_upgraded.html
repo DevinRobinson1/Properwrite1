@@ -2334,6 +2334,7 @@
                                             <div class="flex items-center">
                                                 <input type="number" id="listing-commission" value="2" step="0.1" class="w-16 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
                                                 <span class="text-sm text-gray-500 ml-1" title="Default: 2% of List Price">ℹ️</span>
+                                                <span id="listing-commission-value" class="text-sm text-gray-600 ml-2">2.0%</span>
                                             </div>
                                         </div>
                                         
@@ -2342,6 +2343,7 @@
                                             <div class="flex items-center">
                                                 <input type="number" id="buyer-commission" value="2" step="0.1" class="w-16 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
                                                 <span class="text-sm text-gray-500 ml-1" title="Default: 2% of List Price">ℹ️</span>
+                                                <span id="buyer-commission-value" class="text-sm text-gray-600 ml-2">2.0%</span>
                                             </div>
                                         </div>
                                         
@@ -5997,12 +5999,16 @@
 
         function toggleUserDropdown() {
             const menu = document.getElementById('user-menu');
-            menu.classList.toggle('hidden');
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
         }
 
         function toggleMobileMenu() {
             const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
         }
 
         function showLoginModal() {
@@ -6112,10 +6118,16 @@
         // Close dropdowns when clicking outside
         document.addEventListener('click', function(event) {
             if (!event.target.closest('#resources-dropdown')) {
-                document.getElementById('resources-menu').classList.add('hidden');
+                const resourcesMenu = document.getElementById('resources-menu');
+                if (resourcesMenu) {
+                    resourcesMenu.classList.add('hidden');
+                }
             }
             if (!event.target.closest('#user-dropdown')) {
-                document.getElementById('user-menu').classList.add('hidden');
+                const userMenu = document.getElementById('user-menu');
+                if (userMenu) {
+                    userMenu.classList.add('hidden');
+                }
             }
         });
 
