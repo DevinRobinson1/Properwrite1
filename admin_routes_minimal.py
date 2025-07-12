@@ -198,6 +198,277 @@ def dashboard():
         }
         return render_template('admin_dashboard_unified.html', data=dashboard_data, error=str(e))
 
+@admin_bp.route('/api/affiliates', methods=['GET'])
+@require_admin
+def get_affiliates():
+    """Get all affiliates with filtering and pagination"""
+    try:
+        # Sample affiliates data
+        affiliates_data = [
+            {
+                'id': 'sample-affiliate-1',
+                'name': 'John Martinez',
+                'email': 'john@realestatecoach.com',
+                'company': 'Real Estate Coach',
+                'website': 'https://realestatecoach.com',
+                'status': 'active',
+                'tier': 'elite',
+                'commission_rate': 0.35,
+                'total_referrals': 15,
+                'active_referrals': 8,
+                'total_revenue_generated': 47500.00,
+                'total_commissions_earned': 16625.00,
+                'total_commissions_paid': 15000.00,
+                'payout_method': 'paypal',
+                'created_at': '2024-01-15'
+            },
+            {
+                'id': 'sample-affiliate-2',
+                'name': 'Sarah Thompson',
+                'email': 'sarah@investorpro.com',
+                'company': 'InvestorPro Media',
+                'website': 'https://investorpro.com',
+                'status': 'active',
+                'tier': 'premium',
+                'commission_rate': 0.40,
+                'total_referrals': 22,
+                'active_referrals': 12,
+                'total_revenue_generated': 68000.00,
+                'total_commissions_earned': 27200.00,
+                'total_commissions_paid': 25000.00,
+                'payout_method': 'stripe_connect',
+                'created_at': '2024-02-20'
+            },
+            {
+                'id': 'sample-affiliate-3',
+                'name': 'Mike Rodriguez',
+                'email': 'mike@flippingpro.com',
+                'company': 'FlippingPro Academy',
+                'website': 'https://flippingpro.com',
+                'status': 'pending',
+                'tier': 'standard',
+                'commission_rate': 0.30,
+                'total_referrals': 0,
+                'active_referrals': 0,
+                'total_revenue_generated': 0.00,
+                'total_commissions_earned': 0.00,
+                'total_commissions_paid': 0.00,
+                'payout_method': 'paypal',
+                'created_at': '2024-07-10'
+            }
+        ]
+        
+        # Calculate stats
+        total_affiliates = len(affiliates_data)
+        total_commissions = sum(a['total_commissions_earned'] for a in affiliates_data)
+        active_referrals = sum(a['active_referrals'] for a in affiliates_data)
+        avg_commission_rate = sum(a['commission_rate'] for a in affiliates_data) / len(affiliates_data) if affiliates_data else 0
+        
+        stats = {
+            'total_affiliates': total_affiliates,
+            'total_commissions': total_commissions,
+            'active_referrals': active_referrals,
+            'avg_commission_rate': avg_commission_rate * 100
+        }
+        
+        return jsonify({
+            'success': True,
+            'affiliates': affiliates_data,
+            'stats': stats
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting affiliates: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@admin_bp.route('/api/promo-codes', methods=['GET'])
+@require_admin
+def get_promo_codes():
+    """Get all promo codes"""
+    try:
+        # Sample promo codes data
+        promo_codes = [
+            {
+                'id': 'promo-1',
+                'code': 'COACH50',
+                'type': 'percentage_discount',
+                'discount_value': 50,
+                'max_uses': 100,
+                'current_uses': 23,
+                'affiliate_name': 'John Martinez',
+                'affiliate_id': 'sample-affiliate-1',
+                'status': 'active',
+                'created_at': '2024-01-15',
+                'expires_at': '2024-12-31'
+            },
+            {
+                'id': 'promo-2',
+                'code': 'INVESTORPRO30',
+                'type': 'percentage_discount',
+                'discount_value': 30,
+                'max_uses': 200,
+                'current_uses': 87,
+                'affiliate_name': 'Sarah Thompson',
+                'affiliate_id': 'sample-affiliate-2',
+                'status': 'active',
+                'created_at': '2024-02-20',
+                'expires_at': '2024-12-31'
+            },
+            {
+                'id': 'promo-3',
+                'code': 'CREDITS100',
+                'type': 'credit_pack',
+                'discount_value': 100,
+                'max_uses': 50,
+                'current_uses': 12,
+                'affiliate_name': 'Sarah Thompson',
+                'affiliate_id': 'sample-affiliate-2',
+                'status': 'active',
+                'created_at': '2024-03-01',
+                'expires_at': '2024-12-31'
+            }
+        ]
+        
+        return jsonify({
+            'success': True,
+            'promo_codes': promo_codes
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting promo codes: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@admin_bp.route('/api/teams', methods=['GET'])
+@require_admin
+def get_teams_data():
+    """Get all teams data"""
+    try:
+        with Session(engine) as session:
+            # Get teams with member counts
+            teams_query = session.query(text("""
+                SELECT 
+                    t.id,
+                    t.name,
+                    t.plan_type,
+                    t.credits_balance,
+                    t.credits_used,
+                    t.created_at,
+                    COUNT(u.id) as member_count,
+                    MAX(u.last_login) as last_active
+                FROM teams t
+                LEFT JOIN users u ON t.id = u.team_id
+                GROUP BY t.id, t.name, t.plan_type, t.credits_balance, t.credits_used, t.created_at
+                ORDER BY t.created_at DESC
+            """))
+            
+            teams = teams_query.all()
+            
+            teams_data = []
+            for team in teams:
+                teams_data.append({
+                    'id': team.id,
+                    'name': team.name,
+                    'plan_type': team.plan_type,
+                    'credits_balance': team.credits_balance,
+                    'credits_used': team.credits_used,
+                    'member_count': team.member_count,
+                    'last_active': team.last_active.isoformat() if team.last_active else None,
+                    'created_at': team.created_at.isoformat() if team.created_at else None
+                })
+            
+            return jsonify({
+                'success': True,
+                'teams': teams_data
+            })
+            
+    except Exception as e:
+        logger.error(f"Error getting teams: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@admin_bp.route('/api/subscriptions', methods=['GET'])
+@require_admin
+def get_subscriptions_data():
+    """Get subscription data"""
+    try:
+        # Sample subscription data
+        subscriptions = [
+            {
+                'id': 'sub_1',
+                'team_name': "Devin's Unlimited Team",
+                'plan_type': 'growth10',
+                'status': 'active',
+                'amount': 399,
+                'currency': 'usd',
+                'interval': 'month',
+                'current_period_start': '2024-07-01',
+                'current_period_end': '2024-08-01',
+                'customer_email': 'devin@pfpsolutions.us',
+                'created_at': '2024-07-01'
+            }
+        ]
+        
+        return jsonify({
+            'success': True,
+            'subscriptions': subscriptions
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting subscriptions: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@admin_bp.route('/api/jv-deals', methods=['GET'])
+@require_admin
+def get_jv_deals_data():
+    """Get JV deals data"""
+    try:
+        with Session(engine) as session:
+            # Get JV deals
+            jv_deals_query = session.query(text("""
+                SELECT 
+                    id,
+                    partner_id,
+                    property_address,
+                    property_city,
+                    property_state,
+                    asking_price,
+                    arv,
+                    repair_estimate,
+                    suggested_offer,
+                    status,
+                    created_at,
+                    updated_at
+                FROM jv_deal_submissions
+                ORDER BY created_at DESC
+            """))
+            
+            jv_deals = jv_deals_query.all()
+            
+            jv_deals_data = []
+            for deal in jv_deals:
+                jv_deals_data.append({
+                    'id': deal.id,
+                    'partner_id': deal.partner_id,
+                    'property_address': deal.property_address,
+                    'property_city': deal.property_city,
+                    'property_state': deal.property_state,
+                    'asking_price': float(deal.asking_price) if deal.asking_price else 0,
+                    'arv': float(deal.arv) if deal.arv else 0,
+                    'repair_estimate': float(deal.repair_estimate) if deal.repair_estimate else 0,
+                    'suggested_offer': float(deal.suggested_offer) if deal.suggested_offer else 0,
+                    'status': deal.status,
+                    'created_at': deal.created_at.isoformat() if deal.created_at else None,
+                    'updated_at': deal.updated_at.isoformat() if deal.updated_at else None
+                })
+            
+            return jsonify({
+                'success': True,
+                'jv_deals': jv_deals_data
+            })
+            
+    except Exception as e:
+        logger.error(f"Error getting JV deals: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @admin_bp.route('/users')
 @require_admin
 def users():
