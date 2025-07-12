@@ -78,7 +78,12 @@ def dashboard():
         with Session(engine) as db:
             # Get real statistics from database
             total_users = db.query(User).count()
-            active_subscriptions = db.query(User).filter(User.subscription_tier != 'free').count()
+            # Use safe query for subscriptions
+            try:
+                active_subscriptions = db.query(User).filter(User.subscription_tier != 'free').count()
+            except AttributeError:
+                # Fallback if subscription_tier column doesn't exist
+                active_subscriptions = 0
             total_teams = db.query(Team).count()
             pending_invites = db.query(TeamInvite).filter(TeamInvite.status == 'pending').count()
             
