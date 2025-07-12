@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_places_api_key }}&libraries=places&callback=initAutocomplete" async defer></script>
     <style>
         .gradient-bg {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -7125,7 +7126,107 @@
     </script>
 
     <!-- Google Autocomplete (New) API Integration -->
-    <script src="{{ url_for('static', filename='js/google-autocomplete-new.js') }}"></script>
+    <script>
+        // Google Maps Places Autocomplete
+        let autocomplete;
+        let addressInput;
+        let cityInput;
+        let stateInput;
+        let zipInput;
+        
+        function initAutocomplete() {
+            console.log('Initializing Google Maps Places Autocomplete');
+            
+            // Get input elements
+            addressInput = document.getElementById('address');
+            cityInput = document.getElementById('city');
+            stateInput = document.getElementById('state');
+            zipInput = document.getElementById('zip');
+            
+            if (!addressInput) {
+                console.error('Address input element not found');
+                return;
+            }
+            
+            // Create autocomplete object
+            autocomplete = new google.maps.places.Autocomplete(addressInput, {
+                types: ['address'],
+                componentRestrictions: { country: 'us' },
+                fields: ['formatted_address', 'address_components', 'geometry']
+            });
+            
+            // Add place_changed listener
+            autocomplete.addListener('place_changed', onPlaceChanged);
+            
+            console.log('Google Maps Places Autocomplete initialized successfully');
+        }
+        
+        function onPlaceChanged() {
+            const place = autocomplete.getPlace();
+            console.log('Place selected:', place);
+            
+            if (!place.address_components) {
+                console.log('No address components found');
+                return;
+            }
+            
+            // Clear existing values
+            if (cityInput) cityInput.value = '';
+            if (stateInput) stateInput.value = '';
+            if (zipInput) zipInput.value = '';
+            
+            // Parse address components
+            const addressComponents = {};
+            place.address_components.forEach(component => {
+                const types = component.types;
+                
+                if (types.includes('street_number')) {
+                    addressComponents.street_number = component.long_name;
+                } else if (types.includes('route')) {
+                    addressComponents.route = component.long_name;
+                } else if (types.includes('locality')) {
+                    addressComponents.city = component.long_name;
+                } else if (types.includes('administrative_area_level_1')) {
+                    addressComponents.state = component.long_name;
+                } else if (types.includes('postal_code')) {
+                    addressComponents.zip = component.long_name;
+                }
+            });
+            
+            // Update form fields
+            if (addressComponents.city && cityInput) {
+                cityInput.value = addressComponents.city;
+                console.log('Set city to:', addressComponents.city);
+            }
+            
+            if (addressComponents.state && stateInput) {
+                stateInput.value = addressComponents.state;
+                console.log('Set state to:', addressComponents.state);
+            }
+            
+            if (addressComponents.zip && zipInput) {
+                zipInput.value = addressComponents.zip;
+                console.log('Set ZIP to:', addressComponents.zip);
+            }
+            
+            // Store selected address data globally
+            window.selectedAddressData = {
+                formattedAddress: place.formatted_address,
+                addressComponents: addressComponents,
+                geometry: place.geometry
+            };
+            
+            console.log('Address populated successfully:', window.selectedAddressData);
+            
+            // Show success message
+            showToast('Address selected successfully!', 'success');
+        }
+        
+        // Initialize when page loads or when Google Maps API is ready
+        if (typeof google !== 'undefined' && google.maps) {
+            initAutocomplete();
+        }
+    </script>
     
     <script>
         // Enhanced form submission with Google Autocomplete (New) data

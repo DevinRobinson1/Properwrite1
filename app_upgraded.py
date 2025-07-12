@@ -202,7 +202,7 @@ app.register_blueprint(zapier_api_bp)
 def index():
     """Enhanced property input form with external data integration"""
     return render_template('index_upgraded.html', 
-                         google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY'))
+                         google_places_api_key=os.environ.get('GOOGLE_PLACES_API_KEY'))
 
 @app.route('/dashboard')
 def dashboard():
