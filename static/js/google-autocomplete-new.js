@@ -358,6 +358,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.formattedAddress) {
                     streetAddressInput.value = data.formattedAddress;
                     console.log('Updated address field with:', data.formattedAddress);
+                    
+                    // Force trigger input event to ensure any listeners are notified
+                    streetAddressInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    streetAddressInput.dispatchEvent(new Event('change', { bubbles: true }));
                 }
                 
                 // Auto-populate city, state, and zip fields
