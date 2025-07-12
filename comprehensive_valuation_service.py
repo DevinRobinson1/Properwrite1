@@ -601,13 +601,65 @@ class ComprehensiveValuationService:
         except Exception:
             return None
     
+    def _sanitize_url(self, url: str) -> str:
+        """Remove API key from URL while preserving other parameters"""
+        if not url or 'googleapis.com' not in url:
+            return url
+        
+        try:
+            from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+            parsed = urlparse(url)
+            query_params = parse_qs(parsed.query)
+            
+            # Remove the key parameter
+            if 'key' in query_params:
+                del query_params['key']
+            
+            # Reconstruct URL without the key
+            new_query = urlencode(query_params, doseq=True)
+            new_parsed = parsed._replace(query=new_query)
+            sanitized_url = urlunparse(new_parsed)
+            
+            logging.debug(f"Sanitized URL: removed API key from {parsed.netloc}")
+            return sanitized_url
+        except Exception as e:
+            logging.error(f"Error sanitizing URL: {e}")
+            return url
+
+    def _sanitize_data_recursive(self, obj):
+        """Recursively sanitize data to remove API keys from URLs"""
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                if isinstance(value, str) and ('googleapis.com' in value and 'key=' in value):
+                    obj[key] = self._sanitize_url(value)
+                elif isinstance(value, list):
+                    for i, item in enumerate(value):
+                        if isinstance(item, str) and ('googleapis.com' in item and 'key=' in item):
+                            value[i] = self._sanitize_url(item)
+                        elif isinstance(item, (dict, list)):
+                            self._sanitize_data_recursive(item)
+                elif isinstance(value, (dict, list)):
+                    self._sanitize_data_recursive(value)
+        elif isinstance(obj, list):
+            for i, item in enumerate(obj):
+                if isinstance(item, str) and ('googleapis.com' in item and 'key=' in item):
+                    obj[i] = self._sanitize_url(item)
+                elif isinstance(item, (dict, list)):
+                    self._sanitize_data_recursive(item)
+
     def _cache_valuation(self, cache_key: str, valuation_data: Dict):
-        """Cache valuation data for 24 hours"""
+        """Cache valuation data for 24 hours with sanitization"""
         try:
             os.makedirs("property_cache", exist_ok=True)
             cache_file = f"property_cache/{cache_key}.json"
+            
+            # Deep copy and sanitize the valuation data to remove API keys
+            import copy
+            sanitized_valuation_data = copy.deepcopy(valuation_data)
+            self._sanitize_data_recursive(sanitized_valuation_data)
+            
             with open(cache_file, 'w') as f:
-                json.dump(valuation_data, f, indent=2)
+                json.dump(sanitized_valuation_data, f, indent=2)
         except Exception as e:
             logging.warning(f"Failed to cache valuation data: {e}")
     

@@ -7,7 +7,7 @@
       "zpid": 11156168,
       "matched_address": "9 Catawba Trail, Myrtle Beach, SC, Myrtle Beach, South Carolina 29588",
       "images": [
-        "https://maps.googleapis.com/maps/api/streetview?location=9+Catawba+Trl%2C+Myrtle+Beach%2C+SC+29588&size=400x300&key=AIzaSyARFMLB1na-BBWf7_R3-5YOQQaHqEJf6RQ&source=outdoor&&signature=mBEjoEXjaCAyffitmDSRMtUR99E="
+        "https://maps.googleapis.com/maps/api/streetview?location=9+Catawba+Trl%2C+Myrtle+Beach%2C+SC+29588&size=400x300&source=outdoor&signature=mBEjoEXjaCAyffitmDSRMtUR99E%3D"
       ],
       "bedrooms": 3.0,
       "bathrooms": 2.0,
