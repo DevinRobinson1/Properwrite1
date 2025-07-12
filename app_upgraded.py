@@ -99,12 +99,11 @@ comps_service = CompsService()
 from admin_routes_minimal import admin_bp
 app.register_blueprint(admin_bp)
 
-# Exempt admin routes from CSRF protection
-@app.before_request
-def exempt_admin_csrf():
-    """Exempt admin routes from CSRF protection"""
-    if request.endpoint and request.endpoint.startswith('admin.'):
-        csrf._exempt_views.add(request.endpoint)
+# Make CSRF token available to admin templates
+@app.context_processor
+def inject_csrf_token():
+    """Make CSRF token available to all templates"""
+    return dict(csrf_token=generate_csrf)
 
 # Register affiliate API blueprint
 app.register_blueprint(affiliate_api)
