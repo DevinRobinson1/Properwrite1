@@ -1561,6 +1561,7 @@ def autocomplete():
 
 
 @app.route('/api/place-details', methods=['POST'])
+@csrf.exempt
 def place_details():
     """
     Google Places Details (New) API proxy endpoint
@@ -1577,9 +1578,9 @@ def place_details():
         import requests
         import os
         
-        api_key = os.environ.get('GOOGLE_MAPS_API_KEY')
+        api_key = os.environ.get('GOOGLE_PLACES_API_KEY')
         if not api_key:
-            return jsonify({'error': 'Google Maps API key not configured'}), 500
+            return jsonify({'error': 'Google Places API key not configured'}), 500
         
         url = f'https://places.googleapis.com/v1/places/{place_id}'
         headers = {
