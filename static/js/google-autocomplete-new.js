@@ -60,7 +60,7 @@ class GoogleAutocompleteNew {
             top: 100%;
             left: 0;
             right: 0;
-            z-index: 1000;
+            z-index: 9999;
             background: white;
             border: 1px solid #d1d5db;
             border-top: none;
@@ -69,11 +69,14 @@ class GoogleAutocompleteNew {
             max-height: 200px;
             overflow-y: auto;
             display: none;
+            width: 100%;
         `;
         
         // Insert after input element
         this.input.parentNode.style.position = 'relative';
         this.input.parentNode.appendChild(this.suggestionsContainer);
+        
+        console.log('Suggestions container created and added to DOM');
     }
     
     generateSessionToken() {
@@ -145,12 +148,17 @@ class GoogleAutocompleteNew {
     }
     
     renderSuggestions() {
+        console.log('renderSuggestions called with suggestions:', this.suggestions.length);
+        console.log('suggestionsContainer exists:', !!this.suggestionsContainer);
+        
         if (!this.suggestions.length || !this.suggestionsContainer) {
+            console.log('Hiding suggestions: no suggestions or container');
             this.hideSuggestions();
             return;
         }
         
         this.suggestionsContainer.innerHTML = '';
+        console.log('Rendering', this.suggestions.length, 'suggestions');
         
         this.suggestions.forEach((suggestion, index) => {
             const prediction = suggestion.placePrediction;
@@ -302,6 +310,9 @@ class GoogleAutocompleteNew {
     showSuggestions() {
         if (this.suggestionsContainer) {
             this.suggestionsContainer.style.display = 'block';
+            console.log('Showing suggestions container');
+        } else {
+            console.log('Cannot show suggestions - container not found');
         }
     }
     
