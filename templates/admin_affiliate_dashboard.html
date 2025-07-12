@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affiliate Management - ProperWrite Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .admin-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            transition: transform 0.2s ease;
+        }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-pending { background-color: #fef3c7; color: #d97706; }
+        .status-active { background-color: #d1fae5; color: #059669; }
+        .status-suspended { background-color: #fee2e2; color: #dc2626; }
+        .gpt-chat-bubble {
+            max-width: 70%;
+            padding: 1rem;
+            border-radius: 1rem;
+            margin: 0.5rem 0;
+        }
+        .gpt-user { background-color: #3b82f6; color: white; margin-left: auto; }
+        .gpt-assistant { background-color: #f3f4f6; color: #374151; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="admin-gradient text-white">
+        <div class="container mx-auto px-6 py-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold">Affiliate Management</h1>
+                    <p class="text-blue-100 mt-2">Manage affiliates, promo codes, and commissions</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="openGPTAssistant()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-robot mr-2"></i>GPT-4o Assistant
+                    </button>
+                    <button onclick="showCreateAffiliateModal()" class="bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Add Affiliate
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-6 py-8">
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow-sm border card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Total Affiliates</p>
+                        <p class="text-2xl font-bold text-gray-900" id="total-affiliates">0</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-users text-blue-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm border card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Active Promo Codes</p>
+                        <p class="text-2xl font-bold text-gray-900" id="active-codes">0</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-tags text-green-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm border card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Pending Payouts</p>
+                        <p class="text-2xl font-bold text-gray-900" id="pending-payouts">$0</p>
+                    </div>
+                    <div class="bg-yellow-100 p-3 rounded-full">
+                        <i class="fas fa-dollar-sign text-yellow-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm border card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Total Revenue</p>
+                        <p class="text-2xl font-bold text-gray-900" id="total-revenue">$0</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-chart-line text-purple-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="bg-white rounded-lg shadow-sm border mb-8">
+            <div class="border-b">
+                <nav class="flex space-x-8 px-6" role="tablist">
+                    <button class="py-4 px-1 border-b-2 font-medium text-sm tab-button active" onclick="showTab('affiliates')" data-tab="affiliates">
+                        <i class="fas fa-users mr-2"></i>Affiliates
+                    </button>
+                    <button class="py-4 px-1 border-b-2 font-medium text-sm tab-button" onclick="showTab('promo-codes')" data-tab="promo-codes">
+                        <i class="fas fa-tags mr-2"></i>Promo Codes
+                    </button>
+                    <button class="py-4 px-1 border-b-2 font-medium text-sm tab-button" onclick="showTab('payouts')" data-tab="payouts">
+                        <i class="fas fa-money-bill mr-2"></i>Payouts
+                    </button>
+                    <button class="py-4 px-1 border-b-2 font-medium text-sm tab-button" onclick="showTab('analytics')" data-tab="analytics">
+                        <i class="fas fa-chart-bar mr-2"></i>Analytics
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Affiliates Tab -->
+            <div id="affiliates-tab" class="tab-content p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold">Affiliate Partners</h3>
+                    <div class="flex items-center space-x-4">
+                        <select id="affiliate-filter" class="border rounded-lg px-3 py-2" onchange="filterAffiliates()">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="active">Active</option>
+                            <option value="suspended">Suspended</option>
+                        </select>
+                        <button onclick="refreshAffiliates()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-refresh mr-2"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Affiliate</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Commission</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referrals</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="affiliates-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Promo Codes Tab -->
+            <div id="promo-codes-tab" class="tab-content p-6 hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold">Promo Codes</h3>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="showGPTPromoGenerator()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+                            <i class="fas fa-magic mr-2"></i>AI Generate
+                        </button>
+                        <button onclick="showCreatePromoModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-plus mr-2"></i>Create Code
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="promo-codes-grid">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Payouts Tab -->
+            <div id="payouts-tab" class="tab-content p-6 hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold">Affiliate Payouts</h3>
+                    <button onclick="processPendingPayouts()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                        <i class="fas fa-money-check mr-2"></i>Process Payouts
+                    </button>
+                </div>
+
+                <div id="payouts-list">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="analytics-tab" class="tab-content p-6 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-lg border">
+                        <h4 class="text-lg font-semibold mb-4">Top Performing Affiliates</h4>
+                        <canvas id="top-affiliates-chart"></canvas>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg border">
+                        <h4 class="text-lg font-semibold mb-4">Promo Code Usage</h4>
+                        <canvas id="promo-usage-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GPT-4o Assistant Modal -->
+    <div id="gpt-assistant-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+                <div class="flex items-center justify-between p-6 border-b">
+                    <h3 class="text-lg font-semibold">GPT-4o Admin Assistant</h3>
+                    <button onclick="closeGPTAssistant()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-6">
+                    <div id="gpt-chat-messages" class="space-y-4 min-h-[300px]">
+                        <div class="gpt-chat-bubble gpt-assistant">
+                            <i class="fas fa-robot text-blue-600 mr-2"></i>
+                            Hello! I'm your AI assistant for affiliate management. I can help you:
+                            <ul class="list-disc list-inside mt-2 text-sm">
+                                <li>Analyze affiliate performance</li>
+                                <li>Generate promo codes</li>
+                                <li>Create marketing content</li>
+                                <li>Suggest optimization strategies</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 border-t">
+                    <div class="flex items-center space-x-4">
+                        <input type="text" id="gpt-input" placeholder="Ask me anything about affiliate management..." class="flex-1 border rounded-lg px-4 py-2" onkeypress="handleGPTEnter(event)">
+                        <button onclick="sendGPTMessage()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'affiliates';
+        let affiliatesData = [];
+        let promoCodesData = [];
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            setupEventListeners();
+        });
+
+        // Tab Management
+        function showTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active', 'border-blue-500', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active', 'border-blue-500', 'text-blue-600');
+            
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+            currentTab = tabName;
+            
+            // Load tab-specific data
+            loadTabData(tabName);
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                const [affiliatesResponse, promoCodesResponse, payoutsResponse] = await Promise.all([
+                    fetch('/api/admin/affiliates', {
+                        headers: { 'X-Admin-Token': 'admin123' }
+                    }),
+                    fetch('/api/admin/promo-codes', {
+                        headers: { 'X-Admin-Token': 'admin123' }
+                    }),
+                    fetch('/api/admin/payouts/pending', {
+                        headers: { 'X-Admin-Token': 'admin123' }
+                    })
+                ]);
+
+                affiliatesData = await affiliatesResponse.json();
+                promoCodesData = await promoCodesResponse.json();
+                const payoutsData = await payoutsResponse.json();
+
+                updateDashboardStats(affiliatesData, promoCodesData, payoutsData);
+                renderAffiliatesTable();
+                renderPromoCodesGrid();
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Update dashboard stats
+        function updateDashboardStats(affiliates, promoCodes, payouts) {
+            document.getElementById('total-affiliates').textContent = affiliates.total || 0;
+            document.getElementById('active-codes').textContent = promoCodes.promo_codes?.filter(c => c.is_active).length || 0;
+            
+            const pendingAmount = payouts.pending_payouts?.reduce((sum, p) => sum + p.pending_amount, 0) || 0;
+            document.getElementById('pending-payouts').textContent = '$' + pendingAmount.toLocaleString();
+            
+            const totalRevenue = affiliates.affiliates?.reduce((sum, a) => sum + (a.metrics?.referrals?.total_revenue || 0), 0) || 0;
+            document.getElementById('total-revenue').textContent = '$' + totalRevenue.toLocaleString();
+        }
+
+        // Render affiliates table
+        function renderAffiliatesTable() {
+            const tbody = document.getElementById('affiliates-table-body');
+            tbody.innerHTML = '';
+
+            affiliatesData.affiliates?.forEach(affiliate => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                
+                const statusClass = `status-${affiliate.status}`;
+                const commission = (affiliate.commission_rate * 100).toFixed(1);
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10">
+                                <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                                    ${affiliate.name.charAt(0)}
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">${affiliate.name}</div>
+                                <div class="text-sm text-gray-500">${affiliate.email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="status-badge ${statusClass}">${affiliate.status}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${commission}%</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${affiliate.metrics?.referrals?.total || 0}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$${(affiliate.metrics?.referrals?.total_revenue || 0).toLocaleString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div class="flex space-x-2">
+                            <button onclick="viewAffiliateDetails('${affiliate.id}')" class="text-blue-600 hover:text-blue-900">View</button>
+                            ${affiliate.status === 'pending' ? `<button onclick="approveAffiliate('${affiliate.id}')" class="text-green-600 hover:text-green-900">Approve</button>` : ''}
+                            <button onclick="generateAffiliateContent('${affiliate.id}')" class="text-purple-600 hover:text-purple-900">AI Content</button>
+                        </div>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Render promo codes grid
+        function renderPromoCodesGrid() {
+            const grid = document.getElementById('promo-codes-grid');
+            grid.innerHTML = '';
+
+            promoCodesData.promo_codes?.forEach(code => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-6 rounded-lg border card-hover';
+                
+                const typeColors = {
+                    'percentage_discount': 'bg-blue-100 text-blue-800',
+                    'credit_pack': 'bg-green-100 text-green-800',
+                    'team_bonus': 'bg-purple-100 text-purple-800'
+                };
+                
+                const typeClass = typeColors[code.type] || 'bg-gray-100 text-gray-800';
+                
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-lg font-bold text-gray-900">${code.code}</div>
+                        <span class="px-2 py-1 rounded-full text-xs font-medium ${typeClass}">${code.type.replace('_', ' ')}</span>
+                    </div>
+                    <div class="space-y-2 text-sm text-gray-600">
+                        <div>Uses: ${code.uses_count}${code.max_uses ? `/${code.max_uses}` : ''}</div>
+                        <div>Revenue: $${(code.total_revenue || 0).toLocaleString()}</div>
+                        <div>Conversion: ${(code.conversion_rate || 0).toFixed(1)}%</div>
+                    </div>
+                    <div class="mt-4 flex space-x-2">
+                        <button onclick="editPromoCode('${code.id}')" class="text-blue-600 hover:text-blue-900 text-sm">Edit</button>
+                        <button onclick="deactivatePromoCode('${code.id}')" class="text-red-600 hover:text-red-900 text-sm">Deactivate</button>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // GPT-4o Assistant Functions
+        function openGPTAssistant() {
+            document.getElementById('gpt-assistant-modal').classList.remove('hidden');
+        }
+
+        function closeGPTAssistant() {
+            document.getElementById('gpt-assistant-modal').classList.add('hidden');
+        }
+
+        function handleGPTEnter(event) {
+            if (event.key === 'Enter') {
+                sendGPTMessage();
+            }
+        }
+
+        async function sendGPTMessage() {
+            const input = document.getElementById('gpt-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            const messagesContainer = document.getElementById('gpt-chat-messages');
+            
+            // Add user message
+            const userBubble = document.createElement('div');
+            userBubble.className = 'gpt-chat-bubble gpt-user';
+            userBubble.textContent = message;
+            messagesContainer.appendChild(userBubble);
+            
+            // Clear input
+            input.value = '';
+            
+            // Add loading message
+            const loadingBubble = document.createElement('div');
+            loadingBubble.className = 'gpt-chat-bubble gpt-assistant';
+            loadingBubble.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Thinking...';
+            messagesContainer.appendChild(loadingBubble);
+            
+            try {
+                // Process the message with context
+                const response = await processGPTMessage(message);
+                
+                // Replace loading with actual response
+                loadingBubble.innerHTML = `<i class="fas fa-robot text-blue-600 mr-2"></i>${response}`;
+                
+            } catch (error) {
+                loadingBubble.innerHTML = `<i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>Sorry, I encountered an error. Please try again.`;
+            }
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        async function processGPTMessage(message) {
+            // This would integrate with your GPT-4o API
+            // For now, return contextual responses based on keywords
+            
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('affiliate') && lowerMessage.includes('performance')) {
+                return `Based on current data, here are your top performing affiliates:
+                        ${affiliatesData.affiliates?.slice(0, 3).map(a => `- ${a.name}: $${(a.metrics?.referrals?.total_revenue || 0).toLocaleString()} revenue`).join('\n')}
+                        
+                        Would you like me to analyze any specific metrics or suggest optimization strategies?`;
+            }
+            
+            if (lowerMessage.includes('promo') && lowerMessage.includes('generate')) {
+                return `I can help you create effective promo codes! Here are some suggestions:
+                        
+                        📊 **High-Converting Formats:**
+                        - FLIP30 (30% off first month)
+                        - BONUS100 (100 bonus credits)
+                        - TEAM5FREE (5 free team seats)
+                        
+                        🎯 **Best Practices:**
+                        - Use action words (FLIP, BONUS, SAVE)
+                        - Include numbers for clarity
+                        - Keep codes 6-10 characters
+                        
+                        What type of promotion are you planning?`;
+            }
+            
+            return `I understand you're asking about: "${message}"
+                    
+                    I can help you with:
+                    - Affiliate performance analysis
+                    - Promo code optimization
+                    - Revenue forecasting
+                    - Content generation
+                    
+                    Please be more specific about what you'd like to know!`;
+        }
+
+        // Helper functions
+        function loadTabData(tabName) {
+            switch(tabName) {
+                case 'analytics':
+                    loadAnalyticsCharts();
+                    break;
+                case 'payouts':
+                    loadPayoutsData();
+                    break;
+            }
+        }
+
+        function setupEventListeners() {
+            // Add any additional event listeners here
+        }
+
+        // Placeholder functions for affiliate actions
+        function approveAffiliate(id) {
+            console.log('Approving affiliate:', id);
+            // Implement approval logic
+        }
+
+        function viewAffiliateDetails(id) {
+            console.log('Viewing affiliate details:', id);
+            // Implement details modal
+        }
+
+        function generateAffiliateContent(id) {
+            console.log('Generating content for affiliate:', id);
+            // Implement content generation
+        }
+
+        function refreshAffiliates() {
+            loadDashboardData();
+        }
+
+        function filterAffiliates() {
+            const filter = document.getElementById('affiliate-filter').value;
+            // Implement filtering logic
+        }
+
+        function loadAnalyticsCharts() {
+            // Implement chart loading
+        }
+
+        function loadPayoutsData() {
+            // Implement payouts loading
+        }
+    </script>
+</body>
+</html>

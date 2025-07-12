@@ -1,0 +1,135 @@
+Focus Area: Affiliate Management + Promo Code System in Admin Dashboard
+💡 Strategic Guidance:
+Your admin should allow you to:
+
+Create + manage affiliate accounts
+
+Assign custom commission %
+
+Generate and monitor promo codes (credit packs, discounts, team bonuses)
+
+Track referral activity and revenue attribution
+
+You’re building a viral loop of real estate pros sharing your app.
+
+🔧 Systems to Build in Admin Dashboard
+1. 🧑‍💼 Affiliate Management
+Add/edit affiliate users manually
+
+Auto-approve or review affiliate applications
+
+Set custom commission rates (default: 20–30%)
+
+View affiliate’s:
+
+Referred users
+
+Total commissions earned
+
+Pending payouts
+
+Active promo codes
+
+Optional: Add tiers (standard / elite affiliates)
+
+2. 🧾 Promo Code System
+Create and manage 3 types of codes:
+
+A. % Discount Codes
+Format: FLIP30, PROPER15
+
+Options:
+
+Apply to: first month, lifetime, specific plans
+
+Stackable? (yes/no)
+
+Expiration dates + usage limits
+
+B. Credit Pack Codes
+Format: EXTRA50, BONUS300
+
+Gives bonus credits on signup or purchase
+
+Can be tied to:
+
+Affiliate campaigns
+
+Freebie offers
+
+Challenge launches
+
+C. Team Bonus Codes
+Format: TEAM5FREE
+
+Gives extra users (seats) for team plans
+
+Can include upgrade offers or onboarding perks
+
+3. 💰 Affiliate Revenue Tracking
+Per affiliate:
+
+MRR referred
+
+active users they brought in
+Avg. LTV of referrals
+
+Churn rate of referred users
+
+Global:
+
+Total affiliate MRR
+
+Top 10 affiliates this month
+
+Affiliate ROI by promo source
+
+4. 🪙 Payout Engine
+Manual or auto-pay via:
+
+PayPal
+
+Bitcoin (optional)
+
+Stripe Connect (if enabled)
+
+View:
+
+Payout status (paid / pending / failed)
+
+Affiliate’s payout settings + history
+
+5. 📊 Dashboard Metrics for Affiliates/Promos
+Total signups using promo codes (by code)
+
+Most effective codes (by conversion %)
+
+Top affiliates (by MRR and LTV)
+
+ROI by channel (e.g. YouTube link vs. IG story vs. direct)
+
+Promo redemption trends (time of day, campaign)
+
+✅ Tools or Templates to Use
+Use Stripe’s metadata or tagging for promo code discounts
+
+Store affiliate relationships in your backend (userID → affiliateID)
+
+Use PostHog/Mixpanel for conversion event attribution
+
+Build a dedicated /affiliates dashboard page
+
+Optional: Integrate with Rewardful, FirstPromoter, or GoAffiliate if you want faster setup
+
+📊 Admin View Example
+sql
+Copy
+Edit
+Affiliate Dashboard
+----------------------
+Affiliate: John D. | 30% | 15 users | $482 MRR | 3 pending payouts
+Promo Code: FLIP30 | 30% off first month | 92 uses | 12 conversions
+Credit Code: BONUS100 | +100 credits | 51 redemptions
+Top Referrer This Month: Sasha R. – $1,028 MRR
+
+→ [Create New Promo Code]   [Create Credit Code]   [Send Payout]

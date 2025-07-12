@@ -1,0 +1,148 @@
+Focus Area: Admin Dashboard Design for ProperWrite
+💡 Strategic Guidance:
+The admin dashboard is not just analytics. It’s your SaaS mission control — use it to:
+
+Spot churn before it happens
+
+Track feature usage
+
+Optimize monetization
+
+Catch broken flows
+
+Scale what’s working
+
+🔧 Systems to Build:
+1. 🧍‍♂️ User Activity & Segmentation
+Total active users (daily/weekly/monthly)
+
+New signups (last 24h, 7d, 30d)
+
+Power users: who runs the most deals
+
+At-risk users: no activity in 7–14 days
+
+Trial → Paid funnel breakdown
+
+User type filters: Solo, Team5, Growth10
+
+2. 📈 Subscription & Revenue Metrics
+MRR / ARR breakdown by tier
+
+New vs. Churned revenue
+
+LTV:CAC (lifetime value vs cost to acquire)
+
+Plan popularity: % on each plan
+
+Coupon code usage (track promos, Bitcoin discounts)
+
+Churn tracking: why users cancel (tagged reasons)
+
+3. 🧠 Feature Usage Analytics
+Top calculators used (MAO, SubTo, Seller Finance, etc.)
+
+Most-used AI tools (Objection Handler, Listing Generator)
+
+Time to first offer
+
+Average number of properties analyzed per user
+
+Conversion rate by strategy type
+
+4. ⚠️ System Health & Errors
+API health (Zillow, Redfin, RentCast, Google Places)
+
+Failed API calls
+
+Data load errors or broken flows
+
+Chatbot/AI output failures
+
+Caching system performance
+
+5. 🧾 Billing & Credit Tracking
+Credit usage trends
+
+Top-up credit purchases
+
+Users running out of credits soon
+
+Failed payments / dunning status
+
+Bitcoin payment volume and discounts given
+
+6. 🧑‍🤝‍🧑 Team & Collaboration Metrics
+Team invite acceptance rates
+
+Team member usage per account
+
+Most active teams
+
+Unused seats / ghost users
+
+7. 🤝 JV Deal Submissions & Approvals
+Count of JV deals submitted
+
+Pending vs. approved vs. rejected
+
+Market/geography tags for each submission
+
+Buyer match success rate
+
+8. 📧 Engagement & Communication
+NPS score if implemented
+
+Email open/click rate (onboarding sequences, upsells)
+
+Support requests / tickets
+
+Churn feedback tags
+
+9. 📊 Conversion Funnel Visuals
+Website → Trial
+
+Trial → First Offer
+
+First Offer → Paid
+
+Paid → Expansion (team seats / credit packs)
+
+📊 Metrics to Track at a Glance
+🔥 Daily active users (DAU)
+
+📊 Trial-to-paid conversion rate
+
+💰 MRR + revenue expansion
+
+📉 Churn reasons tagged
+
+⏱️ Time to first value
+
+🧮 Credits used vs. remaining
+
+👥 # of teams created
+
+🤖 % of users using AI features
+
+✅ Tools or Templates to Use
+Chart.js or Recharts for custom Replit dashboard
+
+PostHog or Mixpanel for event tracking
+
+Stripe API for live billing data
+
+OpenAI error logs for AI output monitoring
+
+Admin UI role settings to hide/show sensitive data
+
+When this is live, your team will know:
+
+Which features to double down on
+
+Which users are about to churn
+
+Where revenue is growing — or leaking
+
+What partnerships or pricing triggers work
+

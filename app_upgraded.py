@@ -33,6 +33,7 @@ from zapier_api import zapier_api_bp
 from bitcoin_payment_service import bitcoin_service
 from comps_service import CompsService
 from email_service import email_service
+from affiliate_api import affiliate_api
 
 # Load environment variables from .env file
 if os.path.exists('.env'):
@@ -74,6 +75,20 @@ comps_service = CompsService()
 
 # Register admin blueprint
 app.register_blueprint(admin_bp)
+
+# Register affiliate API blueprint
+app.register_blueprint(affiliate_api)
+
+# Admin Routes
+@app.route('/admin/affiliates')
+def admin_affiliates():
+    """Admin affiliate management dashboard"""
+    return render_template('admin_affiliate_dashboard.html')
+
+@app.route('/admin/affiliate-login')
+def admin_affiliate_login():
+    """Admin affiliate login page"""
+    return render_template('admin_affiliate_login.html')
 
 # Bitcoin Payment Routes
 @app.route('/bitcoin/subscription/<plan_key>')

@@ -15,7 +15,7 @@
       "year_built": 2014
     },
     "rentcast": {
-      "estimate": 325000,
+      "estimate": 324000,
       "source": "RentCast Property Data",
       "confidence": "high",
       "matched_address": null,
@@ -44,5 +44,5 @@
     "longitude": null
   },
   "cache_used": false,
-  "timestamp": "2025-07-11T19:35:30.348150"
+  "timestamp": "2025-07-12T19:36:10.721533"
 }
