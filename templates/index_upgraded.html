@@ -688,6 +688,9 @@
         </div>
 
         <!-- Property Analysis Results -->
+        <!-- Scroll Gate Trigger Point -->
+        <div id="offers-gate-trigger" class="invisible h-1"></div>
+        
         <div id="analysis-results" class="hidden">
             
             <!-- Property Data Section -->
@@ -2040,9 +2043,6 @@
                     </div>
                 </div>
 
-                <!-- Scroll Gate Trigger Point -->
-                <div id="offers-gate-trigger" class="invisible h-1"></div>
-                
                 <!-- Acquisitions Tab Content -->
                 <div id="acquisitions-tab-content" class="p-8 bg-blue-50 border-l-4 border-blue-500">
                     
@@ -7984,21 +7984,27 @@
             if (isAuthenticated || scrollGateTriggered) return;
 
             const trigger = document.getElementById('offers-gate-trigger');
-            if (!trigger) return;
+            if (!trigger) {
+                console.log('Scroll gate trigger element not found');
+                return;
+            }
 
-            // Create intersection observer
+            // Create intersection observer with stricter settings
             scrollGateObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
+                    console.log('Intersection observer triggered:', entry.isIntersecting, 'scrollGateTriggered:', scrollGateTriggered, 'isAuthenticated:', isAuthenticated);
                     if (entry.isIntersecting && !isAuthenticated && !scrollGateTriggered) {
+                        console.log('Triggering scroll gate');
                         triggerScrollGate();
                     }
                 });
             }, {
-                threshold: 0.2,
-                rootMargin: '0px 0px -50px 0px'
+                threshold: 0.5,
+                rootMargin: '0px 0px -200px 0px'
             });
 
             scrollGateObserver.observe(trigger);
+            console.log('Scroll gate initialized and observing trigger element');
         }
 
         // Trigger scroll gate
@@ -8050,7 +8056,7 @@
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
             // Check auth status and initialize scroll gate
-            setTimeout(checkAuthStatus, 1000);
+            setTimeout(checkAuthStatus, 2000);
             
             // Re-check auth status after login/signup
             window.addEventListener('user-authenticated', function() {
