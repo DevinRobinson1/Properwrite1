@@ -1463,6 +1463,7 @@ def require_complete_address(data):
     return None
 
 @app.route('/api/autocomplete', methods=['POST'])
+@csrf.exempt
 def autocomplete():
     """
     Google Places Autocomplete (New) API proxy endpoint
@@ -1483,9 +1484,9 @@ def autocomplete():
         import requests
         import os
         
-        api_key = os.environ.get('GOOGLE_MAPS_API_KEY')
+        api_key = os.environ.get('GOOGLE_PLACES_API_KEY')
         if not api_key:
-            return jsonify({'error': 'Google Maps API key not configured'}), 500
+            return jsonify({'error': 'Google Places API key not configured'}), 500
         
         # Try Google Places API (New) first
         url = 'https://places.googleapis.com/v1/places:autocomplete'

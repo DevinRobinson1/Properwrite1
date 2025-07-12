@@ -145,7 +145,7 @@ class GoogleAutocompleteNew {
     }
     
     renderSuggestions() {
-        if (!this.suggestions.length) {
+        if (!this.suggestions.length || !this.suggestionsContainer) {
             this.hideSuggestions();
             return;
         }
@@ -154,6 +154,10 @@ class GoogleAutocompleteNew {
         
         this.suggestions.forEach((suggestion, index) => {
             const prediction = suggestion.placePrediction;
+            if (!prediction || !prediction.text) {
+                return;
+            }
+            
             const item = document.createElement('div');
             item.className = 'google-autocomplete-item';
             item.style.cssText = `
@@ -169,11 +173,15 @@ class GoogleAutocompleteNew {
             
             // Hover effects
             item.addEventListener('mouseenter', () => {
-                item.style.backgroundColor = '#f9fafb';
+                if (item.style) {
+                    item.style.backgroundColor = '#f9fafb';
+                }
             });
             
             item.addEventListener('mouseleave', () => {
-                item.style.backgroundColor = 'white';
+                if (item.style) {
+                    item.style.backgroundColor = 'white';
+                }
             });
             
             // Click handler
