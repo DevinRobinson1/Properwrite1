@@ -1,0 +1,82 @@
+Full Security + Functionality + QA Audit
+Objective: Run a comprehensive security review, end-to-end functional audit, and regression QA on the entire Fund Flow OS code-base before public launch.
+Rule: No refactors or feature edits inside Acquisitions, Dispositions, or Comps during the audit phase—flag issues, don’t “hot-fix” them.
+
+1 Security Audit ✅
+Task	Tool / Method	Deliverable
+Dependency scan	npm audit, npm audit fix --dry-run, Snyk (if available)	List of vulnerable packages & CVSS, with remediation suggestions
+Static code analysis	Bandit (Python), ESLint security-plugin (JS/TS)	Report of high/medium findings
+Secrets check	git-secrets or Trufflehog	Verify no keys in repo & .env variables used consistently
+Auth / Session review	Manual code review	Confirm JWT / cookie flags, expiry, CSRF tokens
+Rate-limit / DoS	Review Express/Fastify middlewares	Note missing rate-limit or brute-force protection
+Payment Webhooks	Stripe + Coinbase signature verification	Ensure webhook secret validation & idempotency keys
+RBAC	Verify role = admin gate on /admin/* routes	Table of routes with required roles
+SSRF / XSS	Check external fetch wrappers, user inputs	List of unsanitized inputs
+
+2 Functionality Audit ✅
+Flow	Steps to Verify	Expected Result
+🆕 Signup → Free Credits	Register → DB row → 5 credits	credit_balance = 5
+Blur-gate	Guest scrolls Offers	Modal + blur triggers
+Stripe Card Purchase	Buy 25-credit pack	Balance +25, invoice logged
+Bitcoin Purchase	Choose Team5 BTC → pay → webhook	Plan = team5, credits 1000, “bitcoin” log
+Credit Refresh	Fast-forward cron date	Balance resets to quota
+Admin Quick Actions	Grant Bonus Credits	Ledger row + balance update
+Zapier Webhook (New User)	Simulate signup	Zap fires JSON payload
+
+Provide a checklist in /docs/audit-results.md. Mark each flow ✅ / ❌ with notes.
+
+3 QA / Regression Suite ✅
+3.1 Automated
+Unit Tests: Run npm test (Jest). Increase coverage > 80 %.
+
+E2E: Add Cypress tests for:
+
+Address → blur-gate → signup → see offers
+
+Stripe checkout → success page
+
+Coinbase charge → webhook mock
+
+Admin impersonate user → dashboard loads
+
+3.2 Manual Exploratory
+Mobile Safari, Chrome Android
+
+3G throttling (DevTools) → skeleton loaders show
+
+Resize 320 px → no horizontal scroll
+
+Log manual findings in /docs/QA-notes.md with screenshots or screen-record GIFs.
+
+4 Reporting Format 📄
+Create one folder: /audit/
+
+bash
+Copy
+Edit
+/audit/
+  security-report.md
+  functionality-checklist.md
+  QA-notes.md
+Each report should include:
+
+Severity rating (High / Med / Low)
+
+Steps to reproduce
+
+Suggested fix (code pointer or package update)
+
+Screenshot or log excerpt if applicable
+
+5 Acceptance Criteria
+ security-report.md lists 0 unresolved High items.
+
+ All flows in functionality-checklist marked ✅ or have issue ticket refs.
+
+ Automated tests pass in CI; coverage ≥ 80 %.
+
+ No console errors on basic smoke-test.
+
+ No dummy or hard-coded sample data in production UI.
+
+Deliverable: PR audit/security-functional-qa adding only report files, Cypress tests, and CI config. Do not alter production business logic during this audit pass; open separate tickets for any code fixes needed.
