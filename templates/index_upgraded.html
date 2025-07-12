@@ -8057,8 +8057,8 @@
         function initializeScrollGate() {
             if (isAuthenticated || scrollGateTriggered) return;
             
-            const acquisitionsSection = document.getElementById('acquisitions-section');
-            if (!acquisitionsSection) return;
+            const offersGateTrigger = document.getElementById('offers-gate-trigger');
+            if (!offersGateTrigger) return;
             
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -8076,7 +8076,7 @@
                 });
             }, { threshold: 0.2 });
             
-            observer.observe(acquisitionsSection);
+            observer.observe(offersGateTrigger);
         }
         
         function showScrollGateModal() {
@@ -8479,11 +8479,7 @@
                     </a>
                 </div>
                 
-                <div class="text-center">
-                    <button onclick="closeScrollGateModal()" class="text-sm text-gray-500 hover:text-gray-700 underline">
-                        Continue as guest (limited access)
-                    </button>
-                </div>
+
                 
                 <div class="text-center text-xs text-gray-400 border-t pt-4">
                     No credit card required • Instant access
