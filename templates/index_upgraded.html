@@ -915,6 +915,9 @@
                     </div>
                 </div>
 
+                <!-- Offers Gate Reference Point -->
+                <div id="offers-gate-trigger" class="offers-gate-trigger"></div>
+                
                 <!-- Acquisitions Section -->
                 <div id="acquisitions-section" class="section-content">
                     <!-- Acquisitions Header -->
@@ -6066,6 +6069,9 @@
                         // Reload user status
                         await loadUserStatus();
                         
+                        // Trigger authentication event for scroll gate
+                        window.dispatchEvent(new CustomEvent('user-authenticated'));
+                        
                         // Show success message
                         showMobileToast('Logged in successfully!', 'success');
                     } else {
@@ -6088,15 +6094,15 @@
                     <form id="signup-form">
                         <div class="mb-4">
                             <label class="block text-sm font-medium mb-2">Name</label>
-                            <input type="text" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <input type="text" name="name" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div class="mb-4">
                             <label class="block text-sm font-medium mb-2">Email</label>
-                            <input type="email" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <input type="email" name="email" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div class="mb-6">
                             <label class="block text-sm font-medium mb-2">Password</label>
-                            <input type="password" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <input type="password" name="password" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div class="flex justify-end space-x-3">
                             <button type="button" onclick="this.closest('.fixed').remove()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
@@ -6106,6 +6112,51 @@
                 </div>
             `;
             document.body.appendChild(modal);
+            
+            // Add form submission handler
+            const form = modal.querySelector('#signup-form');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData(form);
+                const name = formData.get('name');
+                const email = formData.get('email');
+                const password = formData.get('password');
+                
+                try {
+                    const response = await fetch('/api/signup', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ name, email, password })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Close modal
+                        modal.remove();
+                        
+                        // Update UI to show logged-in state
+                        updateAuthenticationUI(true);
+                        
+                        // Reload user status
+                        await loadUserStatus();
+                        
+                        // Trigger authentication event for scroll gate
+                        window.dispatchEvent(new CustomEvent('user-authenticated'));
+                        
+                        // Show success message
+                        showMobileToast('Account created successfully!', 'success');
+                    } else {
+                        showMobileToast(data.error || 'Registration failed', 'error');
+                    }
+                } catch (error) {
+                    console.error('Signup error:', error);
+                    showMobileToast('Registration failed. Please try again.', 'error');
+                }
+            });
         }
 
         function scrollToResults() {
@@ -7861,6 +7912,162 @@
                 }, 2000);
             }
         });
+    </script>
+
+    <!-- Scroll-Gate Registration Modal -->
+    <div id="scroll-gate-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-xl transform transition-all">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-lock text-white text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-3">Unlock Your Offers</h2>
+                <p class="text-gray-600 mb-6">Create a free account to see your max allowable offers, AI comps, and full calculators.</p>
+                
+                <div class="space-y-3 mb-4">
+                    <button onclick="showSignupModal(); closeScrollGate()" 
+                            class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200">
+                        <i class="fas fa-user-plus mr-2"></i>Sign Up Free
+                    </button>
+                    <button onclick="showLoginModal(); closeScrollGate()" 
+                            class="w-full bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-lg hover:bg-gray-200 transition-all duration-200">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Log In
+                    </button>
+                </div>
+                
+                <button onclick="closeScrollGate()" 
+                        class="text-sm text-gray-500 hover:text-gray-700 transition-colors">
+                    Maybe later
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll-Gate Blur Overlay -->
+    <div id="scroll-gate-blur" class="fixed inset-0 z-20 backdrop-blur-sm brightness-75 pointer-events-none hidden"></div>
+
+    <script>
+        // Scroll-Gate Registration System
+        let scrollGateTriggered = false;
+        let scrollGateObserver = null;
+        let isAuthenticated = false;
+
+        // Check authentication status
+        function checkAuthStatus() {
+            fetch('/api/user-status')
+                .then(response => response.json())
+                .then(data => {
+                    isAuthenticated = data.logged_in;
+                    if (isAuthenticated) {
+                        // User is authenticated, disable scroll gate
+                        if (scrollGateObserver) {
+                            scrollGateObserver.disconnect();
+                        }
+                        removeScrollGate();
+                    } else {
+                        // User is not authenticated, initialize scroll gate
+                        initializeScrollGate();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking auth status:', error);
+                    // Assume not authenticated on error
+                    initializeScrollGate();
+                });
+        }
+
+        // Initialize scroll gate
+        function initializeScrollGate() {
+            if (isAuthenticated || scrollGateTriggered) return;
+
+            const trigger = document.getElementById('offers-gate-trigger');
+            if (!trigger) return;
+
+            // Create intersection observer
+            scrollGateObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !isAuthenticated && !scrollGateTriggered) {
+                        triggerScrollGate();
+                    }
+                });
+            }, {
+                threshold: 0.2,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            scrollGateObserver.observe(trigger);
+        }
+
+        // Trigger scroll gate
+        function triggerScrollGate() {
+            if (isAuthenticated || scrollGateTriggered) return;
+            
+            scrollGateTriggered = true;
+            
+            // Show blur overlay
+            const blurOverlay = document.getElementById('scroll-gate-blur');
+            if (blurOverlay) {
+                blurOverlay.classList.remove('hidden');
+            }
+            
+            // Show modal
+            const modal = document.getElementById('scroll-gate-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                
+                // Prevent body scrolling
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        // Close scroll gate
+        function closeScrollGate() {
+            const modal = document.getElementById('scroll-gate-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+            
+            // Keep blur overlay visible (as specified in requirements)
+            // Remove body scroll lock
+            document.body.style.overflow = '';
+        }
+
+        // Remove scroll gate completely (for authenticated users)
+        function removeScrollGate() {
+            const modal = document.getElementById('scroll-gate-modal');
+            const blurOverlay = document.getElementById('scroll-gate-blur');
+            
+            if (modal) modal.classList.add('hidden');
+            if (blurOverlay) blurOverlay.classList.add('hidden');
+            
+            document.body.style.overflow = '';
+            scrollGateTriggered = false;
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check auth status and initialize scroll gate
+            setTimeout(checkAuthStatus, 1000);
+            
+            // Re-check auth status after login/signup
+            window.addEventListener('user-authenticated', function() {
+                isAuthenticated = true;
+                removeScrollGate();
+                if (scrollGateObserver) {
+                    scrollGateObserver.disconnect();
+                }
+            });
+        });
+
+        // Override existing login/signup success handlers to trigger auth check
+        const originalLoadUserStatus = window.loadUserStatus;
+        window.loadUserStatus = function() {
+            if (originalLoadUserStatus) {
+                originalLoadUserStatus();
+            }
+            // Check auth status after user status loads
+            setTimeout(checkAuthStatus, 500);
+        };
     </script>
 </body>
 </html>
