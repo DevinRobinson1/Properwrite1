@@ -223,15 +223,6 @@
         .welcome-back-overlay.show {
             opacity: 1;
         }
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.8s ease-in-out;
-        }
-
-        .welcome-back-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
 
         .welcome-back-content {
             text-align: center;
@@ -708,7 +699,7 @@
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center space-x-8">
                     <!-- Features Button -->
-                    <button onclick="showFeaturesModal()" class="text-gray-600 hover:text-blue-600 transition-colors font-medium">
+                    <button onclick="console.log('Features clicked'); showFeaturesModal()" class="text-gray-600 hover:text-blue-600 transition-colors font-medium">
                         Features
                     </button>
                     
@@ -7002,10 +6993,12 @@
         // Close dropdowns when clicking outside
         document.addEventListener('click', function(event) {
             if (!event.target.closest('#resources-dropdown')) {
-                document.getElementById('resources-menu').classList.add('hidden');
+                const resourcesMenu = document.getElementById('resources-menu');
+                if (resourcesMenu) resourcesMenu.classList.add('hidden');
             }
             if (!event.target.closest('#user-dropdown')) {
-                document.getElementById('user-menu').classList.add('hidden');
+                const userMenu = document.getElementById('user-menu');
+                if (userMenu) userMenu.classList.add('hidden');
             }
         });
 
@@ -8521,15 +8514,42 @@
         
         // Modal Functions
         function showFeaturesModal() {
-            document.getElementById('featuresModal').classList.add('show');
+            try {
+                const modal = document.getElementById('featuresModal');
+                if (modal) {
+                    modal.classList.add('show');
+                } else {
+                    console.error('Features modal not found');
+                }
+            } catch (error) {
+                console.error('Error showing features modal:', error);
+            }
         }
         
         function showPricingModal() {
-            document.getElementById('pricingModal').classList.add('show');
+            try {
+                const modal = document.getElementById('pricingModal');
+                if (modal) {
+                    modal.classList.add('show');
+                } else {
+                    console.error('Pricing modal not found');
+                }
+            } catch (error) {
+                console.error('Error showing pricing modal:', error);
+            }
         }
         
         function showHowItWorksModal() {
-            document.getElementById('howItWorksModal').classList.add('show');
+            try {
+                const modal = document.getElementById('howItWorksModal');
+                if (modal) {
+                    modal.classList.add('show');
+                } else {
+                    console.error('How it works modal not found');
+                }
+            } catch (error) {
+                console.error('Error showing how it works modal:', error);
+            }
         }
         
         function closeModal(modalId) {
