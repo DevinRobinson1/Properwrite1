@@ -1106,14 +1106,18 @@ class BillingService:
                 if not plan_config:
                     return {'success': False, 'error': 'Invalid plan'}
                 
+                # Debug logging
+                logging.info(f"Changing plan for team {team_id} from {team.tier} to {new_plan_key}")
+                logging.info(f"Plan config: {plan_config}")
+                
                 old_plan = team.tier
                 
                 # Update team plan
                 team.tier = new_plan_key
-                team.seats_max = plan_config.get('seats', 1)
+                team.seats_max = plan_config['seats']  # Use direct access since we validated the config exists
                 
                 # Handle credit allocation for plan changes
-                monthly_credits = plan_config.get('credits_per_month', 0)
+                monthly_credits = plan_config['credits_per_month']
                 if monthly_credits > 0:
                     # For plans with monthly credits, set balance to plan credits
                     team.credit_balance = monthly_credits
@@ -1122,7 +1126,6 @@ class BillingService:
                     team.credit_balance = 999999
                 
                 # Create log entry for plan change
-                monthly_credits = plan_config.get('credits_per_month', 0)
                 credit_log = CreditLog(
                     team_id=team_id,
                     user_id=user_id,
@@ -1133,17 +1136,18 @@ class BillingService:
                 db.add(credit_log)
                 db.commit()
                 
-                monthly_credits = plan_config.get('credits_per_month', 0)
                 return {
                     'success': True,
                     'old_plan': old_plan,
                     'new_plan': new_plan_key,
                     'credits': monthly_credits,
-                    'seats': plan_config.get('seats', 1)
+                    'seats': plan_config['seats']
                 }
                 
         except Exception as e:
             logging.error(f"Error changing plan: {e}")
+            import traceback
+            logging.error(f"Full traceback: {traceback.format_exc()}")
             return {'success': False, 'error': str(e)}
     
     def get_billing_history(self, team_id: str, limit: int = 50) -> List[Dict]:
