@@ -207,6 +207,7 @@ def bitcoin_webhook():
         return jsonify({"error": "Webhook processing failed"}), 500
 
 @app.route('/api/billing/create-bitcoin-checkout', methods=['POST'])
+@csrf.exempt
 def create_bitcoin_checkout():
     """Create Bitcoin checkout for credit packs"""
     try:
@@ -221,12 +222,15 @@ def create_bitcoin_checkout():
         user_email = session.get('user_email', '')
         team_id = session.get('team_id', '')
         
+        # Check if Bitcoin payment is configured
+        if not bitcoin_service.api_key:
+            return jsonify({"error": "Bitcoin payments are not configured"}), 400
+        
         # Create Bitcoin payment charge
         charge = bitcoin_service.create_credit_pack_charge(
             credits=credits,
             user_email=user_email,
-            team_id=team_id,
-            amount=amount
+            team_id=team_id
         )
         
         return jsonify({
@@ -2696,6 +2700,7 @@ def jv_admin_update_deal_status(deal_id):
 # ==================== BILLING & SUBSCRIPTION ENDPOINTS ====================
 
 @app.route('/api/billing/create-checkout', methods=['POST'])
+@csrf.exempt
 @require_auth
 def create_checkout():
     """Create Stripe checkout session for subscription or credit purchase"""

@@ -998,3 +998,93 @@ class BillingService:
         except Exception as e:
             logging.error(f"Error redeeming credit code: {e}")
             return {'success': False, 'error': 'system error'}
+    
+    def add_credits(self, user_email: str, credits: int, payment_method: str = 'bitcoin') -> Dict:
+        """
+        Add credits to a user's team account
+        """
+        try:
+            with self.db_session() as db:
+                # Find the user
+                user = db.query(User).filter(User.email == user_email).first()
+                if not user:
+                    return {'success': False, 'error': 'User not found'}
+                
+                # Get the team
+                team = db.query(Team).filter(Team.id == user.team_id).first()
+                if not team:
+                    return {'success': False, 'error': 'Team not found'}
+                
+                # Add credits to team balance
+                team.credit_balance = (team.credit_balance or 0) + credits
+                
+                # Create credit log entry
+                credit_log = CreditLog(
+                    team_id=user.team_id,
+                    user_id=user.id,
+                    delta=credits,
+                    reason=f'Credit pack purchase via {payment_method}'
+                )
+                
+                db.add(credit_log)
+                db.commit()
+                
+                return {
+                    'success': True,
+                    'credits_added': credits,
+                    'new_balance': team.credit_balance
+                }
+                
+        except Exception as e:
+            logging.error(f"Error adding credits: {e}")
+            return {'success': False, 'error': str(e)}
+    
+    def activate_subscription(self, user_email: str, plan_key: str, payment_method: str = 'bitcoin') -> Dict:
+        """
+        Activate a subscription for a user's team
+        """
+        try:
+            with self.db_session() as db:
+                # Find the user
+                user = db.query(User).filter(User.email == user_email).first()
+                if not user:
+                    return {'success': False, 'error': 'User not found'}
+                
+                # Get the team
+                team = db.query(Team).filter(Team.id == user.team_id).first()
+                if not team:
+                    return {'success': False, 'error': 'Team not found'}
+                
+                # Get plan configuration
+                plan_config = TIER_CONFIG.get(plan_key)
+                if not plan_config:
+                    return {'success': False, 'error': 'Invalid plan key'}
+                
+                # Update team subscription
+                team.tier = plan_key
+                team.seats_max = plan_config['seats']
+                team.credit_balance = plan_config.get('credits', 0)  # Set to plan credits or 0 for unlimited
+                team.stripe_customer_id = f"bitcoin_{user_email}"  # Mark as Bitcoin customer
+                
+                # Create credit log entry for subscription activation
+                credit_log = CreditLog(
+                    team_id=user.team_id,
+                    user_id=user.id,
+                    delta=plan_config.get('credits', 0),
+                    reason=f'Subscription activated via {payment_method}'
+                )
+                
+                db.add(credit_log)
+                db.commit()
+                
+                return {
+                    'success': True,
+                    'plan_key': plan_key,
+                    'tier': plan_key,
+                    'credits': plan_config.get('credits', 0),
+                    'seats': plan_config['seats']
+                }
+                
+        except Exception as e:
+            logging.error(f"Error activating subscription: {e}")
+            return {'success': False, 'error': str(e)}
