@@ -255,43 +255,157 @@
         @media (max-width: 768px) {
             .section-toggle-btn {
                 white-space: nowrap;
-                min-width: 120px;
-                padding: 0.5rem 1rem;
-                font-size: 0.875rem;
+                min-width: 100px;
+                padding: 0.75rem 1rem;
+                font-size: 0.8rem;
                 text-align: center;
             }
             
             .section-toggle-btn i {
-                font-size: 0.875rem;
+                font-size: 0.8rem;
+                margin-right: 0.25rem;
             }
             
-            /* Improved property header on mobile */
-            .property-header-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.75rem;
+            /* Mobile property details grid */
+            .property-details-mobile {
+                grid-template-columns: 1fr;
+                gap: 1rem;
                 padding: 1rem;
             }
             
-            /* Mobile form improvements */
-            .mobile-form-section {
+            /* Mobile property cards */
+            .property-card-mobile {
+                padding: 1rem;
+                border-radius: 0.75rem;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                min-height: 80px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+            
+            .property-card-mobile label {
+                font-size: 0.875rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                text-align: left;
+            }
+            
+            .property-card-mobile input {
+                font-size: 1.125rem;
+                padding: 0.75rem;
+                text-align: center;
+                border-radius: 0.5rem;
+                border: 2px solid #e5e7eb;
+                font-weight: 600;
+            }
+            
+            .property-card-mobile input:focus {
+                border-color: #3b82f6;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+            
+            /* Mobile section container */
+            .mobile-section-container {
                 padding: 1rem;
                 margin-bottom: 1rem;
             }
             
-            .mobile-card {
-                padding: 0.75rem;
+            /* Mobile tabs improvement */
+            .mobile-tabs-container {
+                padding: 0.5rem;
+                margin-bottom: 1rem;
+                background: #f8fafc;
                 border-radius: 0.5rem;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             }
             
-            .mobile-card label {
+            .mobile-tab-btn {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-align: center;
+                border-radius: 0.375rem;
+                min-width: 80px;
+                white-space: nowrap;
+            }
+            
+            /* Mobile form section improvements */
+            .mobile-form-section {
+                padding: 1.5rem 1rem;
+                margin-bottom: 1rem;
+                border-radius: 0.75rem;
+                background: white;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+            
+            .mobile-form-section h3 {
+                font-size: 1.125rem;
+                font-weight: 700;
+                margin-bottom: 1rem;
+                text-align: center;
+            }
+            
+            .mobile-form-section p {
                 font-size: 0.875rem;
-                font-weight: 500;
+                text-align: center;
+                margin-bottom: 1rem;
+                color: #6b7280;
             }
             
-            .mobile-card input {
-                font-size: 1rem;
+            /* Property card responsive styling */
+            .property-card {
+                padding: 1.5rem 1rem;
+                border-radius: 0.75rem;
+                min-height: 100px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+            }
+            
+            .property-card-label {
+                font-size: 0.875rem;
+                font-weight: 600;
+                margin-bottom: 0.75rem;
+                display: block;
+                text-align: center;
+            }
+            
+            .property-card-input {
+                width: 100%;
                 padding: 0.75rem;
+                font-size: 1.125rem;
+                font-weight: 600;
+                text-align: center;
+                border: 2px solid #e5e7eb;
+                border-radius: 0.5rem;
+                transition: all 0.2s ease;
+            }
+            
+            .property-card-input:focus {
+                outline: none;
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+        }
+        
+        /* Desktop property card styling */
+        @media (min-width: 768px) {
+            .property-card {
+                padding: 1rem;
+                min-height: 120px;
+            }
+            
+            .property-card-label {
+                font-size: 0.875rem;
+                margin-bottom: 0.75rem;
+            }
+            
+            .property-card-input {
+                padding: 0.75rem;
+                font-size: 1.125rem;
             }
         }
         
@@ -389,6 +503,110 @@
                 padding: 12px 16px;
                 font-size: 14px;
                 flex: 1;
+            }
+            
+            /* Mobile disposition tab buttons */
+            .disposition-tab.mobile-tab-btn {
+                padding: 10px 14px;
+                font-size: 11px;
+                min-width: 75px;
+                border-radius: 8px;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+                transition: all 0.2s ease;
+            }
+            
+            .disposition-tab.mobile-tab-btn:active {
+                transform: scale(0.98);
+            }
+            
+            /* Mobile dispositions tabs horizontal scroll */
+            .mobile-tabs-container {
+                overflow-x: auto;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            
+            .mobile-tabs-container::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .mobile-dispositions-nav {
+                display: flex;
+                gap: 8px;
+                padding: 8px 16px;
+                min-width: max-content;
+            }
+            
+            .mobile-dispositions-nav button {
+                flex-shrink: 0;
+                white-space: nowrap;
+            }
+            
+            /* Property cards mobile styling */
+            .property-card {
+                padding: 16px;
+                margin: 8px 0;
+                border-radius: 12px;
+                border: 1px solid #e5e7eb;
+                background-color: white;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+            
+            .property-card-label {
+                font-size: 12px;
+                margin-bottom: 4px;
+                color: #6b7280;
+                font-weight: 500;
+            }
+            
+            .property-card-input {
+                font-size: 14px;
+                padding: 10px 12px;
+                border-radius: 8px;
+                min-height: 44px;
+                border: 1px solid #d1d5db;
+                width: 100%;
+                transition: all 0.2s ease;
+            }
+            
+            .property-card-input:focus {
+                outline: none;
+                border: 2px solid #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+            
+            .mobile-section-content {
+                padding: 16px;
+                margin-bottom: 20px;
+            }
+            
+            .mobile-result-card {
+                padding: 16px;
+                border-radius: 12px;
+                border: 1px solid #e5e7eb;
+                background-color: white;
+                margin-bottom: 12px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+            
+            .mobile-result-header {
+                font-size: 16px;
+                font-weight: 600;
+                margin-bottom: 8px;
+                color: #1f2937;
+            }
+            
+            .mobile-result-value {
+                font-size: 20px;
+                font-weight: 700;
+                color: #059669;
+            }
+            
+            .mobile-result-description {
+                font-size: 12px;
+                color: #6b7280;
+                margin-top: 4px;
             }
         }
         
@@ -1138,7 +1356,7 @@
                 </div>
 
                 <!-- Editable Property Details -->
-                <div class="p-8 bg-gray-50 rounded-lg">
+                <div class="p-4 md:p-8 bg-gray-50 rounded-lg mobile-form-section">
                     <div class="mb-4 text-center">
                         <h3 class="text-lg font-semibold text-gray-700">Property Details</h3>
                         <p class="text-sm text-gray-500 mt-1">All fields below are editable - adjust values as needed for your analysis</p>
@@ -1147,37 +1365,39 @@
                             <span>Click any field to edit</span>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-1">
-                        <label class="block text-sm font-medium text-gray-600 mb-3 group-hover:text-blue-600">Bedrooms</label>
-                        <input type="number" id="bedrooms" class="w-full text-center py-3 text-lg font-semibold border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-colors input-focus" value="" onchange="updateAllTabCalculations()" placeholder="--">
-                    </div>
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-2">
-                        <label class="block text-sm font-medium text-gray-600 mb-3 group-hover:text-blue-600">Bathrooms</label>
-                        <input type="number" step="0.5" id="bathrooms" class="w-full text-center py-3 text-lg font-semibold border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-colors input-focus" value="" onchange="updateAllTabCalculations()" placeholder="--">
-                    </div>
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-3">
-                        <label class="block text-sm font-medium text-gray-600 mb-3 group-hover:text-blue-600">Square Feet</label>
-                        <input type="text" id="square_feet" class="w-full text-center py-3 text-lg font-semibold border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-colors input-focus" value="" onchange="formatNumber(this); updateAllTabCalculations()" oninput="formatNumber(this)" placeholder="--">
-                    </div>
-                    <div class="bg-white p-4 rounded-lg border border-green-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-4">
-                        <label class="block text-sm font-medium text-green-600 mb-3 group-hover:text-green-700">ARV ($)</label>
-                        <input type="text" id="arv" class="w-full text-center py-3 text-lg font-semibold border border-green-300 rounded-lg bg-green-50 focus:ring-2 focus:ring-green-500 hover:border-green-400 transition-colors input-focus" value="415,000" onchange="formatNumber(this); updateAllTabCalculations()" oninput="formatNumber(this)" placeholder="--">
-                    </div>
-                    <div class="bg-white p-4 rounded-lg border border-red-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-5">
-                        <label class="block text-sm font-medium text-red-600 mb-3 group-hover:text-red-700">Repairs ($)</label>
-                        <input type="text" id="repairs" class="w-full text-center py-3 text-lg font-semibold border border-red-300 rounded-lg bg-red-50 focus:ring-2 focus:ring-red-500 hover:border-red-400 transition-colors input-focus" value="30,000" onchange="formatNumber(this); updateAllTabCalculations()" oninput="formatNumber(this)" placeholder="--">
-                    </div>
-                    <div class="bg-white p-4 rounded-lg border border-purple-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-6">
-                        <label class="block text-sm font-medium text-purple-600 mb-3 group-hover:text-purple-700">Monthly Rent ($)</label>
-                        <input type="text" id="rent" class="w-full text-center py-3 text-lg font-semibold border border-purple-300 rounded-lg bg-purple-50 focus:ring-2 focus:ring-purple-500 hover:border-purple-400 transition-colors input-focus" value="1,325" onchange="formatNumber(this); updateAllTabCalculations()" oninput="formatNumber(this)" placeholder="--">
-                    </div>
-                    <div class="bg-white p-4 rounded-lg border border-orange-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-1">
-                        <label class="block text-sm font-medium text-orange-600 mb-2 group-hover:text-orange-700">Acquisitions Price ($)</label>
-                        <div class="text-xs text-gray-500 mb-1" id="acquisitions-price-indicator">Auto-calculated</div>
-                        <input type="text" id="global-acquisitions-price-header" class="w-full text-center py-3 text-lg font-semibold border border-orange-300 rounded-lg bg-orange-50 focus:ring-2 focus:ring-orange-500 hover:border-orange-400 transition-colors input-focus" value="269,750" onchange="formatNumber(this); updateGlobalAcquisitionsPriceFromHeader()" oninput="formatNumber(this)" placeholder="--">
-                        <button onclick="resetAcquisitionsPriceToCalculated()" class="mt-1 text-xs text-orange-600 hover:text-orange-800 underline button-hover" id="reset-acquisitions-price" style="display: none;">Reset to calculated</button>
-                    </div>
+                    
+                    <!-- Responsive Property Cards -->
+                    <div class="property-cards-responsive grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+                        <div class="property-card bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-1">
+                            <label class="property-card-label text-gray-600 group-hover:text-blue-600">Bedrooms</label>
+                            <input type="number" id="bedrooms" class="property-card-input" value="" onchange="updateAllTabCalculations()" placeholder="--">
+                        </div>
+                        <div class="property-card bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-2">
+                            <label class="property-card-label text-gray-600 group-hover:text-blue-600">Bathrooms</label>
+                            <input type="number" step="0.5" id="bathrooms" class="property-card-input" value="" onchange="updateAllTabCalculations()" placeholder="--">
+                        </div>
+                        <div class="property-card bg-white border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-3">
+                            <label class="property-card-label text-gray-600 group-hover:text-blue-600">Square Feet</label>
+                            <input type="text" id="square_feet" class="property-card-input" value="" onchange="formatNumber(this); updateAllTabCalculations()" oninput="formatNumber(this)" placeholder="--">
+                        </div>
+                        <div class="property-card bg-white border border-green-200 hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-4">
+                            <label class="property-card-label text-green-600 group-hover:text-green-700">ARV ($)</label>
+                            <input type="text" id="arv" class="property-card-input bg-green-50 border-green-300 focus:border-green-500" value="415,000" onchange="formatNumber(this); updateAllTabCalculations()" oninput="formatNumber(this)" placeholder="--">
+                        </div>
+                        <div class="property-card bg-white border border-red-200 hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-5">
+                            <label class="property-card-label text-red-600 group-hover:text-red-700">Repairs ($)</label>
+                            <input type="text" id="repairs" class="property-card-input bg-red-50 border-red-300 focus:border-red-500" value="30,000" onchange="formatNumber(this); updateAllTabCalculations()" oninput="formatNumber(this)" placeholder="--">
+                        </div>
+                        <div class="property-card bg-white border border-purple-200 hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-6">
+                            <label class="property-card-label text-purple-600 group-hover:text-purple-700">Monthly Rent ($)</label>
+                            <input type="text" id="rent" class="property-card-input bg-purple-50 border-purple-300 focus:border-purple-500" value="1,325" onchange="formatNumber(this); updateAllTabCalculations()" oninput="formatNumber(this)" placeholder="--">
+                        </div>
+                        <div class="property-card bg-white border border-orange-200 hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-1">
+                            <label class="property-card-label text-orange-600 group-hover:text-orange-700">Acquisitions Price ($)</label>
+                            <div class="text-xs text-gray-500 mb-1" id="acquisitions-price-indicator">Auto-calculated</div>
+                            <input type="text" id="global-acquisitions-price-header" class="property-card-input bg-orange-50 border-orange-300 focus:border-orange-500" value="269,750" onchange="formatNumber(this); updateGlobalAcquisitionsPriceFromHeader()" oninput="formatNumber(this)" placeholder="--">
+                            <button onclick="resetAcquisitionsPriceToCalculated()" class="mt-2 text-xs text-orange-600 hover:text-orange-800 underline button-hover" id="reset-acquisitions-price" style="display: none;">Reset to calculated</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1672,34 +1892,70 @@
 
                     <!-- Exit Strategy Tabs -->
                     <div class="mb-6">
-                        <div class="border-b border-gray-200">
-                            <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                                <button onclick="showDispositionTab('cash-sale')" 
-                                        class="disposition-tab border-green-500 text-green-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50"
-                                        id="cash-sale-tab">
-                                    Cash Sale
-                                </button>
-                                <button onclick="showDispositionTab('mls-novation')" 
-                                        class="disposition-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50"
-                                        id="mls-novation-tab">
-                                    MLS / Novation
-                                </button>
-                                <button onclick="showDispositionTab('subject-to-wrap')" 
-                                        class="disposition-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50"
-                                        id="subject-to-wrap-tab">
-                                    Sub-To Wrap
-                                </button>
-                                <button onclick="showDispositionTab('seller-finance-wrap')" 
-                                        class="disposition-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50"
-                                        id="seller-finance-wrap-tab">
-                                    SF Wrap / Lease-Option
-                                </button>
-                                <button onclick="showDispositionTab('compare-all')" 
-                                        class="disposition-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50"
-                                        id="compare-all-tab">
-                                    Compare All
-                                </button>
-                            </nav>
+                        <!-- Mobile Dispositions Tabs - Horizontal Scroll -->
+                        <div class="md:hidden mb-4">
+                            <div class="overflow-x-auto scrollbar-hide">
+                                <nav class="flex space-x-2 px-2 pb-2 min-w-max border-b border-gray-200">
+                                    <button onclick="showDispositionTab('cash-sale')" 
+                                            class="disposition-tab mobile-tab-btn flex-shrink-0 bg-green-500 text-white px-3 py-2 rounded-lg font-medium text-xs transition-colors"
+                                            id="cash-sale-tab">
+                                        💰 Cash Sale
+                                    </button>
+                                    <button onclick="showDispositionTab('mls-novation')" 
+                                            class="disposition-tab mobile-tab-btn flex-shrink-0 bg-gray-300 text-gray-700 px-3 py-2 rounded-lg font-medium text-xs transition-colors hover:bg-blue-500 hover:text-white"
+                                            id="mls-novation-tab">
+                                        🏠 MLS
+                                    </button>
+                                    <button onclick="showDispositionTab('subject-to-wrap')" 
+                                            class="disposition-tab mobile-tab-btn flex-shrink-0 bg-gray-300 text-gray-700 px-3 py-2 rounded-lg font-medium text-xs transition-colors hover:bg-orange-500 hover:text-white"
+                                            id="subject-to-wrap-tab">
+                                        🔄 Sub-To
+                                    </button>
+                                    <button onclick="showDispositionTab('seller-finance-wrap')" 
+                                            class="disposition-tab mobile-tab-btn flex-shrink-0 bg-gray-300 text-gray-700 px-3 py-2 rounded-lg font-medium text-xs transition-colors hover:bg-purple-500 hover:text-white"
+                                            id="seller-finance-wrap-tab">
+                                        📄 SF Wrap
+                                    </button>
+                                    <button onclick="showDispositionTab('compare-all')" 
+                                            class="disposition-tab mobile-tab-btn flex-shrink-0 bg-gray-300 text-gray-700 px-3 py-2 rounded-lg font-medium text-xs transition-colors hover:bg-gray-600 hover:text-white"
+                                            id="compare-all-tab">
+                                        📊 Compare
+                                    </button>
+                                </nav>
+                            </div>
+                        </div>
+                        
+                        <!-- Desktop Dispositions Tabs -->
+                        <div class="hidden md:block">
+                            <div class="border-b border-gray-200">
+                                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                                    <button onclick="showDispositionTab('cash-sale')" 
+                                            class="disposition-tab border-green-500 text-green-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50"
+                                            id="cash-sale-tab-desktop">
+                                        💰 Cash Sale
+                                    </button>
+                                    <button onclick="showDispositionTab('mls-novation')" 
+                                            class="disposition-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50"
+                                            id="mls-novation-tab-desktop">
+                                        🏠 MLS / Novation
+                                    </button>
+                                    <button onclick="showDispositionTab('subject-to-wrap')" 
+                                            class="disposition-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50"
+                                            id="subject-to-wrap-tab-desktop">
+                                        🔄 Sub-To Wrap
+                                    </button>
+                                    <button onclick="showDispositionTab('seller-finance-wrap')" 
+                                            class="disposition-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50"
+                                            id="seller-finance-wrap-tab-desktop">
+                                        📄 SF Wrap / Lease-Option
+                                    </button>
+                                    <button onclick="showDispositionTab('compare-all')" 
+                                            class="disposition-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm bg-transparent hover:bg-gray-50"
+                                            id="compare-all-tab-desktop">
+                                        📊 Compare All
+                                    </button>
+                                </nav>
+                            </div>
                         </div>
                     </div>
 
@@ -7521,19 +7777,26 @@
             // Define all tab names
             const allTabs = ['cash-sale', 'mls-novation', 'subject-to-wrap', 'seller-finance-wrap', 'compare-all'];
             
-            // Hide all tab contents and reset all tab buttons
+            // Hide all tab contents and reset all tab buttons (both mobile and desktop)
             allTabs.forEach(tab => {
                 const content = document.getElementById(tab + '-content');
-                const button = document.getElementById(tab + '-tab');
+                const mobileButton = document.getElementById(tab + '-tab');
+                const desktopButton = document.getElementById(tab + '-tab-desktop');
                 
                 if (content) {
                     content.classList.add('hidden');
                 }
                 
-                if (button) {
-                    // Remove active class and add inactive styling
-                    button.classList.remove('active');
-                    button.className = 'disposition-tab-button px-6 py-4 font-semibold transition-all duration-300';
+                // Reset mobile button styling
+                if (mobileButton) {
+                    mobileButton.classList.remove('bg-green-500', 'bg-blue-500', 'bg-orange-500', 'bg-purple-500', 'bg-gray-600', 'text-white');
+                    mobileButton.classList.add('bg-gray-300', 'text-gray-700');
+                }
+                
+                // Reset desktop button styling
+                if (desktopButton) {
+                    desktopButton.classList.remove('border-green-500', 'border-blue-500', 'border-orange-500', 'border-purple-500', 'border-gray-600', 'text-green-600', 'text-blue-600', 'text-orange-600', 'text-purple-600', 'text-gray-600');
+                    desktopButton.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
                 }
             });
             
@@ -7543,10 +7806,38 @@
                 selectedContent.classList.remove('hidden');
             }
             
-            // Set active styling for selected tab
-            const selectedButton = document.getElementById(tabName + '-tab');
-            if (selectedButton) {
-                selectedButton.classList.add('active');
+            // Set active styling for selected tab (both mobile and desktop)
+            const selectedMobileButton = document.getElementById(tabName + '-tab');
+            const selectedDesktopButton = document.getElementById(tabName + '-tab-desktop');
+            
+            if (selectedMobileButton) {
+                selectedMobileButton.classList.remove('bg-gray-300', 'text-gray-700');
+                if (tabName === 'cash-sale') {
+                    selectedMobileButton.classList.add('bg-green-500', 'text-white');
+                } else if (tabName === 'mls-novation') {
+                    selectedMobileButton.classList.add('bg-blue-500', 'text-white');
+                } else if (tabName === 'subject-to-wrap') {
+                    selectedMobileButton.classList.add('bg-orange-500', 'text-white');
+                } else if (tabName === 'seller-finance-wrap') {
+                    selectedMobileButton.classList.add('bg-purple-500', 'text-white');
+                } else if (tabName === 'compare-all') {
+                    selectedMobileButton.classList.add('bg-gray-600', 'text-white');
+                }
+            }
+            
+            if (selectedDesktopButton) {
+                selectedDesktopButton.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                if (tabName === 'cash-sale') {
+                    selectedDesktopButton.classList.add('border-green-500', 'text-green-600');
+                } else if (tabName === 'mls-novation') {
+                    selectedDesktopButton.classList.add('border-blue-500', 'text-blue-600');
+                } else if (tabName === 'subject-to-wrap') {
+                    selectedDesktopButton.classList.add('border-orange-500', 'text-orange-600');
+                } else if (tabName === 'seller-finance-wrap') {
+                    selectedDesktopButton.classList.add('border-purple-500', 'text-purple-600');
+                } else if (tabName === 'compare-all') {
+                    selectedDesktopButton.classList.add('border-gray-600', 'text-gray-600');
+                }
             }
             
             // Initialize tab and recalculate values
