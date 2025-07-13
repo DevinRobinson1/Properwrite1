@@ -6,7 +6,7 @@ import os
 import logging
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, jsonify, session, redirect, g, url_for, flash
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from flask_limiter import Limiter
@@ -434,6 +434,7 @@ def login_page():
     elif request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
+        remember_me = request.form.get('remember-me')
         
         if not email or not password:
             flash('Email and password are required', 'error')
@@ -446,6 +447,16 @@ def login_page():
             # Set up session
             session['user_id'] = result.get('user_id')
             session['email'] = email
+            
+            # Handle "Remember me" functionality
+            if remember_me:
+                # Set session to permanent (will persist after browser closes)
+                session.permanent = True
+                # Set session timeout to 30 days
+                app.permanent_session_lifetime = timedelta(days=30)
+            else:
+                # Session expires when browser closes
+                session.permanent = False
             
             flash('Login successful!', 'success')
             return redirect(url_for('dashboard'))

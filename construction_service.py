@@ -12,6 +12,23 @@ class ConstructionService:
     def __init__(self):
         self.db = construction_db
     
+    def get_catalog_items(self, project_type: str, trade: str = None) -> List[Dict]:
+        """
+        Get catalog items filtered by project type and optionally by trade
+        
+        Args:
+            project_type: 'fix_flip' or 'new_construction'
+            trade: Optional trade filter
+            
+        Returns:
+            List of catalog items
+        """
+        try:
+            return self.db.get_catalog_items(project_type, trade)
+        except Exception as e:
+            logging.error(f"Error getting catalog items: {e}")
+            return []
+    
     def calculate_fix_flip_estimate(self, line_items: List[Dict], multipliers: Dict) -> Dict:
         """
         Calculate fix and flip estimate based on line items and multipliers
