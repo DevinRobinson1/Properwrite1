@@ -107,12 +107,21 @@ def register():
     
     return render_template('auth/register.html')
 
-@app.route('/logout')
+@app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()
-    flash('You have been logged out.', 'info')
-    return redirect(url_for('index'))
+    
+    if request.method == 'POST':
+        # Handle AJAX logout request
+        return jsonify({
+            'success': True,
+            'message': 'Logged out successfully'
+        })
+    else:
+        # Handle regular logout request
+        flash('You have been logged out.', 'info')
+        return redirect(url_for('index'))
 
 @app.route('/api/user-status')
 def api_user_status():

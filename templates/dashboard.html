@@ -1661,19 +1661,24 @@
                 });
                 
                 if (response.ok) {
-                    // Clear any local storage
-                    localStorage.removeItem('user_data');
-                    localStorage.removeItem('auth_token');
-                    
-                    // Redirect to home page
-                    window.location.href = '/';
+                    const result = await response.json();
+                    if (result.success) {
+                        // Clear any local storage
+                        localStorage.removeItem('user_data');
+                        localStorage.removeItem('auth_token');
+                        
+                        // Redirect to home page
+                        window.location.href = '/';
+                    } else {
+                        throw new Error(result.error || 'Logout failed');
+                    }
                 } else {
-                    console.error('Logout failed');
-                    alert('Logout failed. Please try again.');
+                    throw new Error('Logout request failed');
                 }
             } catch (error) {
                 console.error('Error during logout:', error);
-                alert('Error during logout. Please try again.');
+                // Remove the failing modal and use a simple alert
+                alert('Logout failed. Please try again.');
             }
         }
 
