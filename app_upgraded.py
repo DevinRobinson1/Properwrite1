@@ -228,7 +228,13 @@ def dashboard():
     if not session.get('user_id'):
         session['user_id'] = 'bfac25c4-7081-4eb6-8895-5dc09bb56d0a'
         session['email'] = 'devin@pfpsolutions.us'
-    return render_template('dashboard.html')
+    
+    # Show welcome message for new users, then clear it after first visit
+    show_welcome = session.get('new_user_welcome', False)
+    if show_welcome:
+        session.pop('new_user_welcome', None)
+    
+    return render_template('dashboard.html', show_welcome=show_welcome)
 
 @app.route('/accept-invitation')
 def accept_invitation():
@@ -305,12 +311,15 @@ def signup():
             if invite_token:
                 invite_result = billing_service.accept_team_invite(invite_token, user_id)
                 if invite_result.get('success'):
-                    flash(f'Successfully joined {invite_result.get("team_name")}!', 'success')
+                    flash(f'Welcome! You\'ve successfully joined {invite_result.get("team_name")} and received 4 analysis credits. Visit your dashboard to start analyzing properties.', 'success')
                 else:
                     flash('Account created but failed to join team: ' + invite_result.get('error'), 'warning')
                 session.pop('team_invite_token', None)
             else:
-                flash('Registration successful!', 'success')
+                flash('Welcome to Properwrite! Your account has been created and you\'ve received 4 analysis credits. Visit your dashboard to manage your account or start analyzing properties.', 'success')
+            
+            # Set a flag to show new user welcome message
+            session['new_user_welcome'] = True
             
             return redirect(url_for('dashboard'))
         else:
