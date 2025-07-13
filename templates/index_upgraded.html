@@ -1149,7 +1149,9 @@
                 </div>
 
                 <!-- Scroll Gate Detection Point -->
+                {% if not session.get('user_id') %}
                 <div id="offers-gate-trigger" class="scroll-gate-trigger"></div>
+                {% endif %}
                 
                 <!-- Acquisitions Section -->
                 <div id="acquisitions-section" class="section-content hidden">
@@ -4030,8 +4032,7 @@
                     // Show mobile footer after successful analysis
                     showMobileFooter();
                     
-                    // Initialize scroll gate for unauthenticated users
-                    initializeScrollGate();
+                    // DO NOT initialize scroll gate - this is handled on page load only
                     
                     // Smooth scroll to results after a brief delay
                     setTimeout(() => {
@@ -8784,39 +8785,56 @@
         // Check authentication state dynamically
         async function checkAuthenticationState() {
             try {
+                console.log('🔐 Checking authentication state via API...');
                 const response = await fetch('/api/user-status');
                 const data = await response.json();
+                console.log('🔐 User status API response:', data);
+                
                 const wasAuthenticated = isAuthenticated;
                 isAuthenticated = data.logged_in;
                 
+                console.log('🔐 Auth state changed from', wasAuthenticated, 'to', isAuthenticated);
+                
                 // If user just logged in, remove scroll gate elements
                 if (!wasAuthenticated && isAuthenticated) {
+                    console.log('🔐 User just logged in - removing scroll gate elements');
                     const blurOverlay = document.getElementById('scroll-gate-blur');
                     if (blurOverlay) {
+                        console.log('🔐 Removing blur overlay');
                         blurOverlay.remove();
                     }
                     const scrollGateModal = document.getElementById('scroll-gate-modal');
                     if (scrollGateModal) {
+                        console.log('🔐 Hiding scroll gate modal');
                         scrollGateModal.classList.add('hidden');
                     }
                 }
                 
                 return isAuthenticated;
             } catch (error) {
-                console.error('Error checking authentication state:', error);
+                console.error('🔐 Error checking authentication state:', error);
                 return isAuthenticated;
             }
         }
         
         function initializeScrollGate() {
-            if (isAuthenticated || scrollGateTriggered) return;
+            console.log('🔐 initializeScrollGate called - checking auth state:', isAuthenticated);
+            if (isAuthenticated || scrollGateTriggered) {
+                console.log('🔐 Scroll gate blocked - authenticated:', isAuthenticated, 'triggered:', scrollGateTriggered);
+                return;
+            }
             
             const offersGateTrigger = document.getElementById('offers-gate-trigger');
-            if (!offersGateTrigger) return;
+            if (!offersGateTrigger) {
+                console.log('🔐 No offers gate trigger found');
+                return;
+            }
             
+            console.log('🔐 Setting up scroll gate observer');
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting && !scrollGateTriggered && !isAuthenticated) {
+                        console.log('🔐 SCROLL GATE TRIGGERED - showing modal');
                         scrollGateTriggered = true;
                         // Add blur overlay to content
                         const blurOverlay = document.createElement('div');
@@ -9246,10 +9264,18 @@
     <script>
         // Initialize scroll gate after checking authentication state
         document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🔐 Initial authentication state:', isAuthenticated);
             await checkAuthenticationState();
-            if (!isAuthenticated) {
-                initializeScrollGate();
+            console.log('🔐 After check authentication state:', isAuthenticated);
+            
+            // ABSOLUTELY NO SCROLL GATE FOR LOGGED IN USERS
+            if (isAuthenticated) {
+                console.log('🔐 User is authenticated - DISABLING scroll gate completely');
+                return; // Exit early - no scroll gate for logged-in users
             }
+            
+            console.log('🔐 User is NOT authenticated - initializing scroll gate');
+            initializeScrollGate();
         });
         
         function initializeScrollGate() {
