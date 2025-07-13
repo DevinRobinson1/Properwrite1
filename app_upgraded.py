@@ -273,12 +273,13 @@ def api_signup():
         )
         
         if result.get('success'):
-            # Set session
+            # Set consolidated session
             session['user_id'] = result['user_id']
             session['user_email'] = email
+            session['email'] = email  # Keep for backward compatibility
             session['user_name'] = name
             session['team_id'] = result['team_id']
-            session['team_role'] = 'owner'
+            session['team_role'] = 'owner'  # Keep for backward compatibility
             session['new_user_welcome'] = True
             
             # Send welcome email
@@ -399,9 +400,10 @@ def signup():
         if result.get('success'):
             user_id = result.get('user_id')
             
-            # Set up session
+            # Set up consolidated session
             session['user_id'] = user_id
-            session['email'] = email
+            session['user_email'] = email
+            session['email'] = email  # Keep for backward compatibility
             
             # Send welcome email immediately after successful registration
             try:
@@ -453,18 +455,16 @@ def login_page():
         result = billing_service.authenticate_user(email, password)
         
         if result.get('success'):
-            # Set up session
+            # Set up consolidated session
             session['user_id'] = result.get('user_id')
-            session['email'] = email
+            session['user_email'] = email
+            session['email'] = email  # Keep for backward compatibility
             
             # Handle "Remember me" functionality
             if remember_me:
-                # Set session to permanent (will persist after browser closes)
                 session.permanent = True
-                # Set session timeout to 30 days
                 app.permanent_session_lifetime = timedelta(days=30)
             else:
-                # Session expires when browser closes
                 session.permanent = False
             
             flash('Login successful!', 'success')
@@ -656,28 +656,45 @@ def get_user_initials(name):
 
 @app.route('/api/user-status', methods=['GET'])
 def get_user_status():
-    """Get current user authentication status and credit information"""
+    """Get current user status for frontend - consolidated session management"""
     try:
-        # For now, simulate authentication - this can be enhanced with real auth
-        # Check if user has a session or token
+        # Check for user_id in session (primary identifier)
         user_id = session.get('user_id')
-        auth_header = request.headers.get('Authorization')
-        
-        if user_id or auth_header:
-            # User is logged in
-            return jsonify({
-                'logged_in': True,
-                'credits': 100,  # Mock credit balance
-                'unlimited_credits': False,
-                'user_id': user_id or 'mock_user'
-            })
-        else:
-            # User not logged in
+        if not user_id:
             return jsonify({
                 'logged_in': False,
-                'remaining_uses': 3,  # Free uses remaining
-                'credits': 0
+                'credits': 0,
+                'unlimited_credits': False,
+                'remaining_uses': 3
             })
+        
+        # Get user info from database
+        with Session(engine) as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            
+            if user and user.is_active:
+                # Get team info for unlimited credits check
+                team_data = user.team
+                unlimited_credits = team_data.tier == 'growth10' if team_data else False
+                
+                return jsonify({
+                    'logged_in': True,
+                    'user_id': user_id,
+                    'email': session.get('user_email', session.get('email')),
+                    'credits': team_data.credit_balance if team_data else 0,
+                    'unlimited_credits': unlimited_credits,
+                    'remaining_uses': 0  # Logged in users don't have use limits
+                })
+            else:
+                # User not found or inactive, clear session completely
+                session.clear()
+                return jsonify({
+                    'logged_in': False,
+                    'credits': 0,
+                    'unlimited_credits': False,
+                    'remaining_uses': 3
+                })
+            
     except Exception as e:
         logging.error(f"Error getting user status: {str(e)}")
         return jsonify({
@@ -706,8 +723,8 @@ def api_logout():
 
 @app.route('/api/login', methods=['POST'])
 @limiter.limit("5 per minute")
-def login():
-    """Login endpoint with CSRF protection and remember me functionality"""
+def api_login():
+    """Secure API login endpoint with proper password validation"""
     try:
         # Handle both JSON and form data
         if request.content_type == 'application/json':
@@ -719,37 +736,45 @@ def login():
         password = data.get('password')
         remember_me = data.get('remember_me') == 'true' or data.get('remember_me') == True
         
-        # Look up user in database
-        with Session(engine) as db:
-            user = db.query(User).filter(User.email == email).first()
+        if not email or not password:
+            return jsonify({
+                'success': False,
+                'error': 'Email and password are required'
+            }), 400
+        
+        # Use billing service for secure authentication
+        billing_service = BillingService()
+        result = billing_service.authenticate_user(email, password)
+        
+        if result.get('success'):
+            # Set up consolidated session
+            session['user_id'] = result.get('user_id')
+            session['user_email'] = email
+            session['email'] = email  # Keep for backward compatibility
             
-            if user and user.is_active:
-                # Set session for logged in user
-                session['user_id'] = str(user.id)
-                session['email'] = email
-                
-                # Set session permanence based on remember me
-                if remember_me:
-                    session.permanent = True
-                    app.permanent_session_lifetime = timedelta(days=30)
-                else:
-                    session.permanent = False
-                
-                return jsonify({
-                    'success': True,
-                    'message': 'Logged in successfully',
-                    'user_id': session['user_id']
-                })
+            # Handle remember me functionality
+            if remember_me:
+                session.permanent = True
+                app.permanent_session_lifetime = timedelta(days=30)
             else:
-                return jsonify({
-                    'success': False,
-                    'error': 'Invalid email or password'
-                }), 401
+                session.permanent = False
+            
+            return jsonify({
+                'success': True,
+                'message': 'Logged in successfully',
+                'user_id': session['user_id']
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': result.get('error', 'Invalid email or password')
+            }), 401
+            
     except Exception as e:
-        logging.error(f"Error logging in: {str(e)}")
+        logging.error(f"Error in API login: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'Error logging in'
+            'error': 'Authentication error'
         }), 500
 
 @app.route('/api/analyze-property', methods=['POST'])
@@ -2891,7 +2916,7 @@ def redeem_credit_code():
 @app.route('/api/team/invite', methods=['POST'])
 @require_role('manager')
 def create_team_invite():
-    """Create team invitation (managers and owners only)"""
+    """Create team invitation (managers and owners only) - consolidated"""
     try:
         data = request.get_json()
         email = data.get('email')
@@ -3007,7 +3032,7 @@ def get_pending_invites():
 
 @app.route('/api/team/invite/<invite_id>/resend', methods=['POST'])
 def resend_invite(invite_id):
-    """Resend a team invitation"""
+    """Resend a team invitation - consolidated with session auth"""
     try:
         user_id = session.get('user_id')
         if not user_id:
