@@ -103,22 +103,25 @@ class EmailService:
         """
         try:
             import sendgrid
-            from sendgrid.helpers.mail import Mail, Email, To, Content
+            from sendgrid.helpers.mail import Mail
             
             sg = sendgrid.SendGridAPIClient(api_key=self.sendgrid_api_key)
             
-            from_email = Email(self.from_email, self.from_name)
-            to_email = To(to_email)
+            # Use a verified sender domain for SendGrid
+            from_email_address = os.environ.get('FROM_EMAIL', 'support@fundflowos.com')
+            from_name = os.environ.get('FROM_NAME', 'Properwrite Team')
             
-            mail = Mail(from_email, to_email, subject, Content("text/html", html_content))
+            mail = Mail(
+                from_email=from_email_address,
+                to_emails=to_email,
+                subject=subject,
+                html_content=html_content
+            )
             
             if text_content:
-                mail.content = [
-                    Content("text/plain", text_content),
-                    Content("text/html", html_content)
-                ]
+                mail.plain_text_content = text_content
             
-            response = sg.client.mail.send.post(request_body=mail.get())
+            response = sg.send(mail)
             
             if response.status_code == 202:
                 logger.info(f"Email sent successfully via SendGrid to {to_email}")
@@ -164,21 +167,22 @@ class EmailService:
                   text_content: str = None, attachments: List = None) -> bool:
         """
         Send email using the best available method
-        Priority: SendGrid > Mailgun > SMTP
+        Priority: Gmail SMTP > SendGrid > Mailgun
         """
-        # Try SendGrid first
+        # Try Gmail SMTP first (support@fundflowos.com)
+        if self.smtp_username and self.smtp_password:
+            if self.send_email_smtp(to_email, subject, html_content, text_content, attachments):
+                return True
+        
+        # Try SendGrid second
         if self.sendgrid_api_key:
             if self.send_email_sendgrid(to_email, subject, html_content, text_content):
                 return True
         
-        # Try Mailgun second
+        # Try Mailgun third
         if self.mailgun_api_key and self.mailgun_domain:
             if self.send_email_mailgun(to_email, subject, html_content, text_content):
                 return True
-        
-        # Fall back to SMTP
-        if self.smtp_username and self.smtp_password:
-            return self.send_email_smtp(to_email, subject, html_content, text_content, attachments)
         
         logger.error("No email service configured")
         return False

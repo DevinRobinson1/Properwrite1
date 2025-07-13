@@ -306,6 +306,17 @@ def signup():
             session['user_id'] = user_id
             session['email'] = email
             
+            # Send welcome email immediately after successful registration
+            try:
+                user_name = name or email.split('@')[0]
+                welcome_email_sent = email_service.send_welcome_email(email, user_name)
+                if welcome_email_sent:
+                    logging.info(f"Welcome email sent successfully to {email}")
+                else:
+                    logging.warning(f"Failed to send welcome email to {email}")
+            except Exception as e:
+                logging.error(f"Error sending welcome email to {email}: {str(e)}")
+            
             # If there's a team invite token, accept it
             invite_token = session.get('team_invite_token')
             if invite_token:
@@ -353,6 +364,61 @@ def login_page():
         else:
             flash('Invalid email or password', 'error')
             return render_template('auth/login.html')
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    """Forgot password page and handler"""
+    if request.method == 'GET':
+        return render_template('auth/forgot_password.html')
+    
+@app.route('/api/forgot-password', methods=['POST'])
+@limiter.limit("5 per minute")
+def api_forgot_password():
+    """Handle forgot password API request"""
+    try:
+        email = request.form.get('email')
+        
+        if not email:
+            return jsonify({'success': False, 'error': 'Email is required'}), 400
+        
+        # Generate reset token
+        import secrets
+        reset_token = secrets.token_urlsafe(32)
+        
+        # Store reset token in session (in production, use database)
+        session[f'reset_token_{email}'] = {
+            'token': reset_token,
+            'expires': datetime.now() + timedelta(hours=24)
+        }
+        
+        # Send reset email
+        try:
+            email_sent = email_service.send_password_reset_email(email, reset_token)
+            
+            if email_sent:
+                return jsonify({
+                    'success': True,
+                    'message': 'Password reset instructions sent to your email'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Failed to send reset email. Please try again.'
+                }), 500
+                
+        except Exception as e:
+            logging.error(f"Error sending reset email: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': 'Failed to send reset email. Please try again.'
+            }), 500
+            
+    except Exception as e:
+        logging.error(f"Error in forgot password: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'An error occurred. Please try again.'
+        }), 500
 
 @app.route('/api/dashboard-data', methods=['GET'])
 def get_dashboard_data():
