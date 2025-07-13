@@ -10,7 +10,8 @@ from datetime import datetime, timedelta
 from typing import Dict, Optional, List
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import create_engine, and_
-from billing_models import Team, User, CreditLog, TeamInvite, TIER_CONFIG, CREDIT_PACKS
+from billing_models import Team, User, CreditLog, TeamInvite
+from billing_config import SUBSCRIPTION_PLANS, CREDIT_PACKS
 import secrets
 import jwt
 import uuid
@@ -68,7 +69,7 @@ class BillingService:
         """
         try:
             # Retrieve price by lookup key
-            prices = stripe.Price.list(lookup_key=lookup_key, limit=1)
+            prices = stripe.Price.list(lookup_keys=[lookup_key], limit=1)
             if not prices.data:
                 raise ValueError(f"No price found for lookup key: {lookup_key}")
             
@@ -163,7 +164,7 @@ class BillingService:
                         team = db.query(Team).filter(Team.id == team_id).first()
                         if team:
                             team.tier = tier
-                            team.seats_max = TIER_CONFIG[tier]['seats_max'] * quantity
+                            team.seats_max = SUBSCRIPTION_PLANS[tier]['seats'] * quantity
                             team.stripe_customer_id = customer.id
                     else:
                         # New team creation
@@ -171,8 +172,8 @@ class BillingService:
                             name=f"{customer.email}'s Team",
                             stripe_customer_id=customer.id,
                             tier=tier,
-                            seats_max=TIER_CONFIG[tier]['seats_max'] * quantity,
-                            credit_balance=TIER_CONFIG[tier]['monthly_credits']
+                            seats_max=SUBSCRIPTION_PLANS[tier]['seats'] * quantity,
+                            credit_balance=SUBSCRIPTION_PLANS[tier]['credits_per_month']
                         )
                         db.add(team)
                         db.flush()
@@ -200,7 +201,7 @@ class BillingService:
                         # Log initial credits
                         credit_log = CreditLog(
                             team_id=team.id,
-                            delta=TIER_CONFIG[tier]['monthly_credits'],
+                            delta=SUBSCRIPTION_PLANS[tier]['credits_per_month'],
                             reason=f'initial-{tier}'
                         )
                         db.add(credit_log)
@@ -234,9 +235,9 @@ class BillingService:
                     Team.stripe_customer_id == invoice['customer']
                 ).first()
                 
-                if team and team.tier in TIER_CONFIG:
+                if team and team.tier in SUBSCRIPTION_PLANS:
                     # Add monthly credits
-                    monthly_credits = TIER_CONFIG[team.tier]['monthly_credits']
+                    monthly_credits = SUBSCRIPTION_PLANS[team.tier]['credits_per_month']
                     team.credit_balance += monthly_credits
                     
                     # Log the credit addition
@@ -1056,7 +1057,7 @@ class BillingService:
                     return {'success': False, 'error': 'Team not found'}
                 
                 # Get plan configuration
-                plan_config = TIER_CONFIG.get(plan_key)
+                plan_config = SUBSCRIPTION_PLANS.get(plan_key)
                 if not plan_config:
                     return {'success': False, 'error': 'Invalid plan key'}
                 
@@ -1101,7 +1102,7 @@ class BillingService:
                     return {'success': False, 'error': 'Team not found'}
                 
                 # Get plan configuration
-                plan_config = TIER_CONFIG.get(new_plan_key)
+                plan_config = SUBSCRIPTION_PLANS.get(new_plan_key)
                 if not plan_config:
                     return {'success': False, 'error': 'Invalid plan'}
                 
@@ -1109,33 +1110,36 @@ class BillingService:
                 
                 # Update team plan
                 team.tier = new_plan_key
-                team.seats_max = plan_config['seats']
+                team.seats_max = plan_config.get('seats', 1)
                 
                 # Handle credit allocation for plan changes
-                if plan_config.get('monthly_credits', 0) > 0:
+                monthly_credits = plan_config.get('credits_per_month', 0)
+                if monthly_credits > 0:
                     # For plans with monthly credits, set balance to plan credits
-                    team.credit_balance = plan_config['monthly_credits']
-                elif plan_config.get('monthly_credits') == -1:
+                    team.credit_balance = monthly_credits
+                elif monthly_credits == -1:
                     # For unlimited plans, set a high number
                     team.credit_balance = 999999
                 
                 # Create log entry for plan change
+                monthly_credits = plan_config.get('credits_per_month', 0)
                 credit_log = CreditLog(
                     team_id=team_id,
                     user_id=user_id,
-                    delta=plan_config.get('monthly_credits', 0),
+                    delta=monthly_credits if monthly_credits > 0 else 0,
                     reason=f'Plan changed from {old_plan} to {new_plan_key}'
                 )
                 
                 db.add(credit_log)
                 db.commit()
                 
+                monthly_credits = plan_config.get('credits_per_month', 0)
                 return {
                     'success': True,
                     'old_plan': old_plan,
                     'new_plan': new_plan_key,
-                    'credits': plan_config.get('monthly_credits', 0),
-                    'seats': plan_config['seats']
+                    'credits': monthly_credits,
+                    'seats': plan_config.get('seats', 1)
                 }
                 
         except Exception as e:
