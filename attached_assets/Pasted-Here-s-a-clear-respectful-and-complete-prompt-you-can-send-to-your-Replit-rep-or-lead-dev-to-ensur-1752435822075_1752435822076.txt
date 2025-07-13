@@ -1,0 +1,72 @@
+Here’s a clear, respectful, and complete prompt you can send to your Replit rep or lead dev to ensure a flawless production launch:
+
+⸻
+
+🚨 Final Launch Prep — “Full-Stability & QA Readiness Sweep”
+
+Mission: We are entering our final pre-launch sprint and need the system to be 100% launch-ready.
+Please take all the time needed to methodically review, clean, and bulletproof the platform.
+✅ Do not rush this.
+✅ Do not modify UI/UX layouts or flows.
+✅ Do not remove any working functionality.
+Your only job is to ensure stability, security, and reliability across all moving parts.
+
+⸻
+
+🔍 Core Objectives
+
+✅ 1. Full End-to-End Functionality
+	•	Every button and interaction works 100% of the time
+	•	User signup → verification → login → logout → team invite → accept → switch team
+	•	Stripe & Coinbase purchases succeed and apply correct plans/credits
+	•	Credit tracking logic is accurate everywhere
+	•	All tabs (Acquisitions, Dispositions, Comps, Construction, Admin) open without error
+
+✅ 2. Cross-Browser & Mobile QA
+	•	Chrome, Safari, Firefox (latest)
+	•	Mobile: iOS Safari, Android Chrome
+	•	Resizing / scrolling doesn’t break layout
+	•	Buttons/touch targets are mobile-usable
+
+✅ 3. Security & Access
+	•	Session storage is secure (JWTs/cookies)
+	•	Only authenticated users can access gated features
+	•	Role permissions respected (admin, team user)
+	•	No hardcoded tokens, no dev keys exposed in production build
+	•	Stripe/Coinbase webhooks verified via secret
+
+✅ 4. Team & Auth Logic
+	•	Invite flow works across devices
+	•	Team credit tracking works
+	•	User switching is clean and error-free
+	•	No duplicate logic for auth/session/context
+
+✅ 5. No Placeholder or Sample Data
+	•	Every new account starts with clean slate (no leftover fields or sample values)
+	•	Admin dashboard shows only real user data
+	•	No dummy buttons, lorem text, or empty functions in production
+
+⸻
+
+⚠️ Guidelines
+	•	✅ You may refactor and clean backend/API logic
+	•	✅ You may optimize performance or error handling
+	•	🚫 You may not change the visual layout, tab order, or screen structure
+	•	🚫 You may not alter Acquisitions, Dispositions, Construction, or Comps calculations
+
+⸻
+
+🧪 Testing Requirements
+	•	Run automated test suite (unit + E2E)
+	•	Do manual walkthroughs of all flows
+	•	Provide a final checklist of all bugs caught + fixed
+	•	If any logic fails, isolate it in a feature branch before merging into main
+
+⸻
+
+Final Deliverable:
+A PR or deployment labeled release/launch-ready that passes all tests, contains zero bugs, has no security holes, and can be pushed to production with full confidence.
+
+Please take your time. This is our foundation for public use, investors, and customers — we need it bulletproof.
+
+Let us know what support or resources you need along the way.
