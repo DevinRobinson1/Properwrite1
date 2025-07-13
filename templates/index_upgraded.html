@@ -1659,26 +1659,62 @@
 
                     <!-- Acquisitions Tab Navigation -->
                     <div class="bg-blue-50 border-l-4 border-blue-500 shadow-sm">
-                        <div class="acquisitions-tabs flex flex-wrap">
-                            <button class="acquisition-tab-button px-6 py-4 font-semibold transition-all duration-300 active flex items-center min-h-[44px]" onclick="showAcquisitionTab('wholesale')" title="Cash offers using Maximum Allowable Offer formula">
-                                <i class="fas fa-dollar-sign mr-2"></i>Wholesale MAO
-                                <i class="fas fa-info-circle ml-2 text-xs opacity-60" title="Cash offers using Maximum Allowable Offer formula"></i>
-                            </button>
-                            <button class="acquisition-tab-button px-6 py-4 font-semibold transition-all duration-300 flex items-center min-h-[44px]" onclick="showAcquisitionTab('installment')" title="Seller keeps property but you control the sale - great for motivated sellers">
-                                <i class="fas fa-calendar-alt mr-2"></i>Installments/Novations
-                                <i class="fas fa-info-circle ml-2 text-xs opacity-60" title="Seller keeps property but you control the sale"></i>
-                            </button>
-                            <button class="acquisition-tab-button px-6 py-4 font-semibold transition-all duration-300 flex items-center min-h-[44px]" onclick="showAcquisitionTab('subject-to')" title="Take over existing mortgage payments - no new financing needed">
-                                <i class="fas fa-handshake mr-2"></i>Subject-To
-                                <i class="fas fa-info-circle ml-2 text-xs opacity-60" title="Take over existing mortgage payments"></i>
-                            </button>
-                            <button class="acquisition-tab-button px-6 py-4 font-semibold transition-all duration-300 flex items-center min-h-[44px]" onclick="showAcquisitionTab('seller-finance')" title="Seller acts as the bank - monthly payments directly to seller">
-                                <i class="fas fa-university mr-2"></i>Seller Finance
-                                <i class="fas fa-info-circle ml-2 text-xs opacity-60" title="Seller acts as the bank"></i>
-                            </button>
-                            <button class="acquisition-tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showAcquisitionTab('compare')">
-                                <i class="fas fa-chart-bar mr-2"></i>Compare Offers
-                            </button>
+                        <!-- Mobile Acquisitions Tabs - Horizontal Scroll -->
+                        <div class="md:hidden">
+                            <div class="overflow-x-auto scrollbar-hide">
+                                <nav class="flex space-x-2 px-2 py-2 min-w-max border-b border-blue-200">
+                                    <button onclick="showAcquisitionTab('wholesale')" 
+                                            class="acquisition-tab-button mobile-tab-btn flex-shrink-0 bg-blue-500 text-white px-3 py-2 rounded-lg font-medium text-xs transition-colors"
+                                            id="wholesale-tab-mobile">
+                                        💰 Wholesale
+                                    </button>
+                                    <button onclick="showAcquisitionTab('installment')" 
+                                            class="acquisition-tab-button mobile-tab-btn flex-shrink-0 bg-gray-300 text-gray-700 px-3 py-2 rounded-lg font-medium text-xs transition-colors hover:bg-blue-500 hover:text-white"
+                                            id="installment-tab-mobile">
+                                        📅 Installment
+                                    </button>
+                                    <button onclick="showAcquisitionTab('subject-to')" 
+                                            class="acquisition-tab-button mobile-tab-btn flex-shrink-0 bg-gray-300 text-gray-700 px-3 py-2 rounded-lg font-medium text-xs transition-colors hover:bg-blue-500 hover:text-white"
+                                            id="subject-to-tab-mobile">
+                                        🤝 Subject-To
+                                    </button>
+                                    <button onclick="showAcquisitionTab('seller-finance')" 
+                                            class="acquisition-tab-button mobile-tab-btn flex-shrink-0 bg-gray-300 text-gray-700 px-3 py-2 rounded-lg font-medium text-xs transition-colors hover:bg-blue-500 hover:text-white"
+                                            id="seller-finance-tab-mobile">
+                                        🏦 Seller Finance
+                                    </button>
+                                    <button onclick="showAcquisitionTab('compare')" 
+                                            class="acquisition-tab-button mobile-tab-btn flex-shrink-0 bg-gray-300 text-gray-700 px-3 py-2 rounded-lg font-medium text-xs transition-colors hover:bg-blue-500 hover:text-white"
+                                            id="compare-tab-mobile">
+                                        📊 Compare
+                                    </button>
+                                </nav>
+                            </div>
+                        </div>
+                        
+                        <!-- Desktop Acquisitions Tabs -->
+                        <div class="hidden md:block">
+                            <div class="acquisitions-tabs flex flex-wrap">
+                                <button class="acquisition-tab-button px-6 py-4 font-semibold transition-all duration-300 active flex items-center min-h-[44px]" onclick="showAcquisitionTab('wholesale')" title="Cash offers using Maximum Allowable Offer formula">
+                                    <i class="fas fa-dollar-sign mr-2"></i>Wholesale MAO
+                                    <i class="fas fa-info-circle ml-2 text-xs opacity-60" title="Cash offers using Maximum Allowable Offer formula"></i>
+                                </button>
+                                <button class="acquisition-tab-button px-6 py-4 font-semibold transition-all duration-300 flex items-center min-h-[44px]" onclick="showAcquisitionTab('installment')" title="Seller keeps property but you control the sale - great for motivated sellers">
+                                    <i class="fas fa-calendar-alt mr-2"></i>Installments/Novations
+                                    <i class="fas fa-info-circle ml-2 text-xs opacity-60" title="Seller keeps property but you control the sale"></i>
+                                </button>
+                                <button class="acquisition-tab-button px-6 py-4 font-semibold transition-all duration-300 flex items-center min-h-[44px]" onclick="showAcquisitionTab('subject-to')" title="Take over existing mortgage payments - no new financing needed">
+                                    <i class="fas fa-handshake mr-2"></i>Subject-To
+                                    <i class="fas fa-info-circle ml-2 text-xs opacity-60" title="Take over existing mortgage payments"></i>
+                                </button>
+                                <button class="acquisition-tab-button px-6 py-4 font-semibold transition-all duration-300 flex items-center min-h-[44px]" onclick="showAcquisitionTab('seller-finance')" title="Seller acts as the bank - monthly payments directly to seller">
+                                    <i class="fas fa-university mr-2"></i>Seller Finance
+                                    <i class="fas fa-info-circle ml-2 text-xs opacity-60" title="Seller acts as the bank"></i>
+                                </button>
+                                <button class="acquisition-tab-button px-6 py-4 font-semibold transition-all duration-300" onclick="showAcquisitionTab('compare')">
+                                    <i class="fas fa-chart-bar mr-2"></i>Compare Offers
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -7024,10 +7060,16 @@
                 content.classList.add('hidden');
             });
             
-            // Remove active class from all acquisition tab buttons
+            // Remove active class from all acquisition tab buttons (both desktop and mobile)
             document.querySelectorAll('.acquisition-tab-button').forEach(button => {
-                button.classList.remove('active', 'bg-blue-600', 'text-white');
+                button.classList.remove('active', 'bg-blue-600', 'text-white', 'bg-blue-500');
                 button.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            });
+            
+            // Update mobile tab buttons
+            document.querySelectorAll('.mobile-tab-btn').forEach(button => {
+                button.classList.remove('bg-blue-500', 'text-white');
+                button.classList.add('bg-gray-300', 'text-gray-700');
             });
             
             // Show selected tab content
@@ -7039,10 +7081,18 @@
                 console.error('Tab not found:', tabName + '-tab');
             }
             
-            // Add active class to clicked button
-            if (event && event.target) {
-                event.target.classList.add('active', 'bg-blue-600', 'text-white');
-                event.target.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            // Add active class to both desktop and mobile buttons
+            const desktopButton = document.querySelector(`.acquisition-tab-button[onclick="showAcquisitionTab('${tabName}')"]`);
+            const mobileButton = document.getElementById(`${tabName}-tab-mobile`);
+            
+            if (desktopButton) {
+                desktopButton.classList.add('active', 'bg-blue-600', 'text-white');
+                desktopButton.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            }
+            
+            if (mobileButton) {
+                mobileButton.classList.add('bg-blue-500', 'text-white');
+                mobileButton.classList.remove('bg-gray-300', 'text-gray-700');
             }
             
             // Update calculations for the active tab
