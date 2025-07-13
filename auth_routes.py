@@ -11,8 +11,8 @@ import uuid
 
 stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
+@app.route('/auth/login', methods=['GET', 'POST'])
+def auth_login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
@@ -44,8 +44,8 @@ def login():
     
     return render_template('auth/login.html')
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
+@app.route('/auth/register', methods=['GET', 'POST'])
+def auth_register():
     if request.method == 'POST':
         email = request.form.get('email')
         name = request.form.get('name')
@@ -60,7 +60,7 @@ def register():
         existing_user = db.session.query(User).filter_by(email=email).first()
         if existing_user:
             flash('Account already exists with this email. Please login.', 'error')
-            return redirect(url_for('login'))
+            return redirect(url_for('login_page'))
         
         # Start with default credits
         starting_credits = 4
@@ -107,9 +107,9 @@ def register():
     
     return render_template('auth/register.html')
 
-@app.route('/logout', methods=['GET', 'POST'])
+@app.route('/auth/logout', methods=['GET', 'POST'])
 @login_required
-def logout():
+def auth_logout():
     logout_user()
     
     if request.method == 'POST':
