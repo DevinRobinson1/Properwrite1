@@ -316,7 +316,7 @@ def index():
         flash(f'Promo code {promo_code} has been automatically applied to your account!', 'success')
     
     return render_template('index_upgraded.html', 
-                         google_places_api_key=os.environ.get('GOOGLE_PLACES_API_KEY'))
+                         google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY') or os.environ.get('GOOGLE_API_KEY'))
 
 @app.route('/dashboard')
 def dashboard():
@@ -2413,7 +2413,7 @@ def get_construction_trades():
 def jv_submit_page():
     """JV Deal Submit page"""
     return render_template('jv_submit.html', 
-                         google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY'))
+                         google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY') or os.environ.get('GOOGLE_API_KEY'))
 
 @app.route('/api/jv-submit', methods=['POST'])
 @limiter.limit("5 per hour")  # Limit JV submissions to prevent spam
