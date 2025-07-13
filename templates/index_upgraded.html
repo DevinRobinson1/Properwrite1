@@ -1142,6 +1142,9 @@
                         <button id="comps-section-btn" class="section-toggle-btn px-8 py-3 font-bold text-lg rounded-lg transition-all duration-300 bg-gray-300 text-gray-700 hover:bg-teal-500 hover:text-white button-hover" onclick="checkAuthAndShowSection('comps')">
                             <i class="fas fa-chart-area mr-3"></i>📊 Comps
                         </button>
+                        <button id="construction-section-btn" class="section-toggle-btn px-8 py-3 font-bold text-lg rounded-lg transition-all duration-300 bg-gray-300 text-gray-700 hover:bg-orange-500 hover:text-white button-hover" onclick="checkAuthAndShowSection('construction')">
+                            <i class="fas fa-hammer mr-3"></i>🧰 Construction
+                        </button>
                     </div>
                 </div>
 
@@ -2279,6 +2282,351 @@
                                                 <i class="fas fa-redo mr-2"></i>Try Again
                                             </button>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Construction Section -->
+                <div id="construction-section" class="section-content hidden">
+                    <div class="bg-orange-50 border-b-4 border-orange-500 p-6 mb-6">
+                        <h2 class="text-2xl font-bold text-orange-800">
+                            <i class="fas fa-hammer mr-2"></i>🧰 Construction Estimator
+                        </h2>
+                        <p class="text-gray-700 mt-2">Professional construction cost estimation for Fix & Flip and New Construction projects</p>
+                    </div>
+
+                    <!-- Construction Tab Navigation -->
+                    <div class="mb-6">
+                        <div class="flex justify-center space-x-4">
+                            <button id="fix-flip-tab-btn" class="construction-tab-button px-6 py-3 font-semibold text-lg rounded-lg transition-all duration-300 bg-orange-600 text-white" onclick="showConstructionTab('fix-flip')">
+                                <i class="fas fa-tools mr-2"></i>🧰 Fix & Flip
+                            </button>
+                            <button id="new-construction-tab-btn" class="construction-tab-button px-6 py-3 font-semibold text-lg rounded-lg transition-all duration-300 bg-gray-300 text-gray-700 hover:bg-orange-500 hover:text-white" onclick="showConstructionTab('new-construction')">
+                                <i class="fas fa-building mr-2"></i>🏗️ New Construction
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Fix & Flip Tab Content -->
+                    <div id="fix-flip-content" class="construction-tab-content">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+                            <!-- Left Column: Project Setup -->
+                            <div class="lg:col-span-1">
+                                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                        <i class="fas fa-file-alt mr-2 text-orange-500"></i>Project Setup
+                                    </h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
+                                            <input type="text" id="ff-project-name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Enter project name">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Property Address</label>
+                                            <input type="text" id="ff-property-address" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Enter property address">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Square Footage</label>
+                                            <input type="number" id="ff-property-sqft" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Enter square footage">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Multipliers -->
+                                <div class="bg-white rounded-lg shadow-lg p-6">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                        <i class="fas fa-calculator mr-2 text-orange-500"></i>Cost Multipliers
+                                    </h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                Overhead (%)
+                                                <button class="ml-1 text-gray-400 hover:text-gray-600" onclick="showTooltip('overhead')">
+                                                    <i class="fas fa-question-circle"></i>
+                                                </button>
+                                            </label>
+                                            <input type="number" id="ff-overhead-percent" value="15" min="0" max="50" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" onchange="calculateFixFlipTotal()">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                Contingency (%)
+                                                <button class="ml-1 text-gray-400 hover:text-gray-600" onclick="showTooltip('contingency')">
+                                                    <i class="fas fa-question-circle"></i>
+                                                </button>
+                                            </label>
+                                            <input type="number" id="ff-contingency-percent" value="10" min="0" max="30" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" onchange="calculateFixFlipTotal()">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                GC Fee (%)
+                                                <button class="ml-1 text-gray-400 hover:text-gray-600" onclick="showTooltip('gc-fee')">
+                                                    <i class="fas fa-question-circle"></i>
+                                                </button>
+                                            </label>
+                                            <input type="number" id="ff-gc-fee-percent" value="10" min="0" max="25" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" onchange="calculateFixFlipTotal()">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Middle Column: Scope Builder -->
+                            <div class="lg:col-span-1">
+                                <div class="bg-white rounded-lg shadow-lg p-6">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                        <i class="fas fa-list mr-2 text-orange-500"></i>Scope Builder
+                                    </h3>
+                                    
+                                    <!-- Search and Add Items -->
+                                    <div class="mb-4">
+                                        <div class="relative">
+                                            <input type="text" id="ff-item-search" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 pl-10" placeholder="Search by trade or item..." onkeyup="searchConstructionItems('fix_flip')">
+                                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                        </div>
+                                        <div id="ff-search-results" class="mt-2 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto hidden"></div>
+                                    </div>
+
+                                    <!-- Selected Items -->
+                                    <div id="ff-selected-items" class="space-y-2 max-h-96 overflow-y-auto">
+                                        <!-- Items will be populated here -->
+                                    </div>
+
+                                    <!-- Add Custom Item -->
+                                    <button onclick="addCustomItem('fix_flip')" class="w-full mt-4 bg-orange-100 hover:bg-orange-200 text-orange-700 font-medium py-2 px-4 rounded-lg border border-orange-300 transition-colors">
+                                        <i class="fas fa-plus mr-2"></i>Add Custom Item
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Summary -->
+                            <div class="lg:col-span-1">
+                                <div class="bg-white rounded-lg shadow-lg p-6 sticky top-6">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                        <i class="fas fa-chart-pie mr-2 text-orange-500"></i>Cost Summary
+                                    </h3>
+                                    
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Hard Costs:</span>
+                                            <span class="font-semibold" id="ff-hard-costs">$0</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Overhead:</span>
+                                            <span class="font-semibold" id="ff-overhead-cost">$0</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Contingency:</span>
+                                            <span class="font-semibold" id="ff-contingency-cost">$0</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">GC Fee:</span>
+                                            <span class="font-semibold" id="ff-gc-fee-cost">$0</span>
+                                        </div>
+                                        <hr class="border-gray-300">
+                                        <div class="flex justify-between items-center text-lg font-bold">
+                                            <span>Total Project Cost:</span>
+                                            <span class="text-orange-600" id="ff-total-cost">$0</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div class="mt-6 space-y-3">
+                                        <button onclick="saveFixFlipProject()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+                                            <i class="fas fa-save mr-2"></i>Save Project
+                                        </button>
+                                        <button onclick="exportFixFlipSOW()" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+                                            <i class="fas fa-download mr-2"></i>Download SOW (.xlsx)
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- New Construction Tab Content -->
+                    <div id="new-construction-content" class="construction-tab-content hidden">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+                            <!-- Left Column: Project Setup -->
+                            <div class="lg:col-span-1">
+                                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                        <i class="fas fa-file-alt mr-2 text-orange-500"></i>Project Setup
+                                    </h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
+                                            <input type="text" id="nc-project-name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Enter project name">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Property Address</label>
+                                            <input type="text" id="nc-property-address" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Enter property address">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Square Footage</label>
+                                            <input type="number" id="nc-property-sqft" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Enter square footage">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Land Cost ($)</label>
+                                            <input type="number" id="nc-land-cost" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Enter land cost" onchange="calculateNewConstructionTotal()">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Multipliers -->
+                                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                        <i class="fas fa-calculator mr-2 text-orange-500"></i>Cost Multipliers
+                                    </h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                Overhead (%)
+                                                <button class="ml-1 text-gray-400 hover:text-gray-600" onclick="showTooltip('overhead')">
+                                                    <i class="fas fa-question-circle"></i>
+                                                </button>
+                                            </label>
+                                            <input type="number" id="nc-overhead-percent" value="15" min="0" max="50" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" onchange="calculateNewConstructionTotal()">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                Contingency (%)
+                                                <button class="ml-1 text-gray-400 hover:text-gray-600" onclick="showTooltip('contingency')">
+                                                    <i class="fas fa-question-circle"></i>
+                                                </button>
+                                            </label>
+                                            <input type="number" id="nc-contingency-percent" value="10" min="0" max="30" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" onchange="calculateNewConstructionTotal()">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                GC Fee (%)
+                                                <button class="ml-1 text-gray-400 hover:text-gray-600" onclick="showTooltip('gc-fee')">
+                                                    <i class="fas fa-question-circle"></i>
+                                                </button>
+                                            </label>
+                                            <input type="number" id="nc-gc-fee-percent" value="10" min="0" max="25" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" onchange="calculateNewConstructionTotal()">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Carry Cost Calculator -->
+                                <div class="bg-white rounded-lg shadow-lg p-6">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                        <i class="fas fa-credit-card mr-2 text-orange-500"></i>Carry Cost Calculator
+                                    </h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                Loan % (LTV)
+                                                <button class="ml-1 text-gray-400 hover:text-gray-600" onclick="showTooltip('loan-percent')">
+                                                    <i class="fas fa-question-circle"></i>
+                                                </button>
+                                            </label>
+                                            <input type="number" id="nc-loan-percent" value="80" min="0" max="100" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" onchange="calculateNewConstructionTotal()">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                Interest Rate (%)
+                                                <button class="ml-1 text-gray-400 hover:text-gray-600" onclick="showTooltip('interest-rate')">
+                                                    <i class="fas fa-question-circle"></i>
+                                                </button>
+                                            </label>
+                                            <input type="number" id="nc-interest-rate" value="8" min="0" max="20" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" onchange="calculateNewConstructionTotal()">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                Construction Months
+                                                <button class="ml-1 text-gray-400 hover:text-gray-600" onclick="showTooltip('construction-months')">
+                                                    <i class="fas fa-question-circle"></i>
+                                                </button>
+                                            </label>
+                                            <input type="number" id="nc-construction-months" value="12" min="1" max="36" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" onchange="calculateNewConstructionTotal()">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Middle Column: Scope Builder -->
+                            <div class="lg:col-span-1">
+                                <div class="bg-white rounded-lg shadow-lg p-6">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                        <i class="fas fa-list mr-2 text-orange-500"></i>Scope Builder
+                                    </h3>
+                                    
+                                    <!-- Search and Add Items -->
+                                    <div class="mb-4">
+                                        <div class="relative">
+                                            <input type="text" id="nc-item-search" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 pl-10" placeholder="Search by trade or item..." onkeyup="searchConstructionItems('new_construction')">
+                                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                        </div>
+                                        <div id="nc-search-results" class="mt-2 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto hidden"></div>
+                                    </div>
+
+                                    <!-- Selected Items -->
+                                    <div id="nc-selected-items" class="space-y-2 max-h-96 overflow-y-auto">
+                                        <!-- Items will be populated here -->
+                                    </div>
+
+                                    <!-- Add Custom Item -->
+                                    <button onclick="addCustomItem('new_construction')" class="w-full mt-4 bg-orange-100 hover:bg-orange-200 text-orange-700 font-medium py-2 px-4 rounded-lg border border-orange-300 transition-colors">
+                                        <i class="fas fa-plus mr-2"></i>Add Custom Item
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Summary -->
+                            <div class="lg:col-span-1">
+                                <div class="bg-white rounded-lg shadow-lg p-6 sticky top-6">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                        <i class="fas fa-chart-pie mr-2 text-orange-500"></i>Cost Summary
+                                    </h3>
+                                    
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Hard Costs:</span>
+                                            <span class="font-semibold" id="nc-hard-costs">$0</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Overhead:</span>
+                                            <span class="font-semibold" id="nc-overhead-cost">$0</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Contingency:</span>
+                                            <span class="font-semibold" id="nc-contingency-cost">$0</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">GC Fee:</span>
+                                            <span class="font-semibold" id="nc-gc-fee-cost">$0</span>
+                                        </div>
+                                        <hr class="border-gray-300">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Construction Cost:</span>
+                                            <span class="font-semibold" id="nc-construction-cost">$0</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Land Cost:</span>
+                                            <span class="font-semibold" id="nc-land-cost-display">$0</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Carry Cost:</span>
+                                            <span class="font-semibold" id="nc-carry-cost-display">$0</span>
+                                        </div>
+                                        <hr class="border-gray-300">
+                                        <div class="flex justify-between items-center text-lg font-bold">
+                                            <span>Total Project Cost:</span>
+                                            <span class="text-orange-600" id="nc-total-cost">$0</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div class="mt-6 space-y-3">
+                                        <button onclick="saveNewConstructionProject()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+                                            <i class="fas fa-save mr-2"></i>Save Project
+                                        </button>
+                                        <button onclick="exportNewConstructionProForma()" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+                                            <i class="fas fa-download mr-2"></i>Download Pro-Forma (.xlsx)
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -8942,6 +9290,431 @@
                 }
             }, 5000);
         }
+
+        // Construction Section JavaScript Functions
+        
+        // Tab switching for Construction section
+        function showConstructionTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.construction-tab-content');
+            tabContents.forEach(content => content.classList.add('hidden'));
+            
+            // Remove active class from all buttons
+            const tabButtons = document.querySelectorAll('.construction-tab-button');
+            tabButtons.forEach(button => {
+                button.classList.remove('bg-orange-600', 'text-white');
+                button.classList.add('bg-gray-300', 'text-gray-700');
+            });
+            
+            // Show selected tab content
+            if (tabName === 'fix-flip') {
+                document.getElementById('fix-flip-content').classList.remove('hidden');
+                document.getElementById('fix-flip-tab-btn').classList.add('bg-orange-600', 'text-white');
+                document.getElementById('fix-flip-tab-btn').classList.remove('bg-gray-300', 'text-gray-700');
+            } else if (tabName === 'new-construction') {
+                document.getElementById('new-construction-content').classList.remove('hidden');
+                document.getElementById('new-construction-tab-btn').classList.add('bg-orange-600', 'text-white');
+                document.getElementById('new-construction-tab-btn').classList.remove('bg-gray-300', 'text-gray-700');
+            }
+        }
+        
+        // Global variables for construction projects
+        let fixFlipItems = [];
+        let newConstructionItems = [];
+        let constructionCatalog = {};
+        
+        // Load construction catalog from backend
+        async function loadConstructionCatalog() {
+            try {
+                const response = await fetch('/api/construction/catalog');
+                const data = await response.json();
+                constructionCatalog = data;
+            } catch (error) {
+                console.error('Error loading construction catalog:', error);
+            }
+        }
+        
+        // Search construction items
+        function searchConstructionItems(projectType) {
+            const searchTerm = document.getElementById(projectType === 'fix_flip' ? 'ff-item-search' : 'nc-item-search').value.toLowerCase();
+            const resultsContainer = document.getElementById(projectType === 'fix_flip' ? 'ff-search-results' : 'nc-search-results');
+            
+            if (searchTerm.length < 2) {
+                resultsContainer.classList.add('hidden');
+                return;
+            }
+            
+            const items = constructionCatalog[projectType] || [];
+            const filteredItems = items.filter(item => 
+                item.trade.toLowerCase().includes(searchTerm) || 
+                item.sub_item.toLowerCase().includes(searchTerm)
+            );
+            
+            if (filteredItems.length === 0) {
+                resultsContainer.innerHTML = '<div class="p-3 text-gray-500 text-sm">No items found</div>';
+                resultsContainer.classList.remove('hidden');
+                return;
+            }
+            
+            resultsContainer.innerHTML = filteredItems.map(item => `
+                <div class="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0" onclick="addCatalogItem('${projectType}', ${item.id})">
+                    <div class="font-medium text-gray-900">${item.sub_item}</div>
+                    <div class="text-sm text-gray-600">${item.trade}</div>
+                    <div class="text-xs text-gray-500">Labor: $${item.labor_cost || 0} | Material: $${item.material_cost || 0}</div>
+                </div>
+            `).join('');
+            
+            resultsContainer.classList.remove('hidden');
+        }
+        
+        // Add catalog item to project
+        function addCatalogItem(projectType, itemId) {
+            const items = constructionCatalog[projectType] || [];
+            const item = items.find(i => i.id === itemId);
+            
+            if (!item) return;
+            
+            const newItem = {
+                id: Date.now(),
+                catalog_id: itemId,
+                trade: item.trade,
+                sub_item: item.sub_item,
+                quantity: 1,
+                labor_cost: item.labor_cost || 0,
+                material_cost: item.material_cost || 0,
+                total_cost: (item.labor_cost || 0) + (item.material_cost || 0)
+            };
+            
+            if (projectType === 'fix_flip') {
+                fixFlipItems.push(newItem);
+                renderFixFlipItems();
+                calculateFixFlipTotal();
+            } else {
+                newConstructionItems.push(newItem);
+                renderNewConstructionItems();
+                calculateNewConstructionTotal();
+            }
+            
+            // Clear search
+            const searchInput = document.getElementById(projectType === 'fix_flip' ? 'ff-item-search' : 'nc-item-search');
+            const resultsContainer = document.getElementById(projectType === 'fix_flip' ? 'ff-search-results' : 'nc-search-results');
+            searchInput.value = '';
+            resultsContainer.classList.add('hidden');
+        }
+        
+        // Add custom item
+        function addCustomItem(projectType) {
+            const newItem = {
+                id: Date.now(),
+                catalog_id: null,
+                trade: 'Custom',
+                sub_item: 'Custom Item',
+                quantity: 1,
+                labor_cost: 0,
+                material_cost: 0,
+                total_cost: 0
+            };
+            
+            if (projectType === 'fix_flip') {
+                fixFlipItems.push(newItem);
+                renderFixFlipItems();
+                calculateFixFlipTotal();
+            } else {
+                newConstructionItems.push(newItem);
+                renderNewConstructionItems();
+                calculateNewConstructionTotal();
+            }
+        }
+        
+        // Render Fix & Flip items
+        function renderFixFlipItems() {
+            const container = document.getElementById('ff-selected-items');
+            container.innerHTML = fixFlipItems.map(item => `
+                <div class="border border-gray-200 rounded-lg p-3 bg-white">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex-1">
+                            <input type="text" value="${item.sub_item}" 
+                                   class="font-medium text-gray-900 bg-transparent border-none p-0 w-full"
+                                   onchange="updateItemField(${item.id}, 'sub_item', this.value, 'fix_flip')">
+                            <div class="text-sm text-gray-600">${item.trade}</div>
+                        </div>
+                        <button onclick="removeItem(${item.id}, 'fix_flip')" 
+                                class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-trash text-sm"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                            <label class="text-gray-600">Quantity:</label>
+                            <input type="number" value="${item.quantity}" min="1" 
+                                   class="w-full px-2 py-1 border border-gray-300 rounded"
+                                   onchange="updateItemField(${item.id}, 'quantity', this.value, 'fix_flip')">
+                        </div>
+                        <div>
+                            <label class="text-gray-600">Total:</label>
+                            <div class="font-medium text-gray-900">$${item.total_cost.toLocaleString()}</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mt-2 text-sm">
+                        <div>
+                            <label class="text-gray-600">Labor:</label>
+                            <input type="number" value="${item.labor_cost}" min="0" 
+                                   class="w-full px-2 py-1 border border-gray-300 rounded"
+                                   onchange="updateItemField(${item.id}, 'labor_cost', this.value, 'fix_flip')">
+                        </div>
+                        <div>
+                            <label class="text-gray-600">Material:</label>
+                            <input type="number" value="${item.material_cost}" min="0" 
+                                   class="w-full px-2 py-1 border border-gray-300 rounded"
+                                   onchange="updateItemField(${item.id}, 'material_cost', this.value, 'fix_flip')">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Render New Construction items
+        function renderNewConstructionItems() {
+            const container = document.getElementById('nc-selected-items');
+            container.innerHTML = newConstructionItems.map(item => `
+                <div class="border border-gray-200 rounded-lg p-3 bg-white">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex-1">
+                            <input type="text" value="${item.sub_item}" 
+                                   class="font-medium text-gray-900 bg-transparent border-none p-0 w-full"
+                                   onchange="updateItemField(${item.id}, 'sub_item', this.value, 'new_construction')">
+                            <div class="text-sm text-gray-600">${item.trade}</div>
+                        </div>
+                        <button onclick="removeItem(${item.id}, 'new_construction')" 
+                                class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-trash text-sm"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                            <label class="text-gray-600">Quantity:</label>
+                            <input type="number" value="${item.quantity}" min="1" 
+                                   class="w-full px-2 py-1 border border-gray-300 rounded"
+                                   onchange="updateItemField(${item.id}, 'quantity', this.value, 'new_construction')">
+                        </div>
+                        <div>
+                            <label class="text-gray-600">Total:</label>
+                            <div class="font-medium text-gray-900">$${item.total_cost.toLocaleString()}</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mt-2 text-sm">
+                        <div>
+                            <label class="text-gray-600">Labor:</label>
+                            <input type="number" value="${item.labor_cost}" min="0" 
+                                   class="w-full px-2 py-1 border border-gray-300 rounded"
+                                   onchange="updateItemField(${item.id}, 'labor_cost', this.value, 'new_construction')">
+                        </div>
+                        <div>
+                            <label class="text-gray-600">Material:</label>
+                            <input type="number" value="${item.material_cost}" min="0" 
+                                   class="w-full px-2 py-1 border border-gray-300 rounded"
+                                   onchange="updateItemField(${item.id}, 'material_cost', this.value, 'new_construction')">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Update item field
+        function updateItemField(itemId, field, value, projectType) {
+            const items = projectType === 'fix_flip' ? fixFlipItems : newConstructionItems;
+            const item = items.find(i => i.id === itemId);
+            
+            if (!item) return;
+            
+            if (field === 'quantity' || field === 'labor_cost' || field === 'material_cost') {
+                item[field] = parseFloat(value) || 0;
+                item.total_cost = (item.labor_cost + item.material_cost) * item.quantity;
+            } else {
+                item[field] = value;
+            }
+            
+            if (projectType === 'fix_flip') {
+                renderFixFlipItems();
+                calculateFixFlipTotal();
+            } else {
+                renderNewConstructionItems();
+                calculateNewConstructionTotal();
+            }
+        }
+        
+        // Remove item
+        function removeItem(itemId, projectType) {
+            if (projectType === 'fix_flip') {
+                fixFlipItems = fixFlipItems.filter(item => item.id !== itemId);
+                renderFixFlipItems();
+                calculateFixFlipTotal();
+            } else {
+                newConstructionItems = newConstructionItems.filter(item => item.id !== itemId);
+                renderNewConstructionItems();
+                calculateNewConstructionTotal();
+            }
+        }
+        
+        // Calculate Fix & Flip total
+        function calculateFixFlipTotal() {
+            const hardCosts = fixFlipItems.reduce((sum, item) => sum + item.total_cost, 0);
+            const overheadPercent = parseFloat(document.getElementById('ff-overhead-percent').value) || 0;
+            const contingencyPercent = parseFloat(document.getElementById('ff-contingency-percent').value) || 0;
+            const gcFeePercent = parseFloat(document.getElementById('ff-gc-fee-percent').value) || 0;
+            
+            const overheadCost = hardCosts * (overheadPercent / 100);
+            const contingencyCost = hardCosts * (contingencyPercent / 100);
+            const gcFeeCost = hardCosts * (gcFeePercent / 100);
+            const totalCost = hardCosts + overheadCost + contingencyCost + gcFeeCost;
+            
+            document.getElementById('ff-hard-costs').textContent = `$${hardCosts.toLocaleString()}`;
+            document.getElementById('ff-overhead-cost').textContent = `$${overheadCost.toLocaleString()}`;
+            document.getElementById('ff-contingency-cost').textContent = `$${contingencyCost.toLocaleString()}`;
+            document.getElementById('ff-gc-fee-cost').textContent = `$${gcFeeCost.toLocaleString()}`;
+            document.getElementById('ff-total-cost').textContent = `$${totalCost.toLocaleString()}`;
+        }
+        
+        // Calculate New Construction total
+        function calculateNewConstructionTotal() {
+            const hardCosts = newConstructionItems.reduce((sum, item) => sum + item.total_cost, 0);
+            const overheadPercent = parseFloat(document.getElementById('nc-overhead-percent').value) || 0;
+            const contingencyPercent = parseFloat(document.getElementById('nc-contingency-percent').value) || 0;
+            const gcFeePercent = parseFloat(document.getElementById('nc-gc-fee-percent').value) || 0;
+            
+            const overheadCost = hardCosts * (overheadPercent / 100);
+            const contingencyCost = hardCosts * (contingencyPercent / 100);
+            const gcFeeCost = hardCosts * (gcFeePercent / 100);
+            const constructionCost = hardCosts + overheadCost + contingencyCost + gcFeeCost;
+            
+            const landCost = parseFloat(document.getElementById('nc-land-cost').value) || 0;
+            
+            // Calculate carry costs
+            const loanPercent = parseFloat(document.getElementById('nc-loan-percent').value) || 0;
+            const interestRate = parseFloat(document.getElementById('nc-interest-rate').value) || 0;
+            const constructionMonths = parseFloat(document.getElementById('nc-construction-months').value) || 0;
+            
+            const totalProjectCost = constructionCost + landCost;
+            const loanAmount = totalProjectCost * (loanPercent / 100);
+            const monthlyInterest = loanAmount * (interestRate / 100 / 12);
+            const carryCost = monthlyInterest * constructionMonths;
+            
+            const finalTotalCost = totalProjectCost + carryCost;
+            
+            document.getElementById('nc-hard-costs').textContent = `$${hardCosts.toLocaleString()}`;
+            document.getElementById('nc-overhead-cost').textContent = `$${overheadCost.toLocaleString()}`;
+            document.getElementById('nc-contingency-cost').textContent = `$${contingencyCost.toLocaleString()}`;
+            document.getElementById('nc-gc-fee-cost').textContent = `$${gcFeeCost.toLocaleString()}`;
+            document.getElementById('nc-construction-cost').textContent = `$${constructionCost.toLocaleString()}`;
+            document.getElementById('nc-land-cost-display').textContent = `$${landCost.toLocaleString()}`;
+            document.getElementById('nc-carry-cost-display').textContent = `$${carryCost.toLocaleString()}`;
+            document.getElementById('nc-total-cost').textContent = `$${finalTotalCost.toLocaleString()}`;
+        }
+        
+        // Save Fix & Flip project
+        async function saveFixFlipProject() {
+            const projectData = {
+                project_name: document.getElementById('ff-project-name').value,
+                property_address: document.getElementById('ff-property-address').value,
+                property_sqft: parseFloat(document.getElementById('ff-property-sqft').value) || 0,
+                project_type: 'fix_flip',
+                line_items: fixFlipItems,
+                multipliers: {
+                    overhead_percent: parseFloat(document.getElementById('ff-overhead-percent').value) || 0,
+                    contingency_percent: parseFloat(document.getElementById('ff-contingency-percent').value) || 0,
+                    gc_fee_percent: parseFloat(document.getElementById('ff-gc-fee-percent').value) || 0
+                }
+            };
+            
+            try {
+                const response = await fetch('/api/construction/save-project', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(projectData)
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showToast('Project saved successfully!', 'success');
+                } else {
+                    showToast('Error saving project: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showToast('Error saving project: ' + error.message, 'error');
+            }
+        }
+        
+        // Save New Construction project
+        async function saveNewConstructionProject() {
+            const projectData = {
+                project_name: document.getElementById('nc-project-name').value,
+                property_address: document.getElementById('nc-property-address').value,
+                property_sqft: parseFloat(document.getElementById('nc-property-sqft').value) || 0,
+                project_type: 'new_construction',
+                line_items: newConstructionItems,
+                multipliers: {
+                    overhead_percent: parseFloat(document.getElementById('nc-overhead-percent').value) || 0,
+                    contingency_percent: parseFloat(document.getElementById('nc-contingency-percent').value) || 0,
+                    gc_fee_percent: parseFloat(document.getElementById('nc-gc-fee-percent').value) || 0
+                },
+                land_cost: parseFloat(document.getElementById('nc-land-cost').value) || 0,
+                carry_costs: {
+                    loan_percent: parseFloat(document.getElementById('nc-loan-percent').value) || 0,
+                    interest_rate: parseFloat(document.getElementById('nc-interest-rate').value) || 0,
+                    construction_months: parseFloat(document.getElementById('nc-construction-months').value) || 0
+                }
+            };
+            
+            try {
+                const response = await fetch('/api/construction/save-project', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(projectData)
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showToast('Project saved successfully!', 'success');
+                } else {
+                    showToast('Error saving project: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showToast('Error saving project: ' + error.message, 'error');
+            }
+        }
+        
+        // Export functions (placeholder)
+        function exportFixFlipSOW() {
+            showToast('Excel export feature coming soon!', 'info');
+        }
+        
+        function exportNewConstructionProForma() {
+            showToast('Excel export feature coming soon!', 'info');
+        }
+        
+        // Show tooltip
+        function showTooltip(type) {
+            const tooltips = {
+                'overhead': 'General overhead costs including insurance, permits, and administrative expenses.',
+                'contingency': 'Buffer for unexpected costs and changes during construction.',
+                'gc-fee': 'General contractor fee for project management and coordination.',
+                'loan-percent': 'Loan-to-value ratio for construction financing.',
+                'interest-rate': 'Annual interest rate for construction loan.',
+                'construction-months': 'Expected duration of construction project.'
+            };
+            
+            const message = tooltips[type] || 'Information not available.';
+            showToast(message, 'info');
+        }
+        
+        // Initialize construction section when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadConstructionCatalog();
+        });
     </script>
     
     <!-- Include Billing Modal -->

@@ -1,0 +1,63 @@
+Prompt for Replit — Add “Construction” workflow (no changes to existing Acq/Dispo/Comps)
+
+1. Global navigation
+
+| Acquisitions | Dispositions | Comps | Construction |
+
+	•	Add Construction as a fourth primary tab; routing & state for the first three remain untouched.
+
+⸻
+
+2. Inside “Construction”
+
+Render an internal tab set:
+
+| 🧰 Fix & Flip | 🏗️ New Construction |
+
+⸻
+
+3. Scope-of-Work Estimators
+
+Feature	Fix & Flip	New Construction
+Source file	Renovo Full Renovation Estimator (Installer).xlsx	Template - New Construction Breakdown.xlsx
+Sheet	“Renovation Estimator”	“Master”
+Seed script	Import rows beginning at row 6 into a construction_catalog table with columns:trade, sub_item, unit, default_qty, labor_cost, material_cost, notes.	Same import logic.
+UI	• Autocomplete by Trade/Sub-Item.• Qty input (prefill with default_qty).• Live line-item cost = (labor + material) × qty.• Apply global multipliers from workbook totals: Overhead %, Contingency %, GC Fee %.• Sticky summary card: Hard Costs / Overhead / Contingency / GC / Total.	Same cost builder plus:• Land-cost field.• Carry-cost calculator (Loan %, IO months, draw schedule) reflecting workbook finance formulas.
+Export	“Download SOW (.xlsx)”— regenerate workbook with user inputs & totals.	“Download Pro-Forma (.xlsx)”— populate workbook’s Summary sheet.
+Events	POST webhook construction.budget.completed with {type, projectId, totalBudget} for Zapier.	Same.
+
+
+⸻
+
+4. UX constraints
+	•	Tailwind grids (grid-cols-1 md:grid-cols-2 lg:grid-cols-3).
+	•	Inputs keep existing brand blue; calculated fields get bg-slate-100.
+	•	Tooltip ? for every multiplier / finance field.
+	•	Mobile-friendly; sticky footer summary on small screens.
+
+⸻
+
+5. Routing & code structure
+
+/construction
+  ├─ /fix-flip       → FixAndFlipEstimator.tsx
+  └─ /new-build      → NewBuildEstimator.tsx
+
+Top-level route guard requires auth; share the same credit deduction logic already used in Acquisitions.
+
+⸻
+
+6. Testing / QA
+	•	Unit tests: workbook import integrity, budget math parity with Excel.
+	•	E2E: create project → build scope → export → reopen and verify persistence.
+	•	No regression in Acquisitions, Dispositions, Comps, payments, Bitcoin flow, or admin dashboard.
+
+⸻
+
+Deliverables
+	1.	Navigation update + new routes
+	2.	DB seed & migration scripts (no hard-coded demo rows)
+	3.	Two fully functional estimators driven by the uploaded Excel logic
+	4.	XLSX export helpers
+	5.	Webhook & Zapier manifest update
+	6.	Passing CI, green QA

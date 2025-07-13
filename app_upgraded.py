@@ -37,6 +37,7 @@ from bitcoin_payment_service import bitcoin_service
 from comps_service import CompsService
 from email_service import email_service
 from affiliate_api import affiliate_api
+from construction_service import ConstructionService
 
 # Load environment variables from .env file
 if os.path.exists('.env'):
@@ -73,6 +74,9 @@ limiter = Limiter(
 
 # Initialize billing service
 billing_service = BillingService()
+
+# Initialize construction service
+construction_service = ConstructionService()
 
 # Database connection with proper connection pool settings and SSL handling
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -2215,6 +2219,155 @@ def analyze_comps():
         
     except Exception as e:
         logging.error(f"Error analyzing comparables: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# Construction API Endpoints
+@app.route('/api/construction/catalog', methods=['GET'])
+def get_construction_catalog():
+    """
+    Get construction catalog items for Fix & Flip and New Construction
+    """
+    try:
+        fix_flip_items = construction_service.get_catalog_items('fix_flip')
+        new_construction_items = construction_service.get_catalog_items('new_construction')
+        
+        return jsonify({
+            'success': True,
+            'fix_flip': fix_flip_items,
+            'new_construction': new_construction_items
+        })
+        
+    except Exception as e:
+        logging.error(f"Error getting construction catalog: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/construction/save-project', methods=['POST'])
+@require_auth
+@require_seat
+def save_construction_project():
+    """
+    Save a construction project (Fix & Flip or New Construction)
+    """
+    try:
+        data = request.get_json()
+        
+        # Get user ID from session
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({
+                'success': False,
+                'error': 'User not authenticated'
+            }), 401
+        
+        # Extract project data
+        project_name = data.get('project_name', 'Untitled Project')
+        project_type = data.get('project_type')
+        property_address = data.get('property_address')
+        property_sqft = data.get('property_sqft')
+        line_items = data.get('line_items', [])
+        multipliers = data.get('multipliers', {})
+        
+        # Calculate estimate
+        if project_type == 'fix_flip':
+            estimate = construction_service.calculate_fix_flip_estimate(line_items, multipliers)
+        elif project_type == 'new_construction':
+            land_cost = data.get('land_cost', 0)
+            carry_costs = data.get('carry_costs', {})
+            estimate = construction_service.calculate_new_construction_estimate(
+                line_items, multipliers, land_cost, carry_costs
+            )
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid project type'
+            }), 400
+        
+        # Save project
+        project_id = construction_service.save_project_estimate(
+            user_id=user_id,
+            project_name=project_name,
+            project_type=project_type,
+            estimate_data={
+                'line_items': line_items,
+                'multipliers': multipliers,
+                'estimate': estimate,
+                'land_cost': land_cost if project_type == 'new_construction' else 0,
+                'carry_costs': carry_costs if project_type == 'new_construction' else {}
+            },
+            property_address=property_address
+        )
+        
+        return jsonify({
+            'success': True,
+            'project_id': project_id,
+            'estimate': estimate
+        })
+        
+    except Exception as e:
+        logging.error(f"Error saving construction project: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/construction/search', methods=['GET'])
+def search_construction_items():
+    """
+    Search construction catalog items
+    """
+    try:
+        project_type = request.args.get('project_type')
+        search_term = request.args.get('search_term', '')
+        
+        if not project_type:
+            return jsonify({
+                'success': False,
+                'error': 'Project type is required'
+            }), 400
+        
+        items = construction_service.search_catalog_items(project_type, search_term)
+        
+        return jsonify({
+            'success': True,
+            'items': items
+        })
+        
+    except Exception as e:
+        logging.error(f"Error searching construction items: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/construction/trades', methods=['GET'])
+def get_construction_trades():
+    """
+    Get all trade categories for a project type
+    """
+    try:
+        project_type = request.args.get('project_type')
+        
+        if not project_type:
+            return jsonify({
+                'success': False,
+                'error': 'Project type is required'
+            }), 400
+        
+        trades = construction_service.get_trade_categories(project_type)
+        
+        return jsonify({
+            'success': True,
+            'trades': trades
+        })
+        
+    except Exception as e:
+        logging.error(f"Error getting construction trades: {e}")
         return jsonify({
             'success': False,
             'error': str(e)
