@@ -1023,7 +1023,7 @@ def calculate_strategies():
         repairs = float(data.get('repairs', 30000)) if data.get('repairs') is not None else 30000
         bedrooms = int(data.get('bedrooms', 3)) if data.get('bedrooms') is not None else 3
         bathrooms = float(data.get('bathrooms', 2)) if data.get('bathrooms') is not None else 2
-        square_feet = int(data.get('square_feet', 1200)) if data.get('square_feet') is not None else 1200
+        square_feet = int(data.get('square_feet')) if data.get('square_feet') is not None else None
         monthly_rent = float(data.get('rent', 2000)) if data.get('rent') is not None else 2000
         
         # Validate inputs
@@ -1041,7 +1041,7 @@ def calculate_strategies():
             min_acceptable_profit=int(15000),
             bedrooms=int(bedrooms),
             bathrooms=int(bathrooms),
-            square_feet=int(square_feet),
+            square_feet=int(square_feet) if square_feet is not None else 1200,  # Only for calculations
             rent=int(monthly_rent)
         )
         
@@ -1054,7 +1054,7 @@ def calculate_strategies():
             min_acceptable_profit=int(25000),
             bedrooms=int(bedrooms),
             bathrooms=int(bathrooms),
-            square_feet=int(square_feet),
+            square_feet=int(square_feet) if square_feet is not None else 1200,  # Only for calculations
             rent=int(monthly_rent)
         )
         
@@ -1070,7 +1070,7 @@ def calculate_strategies():
             rehab=int(repairs),
             bedrooms=int(bedrooms),
             bathrooms=int(bathrooms),
-            square_feet=int(square_feet)
+            square_feet=int(square_feet) if square_feet is not None else 1200  # Only for calculations
         )
         
         # Calculate seller finance strategy
@@ -1083,7 +1083,7 @@ def calculate_strategies():
             rehab_budget=int(repairs),
             bedrooms=int(bedrooms),
             bathrooms=int(bathrooms),
-            square_feet=int(square_feet)
+            square_feet=int(square_feet) if square_feet is not None else 1200  # Only for calculations
         )
         
         # Compile comprehensive results

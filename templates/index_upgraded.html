@@ -2135,7 +2135,7 @@
                                         <input type="number" 
                                                class="w-full mt-1 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-teal-500 font-medium text-gray-800"
                                                id="comps-subject-sqft-input" 
-                                               value="1200"
+                                               value=""
                                                onchange="updateSubjectProperty('sqft', this.value)">
                                     </div>
                                     <div>
@@ -3755,10 +3755,16 @@
                     bathroomsInput.value = data.bathrooms;
                 }
             }
-            if (data.square_feet && data.square_feet > 0) {
-                const sqftInput = document.getElementById('square_feet');
-                if (sqftInput) {
+            const sqftInput = document.getElementById('square_feet');
+            if (sqftInput) {
+                if (data.square_feet && data.square_feet > 0) {
                     sqftInput.value = data.square_feet.toLocaleString();
+                } else {
+                    // Clear any existing value and show placeholder when API doesn't have square footage
+                    sqftInput.value = '';
+                    sqftInput.placeholder = 'Enter square feet';
+                    sqftInput.style.backgroundColor = '#fefce8'; // Light yellow background to indicate manual entry needed
+                    sqftInput.style.borderColor = '#eab308'; // Yellow border
                 }
             }
             if (data.estimated_value) {
@@ -3917,7 +3923,7 @@
                 repairs: parseFloat(getElementValue('repairs', '35000')),
                 bedrooms: parseInt(getElementValue('bedrooms', '3')),
                 bathrooms: parseFloat(getElementValue('bathrooms', '2')),
-                square_feet: parseInt(getElementValue('square_feet', '1450')),
+                square_feet: parseInt(getElementValue('square_feet', '') || '0'),
                 rent: parseFloat(getElementValue('rent', '1325'))
             };
             
@@ -5303,7 +5309,7 @@
                     rent: parseFloat(document.getElementById('property-rent')?.value?.replace(/[^\d]/g, '') || 0),
                     bedrooms: parseInt(document.getElementById('bedrooms')?.value || 0),
                     bathrooms: parseFloat(document.getElementById('bathrooms')?.value || 0),
-                    sqft: parseInt(document.getElementById('square_feet')?.value?.replace(/[^\d]/g, '') || 0),
+                    sqft: parseInt(document.getElementById('square_feet')?.value?.replace(/[^\d]/g, '') || '0'),
                     acquisitionPrice: parseFloat(document.getElementById('global-acquisitions-price-header')?.value?.replace(/[^\d]/g, '') || 0)
                 };
 
@@ -5548,7 +5554,7 @@
             const baths = window.lastPropertyData?.baths || 
                          document.getElementById('bathrooms')?.value || 0;
             const sqft = window.lastPropertyData?.sqft || 
-                        document.getElementById('square_feet')?.value?.replace(/[^\d]/g, '') || 0;
+                        document.getElementById('square_feet')?.value?.replace(/[^\d]/g, '') || '0';
             const yearBuilt = window.lastPropertyData?.year_built || 2014;
             
             // Update subject property display
