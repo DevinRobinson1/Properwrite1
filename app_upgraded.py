@@ -201,6 +201,90 @@ def bitcoin_webhook():
     except Exception as e:
         logging.error(f"Bitcoin webhook error: {str(e)}")
         return jsonify({"error": "Webhook processing failed"}), 500
+
+@app.route('/api/billing/create-bitcoin-checkout', methods=['POST'])
+def create_bitcoin_checkout():
+    """Create Bitcoin checkout for credit packs"""
+    try:
+        data = request.get_json()
+        lookup_key = data.get('lookup_key')
+        credits = data.get('credits')
+        amount = data.get('amount')
+        
+        if not lookup_key or not credits or not amount:
+            return jsonify({"error": "Missing required fields"}), 400
+        
+        user_email = session.get('user_email', '')
+        team_id = session.get('team_id', '')
+        
+        # Create Bitcoin payment charge
+        charge = bitcoin_service.create_credit_pack_charge(
+            credits=credits,
+            user_email=user_email,
+            team_id=team_id,
+            amount=amount
+        )
+        
+        return jsonify({
+            "success": True,
+            "checkout_url": charge['data']['hosted_url']
+        })
+        
+    except Exception as e:
+        logging.error(f"Bitcoin checkout error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/signup', methods=['POST'])
+def api_signup():
+    """API endpoint for user signup"""
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        email = data.get('email')
+        password = data.get('password')
+        
+        if not name or not email or not password:
+            return jsonify({"error": "Missing required fields"}), 400
+        
+        # Check if user already exists
+        with Session(engine) as db_session:
+            existing_user = db_session.query(User).filter_by(email=email).first()
+            if existing_user:
+                return jsonify({"error": "Email already registered"}), 400
+        
+        # Create new user with billing service
+        result = billing_service.create_user(
+            name=name,
+            email=email,
+            password=password
+        )
+        
+        if result.get('success'):
+            # Set session
+            session['user_id'] = result['user_id']
+            session['user_email'] = email
+            session['user_name'] = name
+            session['team_id'] = result['team_id']
+            session['team_role'] = 'owner'
+            session['new_user_welcome'] = True
+            
+            # Send welcome email
+            try:
+                email_service.send_welcome_email(email, name)
+            except Exception as e:
+                logging.error(f"Failed to send welcome email: {e}")
+            
+            return jsonify({
+                "success": True,
+                "message": "Account created successfully"
+            })
+        else:
+            return jsonify({"error": result.get('error', 'Failed to create account')}), 400
+            
+    except Exception as e:
+        logging.error(f"Signup error: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
 app.register_blueprint(admin_api_bp)
 app.register_blueprint(zapier_api_bp)
 

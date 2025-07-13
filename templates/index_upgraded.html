@@ -3347,6 +3347,15 @@
             propertyForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
+                // Check if user is logged in (get from server-side data)
+                const isLoggedIn = {{ "true" if session.get('user_id') else "false" }};
+                
+                if (!isLoggedIn) {
+                    // Show blur gate modal instead of processing
+                    showBlurGateModal();
+                    return;
+                }
+                
                 const address = document.getElementById('address')?.value || '';
                 const city = document.getElementById('city')?.value || '';
                 const state = document.getElementById('state')?.value || '';
@@ -6463,28 +6472,71 @@
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
             modal.innerHTML = `
                 <div class="bg-white p-8 rounded-lg max-w-md w-full mx-4">
-                    <h2 class="text-2xl font-bold mb-6">Sign Up</h2>
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Sign Up</h2>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                     <form id="signup-form">
                         <div class="mb-4">
                             <label class="block text-sm font-medium mb-2">Name</label>
-                            <input type="text" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <input type="text" name="name" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div class="mb-4">
                             <label class="block text-sm font-medium mb-2">Email</label>
-                            <input type="email" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <input type="email" name="email" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div class="mb-6">
                             <label class="block text-sm font-medium mb-2">Password</label>
-                            <input type="password" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <input type="password" name="password" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div class="flex justify-end space-x-3">
                             <button type="button" onclick="this.closest('.fixed').remove()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
                             <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Sign Up</button>
                         </div>
                     </form>
+                    <div class="mt-6 text-center">
+                        <span class="text-gray-600">Already have an account? </span>
+                        <button onclick="this.closest('.fixed').remove(); showLoginModal();" class="text-blue-600 hover:text-blue-500 font-medium">Sign In</button>
+                    </div>
                 </div>
             `;
             document.body.appendChild(modal);
+            
+            // Add form submission handler
+            const form = modal.querySelector('#signup-form');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData(form);
+                const name = formData.get('name');
+                const email = formData.get('email');
+                const password = formData.get('password');
+                
+                try {
+                    const response = await fetch('/api/signup', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ name, email, password })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Close modal and redirect to dashboard
+                        modal.remove();
+                        window.location.href = '/dashboard';
+                    } else {
+                        alert('Error creating account: ' + (data.error || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Error during signup:', error);
+                    alert('Error creating account. Please try again.');
+                }
+            });
         }
 
         function scrollToResults() {
@@ -6497,10 +6549,16 @@
         // Close dropdowns when clicking outside
         document.addEventListener('click', function(event) {
             if (!event.target.closest('#resources-dropdown')) {
-                document.getElementById('resources-menu').classList.add('hidden');
+                const resourcesMenu = document.getElementById('resources-menu');
+                if (resourcesMenu) {
+                    resourcesMenu.classList.add('hidden');
+                }
             }
             if (!event.target.closest('#user-dropdown')) {
-                document.getElementById('user-menu').classList.add('hidden');
+                const userMenu = document.getElementById('user-menu');
+                if (userMenu) {
+                    userMenu.classList.add('hidden');
+                }
             }
         });
 
@@ -8539,6 +8597,24 @@
             
             if (trigger) {
                 observer.observe(trigger);
+            }
+        }
+        
+        function showBlurGateModal() {
+            // Apply blur to main content sections
+            const acquisitionsSection = document.getElementById('acquisitions-section');
+            const dispositionsSection = document.getElementById('dispositions-section');
+            const compsSection = document.getElementById('comps-section');
+            
+            if (acquisitionsSection) acquisitionsSection.style.filter = 'blur(3px)';
+            if (dispositionsSection) dispositionsSection.style.filter = 'blur(3px)';
+            if (compsSection) compsSection.style.filter = 'blur(3px)';
+            
+            // Show the scroll gate modal
+            const modal = document.getElementById('scroll-gate-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
             }
         }
         

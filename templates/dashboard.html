@@ -755,41 +755,74 @@
 
     <!-- Add Credits Modal -->
     <div id="add-credits-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="relative top-20 mx-auto p-5 border w-[500px] shadow-lg rounded-md bg-white">
             <div class="mt-3">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Add Credits</h3>
-                <div class="space-y-3">
-                    <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 cursor-pointer credit-option" data-lookup-key="25-credits" data-credits="25" data-price="15">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Add Credits</h3>
+                    <button onclick="closeAddCreditsModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <!-- Payment Method Tabs -->
+                <div class="flex mb-4 border-b">
+                    <button onclick="showPaymentTab('card')" id="card-tab" class="px-4 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600 payment-tab">
+                        <i class="fas fa-credit-card mr-2"></i>Pay with Card
+                    </button>
+                    <button onclick="showPaymentTab('bitcoin')" id="bitcoin-tab" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 ml-4 payment-tab">
+                        <i class="fab fa-bitcoin mr-2"></i>Pay with Bitcoin (-25%)
+                    </button>
+                </div>
+                
+                <!-- Credit Options -->
+                <div class="space-y-3 mb-6">
+                    <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 cursor-pointer credit-option" data-lookup-key="25-credits" data-credits="25" data-price="15" data-bitcoin-price="11.25">
                         <div class="flex justify-between items-center">
                             <div>
                                 <p class="font-medium">25 Credits</p>
                                 <p class="text-sm text-gray-500">Best for small teams</p>
                             </div>
-                            <p class="text-lg font-bold">$15</p>
+                            <div class="text-right">
+                                <p class="text-lg font-bold card-price">$15</p>
+                                <p class="text-sm text-orange-600 bitcoin-price hidden">$11.25 <span class="text-gray-500 line-through">$15</span></p>
+                            </div>
                         </div>
                     </div>
-                    <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 cursor-pointer credit-option" data-lookup-key="100-credits" data-credits="100" data-price="45">
+                    <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 cursor-pointer credit-option" data-lookup-key="100-credits" data-credits="100" data-price="45" data-bitcoin-price="33.75">
                         <div class="flex justify-between items-center">
                             <div>
                                 <p class="font-medium">100 Credits</p>
                                 <p class="text-sm text-gray-500">Most popular</p>
                             </div>
-                            <p class="text-lg font-bold">$45</p>
+                            <div class="text-right">
+                                <p class="text-lg font-bold card-price">$45</p>
+                                <p class="text-sm text-orange-600 bitcoin-price hidden">$33.75 <span class="text-gray-500 line-through">$45</span></p>
+                            </div>
                         </div>
                     </div>
-                    <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 cursor-pointer credit-option" data-lookup-key="250-credits" data-credits="250" data-price="99">
+                    <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 cursor-pointer credit-option" data-lookup-key="250-credits" data-credits="250" data-price="99" data-bitcoin-price="74.25">
                         <div class="flex justify-between items-center">
                             <div>
                                 <p class="font-medium">250 Credits</p>
                                 <p class="text-sm text-gray-500">Best value</p>
                             </div>
-                            <p class="text-lg font-bold">$99</p>
+                            <div class="text-right">
+                                <p class="text-lg font-bold card-price">$99</p>
+                                <p class="text-sm text-orange-600 bitcoin-price hidden">$74.25 <span class="text-gray-500 line-through">$99</span></p>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="flex justify-end space-x-3 mt-6">
+                
+                <!-- Payment Buttons -->
+                <div class="flex justify-end space-x-3">
                     <button onclick="closeAddCreditsModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Cancel</button>
-                    <button id="purchase-credits-btn" onclick="purchaseSelectedCredits()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Purchase</button>
+                    <button id="purchase-credits-btn" onclick="purchaseSelectedCredits()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed card-payment-btn" disabled>
+                        <i class="fas fa-credit-card mr-2"></i>Pay with Card
+                    </button>
+                    <button id="purchase-bitcoin-btn" onclick="purchaseWithBitcoin()" class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed bitcoin-payment-btn hidden" disabled>
+                        <i class="fab fa-bitcoin mr-2"></i>Pay with Bitcoin (-25%)
+                    </button>
                 </div>
             </div>
         </div>
@@ -928,11 +961,17 @@
                 option.classList.remove('border-blue-500', 'bg-blue-50');
                 option.classList.add('border-gray-200');
             });
-            // Disable purchase button
+            // Disable purchase buttons
             const purchaseBtn = document.getElementById('purchase-credits-btn');
+            const bitcoinBtn = document.getElementById('purchase-bitcoin-btn');
             if (purchaseBtn) {
                 purchaseBtn.disabled = true;
             }
+            if (bitcoinBtn) {
+                bitcoinBtn.disabled = true;
+            }
+            // Reset to card tab
+            showPaymentTab('card');
         }
 
         function setupCreditOptionHandlers() {
@@ -952,16 +991,94 @@
                     selectedCreditOption = {
                         lookup_key: this.dataset.lookupKey,
                         credits: this.dataset.credits,
-                        price: this.dataset.price
+                        price: this.dataset.price,
+                        bitcoin_price: this.dataset.bitcoinPrice
                     };
                     
-                    // Enable purchase button
+                    // Enable purchase buttons
                     const purchaseBtn = document.getElementById('purchase-credits-btn');
+                    const bitcoinBtn = document.getElementById('purchase-bitcoin-btn');
                     if (purchaseBtn) {
                         purchaseBtn.disabled = false;
                     }
+                    if (bitcoinBtn) {
+                        bitcoinBtn.disabled = false;
+                    }
                 });
             });
+        }
+
+        function showPaymentTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.payment-tab').forEach(tab => {
+                tab.classList.remove('text-blue-600', 'border-blue-600');
+                tab.classList.add('text-gray-500');
+            });
+            
+            if (tabName === 'card') {
+                document.getElementById('card-tab').classList.add('text-blue-600', 'border-blue-600');
+                document.getElementById('card-tab').classList.remove('text-gray-500');
+                
+                // Show card pricing, hide bitcoin pricing
+                document.querySelectorAll('.card-price').forEach(el => el.classList.remove('hidden'));
+                document.querySelectorAll('.bitcoin-price').forEach(el => el.classList.add('hidden'));
+                
+                // Show card button, hide bitcoin button
+                document.querySelector('.card-payment-btn').classList.remove('hidden');
+                document.querySelector('.bitcoin-payment-btn').classList.add('hidden');
+            } else if (tabName === 'bitcoin') {
+                document.getElementById('bitcoin-tab').classList.add('text-blue-600', 'border-blue-600');
+                document.getElementById('bitcoin-tab').classList.remove('text-gray-500');
+                
+                // Show bitcoin pricing, hide card pricing
+                document.querySelectorAll('.card-price').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.bitcoin-price').forEach(el => el.classList.remove('hidden'));
+                
+                // Show bitcoin button, hide card button
+                document.querySelector('.card-payment-btn').classList.add('hidden');
+                document.querySelector('.bitcoin-payment-btn').classList.remove('hidden');
+            }
+        }
+
+        async function purchaseWithBitcoin() {
+            if (!selectedCreditOption) {
+                alert('Please select a credit pack first');
+                return;
+            }
+
+            const bitcoinBtn = document.getElementById('purchase-bitcoin-btn');
+            bitcoinBtn.disabled = true;
+            bitcoinBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+
+            try {
+                const response = await fetch('/api/billing/create-bitcoin-checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        lookup_key: selectedCreditOption.lookup_key,
+                        credits: selectedCreditOption.credits,
+                        amount: selectedCreditOption.bitcoin_price
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Redirect to Coinbase Commerce checkout
+                    window.location.href = result.checkout_url;
+                } else {
+                    alert('Error processing Bitcoin payment: ' + (result.error || 'Unknown error'));
+                    bitcoinBtn.disabled = false;
+                    bitcoinBtn.innerHTML = '<i class="fab fa-bitcoin mr-2"></i>Pay with Bitcoin (-25%)';
+                }
+            } catch (error) {
+                console.error('Error processing Bitcoin payment:', error);
+                alert('Error processing Bitcoin payment. Please try again.');
+                bitcoinBtn.disabled = false;
+                bitcoinBtn.innerHTML = '<i class="fab fa-bitcoin mr-2"></i>Pay with Bitcoin (-25%)';
+            }
         }
 
         async function purchaseSelectedCredits() {
