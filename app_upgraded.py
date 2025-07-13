@@ -2746,6 +2746,49 @@ def billing_webhook():
         logging.error(f"Webhook error: {e}")
         return jsonify({'error': 'Webhook processing failed'}), 400
 
+@app.route('/api/billing/change-plan', methods=['POST'])
+@csrf.exempt
+@require_auth
+def change_plan():
+    """Change team's subscription plan"""
+    try:
+        data = request.get_json()
+        new_plan_key = data.get('plan_key')
+        
+        if not new_plan_key:
+            return jsonify({'error': 'plan_key is required'}), 400
+        
+        result = billing_service.change_plan(
+            team_id=g.current_user['team_id'],
+            new_plan_key=new_plan_key,
+            user_id=g.current_user['id']
+        )
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logging.error(f"Error changing plan: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/billing/history')
+@require_auth
+def get_billing_history():
+    """Get billing history for current user's team"""
+    try:
+        history = billing_service.get_billing_history(
+            team_id=g.current_user['team_id'],
+            limit=50
+        )
+        
+        return jsonify({
+            'success': True,
+            'history': history
+        })
+        
+    except Exception as e:
+        logging.error(f"Error getting billing history: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
 @app.route('/api/team/stats')
 def get_team_stats():
     """Get team statistics and billing information"""

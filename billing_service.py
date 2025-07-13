@@ -1088,3 +1088,82 @@ class BillingService:
         except Exception as e:
             logging.error(f"Error activating subscription: {e}")
             return {'success': False, 'error': str(e)}
+    
+    def change_plan(self, team_id: str, new_plan_key: str, user_id: str) -> Dict:
+        """
+        Change team's subscription plan
+        """
+        try:
+            with self.db_session() as db:
+                # Get the team
+                team = db.query(Team).filter(Team.id == team_id).first()
+                if not team:
+                    return {'success': False, 'error': 'Team not found'}
+                
+                # Get plan configuration
+                plan_config = TIER_CONFIG.get(new_plan_key)
+                if not plan_config:
+                    return {'success': False, 'error': 'Invalid plan'}
+                
+                old_plan = team.tier
+                
+                # Update team plan
+                team.tier = new_plan_key
+                team.seats_max = plan_config['seats']
+                
+                # Handle credit allocation for plan changes
+                if plan_config.get('monthly_credits', 0) > 0:
+                    # For plans with monthly credits, set balance to plan credits
+                    team.credit_balance = plan_config['monthly_credits']
+                elif plan_config.get('monthly_credits') == -1:
+                    # For unlimited plans, set a high number
+                    team.credit_balance = 999999
+                
+                # Create log entry for plan change
+                credit_log = CreditLog(
+                    team_id=team_id,
+                    user_id=user_id,
+                    delta=plan_config.get('monthly_credits', 0),
+                    reason=f'Plan changed from {old_plan} to {new_plan_key}'
+                )
+                
+                db.add(credit_log)
+                db.commit()
+                
+                return {
+                    'success': True,
+                    'old_plan': old_plan,
+                    'new_plan': new_plan_key,
+                    'credits': plan_config.get('monthly_credits', 0),
+                    'seats': plan_config['seats']
+                }
+                
+        except Exception as e:
+            logging.error(f"Error changing plan: {e}")
+            return {'success': False, 'error': str(e)}
+    
+    def get_billing_history(self, team_id: str, limit: int = 50) -> List[Dict]:
+        """
+        Get billing history for a team
+        """
+        try:
+            with self.db_session() as db:
+                # Get credit logs for billing history
+                logs = db.query(CreditLog).filter(
+                    CreditLog.team_id == team_id
+                ).order_by(CreditLog.created_at.desc()).limit(limit).all()
+                
+                return [
+                    {
+                        'id': str(log.id),
+                        'date': log.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                        'type': 'Credit Purchase' if log.delta > 0 else 'Credit Usage',
+                        'description': log.reason,
+                        'amount': log.delta,
+                        'balance_after': team.credit_balance if log == logs[0] else None
+                    } for log in logs
+                ]
+                
+        except Exception as e:
+            logging.error(f"Error getting billing history: {e}")
+            return []

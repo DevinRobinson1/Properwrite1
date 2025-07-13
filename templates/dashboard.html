@@ -90,9 +90,9 @@
                             <i class="fas fa-tachometer-alt mr-3"></i>
                             Dashboard
                         </button>
-                        <button onclick="showSection('credits')" class="nav-item w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
-                            <i class="fas fa-coins mr-3"></i>
-                            Credit Usage
+                        <button onclick="showSection('plans')" class="nav-item w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
+                            <i class="fas fa-credit-card mr-3"></i>
+                            Plans & Credits
                         </button>
                         <button onclick="showSection('team')" class="nav-item w-full flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
                             <i class="fas fa-users mr-3"></i>
@@ -258,9 +258,98 @@
                 </div>
 
                 <!-- Credit Management Section -->
-                <div id="credits-section" class="section hidden">
-                    <div class="mb-6">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Credit Management</h2>
+                <div id="plans-section" class="section hidden">
+                    <!-- Current Plan Overview -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                        <h2 class="text-xl font-semibold text-gray-900 mb-2">Current Plan</h2>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Active Plan</p>
+                                <p class="text-2xl font-bold text-blue-600" id="current-plan-name">Pro</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm text-gray-600">Credits</p>
+                                <p class="text-2xl font-bold text-green-600" id="current-plan-credits">247</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Next billing date:</span>
+                                <span id="next-billing-date">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Available Plans -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                        <h2 class="text-xl font-semibold text-gray-900 mb-4">Available Plans</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Individual Plan -->
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition-colors plan-card" data-plan="individual">
+                                <div class="text-center">
+                                    <h3 class="font-semibold text-gray-900">Individual</h3>
+                                    <p class="text-2xl font-bold text-blue-600 mt-2">$27<span class="text-sm text-gray-500">/month</span></p>
+                                    <p class="text-sm text-gray-600 mt-1">100 credits/month</p>
+                                    <p class="text-xs text-gray-500">1 user</p>
+                                </div>
+                                <div class="mt-4">
+                                    <button onclick="changePlan('individual')" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">
+                                        Select Plan
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Pro Plan -->
+                            <div class="border border-blue-500 rounded-lg p-4 bg-blue-50 plan-card current-plan-card" data-plan="pro">
+                                <div class="text-center">
+                                    <h3 class="font-semibold text-gray-900">Pro</h3>
+                                    <div class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full inline-block mb-2">Current</div>
+                                    <p class="text-2xl font-bold text-blue-600">$79<span class="text-sm text-gray-500">/month</span></p>
+                                    <p class="text-sm text-gray-600 mt-1">300 credits/month</p>
+                                    <p class="text-xs text-gray-500">1 user</p>
+                                </div>
+                                <div class="mt-4">
+                                    <button disabled class="w-full px-4 py-2 bg-gray-300 text-gray-500 rounded-md cursor-not-allowed text-sm">
+                                        Current Plan
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Team5 Plan -->
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition-colors plan-card" data-plan="team5">
+                                <div class="text-center">
+                                    <h3 class="font-semibold text-gray-900">Team5</h3>
+                                    <p class="text-2xl font-bold text-blue-600 mt-2">$199<span class="text-sm text-gray-500">/month</span></p>
+                                    <p class="text-sm text-gray-600 mt-1">1,000 credits/month</p>
+                                    <p class="text-xs text-gray-500">5 users</p>
+                                </div>
+                                <div class="mt-4">
+                                    <button onclick="changePlan('team5')" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">
+                                        Upgrade
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Growth10 Plan -->
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition-colors plan-card" data-plan="growth10">
+                                <div class="text-center">
+                                    <h3 class="font-semibold text-gray-900">Growth10</h3>
+                                    <p class="text-2xl font-bold text-blue-600 mt-2">$399<span class="text-sm text-gray-500">/month</span></p>
+                                    <p class="text-sm text-gray-600 mt-1">Unlimited credits</p>
+                                    <p class="text-xs text-gray-500">10 users</p>
+                                </div>
+                                <div class="mt-4">
+                                    <button onclick="changePlan('growth10')" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">
+                                        Upgrade
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Credit Management -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                        <h2 class="text-xl font-semibold text-gray-900 mb-2">Credit Management</h2>
                         <p class="text-gray-600">Track and manage your analysis credits</p>
                     </div>
 
@@ -893,9 +982,9 @@
                 <i class="fas fa-tachometer-alt text-gray-600"></i>
                 <span class="text-xs text-gray-600 mt-1">Dashboard</span>
             </button>
-            <button onclick="showSection('credits')" class="flex flex-col items-center p-2">
-                <i class="fas fa-coins text-gray-600"></i>
-                <span class="text-xs text-gray-600 mt-1">Credits</span>
+            <button onclick="showSection('plans')" class="flex flex-col items-center p-2">
+                <i class="fas fa-credit-card text-gray-600"></i>
+                <span class="text-xs text-gray-600 mt-1">Plans</span>
             </button>
             <button onclick="showSection('team')" class="flex flex-col items-center p-2">
                 <i class="fas fa-users text-gray-600"></i>
@@ -1211,6 +1300,89 @@
             }
         }
 
+        async function changePlan(planKey) {
+            if (!confirm(`Are you sure you want to change to the ${planKey} plan?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/billing/change-plan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ plan_key: planKey })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`Successfully changed from ${result.old_plan} to ${result.new_plan} plan!`);
+                    
+                    // Update UI to reflect new plan
+                    updatePlanUI(result.new_plan);
+                    
+                    // Refresh dashboard data
+                    await loadDashboardData();
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Error changing plan:', error);
+                alert('Error changing plan. Please try again.');
+            }
+        }
+
+        function updatePlanUI(newPlan) {
+            // Remove current plan styling from all cards
+            document.querySelectorAll('.plan-card').forEach(card => {
+                card.classList.remove('border-blue-500', 'bg-blue-50', 'current-plan-card');
+                card.classList.add('border-gray-200');
+                
+                // Reset button to upgrade/select
+                const button = card.querySelector('button');
+                const planKey = card.dataset.plan;
+                
+                if (button) {
+                    button.disabled = false;
+                    button.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+                    button.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+                    button.textContent = 'Select Plan';
+                }
+                
+                // Remove current badge
+                const badge = card.querySelector('.bg-blue-500');
+                if (badge) {
+                    badge.remove();
+                }
+            });
+            
+            // Add current plan styling to new plan
+            const newPlanCard = document.querySelector(`[data-plan="${newPlan}"]`);
+            if (newPlanCard) {
+                newPlanCard.classList.remove('border-gray-200');
+                newPlanCard.classList.add('border-blue-500', 'bg-blue-50', 'current-plan-card');
+                
+                // Update button to current
+                const button = newPlanCard.querySelector('button');
+                if (button) {
+                    button.disabled = true;
+                    button.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+                    button.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+                    button.textContent = 'Current Plan';
+                }
+                
+                // Add current badge
+                const titleElement = newPlanCard.querySelector('h3');
+                if (titleElement) {
+                    const badge = document.createElement('div');
+                    badge.className = 'bg-blue-500 text-white text-xs px-2 py-1 rounded-full inline-block mb-2';
+                    badge.textContent = 'Current';
+                    titleElement.insertAdjacentElement('afterend', badge);
+                }
+            }
+        }
+
         async function sendTeamInvite() {
             const email = document.getElementById('invite-email').value.trim();
             const role = document.getElementById('invite-role').value;
@@ -1353,16 +1525,26 @@
                         });
                     }
                     
-                    // Update credit usage stats in Credits section
-                    const creditsSection = document.getElementById('credits-section');
-                    if (creditsSection) {
-                        const creditsRemainingElements = creditsSection.querySelectorAll('.text-3xl');
+                    // Update credit usage stats in Plans section
+                    const plansSection = document.getElementById('plans-section');
+                    if (plansSection) {
+                        const creditsRemainingElements = plansSection.querySelectorAll('.text-3xl');
                         if (creditsRemainingElements[0]) {
                             creditsRemainingElements[0].textContent = data.team.credits_remaining.toLocaleString();
                         }
                         if (creditsRemainingElements[1]) {
                             creditsRemainingElements[1].textContent = data.team.credits_used_this_month.toLocaleString();
                         }
+                    }
+                    
+                    // Update current plan info
+                    const currentPlanName = document.getElementById('current-plan-name');
+                    const currentPlanCredits = document.getElementById('current-plan-credits');
+                    if (currentPlanName) {
+                        currentPlanName.textContent = data.team.plan || 'Pro';
+                    }
+                    if (currentPlanCredits) {
+                        currentPlanCredits.textContent = data.team.credits_remaining.toLocaleString();
                     }
                     
                     // Update team member count in team section
