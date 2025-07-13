@@ -6972,38 +6972,6 @@
                 document.getElementById('days-active').textContent = data.stats.days_active || 0;
             }
         }
-            
-            // Update avatar icon based on user type
-            const avatarIcon = document.getElementById('welcome-avatar-icon');
-            if (data.user && data.user.team_role === 'owner') {
-                avatarIcon.className = 'fas fa-crown';
-            } else if (data.user && data.user.team_role === 'manager') {
-                avatarIcon.className = 'fas fa-user-tie';
-            } else {
-                avatarIcon.className = 'fas fa-user';
-            }
-            
-            // Update stats
-            document.getElementById('welcome-credits').textContent = data.credits || '--';
-            
-            // Format last visit
-            const lastVisit = localStorage.getItem('lastVisit');
-            if (lastVisit) {
-                const lastVisitTime = new Date(parseInt(lastVisit));
-                const now = new Date();
-                const diffHours = Math.floor((now - lastVisitTime) / (1000 * 60 * 60));
-                
-                if (diffHours < 24) {
-                    document.getElementById('welcome-last-visit').textContent = `${diffHours}h ago`;
-                } else {
-                    const diffDays = Math.floor(diffHours / 24);
-                    document.getElementById('welcome-last-visit').textContent = `${diffDays}d ago`;
-                }
-            }
-            
-            // Update analyses count
-            document.getElementById('welcome-analyses').textContent = data.total_analyses || '0';
-        }
 
         function addSparkleEffects() {
             const overlay = document.getElementById('welcome-back-overlay');
@@ -7029,14 +6997,7 @@
             }
         }
 
-        function hideWelcomeAnimation() {
-            const overlay = document.getElementById('welcome-back-overlay');
-            overlay.classList.remove('show');
-            
-            // Remove any remaining sparkles
-            const sparkles = overlay.querySelectorAll('.sparkle');
-            sparkles.forEach(sparkle => sparkle.remove());
-        }
+
 
         // Close dropdowns when clicking outside
         document.addEventListener('click', function(event) {
