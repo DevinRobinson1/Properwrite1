@@ -8415,6 +8415,9 @@
         }
         
         function updateAuthenticationUI(isLoggedIn) {
+            // Update global authentication state
+            isAuthenticated = isLoggedIn;
+            
             // Desktop navigation elements
             const desktopNotLoggedIn = document.getElementById('not-logged-in');
             const desktopLoggedIn = document.getElementById('logged-in');
@@ -8429,6 +8432,18 @@
                 if (desktopLoggedIn) desktopLoggedIn.classList.remove('hidden');
                 if (mobileNotLoggedIn) mobileNotLoggedIn.classList.add('hidden');
                 if (mobileLoggedIn) mobileLoggedIn.classList.remove('hidden');
+                
+                // Remove scroll gate blur overlay if it exists
+                const blurOverlay = document.getElementById('scroll-gate-blur');
+                if (blurOverlay) {
+                    blurOverlay.remove();
+                }
+                
+                // Hide scroll gate modal if it exists
+                const scrollGateModal = document.getElementById('scroll-gate-modal');
+                if (scrollGateModal) {
+                    scrollGateModal.classList.add('hidden');
+                }
             } else {
                 // Show not logged-in state
                 if (desktopNotLoggedIn) desktopNotLoggedIn.classList.remove('hidden');
@@ -9202,12 +9217,9 @@
     
     <!-- Scroll Gate JavaScript -->
     <script>
-        // Use existing scrollGateTriggered variable from above
-        let isUserAuthenticated = {{ 'true' if session.get('user_id') else 'false' }};
-        
-        // Initialize scroll gate
+        // Initialize scroll gate using existing authentication state
         document.addEventListener('DOMContentLoaded', function() {
-            if (!isUserAuthenticated) {
+            if (!isAuthenticated) {
                 initializeScrollGate();
             }
         });
