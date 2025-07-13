@@ -45,8 +45,98 @@ engine = create_engine(
 )
 
 # In-memory storage for affiliates and promo codes (temporary until database tables are created)
-affiliates_storage = []
-promo_codes_storage = []
+affiliates_storage = [
+    {
+        'id': 'affiliate-1',
+        'name': 'John Martinez',
+        'email': 'john@example.com',
+        'company': 'Real Estate Pro',
+        'commission_rate': 0.15,
+        'tier': 'gold',
+        'status': 'active',
+        'total_commissions_earned': 2450.00,
+        'active_referrals': 12,
+        'total_referrals': 28,
+        'revenue_generated': 16330.00,
+        'created_at': '2024-06-15T10:30:00Z',
+        'last_payout': '2024-07-01T00:00:00Z',
+        'affiliate_code': 'AFF001',
+        'affiliate_link': 'https://properwrite.com/ref/AFF001'
+    },
+    {
+        'id': 'affiliate-2',
+        'name': 'Sarah Thompson',
+        'email': 'sarah@example.com',
+        'company': 'Investment Masters',
+        'commission_rate': 0.12,
+        'tier': 'silver',
+        'status': 'active',
+        'total_commissions_earned': 1820.00,
+        'active_referrals': 8,
+        'total_referrals': 19,
+        'revenue_generated': 15166.67,
+        'created_at': '2024-06-20T14:20:00Z',
+        'last_payout': '2024-07-01T00:00:00Z',
+        'affiliate_code': 'AFF002',
+        'affiliate_link': 'https://properwrite.com/ref/AFF002'
+    },
+    {
+        'id': 'affiliate-3',
+        'name': 'Mike Rodriguez',
+        'email': 'mike@example.com',
+        'company': 'Property Experts LLC',
+        'commission_rate': 0.18,
+        'tier': 'platinum',
+        'status': 'active',
+        'total_commissions_earned': 3240.00,
+        'active_referrals': 15,
+        'total_referrals': 32,
+        'revenue_generated': 18000.00,
+        'created_at': '2024-06-10T09:15:00Z',
+        'last_payout': '2024-07-01T00:00:00Z',
+        'affiliate_code': 'AFF003',
+        'affiliate_link': 'https://properwrite.com/ref/AFF003'
+    }
+]
+
+promo_codes_storage = [
+    {
+        'id': 'promo-1',
+        'code': 'CLT25',
+        'type': 'credit_pack',
+        'discount_value': 25,
+        'max_uses': 100,
+        'uses': 12,
+        'affiliate_id': 'affiliate-1',
+        'status': 'active',
+        'created_at': '2024-06-15T10:30:00Z',
+        'expires_at': '2024-12-31T23:59:59Z'
+    },
+    {
+        'id': 'promo-2',
+        'code': 'WELCOME50',
+        'type': 'credit_pack',
+        'discount_value': 50,
+        'max_uses': 500,
+        'uses': 87,
+        'affiliate_id': '',
+        'status': 'active',
+        'created_at': '2024-06-01T00:00:00Z',
+        'expires_at': '2024-12-31T23:59:59Z'
+    },
+    {
+        'id': 'promo-3',
+        'code': 'STARTER100',
+        'type': 'credit_pack',
+        'discount_value': 100,
+        'max_uses': 200,
+        'uses': 34,
+        'affiliate_id': 'affiliate-2',
+        'status': 'active',
+        'created_at': '2024-06-20T14:20:00Z',
+        'expires_at': '2024-12-31T23:59:59Z'
+    }
+]
 
 # Admin authentication decorator
 def require_admin(f):
