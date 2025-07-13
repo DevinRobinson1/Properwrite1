@@ -278,6 +278,7 @@ def signup():
         email = request.form.get('email')
         password = request.form.get('password')
         name = request.form.get('name')
+        credit_code = request.form.get('credit_code')
         
         if not email or not password:
             flash('Email and password are required', 'error')
@@ -288,7 +289,8 @@ def signup():
         result = billing_service.create_user({
             'email': email,
             'name': name or email.split('@')[0],
-            'password': password
+            'password': password,
+            'credit_code': credit_code
         })
         
         if result.get('success'):
