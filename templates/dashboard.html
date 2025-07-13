@@ -888,7 +888,10 @@
             });
             
             // Show selected section
-            document.getElementById(sectionName + '-section').classList.remove('hidden');
+            const targetSection = document.getElementById(sectionName + '-section');
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+            }
             
             // Update navigation active state
             document.querySelectorAll('.nav-item').forEach(item => {
@@ -897,20 +900,28 @@
             });
             
             // Add active state to current nav item
-            event.target.classList.add('bg-blue-100', 'text-blue-700');
-            event.target.classList.remove('text-gray-700');
+            if (event && event.target) {
+                event.target.classList.add('bg-blue-100', 'text-blue-700');
+                event.target.classList.remove('text-gray-700');
+            }
         }
 
         // Modal functions
         let selectedCreditOption = null;
         
         function showAddCreditsModal() {
-            document.getElementById('add-credits-modal').classList.remove('hidden');
-            setupCreditOptionHandlers();
+            const modal = document.getElementById('add-credits-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                setupCreditOptionHandlers();
+            }
         }
 
         function closeAddCreditsModal() {
-            document.getElementById('add-credits-modal').classList.add('hidden');
+            const modal = document.getElementById('add-credits-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
             selectedCreditOption = null;
             // Reset all credit options
             document.querySelectorAll('.credit-option').forEach(option => {
@@ -918,7 +929,10 @@
                 option.classList.add('border-gray-200');
             });
             // Disable purchase button
-            document.getElementById('purchase-credits-btn').disabled = true;
+            const purchaseBtn = document.getElementById('purchase-credits-btn');
+            if (purchaseBtn) {
+                purchaseBtn.disabled = true;
+            }
         }
 
         function setupCreditOptionHandlers() {
@@ -942,7 +956,10 @@
                     };
                     
                     // Enable purchase button
-                    document.getElementById('purchase-credits-btn').disabled = false;
+                    const purchaseBtn = document.getElementById('purchase-credits-btn');
+                    if (purchaseBtn) {
+                        purchaseBtn.disabled = false;
+                    }
                 });
             });
         }
