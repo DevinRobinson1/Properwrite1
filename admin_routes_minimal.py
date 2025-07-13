@@ -619,6 +619,64 @@ def ai_promo_generator():
             'max_uses': 100
         })
 
+@admin_bp.route('/api/edit-affiliate', methods=['POST'])
+@require_admin
+def edit_affiliate():
+    """Edit an affiliate's details"""
+    try:
+        data = request.get_json()
+        affiliate_id = data.get('affiliate_id')
+        name = data.get('name')
+        email = data.get('email')
+        company = data.get('company')
+        commission_rate = float(data.get('commission_rate', 0))
+        tier = data.get('tier')
+        status = data.get('status')
+        affiliate_code = data.get('affiliate_code')
+        
+        # Find affiliate in storage
+        affiliate = None
+        for i, aff in enumerate(affiliates_storage):
+            if aff['id'] == affiliate_id:
+                affiliate = aff
+                break
+        
+        if not affiliate:
+            return jsonify({'success': False, 'error': 'Affiliate not found'}), 404
+        
+        # Update affiliate details
+        affiliate.update({
+            'name': name,
+            'email': email,
+            'company': company,
+            'commission_rate': commission_rate,
+            'tier': tier,
+            'status': status,
+            'affiliate_code': affiliate_code,
+            'affiliate_link': f'https://properwrite.com/ref/{affiliate_code}'
+        })
+        
+        return jsonify({'success': True, 'message': 'Affiliate updated successfully'})
+        
+    except Exception as e:
+        logger.error(f"Error editing affiliate: {e}")
+        return jsonify({'success': False, 'error': 'Internal server error'}), 500
+
+@admin_bp.route('/api/get-affiliate/<affiliate_id>')
+@require_admin
+def get_affiliate(affiliate_id):
+    """Get single affiliate details for editing"""
+    try:
+        affiliate = next((aff for aff in affiliates_storage if aff['id'] == affiliate_id), None)
+        if not affiliate:
+            return jsonify({'success': False, 'error': 'Affiliate not found'}), 404
+        
+        return jsonify({'success': True, 'affiliate': affiliate})
+        
+    except Exception as e:
+        logger.error(f"Error getting affiliate: {e}")
+        return jsonify({'success': False, 'error': 'Internal server error'}), 500
+
 @admin_bp.route('/api/create-affiliate', methods=['POST'])
 @require_admin
 def create_affiliate():

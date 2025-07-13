@@ -696,7 +696,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$${affiliate.total_commissions_earned.toLocaleString()}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <button onclick="copyAffiliateLink('${affiliate.affiliate_link}')" class="text-purple-600 hover:text-purple-900 mr-2">Copy Link</button>
-                                    <button onclick="editAffiliate('${affiliate.id}')" class="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
+                                    <button onclick="openEditAffiliateModal('${affiliate.id}')" class="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
                                     <button onclick="viewAffiliate('${affiliate.id}')" class="text-green-600 hover:text-green-900">View</button>
                                 </td>
                             `;
@@ -1460,6 +1460,136 @@
                 </div>
             `;
             document.body.appendChild(modal);
+        }
+
+        // Edit Affiliate Modal Functions
+        function openEditAffiliateModal(affiliateId) {
+            fetch(`/admin/api/get-affiliate/${affiliateId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const affiliate = data.affiliate;
+                        showEditAffiliateModal(affiliate);
+                    } else {
+                        alert('Error loading affiliate data: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading affiliate:', error);
+                    alert('Error loading affiliate data');
+                });
+        }
+
+        function showEditAffiliateModal(affiliate) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50';
+            modal.innerHTML = `
+                <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                    <div class="mt-3">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Edit Affiliate</h3>
+                        <form id="editAffiliateForm">
+                            <div class="mb-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                <input type="text" id="editName" value="${affiliate.name}" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input type="email" id="editEmail" value="${affiliate.email}" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                                <input type="text" id="editCompany" value="${affiliate.company}" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Commission Rate (%)</label>
+                                <input type="number" id="editCommissionRate" value="${affiliate.commission_rate * 100}" step="0.1" min="0" max="100" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tier</label>
+                                <select id="editTier" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                    <option value="bronze" ${affiliate.tier === 'bronze' ? 'selected' : ''}>Bronze</option>
+                                    <option value="silver" ${affiliate.tier === 'silver' ? 'selected' : ''}>Silver</option>
+                                    <option value="gold" ${affiliate.tier === 'gold' ? 'selected' : ''}>Gold</option>
+                                    <option value="platinum" ${affiliate.tier === 'platinum' ? 'selected' : ''}>Platinum</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                <select id="editStatus" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                    <option value="active" ${affiliate.status === 'active' ? 'selected' : ''}>Active</option>
+                                    <option value="inactive" ${affiliate.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+                                    <option value="pending" ${affiliate.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Affiliate Code</label>
+                                <input type="text" id="editAffiliateCode" value="${affiliate.affiliate_code}" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Affiliate Link</label>
+                                <div class="flex items-center space-x-2">
+                                    <input type="text" id="editAffiliateLink" value="${affiliate.affiliate_link}" class="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50" readonly>
+                                    <button type="button" onclick="copyAffiliateLink(document.getElementById('editAffiliateLink').value)" class="px-3 py-2 bg-purple-600 text-white rounded-md text-sm hover:bg-purple-700">Copy</button>
+                                </div>
+                            </div>
+                            <div class="flex justify-end space-x-2 mt-4">
+                                <button type="button" onclick="document.body.removeChild(this.closest('.fixed'))" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">Cancel</button>
+                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            // Update affiliate link when code changes
+            document.getElementById('editAffiliateCode').addEventListener('input', function() {
+                const code = this.value;
+                const linkInput = document.getElementById('editAffiliateLink');
+                linkInput.value = `https://properwrite.com/ref/${code}`;
+            });
+
+            // Handle form submission
+            document.getElementById('editAffiliateForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveAffiliateChanges(affiliate.id, modal);
+            });
+        }
+
+        function saveAffiliateChanges(affiliateId, modal) {
+            const formData = {
+                affiliate_id: affiliateId,
+                name: document.getElementById('editName').value,
+                email: document.getElementById('editEmail').value,
+                company: document.getElementById('editCompany').value,
+                commission_rate: parseFloat(document.getElementById('editCommissionRate').value) / 100,
+                tier: document.getElementById('editTier').value,
+                status: document.getElementById('editStatus').value,
+                affiliate_code: document.getElementById('editAffiliateCode').value
+            };
+
+            fetch('/admin/api/edit-affiliate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Affiliate updated successfully!');
+                    document.body.removeChild(modal);
+                    // Reload affiliates data
+                    loadAffiliatesData();
+                } else {
+                    alert('Error updating affiliate: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating affiliate:', error);
+                alert('Error updating affiliate');
+            });
         }
 
     </script>
