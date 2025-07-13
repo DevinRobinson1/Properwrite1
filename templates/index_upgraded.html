@@ -8781,6 +8781,33 @@
         let scrollGateTriggered = false;
         let isAuthenticated = {{ 'true' if session.get('user_id') else 'false' }};
         
+        // Check authentication state dynamically
+        async function checkAuthenticationState() {
+            try {
+                const response = await fetch('/api/user-status');
+                const data = await response.json();
+                const wasAuthenticated = isAuthenticated;
+                isAuthenticated = data.logged_in;
+                
+                // If user just logged in, remove scroll gate elements
+                if (!wasAuthenticated && isAuthenticated) {
+                    const blurOverlay = document.getElementById('scroll-gate-blur');
+                    if (blurOverlay) {
+                        blurOverlay.remove();
+                    }
+                    const scrollGateModal = document.getElementById('scroll-gate-modal');
+                    if (scrollGateModal) {
+                        scrollGateModal.classList.add('hidden');
+                    }
+                }
+                
+                return isAuthenticated;
+            } catch (error) {
+                console.error('Error checking authentication state:', error);
+                return isAuthenticated;
+            }
+        }
+        
         function initializeScrollGate() {
             if (isAuthenticated || scrollGateTriggered) return;
             
@@ -9217,8 +9244,9 @@
     
     <!-- Scroll Gate JavaScript -->
     <script>
-        // Initialize scroll gate using existing authentication state
-        document.addEventListener('DOMContentLoaded', function() {
+        // Initialize scroll gate after checking authentication state
+        document.addEventListener('DOMContentLoaded', async function() {
+            await checkAuthenticationState();
             if (!isAuthenticated) {
                 initializeScrollGate();
             }
