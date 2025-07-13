@@ -704,6 +704,7 @@ def get_user_status():
         })
 
 @app.route('/api/logout', methods=['POST'])
+@csrf.exempt
 def api_logout():
     """API logout endpoint for compatibility"""
     try:
@@ -720,6 +721,20 @@ def api_logout():
             'success': False,
             'error': 'Error logging out'
         }), 500
+
+@app.route('/logout', methods=['GET', 'POST'])
+@csrf.exempt
+def logout():
+    """Standard logout route for compatibility"""
+    try:
+        # Clear session
+        session.clear()
+        
+        # Redirect to homepage
+        return redirect('/')
+    except Exception as e:
+        logging.error(f"Error logging out: {str(e)}")
+        return redirect('/')
 
 @app.route('/api/login', methods=['POST'])
 @limiter.limit("5 per minute")
