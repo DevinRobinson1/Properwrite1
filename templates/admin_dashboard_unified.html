@@ -433,6 +433,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uses</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Affiliate</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Promo Link</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
@@ -724,6 +725,7 @@
                         tbody.innerHTML = '';
                         
                         data.promo_codes.forEach(promo => {
+                            const promoLink = `${window.location.origin}/ref/${promo.code}`;
                             const row = document.createElement('tr');
                             row.innerHTML = `
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -735,6 +737,14 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${promo.affiliate_id || 'None'}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(promo.status)}">${promo.status}</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center space-x-2">
+                                        <input type="text" value="${promoLink}" class="flex-1 px-2 py-1 text-xs border border-gray-300 rounded bg-gray-50 font-mono" readonly style="max-width: 200px;">
+                                        <button onclick="copyPromoLink('${promoLink}')" class="px-3 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700 transition-colors">
+                                            <i class="fas fa-copy mr-1"></i>Copy
+                                        </button>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <button onclick="editPromoCode('${promo.id}')" class="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
@@ -1455,6 +1465,32 @@
                 const toast = document.createElement('div');
                 toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
                 toast.innerHTML = '<i class="fas fa-times mr-2"></i>Error copying link';
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            });
+        }
+        
+        // Promo code link management functions
+        function copyPromoLink(promoLink) {
+            navigator.clipboard.writeText(promoLink).then(function() {
+                // Show success toast
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+                toast.innerHTML = '<i class="fas fa-check mr-2"></i>Promo link copied to clipboard!';
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            }, function(err) {
+                console.error('Error copying promo link: ', err);
+                // Show error toast
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+                toast.innerHTML = '<i class="fas fa-times mr-2"></i>Error copying promo link';
                 document.body.appendChild(toast);
                 
                 setTimeout(() => {
