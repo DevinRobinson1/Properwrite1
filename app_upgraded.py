@@ -365,18 +365,60 @@ def login_page():
             flash('Invalid email or password', 'error')
             return render_template('auth/login.html')
 
-@app.route('/forgot-password')
+@app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
-    """Forgot password page"""
-    return render_template('auth/forgot_password.html')
+    """Forgot password page and handler"""
+    if request.method == 'GET':
+        return render_template('auth/forgot_password.html')
     
-@app.route('/reset-password')
-def reset_password():
-    """Reset password page"""
-    return render_template('auth/reset_password.html')
-
-
-
+@app.route('/api/forgot-password', methods=['POST'])
+@limiter.limit("5 per minute")
+def api_forgot_password():
+    """Handle forgot password API request"""
+    try:
+        email = request.form.get('email')
+        
+        if not email:
+            return jsonify({'success': False, 'error': 'Email is required'}), 400
+        
+        # Generate reset token
+        import secrets
+        reset_token = secrets.token_urlsafe(32)
+        
+        # Store reset token in session (in production, use database)
+        session[f'reset_token_{email}'] = {
+            'token': reset_token,
+            'expires': datetime.now() + timedelta(hours=24)
+        }
+        
+        # Send reset email
+        try:
+            email_sent = email_service.send_password_reset_email(email, reset_token)
+            
+            if email_sent:
+                return jsonify({
+                    'success': True,
+                    'message': 'Password reset instructions sent to your email'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Failed to send reset email. Please try again.'
+                }), 500
+                
+        except Exception as e:
+            logging.error(f"Error sending reset email: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': 'Failed to send reset email. Please try again.'
+            }), 500
+            
+    except Exception as e:
+        logging.error(f"Error in forgot password: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'An error occurred. Please try again.'
+        }), 500
 
 @app.route('/api/dashboard-data', methods=['GET'])
 def get_dashboard_data():
@@ -504,7 +546,37 @@ def get_user_initials(name):
     else:
         return "U"
 
-
+@app.route('/api/user-status', methods=['GET'])
+def get_user_status():
+    """Get current user authentication status and credit information"""
+    try:
+        # For now, simulate authentication - this can be enhanced with real auth
+        # Check if user has a session or token
+        user_id = session.get('user_id')
+        auth_header = request.headers.get('Authorization')
+        
+        if user_id or auth_header:
+            # User is logged in
+            return jsonify({
+                'logged_in': True,
+                'credits': 100,  # Mock credit balance
+                'unlimited_credits': False,
+                'user_id': user_id or 'mock_user'
+            })
+        else:
+            # User not logged in
+            return jsonify({
+                'logged_in': False,
+                'remaining_uses': 3,  # Free uses remaining
+                'credits': 0
+            })
+    except Exception as e:
+        logging.error(f"Error getting user status: {str(e)}")
+        return jsonify({
+            'logged_in': False,
+            'remaining_uses': 3,
+            'credits': 0
+        })
 
 @app.route('/api/logout', methods=['POST'])
 @app.route('/logout', methods=['POST'])
@@ -559,143 +631,6 @@ def login():
             'success': False,
             'error': 'Error logging in'
         }), 500
-
-@app.route('/api/user-stats')
-@require_auth
-def get_user_stats():
-    """Get user statistics for welcome animation"""
-    try:
-        user_id = session.get('user_id')
-        if not user_id:
-            return jsonify({'success': False, 'error': 'Not authenticated'})
-        
-        # Get user data from billing service
-        user_data = billing_service.get_user_by_id(user_id)
-        if not user_data:
-            return jsonify({'success': False, 'error': 'User not found'})
-        
-        # Get team data
-        team_data = billing_service.get_team_by_id(user_data.get('team_id'))
-        
-        # Get usage statistics (simplified for now)
-        total_analyses = session.get('total_analyses', 0)
-        
-        return jsonify({
-            'success': True,
-            'user': {
-                'name': user_data.get('name', 'User'),
-                'email': user_data.get('email'),
-                'team_role': user_data.get('team_role', 'analyst')
-            },
-            'credits': team_data.get('credits_remaining', 0) if team_data else 0,
-            'total_analyses': total_analyses
-        })
-    
-    except Exception as e:
-        logging.error(f"Error getting user stats: {str(e)}")
-        return jsonify({'success': False, 'error': 'Internal server error'})
-
-@app.route('/api/forgot-password', methods=['POST'])
-@limiter.limit("5 per minute")
-def api_forgot_password():
-    """Handle password reset request"""
-    try:
-        data = request.get_json()
-        email = data.get('email', '').strip().lower()
-        
-        if not email:
-            return jsonify({'success': False, 'error': 'Email is required'})
-        
-        # Check if user exists
-        user = billing_service.get_user_by_email(email)
-        if not user:
-            # Don't reveal if user exists - always return success
-            return jsonify({'success': True, 'message': 'If this email exists, you will receive reset instructions.'})
-        
-        # Generate reset token
-        import secrets
-        reset_token = secrets.token_urlsafe(32)
-        
-        # Store reset token (in production, store in database with expiry)
-        session[f'reset_token_{email}'] = {
-            'token': reset_token,
-            'expires': datetime.now().timestamp() + 3600  # 1 hour expiry
-        }
-        
-        # Send reset email
-        reset_link = f"{request.host_url}reset-password?token={reset_token}&email={email}"
-        
-        email_sent = email_service.send_email(
-            to_email=email,
-            subject="Reset Your Password - properwrite.com",
-            html_content=f"""
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center;">
-                    <h1 style="color: white; margin: 0;">Reset Your Password</h1>
-                </div>
-                <div style="padding: 30px; background: #f9f9f9;">
-                    <p>Hi there,</p>
-                    <p>You requested to reset your password for your properwrite.com account.</p>
-                    <p>Click the button below to reset your password:</p>
-                    <div style="text-align: center; margin: 30px 0;">
-                        <a href="{reset_link}" style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a>
-                    </div>
-                    <p>If you didn't request this, you can safely ignore this email.</p>
-                    <p>This link will expire in 1 hour.</p>
-                    <p>Best regards,<br>The properwrite.com Team</p>
-                </div>
-            </div>
-            """,
-            text_content=f"Reset your password by visiting: {reset_link}"
-        )
-        
-        return jsonify({
-            'success': True, 
-            'message': 'If this email exists, you will receive reset instructions.',
-            'email_sent': email_sent
-        })
-        
-    except Exception as e:
-        logging.error(f"Error in forgot password: {str(e)}")
-        return jsonify({'success': False, 'error': 'An error occurred. Please try again.'})
-
-@app.route('/api/reset-password', methods=['POST'])
-@limiter.limit("5 per minute")
-def api_reset_password():
-    """Handle password reset"""
-    try:
-        data = request.get_json()
-        token = data.get('token', '').strip()
-        email = data.get('email', '').strip().lower()
-        new_password = data.get('password', '').strip()
-        
-        if not all([token, email, new_password]):
-            return jsonify({'success': False, 'error': 'All fields are required'})
-        
-        # Validate token
-        stored_token_data = session.get(f'reset_token_{email}')
-        if not stored_token_data:
-            return jsonify({'success': False, 'error': 'Invalid or expired reset token'})
-        
-        if stored_token_data['token'] != token:
-            return jsonify({'success': False, 'error': 'Invalid reset token'})
-        
-        if datetime.now().timestamp() > stored_token_data['expires']:
-            return jsonify({'success': False, 'error': 'Reset token has expired'})
-        
-        # Update password
-        success = billing_service.update_user_password(email, new_password)
-        if not success:
-            return jsonify({'success': False, 'error': 'Failed to update password'})
-        
-        # Clear the reset token
-        session.pop(f'reset_token_{email}', None)
-        
-        return jsonify({'success': True, 'message': 'Password updated successfully'})
-        
-    except Exception as e:
-        logging.error(f"Error in reset password: {str(e)}")
-        return jsonify({'success': False, 'error': 'An error occurred. Please try again.'})
 
 @app.route('/api/analyze-property', methods=['POST'])
 @limiter.limit("10 per minute, 100 per hour")
