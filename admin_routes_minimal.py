@@ -207,59 +207,15 @@ def get_affiliates():
     """Get all affiliates with filtering and pagination"""
     try:
         # Sample affiliates data
-        affiliates_data = [
-            {
-                'id': 'sample-affiliate-1',
-                'name': 'John Martinez',
-                'email': 'john@realestatecoach.com',
-                'company': 'Real Estate Coach',
-                'website': 'https://realestatecoach.com',
-                'status': 'active',
-                'tier': 'elite',
-                'commission_rate': 0.35,
-                'total_referrals': 15,
-                'active_referrals': 8,
-                'total_revenue_generated': 47500.00,
-                'total_commissions_earned': 16625.00,
-                'total_commissions_paid': 15000.00,
-                'payout_method': 'paypal',
-                'created_at': '2024-01-15'
-            },
-            {
-                'id': 'sample-affiliate-2',
-                'name': 'Sarah Thompson',
-                'email': 'sarah@investorpro.com',
-                'company': 'InvestorPro Media',
-                'website': 'https://investorpro.com',
-                'status': 'active',
-                'tier': 'premium',
-                'commission_rate': 0.40,
-                'total_referrals': 22,
-                'active_referrals': 12,
-                'total_revenue_generated': 68000.00,
-                'total_commissions_earned': 27200.00,
-                'total_commissions_paid': 25000.00,
-                'payout_method': 'stripe_connect',
-                'created_at': '2024-02-20'
-            },
-            {
-                'id': 'sample-affiliate-3',
-                'name': 'Mike Rodriguez',
-                'email': 'mike@flippingpro.com',
-                'company': 'FlippingPro Academy',
-                'website': 'https://flippingpro.com',
-                'status': 'pending',
-                'tier': 'standard',
-                'commission_rate': 0.30,
-                'total_referrals': 0,
-                'active_referrals': 0,
-                'total_revenue_generated': 0.00,
-                'total_commissions_earned': 0.00,
-                'total_commissions_paid': 0.00,
-                'payout_method': 'paypal',
-                'created_at': '2024-07-10'
-            }
-        ]
+        # Get authentic affiliate data from database
+        affiliates_data = []
+        try:
+            # TODO: Implement actual affiliate table query when affiliate system is ready
+            # For now, return empty list to show no sample data
+            pass
+        except Exception as e:
+            logging.error(f"Error getting affiliates: {e}")
+            affiliates_data = []
         
         # Calculate stats
         total_affiliates = len(affiliates_data)
@@ -289,48 +245,15 @@ def get_affiliates():
 def get_promo_codes():
     """Get all promo codes"""
     try:
-        # Sample promo codes data
-        promo_codes = [
-            {
-                'id': 'promo-1',
-                'code': 'COACH50',
-                'type': 'percentage_discount',
-                'discount_value': 50,
-                'max_uses': 100,
-                'current_uses': 23,
-                'affiliate_name': 'John Martinez',
-                'affiliate_id': 'sample-affiliate-1',
-                'status': 'active',
-                'created_at': '2024-01-15',
-                'expires_at': '2024-12-31'
-            },
-            {
-                'id': 'promo-2',
-                'code': 'INVESTORPRO30',
-                'type': 'percentage_discount',
-                'discount_value': 30,
-                'max_uses': 200,
-                'current_uses': 87,
-                'affiliate_name': 'Sarah Thompson',
-                'affiliate_id': 'sample-affiliate-2',
-                'status': 'active',
-                'created_at': '2024-02-20',
-                'expires_at': '2024-12-31'
-            },
-            {
-                'id': 'promo-3',
-                'code': 'CREDITS100',
-                'type': 'credit_pack',
-                'discount_value': 100,
-                'max_uses': 50,
-                'current_uses': 12,
-                'affiliate_name': 'Sarah Thompson',
-                'affiliate_id': 'sample-affiliate-2',
-                'status': 'active',
-                'created_at': '2024-03-01',
-                'expires_at': '2024-12-31'
-            }
-        ]
+        # Get authentic promo codes data from database
+        promo_codes = []
+        try:
+            # TODO: Implement actual promo codes table query when promo system is ready
+            # For now, return empty list to show no sample data
+            pass
+        except Exception as e:
+            logging.error(f"Error getting promo codes: {e}")
+            promo_codes = []
         
         return jsonify({
             'success': True,
