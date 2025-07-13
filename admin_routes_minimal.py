@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from billing_models import User, Team, TeamInvite, CreditLog
 import logging
 import os
+import time
 from werkzeug.security import check_password_hash
 import hashlib
 from flask_limiter import Limiter
@@ -276,14 +277,14 @@ def get_teams_data():
                     t.id,
                     t.name,
                     t.tier as plan_type,
-                    t.credits_balance,
+                    t.credit_balance,
                     t.credits_used,
                     t.created_at,
                     COUNT(u.id) as member_count,
                     MAX(u.last_login) as last_active
                 FROM teams t
                 LEFT JOIN users u ON t.id = u.team_id
-                GROUP BY t.id, t.name, t.tier, t.credits_balance, t.credits_used, t.created_at
+                GROUP BY t.id, t.name, t.tier, t.credit_balance, t.credits_used, t.created_at
                 ORDER BY t.created_at DESC
             """)).fetchall()
             
@@ -293,7 +294,7 @@ def get_teams_data():
                     'id': team.id,
                     'name': team.name,
                     'plan_type': team.plan_type,
-                    'credits_balance': team.credits_balance,
+                    'credits_balance': team.credit_balance,
                     'credits_used': team.credits_used,
                     'member_count': team.member_count,
                     'last_active': team.last_active.isoformat() if team.last_active else None,
@@ -564,16 +565,29 @@ def create_promo_code():
     try:
         data = request.get_json()
         
-        # For now, just return success (would normally create in database)
+        # TODO: Implement actual promo code creation in database
+        # For now, just return success with the submitted data
         return jsonify({
             'success': True,
             'message': 'Promo code created successfully',
-            'code_id': f"promo-{data.get('code', 'unknown')}"
+            'promo_code': {
+                'id': 'promo-' + str(int(time.time())),
+                'code': data.get('code', ''),
+                'type': data.get('type', ''),
+                'discount_value': data.get('discount_value', 0),
+                'max_uses': data.get('max_uses', 0),
+                'affiliate_id': data.get('affiliate_id', ''),
+                'status': 'active',
+                'created_at': datetime.now().isoformat(),
+                'expires_at': data.get('expires_at', '')
+            }
         })
         
     except Exception as e:
-        logger.error(f"Create promo code error: {str(e)}")
+        logger.error(f"Error creating promo code: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
 
 @admin_bp.route('/api/usage-metrics', methods=['GET'])
 @require_admin
