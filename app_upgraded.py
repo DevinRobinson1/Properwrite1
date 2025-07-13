@@ -242,7 +242,12 @@ def create_bitcoin_checkout():
 def api_signup():
     """API endpoint for user signup"""
     try:
-        data = request.get_json()
+        # Handle both JSON and form data
+        if request.content_type == 'application/json':
+            data = request.get_json()
+        else:
+            data = request.form.to_dict()
+            
         name = data.get('name')
         email = data.get('email')
         password = data.get('password')
@@ -699,11 +704,17 @@ def logout():
 @app.route('/api/login', methods=['POST'])
 @limiter.limit("5 per minute")
 def login():
-    """Simple login endpoint for testing"""
+    """Login endpoint with CSRF protection and remember me functionality"""
     try:
-        data = request.get_json()
+        # Handle both JSON and form data
+        if request.content_type == 'application/json':
+            data = request.get_json()
+        else:
+            data = request.form.to_dict()
+        
         email = data.get('email')
         password = data.get('password')
+        remember_me = data.get('remember_me') == 'true' or data.get('remember_me') == True
         
         # Look up user in database
         with Session(engine) as db:
@@ -713,6 +724,13 @@ def login():
                 # Set session for logged in user
                 session['user_id'] = str(user.id)
                 session['email'] = email
+                
+                # Set session permanence based on remember me
+                if remember_me:
+                    session.permanent = True
+                    app.permanent_session_lifetime = timedelta(days=30)
+                else:
+                    session.permanent = False
                 
                 return jsonify({
                     'success': True,

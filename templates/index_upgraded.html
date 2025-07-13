@@ -7022,6 +7022,7 @@
                         </button>
                     </div>
                     <form id="login-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="mb-4">
                             <label class="block text-sm font-medium mb-2">Email</label>
                             <input type="email" name="email" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
@@ -7058,14 +7059,21 @@
                 const formData = new FormData(form);
                 const email = formData.get('email');
                 const password = formData.get('password');
+                const csrfToken = formData.get('csrf_token');
+                const rememberMe = document.getElementById('remember-me').checked;
                 
                 try {
                     const response = await fetch('/api/login', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded',
                         },
-                        body: JSON.stringify({ email, password })
+                        body: new URLSearchParams({
+                            email: email,
+                            password: password,
+                            csrf_token: csrfToken,
+                            remember_me: rememberMe
+                        })
                     });
                     
                     const data = await response.json();
@@ -7105,6 +7113,7 @@
                         </button>
                     </div>
                     <form id="signup-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="mb-4">
                             <label class="block text-sm font-medium mb-2">Name</label>
                             <input type="text" name="name" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
@@ -7139,14 +7148,20 @@
                 const name = formData.get('name');
                 const email = formData.get('email');
                 const password = formData.get('password');
+                const csrfToken = formData.get('csrf_token');
                 
                 try {
                     const response = await fetch('/api/signup', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded',
                         },
-                        body: JSON.stringify({ name, email, password })
+                        body: new URLSearchParams({
+                            name: name,
+                            email: email,
+                            password: password,
+                            csrf_token: csrfToken
+                        })
                     });
                     
                     const data = await response.json();
