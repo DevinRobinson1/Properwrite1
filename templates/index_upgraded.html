@@ -41,6 +41,252 @@
             100% { transform: rotate(360deg); }
         }
         
+        /* Micro-animations for enhanced user engagement */
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUpSections {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInDown {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInLeft {
+            0% {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            0% {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+        
+        @keyframes countUp {
+            0% {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.4);
+            }
+        }
+        
+        /* Animation classes */
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .animate-fadeInUp-sections {
+            animation: fadeInUpSections 0.6s ease-out;
+        }
+        
+        .animate-fadeInDown {
+            animation: fadeInDown 0.6s ease-out;
+        }
+        
+        .animate-slideInLeft {
+            animation: slideInLeft 0.5s ease-out;
+        }
+        
+        .animate-slideInRight {
+            animation: slideInRight 0.5s ease-out;
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        .animate-bounce {
+            animation: bounce 1s;
+        }
+        
+        .animate-shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
+        }
+        
+        .animate-countUp {
+            animation: countUp 0.8s ease-out;
+        }
+        
+        .animate-glow {
+            animation: glow 2s infinite;
+        }
+        
+        /* Enhanced hover effects */
+        .button-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(0);
+        }
+        
+        .button-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .button-hover:active {
+            transform: translateY(0);
+            transition: all 0.1s;
+        }
+        
+        /* Card animations */
+        .card-entrance {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Input field animations */
+        .input-focus {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .input-focus:focus {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        /* Loading skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        /* Staggered animations */
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+        .stagger-5 { animation-delay: 0.5s; }
+        .stagger-6 { animation-delay: 0.6s; }
+        
+        /* Success animations */
+        .success-pulse {
+            animation: pulse 0.6s ease-in-out;
+        }
+        
+        /* Modal animations */
+        .modal-entrance {
+            animation: fadeInUp 0.4s ease-out;
+        }
+        
+        /* Tab transition animations */
+        .tab-transition {
+            transition: all 0.3s ease-in-out;
+        }
+        
+        /* Property card flip animation */
+        .flip-card {
+            perspective: 1000px;
+        }
+        
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        /* Number counting animation */
+        .count-animation {
+            display: inline-block;
+            animation: countUp 1s ease-out;
+        }
+        
         /* Acquisition Tab Buttons */
         .acquisition-tab-button {
             background-color: #e5e7eb;
@@ -625,7 +871,7 @@
                                 <input type="text" id="address" required
                                    data-enhanced-address="true"
                                    data-auto-submit="false"
-                                   class="w-full px-4 sm:px-6 py-3 sm:py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 text-base sm:text-lg bg-gray-50 hover:bg-white"
+                                   class="w-full px-4 sm:px-6 py-3 sm:py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 text-base sm:text-lg bg-gray-50 hover:bg-white input-focus animate-fadeInUp"
                                    placeholder="Start typing an address for suggestions...">
                                 <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400">
                                     <i class="fas fa-search-location text-lg"></i>
@@ -639,7 +885,7 @@
                     </div>
                     
                     <div class="flex justify-center">
-                        <button type="submit" class="group relative bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 sm:px-12 py-3 sm:py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 min-h-[52px] min-w-[200px]">
+                        <button type="submit" class="group relative bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 sm:px-12 py-3 sm:py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 min-h-[52px] min-w-[200px] button-hover animate-fadeInUp stagger-2">
                             <span class="flex items-center justify-center">
                                 <i class="fas fa-rocket mr-3 group-hover:animate-bounce"></i>
                                 Analyze Property
@@ -650,33 +896,33 @@
             </div>
         </div>
 
-        <!-- Loading State with Skeleton -->
-        <div id="loading-state" class="hidden bg-white rounded-xl shadow-lg p-8 mb-8">
+        <!-- Loading State with Enhanced Animations -->
+        <div id="loading-state" class="hidden bg-white rounded-xl shadow-lg p-8 mb-8 animate-fadeInUp">
             <div class="text-center mb-6">
-                <div class="loading-spinner mx-auto mb-4"></div>
-                <p class="text-gray-600">Analyzing property data from multiple sources...</p>
-                <p class="text-sm text-gray-500 mt-2">This usually takes 3-5 seconds</p>
+                <div class="loading-spinner mx-auto mb-4 animate-glow"></div>
+                <p class="text-gray-600 animate-pulse">Analyzing property data from multiple sources...</p>
+                <p class="text-sm text-gray-500 mt-2 animate-fadeInUp stagger-1">This usually takes up to a minute</p>
             </div>
             
-            <!-- Skeleton UI -->
-            <div class="animate-pulse">
-                <div class="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
-                <div class="h-4 bg-gray-200 rounded w-1/2 mb-6"></div>
+            <!-- Enhanced Skeleton UI with Staggered Animations -->
+            <div class="space-y-6">
+                <div class="skeleton h-8 rounded w-3/4 animate-shimmer stagger-1"></div>
+                <div class="skeleton h-4 rounded w-1/2 animate-shimmer stagger-2"></div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="h-24 bg-gray-200 rounded-lg"></div>
-                    <div class="h-24 bg-gray-200 rounded-lg"></div>
-                    <div class="h-24 bg-gray-200 rounded-lg"></div>
+                    <div class="skeleton h-24 rounded-lg animate-shimmer stagger-3"></div>
+                    <div class="skeleton h-24 rounded-lg animate-shimmer stagger-4"></div>
+                    <div class="skeleton h-24 rounded-lg animate-shimmer stagger-5"></div>
                 </div>
                 
                 <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-                    <div class="h-16 bg-gray-200 rounded-lg"></div>
-                    <div class="h-16 bg-gray-200 rounded-lg"></div>
-                    <div class="h-16 bg-gray-200 rounded-lg"></div>
-                    <div class="h-16 bg-gray-200 rounded-lg"></div>
-                    <div class="h-16 bg-gray-200 rounded-lg"></div>
-                    <div class="h-16 bg-gray-200 rounded-lg"></div>
-                    <div class="h-16 bg-gray-200 rounded-lg"></div>
+                    <div class="skeleton h-16 rounded-lg animate-shimmer stagger-1"></div>
+                    <div class="skeleton h-16 rounded-lg animate-shimmer stagger-2"></div>
+                    <div class="skeleton h-16 rounded-lg animate-shimmer stagger-3"></div>
+                    <div class="skeleton h-16 rounded-lg animate-shimmer stagger-4"></div>
+                    <div class="skeleton h-16 rounded-lg animate-shimmer stagger-5"></div>
+                    <div class="skeleton h-16 rounded-lg animate-shimmer stagger-6"></div>
+                    <div class="skeleton h-16 rounded-lg animate-shimmer stagger-1"></div>
                 </div>
             </div>
         </div>
@@ -685,8 +931,8 @@
         <div id="analysis-results" class="hidden">
             
             <!-- Property Data Section -->
-            <div class="section-title">🏠 Property Data</div>
-            <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <div class="section-title animate-fadeInDown">🏠 Property Data</div>
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-8 card-entrance stagger-1">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                     <div class="lg:col-span-2">
                         <h2 class="text-3xl font-bold text-gray-800 mb-2" id="property-title">Property Overview</h2>
@@ -733,7 +979,7 @@
                     <!-- Platform Estimate Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <!-- Zillow Estimate Card -->
-                        <div class="bg-white border border-gray-200 rounded-lg p-4 transition-all duration-300 hover:shadow-md">
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 transition-all duration-300 hover:shadow-md card-hover animate-slideInLeft stagger-1">
                             <div class="flex items-center space-x-3 mb-3">
                                 <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background-color: #0074e4;">
                                     Z
@@ -762,7 +1008,7 @@
                         </div>
 
                         <!-- Redfin Estimate Card -->
-                        <div class="bg-white border border-gray-200 rounded-lg p-4 transition-all duration-300 hover:shadow-md">
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 transition-all duration-300 hover:shadow-md card-hover animate-slideInLeft stagger-2">
                             <div class="flex items-center space-x-3 mb-3">
                                 <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background-color: #A02040;">
                                     R
@@ -791,7 +1037,7 @@
                         </div>
 
                         <!-- Rental Estimate Card -->
-                        <div class="bg-white border border-gray-200 rounded-lg p-4 transition-all duration-300 hover:shadow-md">
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 transition-all duration-300 hover:shadow-md card-hover animate-slideInLeft stagger-3">
                             <div class="flex items-center space-x-3 mb-3">
                                 <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background-color: #6B46C1;">
                                     <i class="fas fa-dollar-sign text-sm"></i>
@@ -847,35 +1093,35 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group">
+                    <div class="bg-white p-4 rounded-lg border border-gray-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-1">
                         <label class="block text-sm font-medium text-gray-600 mb-3 group-hover:text-blue-600">Bedrooms</label>
-                        <input type="number" id="bedrooms" class="w-full text-center py-3 text-lg font-semibold border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-colors" value="" onchange="updateAllTabCalculations()" placeholder="--">
+                        <input type="number" id="bedrooms" class="w-full text-center py-3 text-lg font-semibold border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-colors input-focus" value="" onchange="updateAllTabCalculations()" placeholder="--">
                     </div>
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group">
+                    <div class="bg-white p-4 rounded-lg border border-gray-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-2">
                         <label class="block text-sm font-medium text-gray-600 mb-3 group-hover:text-blue-600">Bathrooms</label>
-                        <input type="number" step="0.5" id="bathrooms" class="w-full text-center py-3 text-lg font-semibold border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-colors" value="" onchange="updateAllTabCalculations()" placeholder="--">
+                        <input type="number" step="0.5" id="bathrooms" class="w-full text-center py-3 text-lg font-semibold border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-colors input-focus" value="" onchange="updateAllTabCalculations()" placeholder="--">
                     </div>
-                    <div class="bg-white p-4 rounded-lg border border-gray-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group">
+                    <div class="bg-white p-4 rounded-lg border border-gray-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-3">
                         <label class="block text-sm font-medium text-gray-600 mb-3 group-hover:text-blue-600">Square Feet</label>
-                        <input type="text" id="square_feet" class="w-full text-center py-3 text-lg font-semibold border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-colors" value="" onchange="formatNumber(this); updateAllTabCalculations()" oninput="formatNumber(this)" placeholder="--">
+                        <input type="text" id="square_feet" class="w-full text-center py-3 text-lg font-semibold border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 hover:border-blue-400 transition-colors input-focus" value="" onchange="formatNumber(this); updateAllTabCalculations()" oninput="formatNumber(this)" placeholder="--">
                     </div>
-                    <div class="bg-white p-4 rounded-lg border border-green-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group">
+                    <div class="bg-white p-4 rounded-lg border border-green-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-4">
                         <label class="block text-sm font-medium text-green-600 mb-3 group-hover:text-green-700">ARV ($)</label>
-                        <input type="text" id="arv" class="w-full text-center py-3 text-lg font-semibold border border-green-300 rounded-lg bg-green-50 focus:ring-2 focus:ring-green-500 hover:border-green-400 transition-colors" value="415,000" onchange="formatNumber(this); updateAllTabCalculations()" oninput="formatNumber(this)" placeholder="--">
+                        <input type="text" id="arv" class="w-full text-center py-3 text-lg font-semibold border border-green-300 rounded-lg bg-green-50 focus:ring-2 focus:ring-green-500 hover:border-green-400 transition-colors input-focus" value="415,000" onchange="formatNumber(this); updateAllTabCalculations()" oninput="formatNumber(this)" placeholder="--">
                     </div>
-                    <div class="bg-white p-4 rounded-lg border border-red-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group">
+                    <div class="bg-white p-4 rounded-lg border border-red-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-5">
                         <label class="block text-sm font-medium text-red-600 mb-3 group-hover:text-red-700">Repairs ($)</label>
-                        <input type="text" id="repairs" class="w-full text-center py-3 text-lg font-semibold border border-red-300 rounded-lg bg-red-50 focus:ring-2 focus:ring-red-500 hover:border-red-400 transition-colors" value="30,000" onchange="formatNumber(this); updateAllTabCalculations()" oninput="formatNumber(this)" placeholder="--">
+                        <input type="text" id="repairs" class="w-full text-center py-3 text-lg font-semibold border border-red-300 rounded-lg bg-red-50 focus:ring-2 focus:ring-red-500 hover:border-red-400 transition-colors input-focus" value="30,000" onchange="formatNumber(this); updateAllTabCalculations()" oninput="formatNumber(this)" placeholder="--">
                     </div>
-                    <div class="bg-white p-4 rounded-lg border border-purple-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group">
+                    <div class="bg-white p-4 rounded-lg border border-purple-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-6">
                         <label class="block text-sm font-medium text-purple-600 mb-3 group-hover:text-purple-700">Monthly Rent ($)</label>
-                        <input type="text" id="rent" class="w-full text-center py-3 text-lg font-semibold border border-purple-300 rounded-lg bg-purple-50 focus:ring-2 focus:ring-purple-500 hover:border-purple-400 transition-colors" value="1,325" onchange="formatNumber(this); updateAllTabCalculations()" oninput="formatNumber(this)" placeholder="--">
+                        <input type="text" id="rent" class="w-full text-center py-3 text-lg font-semibold border border-purple-300 rounded-lg bg-purple-50 focus:ring-2 focus:ring-purple-500 hover:border-purple-400 transition-colors input-focus" value="1,325" onchange="formatNumber(this); updateAllTabCalculations()" oninput="formatNumber(this)" placeholder="--">
                     </div>
-                    <div class="bg-white p-4 rounded-lg border border-orange-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group">
+                    <div class="bg-white p-4 rounded-lg border border-orange-200 text-center hover:shadow-md transition-shadow duration-200 cursor-pointer group card-hover animate-slideInUp stagger-1">
                         <label class="block text-sm font-medium text-orange-600 mb-2 group-hover:text-orange-700">Acquisitions Price ($)</label>
                         <div class="text-xs text-gray-500 mb-1" id="acquisitions-price-indicator">Auto-calculated</div>
-                        <input type="text" id="global-acquisitions-price-header" class="w-full text-center py-3 text-lg font-semibold border border-orange-300 rounded-lg bg-orange-50 focus:ring-2 focus:ring-orange-500 hover:border-orange-400 transition-colors" value="269,750" onchange="formatNumber(this); updateGlobalAcquisitionsPriceFromHeader()" oninput="formatNumber(this)" placeholder="--">
-                        <button onclick="resetAcquisitionsPriceToCalculated()" class="mt-1 text-xs text-orange-600 hover:text-orange-800 underline" id="reset-acquisitions-price" style="display: none;">Reset to calculated</button>
+                        <input type="text" id="global-acquisitions-price-header" class="w-full text-center py-3 text-lg font-semibold border border-orange-300 rounded-lg bg-orange-50 focus:ring-2 focus:ring-orange-500 hover:border-orange-400 transition-colors input-focus" value="269,750" onchange="formatNumber(this); updateGlobalAcquisitionsPriceFromHeader()" oninput="formatNumber(this)" placeholder="--">
+                        <button onclick="resetAcquisitionsPriceToCalculated()" class="mt-1 text-xs text-orange-600 hover:text-orange-800 underline button-hover" id="reset-acquisitions-price" style="display: none;">Reset to calculated</button>
                     </div>
                     </div>
                 </div>
@@ -887,13 +1133,13 @@
                 <!-- Section Navigation -->
                 <div class="mb-6">
                     <div class="flex justify-center space-x-4 mb-6">
-                        <button id="acquisitions-section-btn" class="section-toggle-btn active px-8 py-3 font-bold text-lg rounded-lg transition-all duration-300 bg-blue-500 text-white hover:bg-blue-600" onclick="showSection('acquisitions')">
+                        <button id="acquisitions-section-btn" class="section-toggle-btn px-8 py-3 font-bold text-lg rounded-lg transition-all duration-300 bg-gray-300 text-gray-700 hover:bg-blue-500 hover:text-white button-hover" onclick="checkAuthAndShowSection('acquisitions')">
                             <i class="fas fa-briefcase mr-3"></i>🏗 Acquisitions
                         </button>
-                        <button id="dispositions-section-btn" class="section-toggle-btn px-8 py-3 font-bold text-lg rounded-lg transition-all duration-300 bg-gray-300 text-gray-700 hover:bg-purple-500 hover:text-white" onclick="showSection('dispositions')">
+                        <button id="dispositions-section-btn" class="section-toggle-btn px-8 py-3 font-bold text-lg rounded-lg transition-all duration-300 bg-gray-300 text-gray-700 hover:bg-purple-500 hover:text-white button-hover" onclick="checkAuthAndShowSection('dispositions')">
                             <i class="fas fa-chart-line mr-3"></i>🏠 Dispositions
                         </button>
-                        <button id="comps-section-btn" class="section-toggle-btn px-8 py-3 font-bold text-lg rounded-lg transition-all duration-300 bg-gray-300 text-gray-700 hover:bg-teal-500 hover:text-white" onclick="showSection('comps')">
+                        <button id="comps-section-btn" class="section-toggle-btn px-8 py-3 font-bold text-lg rounded-lg transition-all duration-300 bg-gray-300 text-gray-700 hover:bg-teal-500 hover:text-white button-hover" onclick="checkAuthAndShowSection('comps')">
                             <i class="fas fa-chart-area mr-3"></i>📊 Comps
                         </button>
                     </div>
@@ -903,7 +1149,7 @@
                 <div id="offers-gate-trigger" class="scroll-gate-trigger"></div>
                 
                 <!-- Acquisitions Section -->
-                <div id="acquisitions-section" class="section-content">
+                <div id="acquisitions-section" class="section-content hidden">
                     <!-- Acquisitions Header -->
                     <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-t-lg mb-0">
                         <div class="flex items-center justify-between">
@@ -3346,15 +3592,6 @@
         if (propertyForm) {
             propertyForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                
-                // Check if user is logged in (get from server-side data)
-                const isLoggedIn = {{ "true" if session.get('user_id') else "false" }};
-                
-                if (!isLoggedIn) {
-                    // Show blur gate modal instead of processing
-                    showBlurGateModal();
-                    return;
-                }
                 
                 const address = document.getElementById('address')?.value || '';
                 const city = document.getElementById('city')?.value || '';
@@ -5982,37 +6219,72 @@
             populateComparisonResults(comparisonResults);
         }
 
-        // Section functionality
+        // Authentication check for restricted sections
+        function checkAuthAndShowSection(sectionName) {
+            // Check if user is logged in
+            const isLoggedIn = {{ "true" if session.get('user_id') else "false" }};
+            
+            if (!isLoggedIn) {
+                // Show blur gate modal for investment strategy sections
+                showBlurGateModal();
+                return;
+            }
+            
+            // If authenticated, show the section
+            showSection(sectionName);
+        }
+
+        // Section functionality with animations
         function showSection(sectionName) {
-            // Hide all sections
-            document.getElementById('acquisitions-section').classList.toggle('hidden', sectionName !== 'acquisitions');
-            document.getElementById('dispositions-section').classList.toggle('hidden', sectionName !== 'dispositions');
-            document.getElementById('comps-section').classList.toggle('hidden', sectionName !== 'comps');
-            document.getElementById('acquisitions-tab-content').classList.toggle('hidden', sectionName !== 'acquisitions');
-            document.getElementById('dispositions-tab-content').classList.toggle('hidden', sectionName !== 'dispositions');
+            // Hide all sections with animation
+            const sections = ['acquisitions-section', 'dispositions-section', 'comps-section', 'acquisitions-tab-content', 'dispositions-tab-content'];
+            sections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    if (sectionId.includes(sectionName)) {
+                        section.classList.remove('hidden');
+                        section.classList.add('animate-fadeInUp-sections');
+                        // Remove animation class after animation completes
+                        setTimeout(() => {
+                            section.classList.remove('animate-fadeInUp-sections');
+                        }, 600);
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                }
+            });
             
             // Show/hide divider and AI Control Center based on section
             const showDivider = sectionName !== 'acquisitions' && sectionName !== 'comps';
             document.getElementById('section-divider').classList.toggle('hidden', !showDivider);
             document.getElementById('ai-control-center-wrapper').classList.toggle('hidden', !showDivider);
             
-            // Update section toggle buttons
+            // Update section toggle buttons with animations
             document.querySelectorAll('.section-toggle-btn').forEach(btn => {
                 btn.classList.remove('active', 'bg-blue-500', 'bg-purple-500', 'bg-teal-500', 'text-white');
                 btn.classList.add('bg-gray-300', 'text-gray-700');
+                // Add pulse animation when deactivating
+                btn.classList.add('animate-pulse');
+                setTimeout(() => btn.classList.remove('animate-pulse'), 300);
             });
             
             if (sectionName === 'acquisitions') {
-                document.getElementById('acquisitions-section-btn').classList.remove('bg-gray-300', 'text-gray-700');
-                document.getElementById('acquisitions-section-btn').classList.add('bg-blue-500', 'text-white', 'active');
+                const btn = document.getElementById('acquisitions-section-btn');
+                btn.classList.remove('bg-gray-300', 'text-gray-700');
+                btn.classList.add('bg-blue-500', 'text-white', 'active', 'animate-bounce');
+                setTimeout(() => btn.classList.remove('animate-bounce'), 1000);
             } else if (sectionName === 'dispositions') {
-                document.getElementById('dispositions-section-btn').classList.remove('bg-gray-300', 'text-gray-700');
-                document.getElementById('dispositions-section-btn').classList.add('bg-purple-500', 'text-white', 'active');
+                const btn = document.getElementById('dispositions-section-btn');
+                btn.classList.remove('bg-gray-300', 'text-gray-700');
+                btn.classList.add('bg-purple-500', 'text-white', 'active', 'animate-bounce');
+                setTimeout(() => btn.classList.remove('animate-bounce'), 1000);
                 // Update reference values when switching to dispositions
                 updateDispositionsReference();
             } else if (sectionName === 'comps') {
-                document.getElementById('comps-section-btn').classList.remove('bg-gray-300', 'text-gray-700');
-                document.getElementById('comps-section-btn').classList.add('bg-teal-500', 'text-white', 'active');
+                const btn = document.getElementById('comps-section-btn');
+                btn.classList.remove('bg-gray-300', 'text-gray-700');
+                btn.classList.add('bg-teal-500', 'text-white', 'active', 'animate-bounce');
+                setTimeout(() => btn.classList.remove('animate-bounce'), 1000);
                 // Populate subject property data when switching to comps
                 populateCompsSubjectProperty();
             }
