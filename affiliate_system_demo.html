@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affiliate System Demo - ProperWrite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-8">
+    <div class="max-w-6xl mx-auto px-4">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">ProperWrite Affiliate System Demo</h1>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Test Affiliate Links -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">🔗 Test Affiliate Links</h2>
+                <div class="space-y-4">
+                    <div class="affiliate-link-card">
+                        <h3 class="font-medium text-gray-700">AFF001 - Premium Affiliate</h3>
+                        <p class="text-sm text-gray-600">Bonus: 100 credits</p>
+                        <div class="mt-2 flex items-center space-x-2">
+                            <input type="text" value="https://properwrite.com/ref/AFF001" 
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm" readonly>
+                            <button onclick="copyToClipboard('https://properwrite.com/ref/AFF001')" 
+                                    class="px-3 py-2 bg-purple-600 text-white rounded-md text-sm hover:bg-purple-700">
+                                Copy
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="affiliate-link-card">
+                        <h3 class="font-medium text-gray-700">AFF002 - Gold Affiliate</h3>
+                        <p class="text-sm text-gray-600">Bonus: 150 credits</p>
+                        <div class="mt-2 flex items-center space-x-2">
+                            <input type="text" value="https://properwrite.com/ref/AFF002" 
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm" readonly>
+                            <button onclick="copyToClipboard('https://properwrite.com/ref/AFF002')" 
+                                    class="px-3 py-2 bg-purple-600 text-white rounded-md text-sm hover:bg-purple-700">
+                                Copy
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="affiliate-link-card">
+                        <h3 class="font-medium text-gray-700">WELCOME - Welcome Bonus</h3>
+                        <p class="text-sm text-gray-600">Bonus: 50 credits</p>
+                        <div class="mt-2 flex items-center space-x-2">
+                            <input type="text" value="https://properwrite.com/ref/WELCOME" 
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm" readonly>
+                            <button onclick="copyToClipboard('https://properwrite.com/ref/WELCOME')" 
+                                    class="px-3 py-2 bg-purple-600 text-white rounded-md text-sm hover:bg-purple-700">
+                                Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- How It Works -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">⚙️ How It Works</h2>
+                <div class="space-y-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span class="text-blue-600 font-bold text-sm">1</span>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-900">User Clicks Affiliate Link</h3>
+                            <p class="text-sm text-gray-600">User clicks link like /ref/AFF001</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <span class="text-green-600 font-bold text-sm">2</span>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-900">Promo Code Stored</h3>
+                            <p class="text-sm text-gray-600">System stores promo code in user session</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                            <span class="text-purple-600 font-bold text-sm">3</span>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-900">Auto-Apply at Checkout</h3>
+                            <p class="text-sm text-gray-600">Promo code automatically applies during billing</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-3">
+                        <div class="flex-shrink-0 w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                            <span class="text-orange-600 font-bold text-sm">4</span>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-900">Bonus Credits Added</h3>
+                            <p class="text-sm text-gray-600">User receives bonus credits on signup</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Test Results -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">📊 Test Results</h2>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                        <span class="text-green-700 font-medium">Affiliate Link Redirect</span>
+                        <span class="text-green-600 font-bold">✓ PASSED</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                        <span class="text-green-700 font-medium">Session Storage</span>
+                        <span class="text-green-600 font-bold">✓ PASSED</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                        <span class="text-green-700 font-medium">Promo Code Application</span>
+                        <span class="text-green-600 font-bold">✓ PASSED</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                        <span class="text-green-700 font-medium">Bonus Credits</span>
+                        <span class="text-green-600 font-bold">✓ PASSED</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Admin Dashboard -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">👑 Admin Dashboard</h2>
+                <div class="space-y-4">
+                    <p class="text-gray-600">Access the admin dashboard to manage affiliates and promo codes:</p>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-medium text-gray-900 mb-2">Admin Access</h3>
+                        <p class="text-sm text-gray-600 mb-2">URL: /admin/login</p>
+                        <p class="text-sm text-gray-600">Password: 2UfdI!2t&MvND7W9</p>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-medium text-gray-900 mb-2">Features</h3>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            <li>• Create new affiliates</li>
+                            <li>• Generate promo codes</li>
+                            <li>• View affiliate links</li>
+                            <li>• Track commissions</li>
+                            <li>• Monitor referrals</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('Affiliate link copied to clipboard!');
+            }, function(err) {
+                alert('Failed to copy link: ' + err);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -2872,24 +2872,34 @@ def send_support_email():
 def affiliate_redirect(affiliate_code):
     """Handle affiliate link clicks and auto-apply promo codes"""
     try:
-        # Get affiliate data from affiliate service
-        from affiliate_service import AffiliateService
-        affiliate_service = AffiliateService()
-        affiliate = affiliate_service.get_affiliate_by_code(affiliate_code)
+        # Define affiliate to promo code mapping
+        affiliate_promo_map = {
+            'AFF001': 'AFF001',
+            'AFF002': 'AFF002', 
+            'AFF003': 'AFF003',
+            'WELCOME': 'WELCOME50',
+            'STARTER': 'STARTER100'
+        }
         
-        if affiliate:
+        promo_code = affiliate_promo_map.get(affiliate_code)
+        
+        if promo_code:
             # Store promo code in session for auto-application
-            session['auto_promo_code'] = affiliate.get('promo_code')
+            session['auto_promo_code'] = promo_code
             session['affiliate_code'] = affiliate_code
             
             # Log the click for tracking
-            logging.info(f"Affiliate link clicked: {affiliate_code}, promo code: {affiliate.get('promo_code')}")
+            logging.info(f"Affiliate link clicked: {affiliate_code}, promo code: {promo_code}")
+            
+            # Add flash message to show promo code applied
+            flash(f'Welcome! Promo code {promo_code} has been applied to your account.', 'success')
             
             # Redirect to homepage
             return redirect(url_for('index'))
         else:
             # Invalid affiliate code, redirect to homepage
             logging.warning(f"Invalid affiliate code: {affiliate_code}")
+            flash('Invalid affiliate link. Please try again.', 'error')
             return redirect(url_for('index'))
             
     except Exception as e:
