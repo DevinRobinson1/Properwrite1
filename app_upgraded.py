@@ -2906,5 +2906,10 @@ def affiliate_redirect(affiliate_code):
         logging.error(f"Error handling affiliate link: {e}")
         return redirect(url_for('index'))
 
+@app.route('/affiliate-links')
+def affiliate_links():
+    """Show affiliate links for easy copying"""
+    return render_template('affiliate_links.html')
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

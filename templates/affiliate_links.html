@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affiliate Links - ProperWrite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-8">
+    <div class="max-w-4xl mx-auto px-4">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">ProperWrite Affiliate Links</h1>
+        
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Working Affiliate Links</h2>
+            <div class="space-y-4">
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-medium text-gray-700 mb-2">AFF001 - 100 Bonus Credits</h3>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="link1" value="https://properwrite.com/ref/AFF001" 
+                               class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono" readonly>
+                        <button onclick="copyLink('link1')" 
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-medium text-gray-700 mb-2">AFF002 - 150 Bonus Credits</h3>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="link2" value="https://properwrite.com/ref/AFF002" 
+                               class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono" readonly>
+                        <button onclick="copyLink('link2')" 
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-medium text-gray-700 mb-2">AFF003 - 200 Bonus Credits</h3>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="link3" value="https://properwrite.com/ref/AFF003" 
+                               class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono" readonly>
+                        <button onclick="copyLink('link3')" 
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-medium text-gray-700 mb-2">WELCOME - 50 Bonus Credits</h3>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="link4" value="https://properwrite.com/ref/WELCOME" 
+                               class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono" readonly>
+                        <button onclick="copyLink('link4')" 
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">How It Works</h2>
+            <div class="space-y-3">
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span class="text-blue-600 font-bold text-sm">1</span>
+                    </div>
+                    <p class="text-gray-700">User clicks affiliate link (e.g., /ref/AFF001)</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span class="text-blue-600 font-bold text-sm">2</span>
+                    </div>
+                    <p class="text-gray-700">System automatically stores promo code in their session</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span class="text-blue-600 font-bold text-sm">3</span>
+                    </div>
+                    <p class="text-gray-700">Promo code auto-applies during checkout</p>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span class="text-blue-600 font-bold text-sm">4</span>
+                    </div>
+                    <p class="text-gray-700">User receives bonus credits automatically</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-6 text-center">
+            <a href="/admin/login" class="text-blue-600 hover:text-blue-800">← Back to Admin Dashboard</a>
+        </div>
+    </div>
+    
+    <script>
+        function copyLink(elementId) {
+            const input = document.getElementById(elementId);
+            input.select();
+            document.execCommand('copy');
+            
+            // Show success message
+            const button = input.nextElementSibling;
+            const originalText = button.textContent;
+            button.textContent = 'Copied!';
+            button.classList.add('bg-green-600');
+            button.classList.remove('bg-blue-600');
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.classList.remove('bg-green-600');
+                button.classList.add('bg-blue-600');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
