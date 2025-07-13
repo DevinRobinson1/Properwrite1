@@ -8,11 +8,12 @@ import os
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, Optional, List
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import create_engine, and_
 from billing_models import Team, User, CreditLog, TeamInvite, TIER_CONFIG, CREDIT_PACKS
 import secrets
 import jwt
+import uuid
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -43,6 +44,21 @@ class BillingService:
         self.stripe = stripe
         self.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
         self.email_service = EmailService()
+        
+    def db_session(self):
+        """Create a database session"""
+        return sessionmaker(bind=engine)()
+        
+    def _fire_webhook(self, event_type: str, data: dict):
+        """Fire webhook for events (placeholder for webhook service)"""
+        try:
+            # Import here to avoid circular imports
+            from zapier_webhook_service import fire_webhook
+            fire_webhook(event_type, data)
+        except ImportError:
+            logging.info(f"Webhook service not available for event: {event_type}")
+        except Exception as e:
+            logging.warning(f"Webhook firing failed for {event_type}: {e}")
         
     def create_checkout_session(self, lookup_key: str, quantity: int = 1, customer_email: str = None, 
                                team_id: str = None, success_url: str = None, cancel_url: str = None, 
@@ -557,31 +573,46 @@ class BillingService:
                 if existing_user:
                     return {'success': False, 'error': 'User with this email already exists'}
                 
+                # Create a new team for the user
+                team = Team(
+                    id=uuid.uuid4(),
+                    name=f"{user_data.get('name', user_data['email'].split('@')[0])}'s Team",
+                    tier='starter',
+                    credit_balance=5,  # Starting credits
+                    seats_max=1
+                )
+                
                 # Create new user
                 user = User(
-                    id=str(uuid.uuid4()),
+                    id=uuid.uuid4(),
                     email=user_data['email'],
                     name=user_data.get('name', user_data['email'].split('@')[0]),
-                    credits=5,  # Starting credits
-                    is_active=True,
-                    created_at=datetime.utcnow()
+                    team=team,
+                    role='owner',
+                    is_active=True
                 )
                 
                 # Hash password if provided
-                if 'password' in user_data:
+                if 'password' in user_data and user_data['password']:
                     from werkzeug.security import generate_password_hash
                     user.password_hash = generate_password_hash(user_data['password'])
                 
+                # Add both team and user to database
+                db.add(team)
                 db.add(user)
                 db.commit()
                 db.refresh(user)
+                db.refresh(team)
                 
-                # Fire webhook for new user
-                self._fire_webhook('new_user_signup', {
-                    'user_id': str(user.id),
-                    'email': user.email,
-                    'name': user.name
-                })
+                # Fire webhook for new user (if webhook service is available)
+                try:
+                    self._fire_webhook('new_user_signup', {
+                        'user_id': str(user.id),
+                        'email': user.email,
+                        'name': user.name
+                    })
+                except Exception as e:
+                    logging.warning(f"Webhook firing failed: {e}")
                 
                 return {
                     'success': True,

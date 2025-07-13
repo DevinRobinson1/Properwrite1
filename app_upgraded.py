@@ -379,8 +379,8 @@ def signup():
         name = request.form.get('name')
         credit_code = request.form.get('credit_code')
         
-        if not email or not password:
-            flash('Email and password are required', 'error')
+        if not email:
+            flash('Email is required', 'error')
             return render_template('auth/register.html')
         
         # Create user with billing service
