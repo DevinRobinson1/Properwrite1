@@ -45,7 +45,8 @@ class BillingService:
         self.email_service = EmailService()
         
     def create_checkout_session(self, lookup_key: str, quantity: int = 1, customer_email: str = None, 
-                               team_id: str = None, success_url: str = None, cancel_url: str = None) -> Dict:
+                               team_id: str = None, success_url: str = None, cancel_url: str = None, 
+                               promo_code: str = None) -> Dict:
         """
         Create Stripe checkout session for subscription or one-time purchase
         """
@@ -76,7 +77,8 @@ class BillingService:
                 'metadata': {
                     'lookup_key': lookup_key,
                     'team_id': team_id or '',
-                    'quantity': str(quantity)
+                    'quantity': str(quantity),
+                    'promo_code': promo_code or ''
                 }
             }
             
@@ -131,6 +133,7 @@ class BillingService:
                 lookup_key = session.get('metadata', {}).get('lookup_key')
                 team_id = session.get('metadata', {}).get('team_id')
                 quantity = int(session.get('metadata', {}).get('quantity', 1))
+                promo_code = session.get('metadata', {}).get('promo_code')
                 
                 # Get customer
                 customer = stripe.Customer.retrieve(session['customer'])
@@ -185,6 +188,18 @@ class BillingService:
                             reason=f'initial-{tier}'
                         )
                         db.add(credit_log)
+                        
+                        # Apply promo code bonus if present
+                        if promo_code:
+                            bonus_credits = self._apply_promo_code_bonus(promo_code, tier)
+                            if bonus_credits > 0:
+                                team.credit_balance += bonus_credits
+                                bonus_log = CreditLog(
+                                    team_id=team.id,
+                                    delta=bonus_credits,
+                                    reason=f'promo-{promo_code}'
+                                )
+                                db.add(bonus_log)
                 
                 db.commit()
                 
@@ -628,6 +643,19 @@ class BillingService:
         except Exception as e:
             logging.error(f"Error accepting team invite: {e}")
             return {'success': False, 'error': str(e)}
+    
+    def _apply_promo_code_bonus(self, promo_code: str, tier: str) -> int:
+        """Apply promo code bonus credits"""
+        # Define promo code bonuses
+        PROMO_BONUSES = {
+            'AFF001': 100,
+            'AFF002': 150,
+            'AFF003': 200,
+            'WELCOME50': 50,
+            'STARTER100': 100
+        }
+        
+        return PROMO_BONUSES.get(promo_code, 0)
     
     def remove_team_member(self, team_id: str, member_id: str) -> Dict:
         """

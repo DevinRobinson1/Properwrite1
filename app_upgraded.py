@@ -207,6 +207,17 @@ app.register_blueprint(zapier_api_bp)
 @app.route('/')
 def index():
     """Enhanced property input form with external data integration"""
+    # Check for affiliate referral parameters
+    ref_id = request.args.get('ref')
+    promo_code = request.args.get('code')
+    
+    # Auto-apply affiliate promo code if present
+    if ref_id and promo_code:
+        session['affiliate_ref'] = ref_id
+        session['auto_promo_code'] = promo_code
+        session['promo_applied'] = True
+        flash(f'Promo code {promo_code} has been automatically applied to your account!', 'success')
+    
     return render_template('index_upgraded.html', 
                          google_places_api_key=os.environ.get('GOOGLE_PLACES_API_KEY'))
 
@@ -2353,6 +2364,9 @@ def create_checkout():
         if not lookup_key:
             return jsonify({'error': 'lookup_key is required'}), 400
         
+        # Get promo code from session if available
+        promo_code = session.get('auto_promo_code')
+        
         # Create checkout session
         result = billing_service.create_checkout_session(
             lookup_key=lookup_key,
@@ -2360,7 +2374,8 @@ def create_checkout():
             customer_email=g.current_user['email'],
             team_id=g.current_user['team_id'],
             success_url=request.url_root + 'billing/success',
-            cancel_url=request.url_root + 'billing/cancel'
+            cancel_url=request.url_root + 'billing/cancel',
+            promo_code=promo_code
         )
         
         return jsonify(result)
@@ -2852,6 +2867,34 @@ def send_support_email():
     except Exception as e:
         logger.error(f"Error sending support email: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/ref/<affiliate_code>')
+def affiliate_redirect(affiliate_code):
+    """Handle affiliate link clicks and auto-apply promo codes"""
+    try:
+        # Get affiliate data from affiliate service
+        from affiliate_service import AffiliateService
+        affiliate_service = AffiliateService()
+        affiliate = affiliate_service.get_affiliate_by_code(affiliate_code)
+        
+        if affiliate:
+            # Store promo code in session for auto-application
+            session['auto_promo_code'] = affiliate.get('promo_code')
+            session['affiliate_code'] = affiliate_code
+            
+            # Log the click for tracking
+            logging.info(f"Affiliate link clicked: {affiliate_code}, promo code: {affiliate.get('promo_code')}")
+            
+            # Redirect to homepage
+            return redirect(url_for('index'))
+        else:
+            # Invalid affiliate code, redirect to homepage
+            logging.warning(f"Invalid affiliate code: {affiliate_code}")
+            return redirect(url_for('index'))
+            
+    except Exception as e:
+        logging.error(f"Error handling affiliate link: {e}")
+        return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

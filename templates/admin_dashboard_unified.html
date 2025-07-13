@@ -695,6 +695,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$${affiliate.revenue_generated.toLocaleString()}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$${affiliate.total_commissions_earned.toLocaleString()}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button onclick="copyAffiliateLink('${affiliate.affiliate_link}')" class="text-purple-600 hover:text-purple-900 mr-2">Copy Link</button>
                                     <button onclick="editAffiliate('${affiliate.id}')" class="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
                                     <button onclick="viewAffiliate('${affiliate.id}')" class="text-green-600 hover:text-green-900">View</button>
                                 </td>
@@ -1144,6 +1145,11 @@
                     alert('Affiliate created successfully!');
                     closeAddAffiliateModal();
                     loadAffiliatesData(); // Refresh the table
+                    
+                    // Show affiliate link creation success
+                    if (data.affiliate_link) {
+                        showAffiliateSuccess(data.affiliate_code, data.affiliate_link);
+                    }
                 } else {
                     alert('Error creating affiliate: ' + data.error);
                 }
@@ -1421,6 +1427,39 @@
             } else if (tabName === 'churn') {
                 loadChurnMetrics();
             }
+        }
+        
+        // Affiliate link management functions
+        function copyAffiliateLink(affiliateLink) {
+            navigator.clipboard.writeText(affiliateLink).then(function() {
+                alert('Affiliate link copied to clipboard!');
+            }, function(err) {
+                alert('Failed to copy link: ' + err);
+            });
+        }
+        
+        function showAffiliateSuccess(code, link) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50';
+            modal.innerHTML = `
+                <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                    <div class="mt-3 text-center">
+                        <h3 class="text-lg font-medium text-gray-900">Affiliate Created Successfully!</h3>
+                        <div class="mt-2 px-7 py-3">
+                            <p class="text-sm text-gray-500 mb-4">
+                                Your affiliate code: <strong>${code}</strong>
+                            </p>
+                            <div class="bg-gray-100 p-3 rounded-lg mb-4">
+                                <p class="text-xs text-gray-600 mb-2">Affiliate Link:</p>
+                                <p class="text-sm font-mono break-all">${link}</p>
+                            </div>
+                            <button onclick="copyAffiliateLink('${link}')" class="bg-purple-600 text-white px-4 py-2 rounded mr-2">Copy Link</button>
+                            <button onclick="document.body.removeChild(this.closest('.fixed'))" class="bg-gray-300 text-gray-800 px-4 py-2 rounded">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
         }
 
     </script>

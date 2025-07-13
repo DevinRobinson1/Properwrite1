@@ -556,10 +556,21 @@ def create_affiliate():
         # Add to storage
         affiliates_storage.append(affiliate)
         
+        # Generate affiliate link with embedded promo code
+        affiliate_code = f"AFF{len(affiliates_storage):03d}"
+        base_url = request.host_url.rstrip('/')
+        affiliate_link = f"{base_url}/?ref={affiliate['id']}&code={affiliate_code}"
+        
+        # Store affiliate code for future reference
+        affiliate['affiliate_code'] = affiliate_code
+        affiliate['affiliate_link'] = affiliate_link
+        
         return jsonify({
             'success': True,
             'message': 'Affiliate created successfully',
-            'affiliate_id': affiliate['id']
+            'affiliate_id': affiliate['id'],
+            'affiliate_code': affiliate_code,
+            'affiliate_link': affiliate_link
         })
         
     except Exception as e:
