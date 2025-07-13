@@ -44,6 +44,10 @@ engine = create_engine(
     }
 )
 
+# In-memory storage for affiliates and promo codes (temporary until database tables are created)
+affiliates_storage = []
+promo_codes_storage = []
+
 # Admin authentication decorator
 def require_admin(f):
     @wraps(f)
@@ -207,16 +211,8 @@ def dashboard():
 def get_affiliates():
     """Get all affiliates with filtering and pagination"""
     try:
-        # Sample affiliates data
-        # Get authentic affiliate data from database
-        affiliates_data = []
-        try:
-            # TODO: Implement actual affiliate table query when affiliate system is ready
-            # For now, return empty list to show no sample data
-            pass
-        except Exception as e:
-            logging.error(f"Error getting affiliates: {e}")
-            affiliates_data = []
+        # Get affiliates from in-memory storage
+        affiliates_data = affiliates_storage
         
         # Calculate stats
         total_affiliates = len(affiliates_data)
@@ -246,15 +242,8 @@ def get_affiliates():
 def get_promo_codes():
     """Get all promo codes"""
     try:
-        # Get authentic promo codes data from database
-        promo_codes = []
-        try:
-            # TODO: Implement actual promo codes table query when promo system is ready
-            # For now, return empty list to show no sample data
-            pass
-        except Exception as e:
-            logging.error(f"Error getting promo codes: {e}")
-            promo_codes = []
+        # Get promo codes from in-memory storage
+        promo_codes = promo_codes_storage
         
         return jsonify({
             'success': True,
@@ -547,11 +536,30 @@ def create_affiliate():
     try:
         data = request.get_json()
         
-        # For now, just return success (would normally create in database)
+        # Create affiliate object and store it
+        affiliate = {
+            'id': f"affiliate-{len(affiliates_storage) + 1}",
+            'name': data.get('name', ''),
+            'email': data.get('email', ''),
+            'company': data.get('company', ''),
+            'commission_rate': float(data.get('commission_rate', 0)) / 100,
+            'tier': data.get('tier', 'bronze'),
+            'status': 'active',
+            'total_commissions_earned': 0,
+            'active_referrals': 0,
+            'total_referrals': 0,
+            'revenue_generated': 0,
+            'created_at': datetime.now().isoformat(),
+            'last_payout': None
+        }
+        
+        # Add to storage
+        affiliates_storage.append(affiliate)
+        
         return jsonify({
             'success': True,
             'message': 'Affiliate created successfully',
-            'affiliate_id': f"affiliate-{len(data.get('name', ''))}"
+            'affiliate_id': affiliate['id']
         })
         
     except Exception as e:
@@ -565,22 +573,27 @@ def create_promo_code():
     try:
         data = request.get_json()
         
-        # TODO: Implement actual promo code creation in database
-        # For now, just return success with the submitted data
+        # Create promo code object and store it
+        promo_code = {
+            'id': 'promo-' + str(int(time.time())),
+            'code': data.get('code', ''),
+            'type': data.get('type', ''),
+            'discount_value': data.get('value', 0),
+            'max_uses': data.get('max_uses', 0),
+            'uses': 0,
+            'affiliate_id': data.get('affiliate_id', ''),
+            'status': 'active',
+            'created_at': datetime.now().isoformat(),
+            'expires_at': data.get('expires_at', '')
+        }
+        
+        # Add to storage
+        promo_codes_storage.append(promo_code)
+        
         return jsonify({
             'success': True,
             'message': 'Promo code created successfully',
-            'promo_code': {
-                'id': 'promo-' + str(int(time.time())),
-                'code': data.get('code', ''),
-                'type': data.get('type', ''),
-                'discount_value': data.get('discount_value', 0),
-                'max_uses': data.get('max_uses', 0),
-                'affiliate_id': data.get('affiliate_id', ''),
-                'status': 'active',
-                'created_at': datetime.now().isoformat(),
-                'expires_at': data.get('expires_at', '')
-            }
+            'promo_code': promo_code
         })
         
     except Exception as e:
