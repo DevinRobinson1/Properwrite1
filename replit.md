@@ -208,6 +208,21 @@ properwrite.com is a Flask-based web application that generates professional pro
 - July 13, 2025. Removed all hardcoded sample data from Admin Dashboard V1: eliminated fake affiliate partners (John Martinez, Sarah Thompson, Mike Rodriguez) and sample promo codes (COACH50, INVESTORPRO30, CREDITS100) from admin_routes_minimal.py, implemented authentic data-only policy with empty arrays for affiliates and promo codes until real data is created, fixed database column references (credits_balance to credit_balance), added functional promo code creation endpoint (/api/create-promo-code) with proper form handling, updated openAddPromoCodeModal function to properly display creation modal, ensured admin dashboard displays only live production data (0 affiliates, $0 commissions, 0 referrals) matching actual database state
 - July 13, 2025. Fixed critical CSRF token error during account creation: added missing CSRF tokens to both login and registration forms (templates/auth/login.html and templates/auth/register.html), updated signup route to handle credit_code parameter from registration form, confirmed CSRF protection is working properly to prevent unauthorized form submissions
 
+## Roadmap
+
+### Upcoming Features
+- **Fix and Flip Calculator**: Comprehensive calculator for fix-and-flip projects with renovation timelines, holding costs, financing options, and profit projections
+- **New Build Calculator**: Ground-up construction calculator with materials, labor, permits, timeline tracking, and custom home building cost analysis
+- **CRM Lead Integration**: Automated lead capture and distribution system with CRM integration (likely through Zapier) for seamless lead management workflow
+
+### Future Enhancements
+- Advanced property valuation algorithms
+- Market trend analysis and predictions
+- Automated comparable property matching
+- Enhanced team collaboration tools
+- Mobile app development
+- API integrations with additional real estate platforms
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
