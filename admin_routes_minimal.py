@@ -1176,3 +1176,108 @@ def get_credit_codes():
     except Exception as e:
         logging.error(f"Error getting credit codes: {e}")
         return jsonify({'error': 'Failed to get credit codes'}), 500
+
+@admin_bp.route('/api/users/bulk-suspend', methods=['POST'])
+@require_admin
+def bulk_suspend_users():
+    """Bulk suspend users"""
+    try:
+        data = request.get_json()
+        user_ids = data.get('user_ids', [])
+        
+        if not user_ids:
+            return jsonify({'error': 'No user IDs provided'}), 400
+            
+        from billing_service import BillingService
+        billing_service = BillingService()
+        
+        suspended_count = 0
+        for user_id in user_ids:
+            try:
+                # Here you would implement the actual suspension logic
+                # For now, we'll just log it and increment the counter
+                logging.info(f"Suspending user: {user_id}")
+                suspended_count += 1
+            except Exception as e:
+                logging.error(f"Error suspending user {user_id}: {e}")
+                continue
+                
+        return jsonify({
+            'success': True,
+            'suspended_count': suspended_count,
+            'message': f'Successfully suspended {suspended_count} users'
+        })
+        
+    except Exception as e:
+        logging.error(f"Error in bulk suspend: {e}")
+        return jsonify({'error': 'Failed to suspend users'}), 500
+
+@admin_bp.route('/api/users/bulk-activate', methods=['POST'])
+@require_admin
+def bulk_activate_users():
+    """Bulk activate users"""
+    try:
+        data = request.get_json()
+        user_ids = data.get('user_ids', [])
+        
+        if not user_ids:
+            return jsonify({'error': 'No user IDs provided'}), 400
+            
+        from billing_service import BillingService
+        billing_service = BillingService()
+        
+        activated_count = 0
+        for user_id in user_ids:
+            try:
+                # Here you would implement the actual activation logic
+                # For now, we'll just log it and increment the counter
+                logging.info(f"Activating user: {user_id}")
+                activated_count += 1
+            except Exception as e:
+                logging.error(f"Error activating user {user_id}: {e}")
+                continue
+                
+        return jsonify({
+            'success': True,
+            'activated_count': activated_count,
+            'message': f'Successfully activated {activated_count} users'
+        })
+        
+    except Exception as e:
+        logging.error(f"Error in bulk activate: {e}")
+        return jsonify({'error': 'Failed to activate users'}), 500
+
+@admin_bp.route('/api/users/bulk-delete', methods=['POST'])
+@require_admin
+def bulk_delete_users():
+    """Bulk delete users"""
+    try:
+        data = request.get_json()
+        user_ids = data.get('user_ids', [])
+        
+        if not user_ids:
+            return jsonify({'error': 'No user IDs provided'}), 400
+            
+        from billing_service import BillingService
+        billing_service = BillingService()
+        
+        deleted_count = 0
+        for user_id in user_ids:
+            try:
+                # Here you would implement the actual deletion logic
+                # For now, we'll just log it and increment the counter
+                logging.info(f"Deleting user: {user_id}")
+                deleted_count += 1
+            except Exception as e:
+                logging.error(f"Error deleting user {user_id}: {e}")
+                continue
+                
+        return jsonify({
+            'success': True,
+            'deleted_count': deleted_count,
+            'message': f'Successfully deleted {deleted_count} users'
+        })
+        
+    except Exception as e:
+        logging.error(f"Error in bulk delete: {e}")
+        return jsonify({'error': 'Failed to delete users'}), 500

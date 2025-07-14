@@ -174,11 +174,38 @@
                             </button>
                         </div>
                     </div>
+                    <!-- Mass Actions Bar -->
+                    <div id="mass-actions-bar" class="mt-4 bg-gray-50 rounded-lg p-4 hidden">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm font-medium text-gray-700">
+                                    <span id="selected-count">0</span> users selected
+                                </span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="clearSelection()" class="text-sm text-gray-500 hover:text-gray-700">
+                                    Clear Selection
+                                </button>
+                                <button onclick="bulkSuspend()" class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600 transition-colors">
+                                    <i class="fas fa-ban mr-1"></i> Suspend
+                                </button>
+                                <button onclick="bulkActivate()" class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 transition-colors">
+                                    <i class="fas fa-check mr-1"></i> Activate
+                                </button>
+                                <button onclick="bulkDelete()" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition-colors">
+                                    <i class="fas fa-trash mr-1"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <input type="checkbox" id="select-all" onchange="toggleSelectAll()" class="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                                </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
@@ -189,7 +216,11 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             {% for user in data.users %}
-                            <tr class="hover:bg-gray-50">
+                            <tr class="hover:bg-gray-50 user-row">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <input type="checkbox" class="user-checkbox h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" 
+                                           value="{{ user.id }}" onchange="updateMassActions()">
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <div class="flex-shrink-0 h-10 w-10">
@@ -635,8 +666,9 @@
             const rows = document.querySelectorAll('tbody tr');
             
             rows.forEach(row => {
-                const email = row.cells[0].textContent.toLowerCase();
-                const team = row.cells[1].textContent.toLowerCase();
+                // Updated cell indices due to checkbox column
+                const email = row.cells[1].textContent.toLowerCase();
+                const team = row.cells[2].textContent.toLowerCase();
                 
                 if (email.includes(searchTerm) || team.includes(searchTerm)) {
                     row.style.display = '';
@@ -1651,6 +1683,160 @@
                 console.error('Error updating affiliate:', error);
                 alert('Error updating affiliate');
             });
+        }
+
+        // Mass actions functionality
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('select-all');
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+            
+            updateMassActions();
+        }
+
+        function updateMassActions() {
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+            const selectedCheckboxes = document.querySelectorAll('.user-checkbox:checked');
+            const selectAllCheckbox = document.getElementById('select-all');
+            const massActionsBar = document.getElementById('mass-actions-bar');
+            const selectedCount = document.getElementById('selected-count');
+            
+            // Update select all checkbox state
+            if (selectedCheckboxes.length === 0) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = false;
+            } else if (selectedCheckboxes.length === checkboxes.length) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = true;
+            } else {
+                selectAllCheckbox.indeterminate = true;
+            }
+            
+            // Show/hide mass actions bar
+            if (selectedCheckboxes.length > 0) {
+                massActionsBar.classList.remove('hidden');
+                selectedCount.textContent = selectedCheckboxes.length;
+            } else {
+                massActionsBar.classList.add('hidden');
+            }
+        }
+
+        function clearSelection() {
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+            const selectAllCheckbox = document.getElementById('select-all');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = false;
+            
+            updateMassActions();
+        }
+
+        function getSelectedUserIds() {
+            const selectedCheckboxes = document.querySelectorAll('.user-checkbox:checked');
+            return Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
+        }
+
+        function bulkSuspend() {
+            const selectedUsers = getSelectedUserIds();
+            
+            if (selectedUsers.length === 0) {
+                alert('Please select users to suspend');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to suspend ${selectedUsers.length} user(s)?`)) {
+                fetch('/admin/api/users/bulk-suspend', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_ids: selectedUsers })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Successfully suspended ${selectedUsers.length} user(s)`);
+                        location.reload();
+                    } else {
+                        alert('Error suspending users: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error suspending users');
+                });
+            }
+        }
+
+        function bulkActivate() {
+            const selectedUsers = getSelectedUserIds();
+            
+            if (selectedUsers.length === 0) {
+                alert('Please select users to activate');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to activate ${selectedUsers.length} user(s)?`)) {
+                fetch('/admin/api/users/bulk-activate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_ids: selectedUsers })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Successfully activated ${selectedUsers.length} user(s)`);
+                        location.reload();
+                    } else {
+                        alert('Error activating users: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error activating users');
+                });
+            }
+        }
+
+        function bulkDelete() {
+            const selectedUsers = getSelectedUserIds();
+            
+            if (selectedUsers.length === 0) {
+                alert('Please select users to delete');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to permanently delete ${selectedUsers.length} user(s)? This action cannot be undone.`)) {
+                fetch('/admin/api/users/bulk-delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_ids: selectedUsers })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Successfully deleted ${selectedUsers.length} user(s)`);
+                        location.reload();
+                    } else {
+                        alert('Error deleting users: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting users');
+                });
+            }
         }
 
     </script>
