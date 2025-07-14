@@ -62,6 +62,9 @@ if not os.environ.get("SESSION_SECRET"):
 else:
     app.secret_key = os.environ.get("SESSION_SECRET")
 
+# Configure session to last 30 days for better user experience
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
+
 # Initialize CSRF protection
 csrf = CSRFProtect(app)
 
@@ -274,7 +277,8 @@ def api_signup():
         )
         
         if result.get('success'):
-            # Set consolidated session
+            # Set consolidated session with permanent flag
+            session.permanent = True
             session['user_id'] = result['user_id']
             session['user_email'] = email
             session['email'] = email  # Keep for backward compatibility
@@ -764,7 +768,8 @@ def api_login():
         result = billing_service.authenticate_user(email, password)
         
         if result.get('success'):
-            # Set up consolidated session
+            # Set up consolidated session with permanent flag
+            session.permanent = True
             session['user_id'] = result.get('user_id')
             session['user_email'] = email
             session['email'] = email  # Keep for backward compatibility
