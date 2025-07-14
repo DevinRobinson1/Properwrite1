@@ -6543,6 +6543,12 @@
         }
 
         function runCompsAnalysis() {
+            // Check authentication before allowing analysis
+            if (!window.userLoggedIn) {
+                showRegistrationModal('Please create an account to access Comparable Properties Analysis');
+                return;
+            }
+            
             // Try to get address from multiple possible sources
             const address = document.getElementById('address')?.value || 
                            document.getElementById('street-address')?.value ||
@@ -6738,36 +6744,151 @@
         }
         
         function displayCompsResults(data) {
-            console.log('Displaying comps results:', data);
+            console.log('Displaying enhanced comps results:', data);
             document.getElementById('comps-results').classList.remove('hidden');
             
             // Store comps data globally
             window.compsData = data;
             
-            // Display comparable properties
+            // Display comparable properties table
             const compsGrid = document.getElementById('comps-grid');
             compsGrid.innerHTML = '';
             
             if (data.comps && data.comps.length > 0) {
-                data.comps.forEach((comp, index) => {
-                    comp.index = index; // Add index to each comp
-                    const adjustment = data.adjustments && data.adjustments[index] ? data.adjustments[index] : null;
-                    const compCard = createCompCard(comp, adjustment);
-                    compsGrid.appendChild(compCard);
-                });
+                // Create professional table display
+                const table = createCompsTable(data.comps);
+                compsGrid.appendChild(table);
             } else {
                 compsGrid.innerHTML = '<p class="text-gray-600">No comparable properties found</p>';
             }
             
-            // Display AI summary
-            if (data.ai_summary) {
-                document.getElementById('comps-ai-summary').innerHTML = marked.parse(data.ai_summary.summary || '');
-                document.getElementById('comps-recommended-arv').textContent = '$' + (data.ai_summary.recommended_arv || 0).toLocaleString();
+            // Display AI summary and analysis
+            if (data.analysis) {
+                const aiSummary = data.analysis.summary || data.ai_summary || '';
+                document.getElementById('comps-ai-summary').innerHTML = aiSummary;
                 
-                const minArv = data.ai_summary.arv_range?.min || 0;
-                const maxArv = data.ai_summary.arv_range?.max || 0;
+                const recommendedArv = data.analysis.recommended_arv || data.recommended_arv || 0;
+                document.getElementById('comps-recommended-arv').textContent = '$' + recommendedArv.toLocaleString();
+                
+                const minArv = data.analysis.adjusted_price_range?.min || 0;
+                const maxArv = data.analysis.adjusted_price_range?.max || 0;
                 document.getElementById('comps-arv-range').textContent = `Range: $${minArv.toLocaleString()} - $${maxArv.toLocaleString()}`;
             }
+            
+            // Display search summary if available
+            if (data.search_summary) {
+                const searchInfo = `
+                    <div class="mt-4 p-3 bg-blue-50 rounded-lg text-sm">
+                        <strong>Search Summary:</strong> ${data.search_summary.attempts} attempts, 
+                        ${data.search_summary.final_time_window} day window, 
+                        ${data.search_summary.final_radius} mile radius
+                    </div>
+                `;
+                document.getElementById('comps-ai-summary').insertAdjacentHTML('beforeend', searchInfo);
+            }
+        }
+
+        function createCompsTable(comps) {
+            const tableContainer = document.createElement('div');
+            tableContainer.className = 'overflow-x-auto bg-white rounded-lg border border-gray-200 shadow-sm';
+            
+            let tableHTML = `
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specs</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sale Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sale Price</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Adjusted Price</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Adjustments</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+            `;
+            
+            comps.forEach((comp, index) => {
+                const adjustedPrice = comp.adjusted_price || comp.price;
+                const adjustmentAmount = comp.total_adjustment || 0;
+                const saleDateFormatted = comp.sale_date ? new Date(comp.sale_date).toLocaleDateString() : 'N/A';
+                
+                // Display address (handle both string and object format)
+                let displayAddress = 'Unknown Address';
+                if (comp.address) {
+                    if (typeof comp.address === 'string') {
+                        displayAddress = comp.address;
+                    } else if (typeof comp.address === 'object') {
+                        displayAddress = `${comp.address.streetAddress || ''} ${comp.address.city || ''}, ${comp.address.state || ''}`.trim();
+                    }
+                }
+                
+                // Build adjustments display
+                let adjustmentsDisplay = '';
+                if (comp.adjustments) {
+                    const adjustments = comp.adjustments;
+                    const details = [];
+                    
+                    if (adjustments.bedroom) {
+                        details.push(`Beds: ${adjustments.bedroom >= 0 ? '+' : ''}$${adjustments.bedroom.toLocaleString()}`);
+                    }
+                    if (adjustments.bathroom) {
+                        details.push(`Baths: ${adjustments.bathroom >= 0 ? '+' : ''}$${adjustments.bathroom.toLocaleString()}`);
+                    }
+                    if (adjustments.sqft) {
+                        details.push(`Sqft: ${adjustments.sqft >= 0 ? '+' : ''}$${adjustments.sqft.toLocaleString()}`);
+                    }
+                    
+                    adjustmentsDisplay = details.join('<br>');
+                }
+                
+                if (!adjustmentsDisplay) {
+                    adjustmentsDisplay = adjustmentAmount ? `${adjustmentAmount >= 0 ? '+' : ''}$${adjustmentAmount.toLocaleString()}` : 'No adjustments';
+                }
+                
+                tableHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3">
+                            <div class="font-medium text-gray-900">${displayAddress}</div>
+                            <div class="text-sm text-gray-500">${comp.distance ? comp.distance.toFixed(2) : '0.5'} miles away</div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="text-sm text-gray-900">
+                                ${comp.beds || comp.bedrooms || '-'} beds, ${comp.baths || comp.bathrooms || '-'} baths
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                ${(comp.sqft || comp.square_footage || comp.livingArea || '-').toLocaleString()} sqft
+                            </div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="text-sm text-gray-900">${saleDateFormatted}</div>
+                            <div class="text-sm text-gray-500">${comp.days_ago || 0} days ago</div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="text-lg font-bold text-gray-900">$${comp.price.toLocaleString()}</div>
+                            <div class="text-sm text-gray-500">
+                                $${(comp.price / (comp.sqft || comp.square_footage || comp.livingArea || 1)).toFixed(0)}/sqft
+                            </div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="text-lg font-bold text-teal-600">$${adjustedPrice.toLocaleString()}</div>
+                            <div class="text-sm ${adjustmentAmount >= 0 ? 'text-green-600' : 'text-red-600'}">
+                                ${adjustmentAmount >= 0 ? '+' : ''}$${adjustmentAmount.toLocaleString()}
+                            </div>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="text-xs text-gray-600">${adjustmentsDisplay}</div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            tableContainer.innerHTML = tableHTML;
+            return tableContainer;
         }
 
         function createCompCard(comp, adjustments) {

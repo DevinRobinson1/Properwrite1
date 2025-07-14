@@ -1,0 +1,67 @@
+ Objective  
+Make the **Comparable Properties Analysis** tab fully functional and bullet-proof without altering ANY logic, layout, or styling in the Acquisitions, Dispositions, Comps→Construction, or Credit/Payment flows.
+
+────────────────────────────────────────
+🛠  Mandatory fixes & enhancements
+1. **Bug squash**
+   • Resolve `clean_address is not defined` and any other reference / state errors.  
+   • Confirm Google Places → `formatted_address` is passed intact to the comp engine (no double city or “USA, City” duplication).  
+   • Add defensive try/catch + Sentry logging to surface future errors.
+
+2. **Data source**
+   • Continue using Zillow RapidAPI *property/sold* endpoint for closed-sale comps.  
+   • Integrate fallback: Redfin sold API (already in the repo) if Zillow returns 0 hits.
+
+3. **Comp-search algorithm (strict rules)**
+INPUTS → beds, baths, sqft, lat, lng, close_date
+STEP 1 time_window = 90 days, radius = 0.25 mi
+STEP 2 while comps_found < 3 and time_window ≤ 365 days:
+• first expand time_window → 180 days, 210 days, … 30-day increments
+• if still < 3, expand radius → 0.5 mi, then 1 mi max
+• abort if time_window > 365 days OR radius > 1 mi
+Filters:
+• property_type == subject_type
+• +/- 500 sqft of subject (living area)
+• same beds & baths count (±1 if none found)
+• exclude HOA / pool / waterfront if subject lacks them
+• stay inside same census block & DON’T cross major roads (filter by TIGER roads > “M” class)
+
+markdown
+Copy
+Edit
+
+4. **Adjustment engine**
+• Implement dollar-based adjustments (bed, bath, pool, etc.) **exactly** as table provided.  
+• Separate module `utils/compAdjust.ts` – pure, unit-tested.  
+• Lot-size adjust only when Δ > 2,500 sq ft.  
+• Traffic/commercial proximity penalty per spec.
+
+5. **UI enhancements (keep existing style)**
+• When comps load successfully, replace red error card with:
+  - subject card (already present)  
+  - comps table (address, sold date, Δbeds, Δbaths, Δsqft, distance, adjusted price)  
+  - dynamic ARV summary (mean, median, low, high).  
+• If <3 comps after max search → show yellow banner “Fewer than 3 qualified comps – review manually”.
+
+6. **Blur & registration gate**
+• Guests still see subject data; blur comps table & show “Create a free account to unlock comps” modal (same pattern as for Acquisitions).
+
+7. **Performance**
+• Throttle Zillow/Redfin requests to 1 req/s; cache by ZPID for 24h in Supabase `comps_cache` table.
+
+────────────────────────────────────────
+🔒  Security & QA
+• Run ESLint + Prettier fix.  
+• Add Cypress test: enter address, verify ≥3 comps or yellow banner.  
+• Unit tests for `compSearch()` and `compAdjust()` (Vitest).  
+• Confirm no duplicate functions remain (run `npm run dupe-check`).  
+
+────────────────────────────────────────
+✅  Acceptance
+1. Enter “5208 Teakwood Drive, Kannapolis NC 28262” → at least 3 comps within 1 mi / 365 days and correct adjustments.  
+2. Error-free console (no `clean_address` or unhandled promise).  
+3. Guest user sees blur + modal; registered user sees full comps.  
+4. No regressions anywhere else in the app.
+
+Take the time you need—run full regression and security audit before merging.  ```
+::contentReference[oaicite:0]{index=0}

@@ -142,7 +142,7 @@ class SimpleCompsService:
                 'found_count': len(final_comps),
                 'comps': final_comps,
                 'source': 'Zillow RapidAPI',
-                'search_location': clean_address
+                'search_location': self._clean_address_for_search(address)
             }
             
         except Exception as e:

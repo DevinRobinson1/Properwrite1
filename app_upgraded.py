@@ -35,6 +35,7 @@ from admin_api import admin_api_bp
 from zapier_api import zapier_api_bp
 from bitcoin_payment_service import bitcoin_service
 from simple_comps_service import SimpleCompsService
+from enhanced_comps_service import EnhancedCompsService, SearchParams
 from email_service import email_service
 from affiliate_api import affiliate_api
 from construction_service import ConstructionService
@@ -101,6 +102,7 @@ engine = create_engine(
 
 # Initialize comps service
 comps_service = SimpleCompsService()
+enhanced_comps_service = EnhancedCompsService()
 
 # Register admin blueprint (unified admin system)
 from admin_routes_minimal import admin_bp
@@ -2315,15 +2317,23 @@ def analyze_comps():
                 'error': 'Property address is required'
             }), 400
         
-        # Analyze comparables using simple service
-        result = comps_service.analyze_comparables(
-            subject_address=address,
+        # Create search parameters for enhanced service
+        search_params = SearchParams(
             beds=int(beds),
             baths=float(baths),
             sqft=int(sqft),
-            lat=lat,
-            lng=lng
+            lat=lat or 0.0,
+            lng=lng or 0.0,
+            address=address
         )
+        
+        # Use enhanced service for comprehensive analysis
+        result = enhanced_comps_service.search_comparable_sales(search_params)
+        
+        # Add analysis summary if successful
+        if result.get('success') and result.get('comps'):
+            result['ai_summary'] = result['analysis'].get('summary', '')
+            result['recommended_arv'] = result['analysis'].get('recommended_arv', 0)
         
         return jsonify(result)
         
