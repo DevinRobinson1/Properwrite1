@@ -64,6 +64,7 @@ class TeamInvite(Base):
     token = Column(Text, nullable=False, unique=True)
     status = Column(Text, nullable=False, default='pending')  # pending, accepted, cancelled, expired
     expires_at = Column(DateTime(timezone=True), nullable=False)
+    accepted_at = Column(DateTime(timezone=True), nullable=True)
     used = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

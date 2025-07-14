@@ -662,8 +662,9 @@ class BillingService:
                 user.team_id = team.id
                 user.team_role = invite.role
                 
-                # Delete the invite
-                db.delete(invite)
+                # Mark the invite as accepted instead of deleting it
+                invite.status = 'accepted'
+                invite.accepted_at = datetime.utcnow()
                 db.commit()
                 
                 return {
