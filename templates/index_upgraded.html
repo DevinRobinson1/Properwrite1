@@ -3307,10 +3307,22 @@
                     <div id="installment-tab" class="acquisition-tab-content hidden">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6">Installments/Novations Strategy</h3>
                         
-
+                        <!-- Strategy Type Selection -->
+                        <div class="bg-white border border-gray-200 p-6 rounded-lg mb-6">
+                            <div class="flex items-center space-x-4">
+                                <label class="block text-sm font-medium text-gray-700">Strategy Type:</label>
+                                <select id="installment-strategy-type" class="px-4 py-2 border border-gray-300 rounded-lg font-semibold bg-white" onchange="toggleInstallmentMode()">
+                                    <option value="installment">Installment Method</option>
+                                    <option value="novation">Novation Method</option>
+                                </select>
+                                <div class="text-sm text-gray-500">
+                                    <span id="strategy-description">Uses equitable deposit structure for buyer control</span>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Installment Equitable Deposit Structure -->
-                        <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg mb-6">
+                        <div id="installment-deposit-structure" class="bg-blue-50 border border-blue-200 p-6 rounded-lg mb-6">
                             <div class="flex items-center justify-between mb-4">
                                 <h4 class="text-lg font-semibold text-blue-800">💰 Installment Equitable Deposit Structure</h4>
                                 <div class="flex items-center">
@@ -8187,6 +8199,28 @@
             if (section && icon) {
                 section.classList.toggle('hidden');
                 icon.classList.toggle('rotate-180');
+            }
+        }
+
+        // Toggle Installment vs Novation mode
+        function toggleInstallmentMode() {
+            const strategyType = document.getElementById('installment-strategy-type').value;
+            const depositStructure = document.getElementById('installment-deposit-structure');
+            const strategyDescription = document.getElementById('strategy-description');
+            
+            if (strategyType === 'novation') {
+                // Hide deposit structure for Novation
+                depositStructure.classList.add('hidden');
+                strategyDescription.textContent = 'Direct property control without deposit structure';
+            } else {
+                // Show deposit structure for Installment
+                depositStructure.classList.remove('hidden');
+                strategyDescription.textContent = 'Uses equitable deposit structure for buyer control';
+            }
+            
+            // Recalculate based on selected strategy
+            if (typeof recalculateInstallment === 'function') {
+                recalculateInstallment();
             }
         }
 
