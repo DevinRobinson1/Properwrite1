@@ -6544,7 +6544,7 @@
 
         function runCompsAnalysis() {
             // Check authentication before allowing analysis
-            if (!window.userLoggedIn) {
+            if (!isAuthenticated) {
                 showRegistrationModal('Please create an account to access Comparable Properties Analysis');
                 return;
             }
