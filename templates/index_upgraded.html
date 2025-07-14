@@ -5231,6 +5231,10 @@
             const rent = parseFloat(document.getElementById('subject-to-rent')?.value?.replace(/[^\d]/g, '')) || 
                         parseFloat(document.getElementById('rent')?.value?.replace(/[^\d]/g, '')) || 1325;
             
+            console.log('Cash Offer Calculation - Input Values:', {
+                arv, sellerAskingPrice, propertyEquity, repairs, rent
+            });
+            
             // Calculate cash offer based on multiple factors
             // Formula: Consider cash flow potential, equity percentage, and repair costs
             const monthlyNetCashFlow = rent - 800 - 300 - 100; // Estimated PITI and reserves
@@ -5242,14 +5246,24 @@
             const cashFlowBasedOffer = annualCashFlow * cashFlowMultiplier * 0.5; // 50% of cash flow value
             const repairAdjustment = repairs * 0.1; // 10% of repair costs
             
+            console.log('Cash Offer Calculation - Intermediate Values:', {
+                monthlyNetCashFlow, annualCashFlow, cashFlowMultiplier, 
+                equityBasedOffer, cashFlowBasedOffer, repairAdjustment
+            });
+            
             // Final calculation considering seller motivation
-            let calculatedOffer = Math.min(
-                sellerAskingPrice * 0.8, // Max 80% of asking price
-                Math.max(equityBasedOffer, cashFlowBasedOffer) - repairAdjustment
-            );
+            const maxAskingPrice = sellerAskingPrice * 0.8; // Max 80% of asking price
+            const baseOffer = Math.max(equityBasedOffer, cashFlowBasedOffer) - repairAdjustment;
+            let calculatedOffer = Math.min(maxAskingPrice, baseOffer);
+            
+            console.log('Cash Offer Calculation - Final Logic:', {
+                maxAskingPrice, baseOffer, calculatedOfferBeforeMinMax: calculatedOffer
+            });
             
             // Ensure minimum viable offer
             calculatedOffer = Math.max(5000, Math.min(50000, calculatedOffer));
+            
+            console.log('Cash Offer Calculation - Final Offer:', calculatedOffer);
             
             updateElementIfExists('calculated-cash-offer', Math.round(calculatedOffer));
             
