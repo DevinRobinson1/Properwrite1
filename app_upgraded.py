@@ -2317,6 +2317,14 @@ def analyze_comps():
                 'error': 'Property address is required'
             }), 400
         
+        # Extract zip code from address for prioritization
+        zip_code = ""
+        if address:
+            import re
+            zip_match = re.search(r'\b(\d{5})\b', address)
+            if zip_match:
+                zip_code = zip_match.group(1)
+        
         # Create search parameters for enhanced service
         search_params = SearchParams(
             beds=int(beds),
@@ -2324,7 +2332,8 @@ def analyze_comps():
             sqft=int(sqft),
             lat=lat or 0.0,
             lng=lng or 0.0,
-            address=address
+            address=address,
+            zip_code=zip_code
         )
         
         # Use enhanced service for comprehensive analysis
@@ -2336,7 +2345,14 @@ def analyze_comps():
             
             # Use simple service as fallback
             try:
-                simple_result = comps_service.search_comparable_sales(search_params)
+                simple_result = comps_service.search_comparable_sales(
+                    address=address,
+                    beds=int(beds),
+                    baths=float(baths),
+                    sqft=int(sqft),
+                    lat=lat or 0.0,
+                    lng=lng or 0.0
+                )
                 if simple_result.get('success') and simple_result.get('comps'):
                     result = simple_result
                     result['fallback_used'] = True

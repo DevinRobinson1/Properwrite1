@@ -23,6 +23,7 @@ class SearchParams:
     lat: float
     lng: float
     address: str
+    zip_code: str
     close_date: str = None
     
 @dataclass
