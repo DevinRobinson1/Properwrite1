@@ -10378,47 +10378,47 @@
                 const totalExpenses = finalPurchase + finalDevelopment + finalVertical + finalHolding + finalAltHolding + finalClosing + finalRealtor;
                 const finalProfit = finalSellPrice - totalExpenses;
                 
-                // Update all fields
-                document.getElementById('nc-gross-income').value = grossIncome.toFixed(0);
-                document.getElementById('nc-target-roi').value = targetRoi.toFixed(0);
-                document.getElementById('nc-land-pad-ready').value = landPadReady.toFixed(0);
-                document.getElementById('nc-pad-price').value = padPrice.toFixed(0);
-                document.getElementById('nc-build-cost-available').value = buildCostAvailable.toFixed(0);
+                // Update all fields with comma formatting
+                document.getElementById('nc-gross-income').value = Math.round(grossIncome).toLocaleString();
+                document.getElementById('nc-target-roi').value = Math.round(targetRoi).toLocaleString();
+                document.getElementById('nc-land-pad-ready').value = Math.round(landPadReady).toLocaleString();
+                document.getElementById('nc-pad-price').value = Math.round(padPrice).toLocaleString();
+                document.getElementById('nc-build-cost-available').value = Math.round(buildCostAvailable).toLocaleString();
                 
-                document.getElementById('nc-development-cost').value = developmentCost.toFixed(0);
-                document.getElementById('nc-pad-ready-cost').value = padReadyCost.toFixed(0);
+                document.getElementById('nc-development-cost').value = Math.round(developmentCost).toLocaleString();
+                document.getElementById('nc-pad-ready-cost').value = Math.round(padReadyCost).toLocaleString();
                 
-                document.getElementById('nc-build-cost').value = buildCost.toFixed(0);
-                document.getElementById('nc-total-sqft').value = totalSqft.toFixed(0);
-                document.getElementById('nc-estimated-profit-basic').value = estimatedProfitBasic.toFixed(0);
-                document.getElementById('nc-development-fee').value = developmentFee.toFixed(0);
+                document.getElementById('nc-build-cost').value = Math.round(buildCost).toLocaleString();
+                document.getElementById('nc-total-sqft').value = Math.round(totalSqft).toLocaleString();
+                document.getElementById('nc-estimated-profit-basic').value = Math.round(estimatedProfitBasic).toLocaleString();
+                document.getElementById('nc-development-fee').value = Math.round(developmentFee).toLocaleString();
                 
-                document.getElementById('nc-ab-closing-percent').value = abClosingPercent.toFixed(0);
-                document.getElementById('nc-ab-closing-cost').value = abClosingCost.toFixed(0);
-                document.getElementById('nc-bc-closing-percent').value = bcClosingPercent.toFixed(0);
-                document.getElementById('nc-bc-closing-cost').value = bcClosingCost.toFixed(0);
-                document.getElementById('nc-total-cc').value = totalCC.toFixed(0);
-                document.getElementById('nc-total-loan').value = totalLoan.toFixed(0);
-                document.getElementById('nc-hold-time').value = holdTime.toFixed(0);
-                document.getElementById('nc-points').value = points.toFixed(0);
-                document.getElementById('nc-total-hold-cost').value = totalHoldCost.toFixed(0);
+                document.getElementById('nc-ab-closing-percent').value = Math.round(abClosingPercent).toLocaleString();
+                document.getElementById('nc-ab-closing-cost').value = Math.round(abClosingCost).toLocaleString();
+                document.getElementById('nc-bc-closing-percent').value = Math.round(bcClosingPercent).toLocaleString();
+                document.getElementById('nc-bc-closing-cost').value = Math.round(bcClosingCost).toLocaleString();
+                document.getElementById('nc-total-cc').value = Math.round(totalCC).toLocaleString();
+                document.getElementById('nc-total-loan').value = Math.round(totalLoan).toLocaleString();
+                document.getElementById('nc-hold-time').value = Math.round(holdTime).toLocaleString();
+                document.getElementById('nc-points').value = Math.round(points).toLocaleString();
+                document.getElementById('nc-total-hold-cost').value = Math.round(totalHoldCost).toLocaleString();
                 
-                document.getElementById('nc-total-alt-holding').value = totalAltHolding.toFixed(0);
-                document.getElementById('nc-total-holding-days').value = totalHoldingDays.toFixed(0);
+                document.getElementById('nc-total-alt-holding').value = Math.round(totalAltHolding).toLocaleString();
+                document.getElementById('nc-total-holding-days').value = Math.round(totalHoldingDays).toLocaleString();
                 
-                document.getElementById('nc-realtor-amount').value = realtorAmount.toFixed(0);
-                document.getElementById('nc-total-realtor-fees').value = totalRealtorFees.toFixed(0);
+                document.getElementById('nc-realtor-amount').value = Math.round(realtorAmount).toLocaleString();
+                document.getElementById('nc-total-realtor-fees').value = Math.round(totalRealtorFees).toLocaleString();
                 
-                document.getElementById('nc-final-sell-price').value = finalSellPrice.toFixed(0);
-                document.getElementById('nc-final-purchase').value = finalPurchase.toFixed(0);
-                document.getElementById('nc-final-development').value = finalDevelopment.toFixed(0);
-                document.getElementById('nc-final-vertical').value = finalVertical.toFixed(0);
-                document.getElementById('nc-final-holding').value = finalHolding.toFixed(0);
-                document.getElementById('nc-final-alt-holding').value = finalAltHolding.toFixed(0);
-                document.getElementById('nc-final-closing').value = finalClosing.toFixed(0);
-                document.getElementById('nc-final-realtor').value = finalRealtor.toFixed(0);
-                document.getElementById('nc-total-expenses').value = totalExpenses.toFixed(0);
-                document.getElementById('nc-final-profit').value = finalProfit.toFixed(0);
+                document.getElementById('nc-final-sell-price').value = Math.round(finalSellPrice).toLocaleString();
+                document.getElementById('nc-final-purchase').value = Math.round(finalPurchase).toLocaleString();
+                document.getElementById('nc-final-development').value = Math.round(finalDevelopment).toLocaleString();
+                document.getElementById('nc-final-vertical').value = Math.round(finalVertical).toLocaleString();
+                document.getElementById('nc-final-holding').value = Math.round(finalHolding).toLocaleString();
+                document.getElementById('nc-final-alt-holding').value = Math.round(finalAltHolding).toLocaleString();
+                document.getElementById('nc-final-closing').value = Math.round(finalClosing).toLocaleString();
+                document.getElementById('nc-final-realtor').value = Math.round(finalRealtor).toLocaleString();
+                document.getElementById('nc-total-expenses').value = Math.round(totalExpenses).toLocaleString();
+                document.getElementById('nc-final-profit').value = Math.round(finalProfit).toLocaleString();
                 
                 // Add visual feedback for profit
                 const profitElement = document.getElementById('nc-final-profit');
@@ -10561,6 +10561,8 @@
         // Initialize construction section when page loads
         document.addEventListener('DOMContentLoaded', function() {
             loadConstructionCatalog();
+            // Run initial calculation to format numbers with commas
+            calculateNewConstruction();
         });
     </script>
     
