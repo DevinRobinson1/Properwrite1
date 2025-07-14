@@ -40,40 +40,81 @@ class SimpleCompsService:
             }
         
         try:
-            # Search for properties in the area
+            # Try multiple search strategies
+            search_strategies = [
+                {
+                    "location": self._clean_address_for_search(address),
+                    "status_type": "Sold",
+                    "home_type": "Houses",
+                    "sort": "Newest"
+                },
+                {
+                    "location": self._clean_address_for_search(address),
+                    "status_type": "RecentlySold",
+                    "home_type": "Houses",
+                    "sort": "Price_High_Low"
+                },
+                {
+                    "location": self._extract_city_state(address),
+                    "status_type": "Sold",
+                    "home_type": "Houses",
+                    "sort": "Newest"
+                }
+            ]
+            
+            properties = []
             search_url = "https://zillow-com1.p.rapidapi.com/propertyExtendedSearch"
             
-            # Clean address for search
-            clean_address = self._clean_address_for_search(address)
+            for i, search_params in enumerate(search_strategies):
+                logger.info(f"📍 Search strategy {i+1}: {search_params}")
+                
+                response = requests.get(search_url, headers=self.headers, params=search_params)
+                response.raise_for_status()
+                
+                data = response.json()
             
-            search_params = {
-                "location": clean_address,
-                "status_type": "ForSale",
-                "home_type": "Houses",
-                "sort": "Price_High_Low"
-            }
-            
-            logger.info(f"📍 Searching with params: {search_params}")
-            
-            response = requests.get(search_url, headers=self.headers, params=search_params)
-            response.raise_for_status()
-            
-            data = response.json()
-            
-            # Extract properties from response
-            properties = []
-            if 'props' in data:
-                properties = data['props']
-            elif isinstance(data, list):
-                properties = data
+                # Debug log the response structure
+                logger.info(f"📋 API Response structure: {list(data.keys()) if isinstance(data, dict) else type(data)}")
+                
+                # Extract properties from response
+                strategy_properties = []
+                if isinstance(data, dict):
+                    if 'props' in data:
+                        strategy_properties = data['props']
+                    elif 'results' in data:
+                        strategy_properties = data['results']
+                    elif 'data' in data:
+                        strategy_properties = data['data']
+                    else:
+                        # Try to find any list in the response
+                        for key, value in data.items():
+                            if isinstance(value, list) and len(value) > 0:
+                                strategy_properties = value
+                                logger.info(f"📋 Found properties list in key: {key}")
+                                break
+                elif isinstance(data, list):
+                    strategy_properties = data
+                
+                logger.info(f"📊 Strategy {i+1} found {len(strategy_properties)} properties")
+                
+                if strategy_properties:
+                    properties.extend(strategy_properties)
+                    logger.info(f"✅ Found properties with strategy {i+1}, total: {len(properties)}")
+                    break
+                else:
+                    logger.info(f"⚠️ Strategy {i+1} found no properties, trying next...")
             
             if not properties:
-                logger.warning("No properties found in search results")
+                logger.warning("No properties found with any search strategy")
                 return {
-                    'error': 'No properties found in this area',
+                    'error': 'No sold properties found in this area with any search strategy',
                     'found_count': 0,
                     'comps': [],
-                    'success': False
+                    'success': False,
+                    'debug_info': {
+                        'strategies_tried': len(search_strategies),
+                        'last_response_keys': list(data.keys()) if isinstance(data, dict) else None
+                    }
                 }
             
             # Filter for sold properties and create comparable data
@@ -121,6 +162,31 @@ class SimpleCompsService:
         # Remove common prefixes and suffixes
         address = address.replace('USA', '').replace('United States', '')
         address = address.strip().rstrip(',')
+        
+        # Extract city and state for broader search
+        if ',' in address:
+            parts = address.split(',')
+            if len(parts) >= 2:
+                # Use city, state format for broader results
+                city_state = f"{parts[-2].strip()}, {parts[-1].strip()}"
+                logger.info(f"📍 Using broader search location: {city_state}")
+                return city_state
+        
+        return address
+    
+    def _extract_city_state(self, address: str) -> str:
+        """Extract just city and state for very broad search"""
+        address = address.replace('USA', '').replace('United States', '')
+        address = address.strip().rstrip(',')
+        
+        if ',' in address:
+            parts = address.split(',')
+            if len(parts) >= 2:
+                # Get last two parts (should be city and state)
+                city = parts[-2].strip()
+                state = parts[-1].strip()
+                return f"{city}, {state}"
+        
         return address
     
     def _process_property_data(self, prop: Dict, target_beds: int, target_baths: float, target_sqft: int) -> Optional[Dict]:
