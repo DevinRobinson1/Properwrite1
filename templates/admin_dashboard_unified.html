@@ -716,12 +716,12 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${affiliate.tier}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${(affiliate.commission_rate * 100).toFixed(1)}%</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${affiliate.total_referrals}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$${affiliate.revenue_generated.toLocaleString()}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$${affiliate.total_commissions_earned.toLocaleString()}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$${affiliate.total_commissions_earned.toLocaleString()}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center space-x-2">
-                                        <input type="text" value="${affiliate.affiliate_link}" class="flex-1 px-2 py-1 text-xs border border-gray-300 rounded bg-gray-50 font-mono" readonly style="max-width: 200px;">
-                                        <button onclick="copyAffiliateLink('${affiliate.affiliate_link}')" class="px-3 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700 transition-colors">
+                                        <input type="text" value="https://properwrite.com/ref/${affiliate.id}" class="flex-1 px-2 py-1 text-xs border border-gray-300 rounded bg-gray-50 font-mono" readonly style="max-width: 200px;">
+                                        <button onclick="copyAffiliateLink('https://properwrite.com/ref/${affiliate.id}')" class="px-3 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700 transition-colors">
                                             <i class="fas fa-copy mr-1"></i>Copy
                                         </button>
                                     </div>
@@ -754,11 +754,11 @@
                                     <div class="text-sm font-medium text-gray-900">${promo.code}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${promo.type.replace('_', ' ')}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${promo.discount_value}${promo.type.includes('percentage') ? '%' : ' credits'}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${promo.uses}/${promo.max_uses}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${promo.affiliate_id || 'None'}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${promo.discount_percentage || promo.credit_amount}${promo.type.includes('percentage') ? '%' : ' credits'}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${promo.uses_count}/${promo.max_uses}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${promo.affiliate_name || 'None'}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(promo.status)}">${promo.status}</span>
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full ${promo.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${promo.is_active ? 'Active' : 'Inactive'}</span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center space-x-2">
@@ -901,11 +901,11 @@
                                                         <div class="text-sm text-gray-500">${deal.property_city}, ${deal.property_state}</div>
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${deal.partner_id}</td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$${deal.asking_price.toLocaleString()}</td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$${deal.arv.toLocaleString()}</td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$${deal.suggested_offer.toLocaleString()}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$${(deal.asking_price || 0).toLocaleString()}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$${(deal.arv || 0).toLocaleString()}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$${(deal.suggested_offer || 0).toLocaleString()}</td>
                                                     <td class="px-6 py-4 whitespace-nowrap">
-                                                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(deal.status)}">${deal.status}</span>
+                                                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(deal.final_status || deal.auto_status)}">${deal.final_status || deal.auto_status}</span>
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                         <button onclick="viewJVDeal('${deal.id}')" class="text-blue-600 hover:text-blue-900">View</button>
@@ -1806,7 +1806,7 @@
             }
             
             if (confirm(`Are you sure you want to permanently delete ${selectedUsers.length} user(s)? This action cannot be undone.`)) {
-                fetch('/admin/api/users/bulk-delete', {
+                fetch('/admin/api/users/delete', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

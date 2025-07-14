@@ -347,16 +347,14 @@ def create_affiliate():
         with Session(engine) as session:
             # Insert new affiliate
             session.execute(text("""
-                INSERT INTO affiliates (name, email, company, commission_rate, tier, affiliate_code, affiliate_link)
-                VALUES (:name, :email, :company, :commission_rate, :tier, :affiliate_code, :affiliate_link)
+                INSERT INTO affiliates (name, email, company, commission_rate, tier)
+                VALUES (:name, :email, :company, :commission_rate, :tier)
             """), {
                 'name': name,
                 'email': email,
                 'company': company,
                 'commission_rate': commission_rate,
-                'tier': tier,
-                'affiliate_code': affiliate_code,
-                'affiliate_link': affiliate_link
+                'tier': tier
             })
             session.commit()
             
@@ -386,12 +384,13 @@ def create_promo_code():
         with Session(engine) as session:
             # Insert new promo code
             session.execute(text("""
-                INSERT INTO promo_codes (code, type, discount_value, max_uses, affiliate_id)
-                VALUES (:code, :type, :discount_value, :max_uses, :affiliate_id)
+                INSERT INTO promo_codes (code, type, discount_percentage, credit_amount, max_uses, affiliate_id)
+                VALUES (:code, :type, :discount_percentage, :credit_amount, :max_uses, :affiliate_id)
             """), {
                 'code': code,
                 'type': promo_type,
-                'discount_value': discount_value,
+                'discount_percentage': discount_value if promo_type == 'percentage_discount' else None,
+                'credit_amount': int(discount_value) if promo_type == 'credit_bonus' else None,
                 'max_uses': max_uses,
                 'affiliate_id': affiliate_id if affiliate_id else None
             })
@@ -428,8 +427,8 @@ def get_ai_insights():
             team_stats = session.execute(text("""
                 SELECT 
                     COUNT(*) as total_teams,
-                    COUNT(CASE WHEN plan_id = 'growth10' THEN 1 END) as growth_teams,
-                    COUNT(CASE WHEN last_login < NOW() - INTERVAL '7 days' THEN 1 END) as inactive_teams
+                    COUNT(CASE WHEN tier = 'growth10' THEN 1 END) as growth_teams,
+                    COUNT(CASE WHEN created_at < NOW() - INTERVAL '7 days' THEN 1 END) as inactive_teams
                 FROM teams
             """)).fetchone()
             
