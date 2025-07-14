@@ -280,12 +280,13 @@ class EnhancedCompsService:
                         
                         # Check if property is in same zip code
                         prop_zip = self._extract_zip_code(processed_prop.get('address', ''))
+                        logger.debug(f"🔍 Prop zip: {prop_zip}, Target zip: {search_params.zip_code}")
                         if prop_zip and search_params.zip_code and prop_zip == search_params.zip_code:
                             same_zip_properties.append(processed_prop)
-                            logger.info(f"🎯 Same zip property {i+1}: {processed_prop.get('address', 'Unknown')}")
+                            logger.info(f"🎯 Same zip property {i+1}: {processed_prop.get('address', 'Unknown')} (zip: {prop_zip})")
                         else:
                             filtered_properties.append(processed_prop)
-                            logger.info(f"✅ Property {i+1} passed criteria: {processed_prop.get('address', 'Unknown')}")
+                            logger.info(f"✅ Property {i+1} passed criteria: {processed_prop.get('address', 'Unknown')} (zip: {prop_zip})")
                     else:
                         logger.debug(f"❌ Property {i+1} failed criteria: {processed_prop.get('address', 'Unknown')}")
                 else:
