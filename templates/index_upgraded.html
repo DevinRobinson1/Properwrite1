@@ -5116,6 +5116,9 @@
         }
 
         function recalculateInstallment() {
+            // Initialize refundable consideration field if needed
+            initializeRefundableConsideration();
+            
             const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 415000;
             const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/[^\d]/g, '')) || 30000;
             const discountToSellFast = parseFloat(document.getElementById('installment-discount')?.value?.replace(/[^\d]/g, '')) || 10000;
@@ -6380,6 +6383,14 @@
             recalculateInstallment();
         }
 
+        // Initialize refundable consideration field if it's showing 0
+        function initializeRefundableConsideration() {
+            const refundableField = document.getElementById('refundable-consideration');
+            if (refundableField && (refundableField.value === '0' || refundableField.value === '')) {
+                refundableField.value = '1,000';
+            }
+        }
+
         function updateGlobalAcquisitionsPriceFromHeader() {
             const headerPrice = parseFloat(document.getElementById('global-acquisitions-price-header')?.value?.replace(/[^\d]/g, '') || 0);
             
@@ -6942,6 +6953,9 @@
         }
 
         function recalculateNovationMAO() {
+            // Initialize refundable consideration field if needed
+            initializeRefundableConsideration();
+            
             const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 200000;
             const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/[^\d]/g, '')) || 30000;
             const discountToSellFast = parseFloat(document.getElementById('installment-discount')?.value?.replace(/[^\d]/g, '')) || 10000;
