@@ -3180,6 +3180,121 @@ def team_settings():
                          user=g.current_user, 
                          team=g.current_team)
 
+# ==================== PROFILE UPDATE ENDPOINTS ====================
+
+@app.route('/api/update-profile', methods=['POST'])
+@require_auth
+def update_profile():
+    """Update user profile (name and email)"""
+    try:
+        data = request.get_json()
+        new_name = data.get('name', '').strip()
+        new_email = data.get('email', '').strip()
+        
+        if not new_name or not new_email:
+            return jsonify({'success': False, 'error': 'Name and email are required'}), 400
+        
+        # Basic email validation
+        import re
+        email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+        if not re.match(email_pattern, new_email):
+            return jsonify({'success': False, 'error': 'Invalid email format'}), 400
+        
+        # Get current user ID from session
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+        
+        # Update user profile in database
+        billing_service = BillingService()
+        with billing_service.db_session() as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user:
+                return jsonify({'success': False, 'error': 'User not found'}), 404
+            
+            # Check if email is already taken by another user
+            existing_user = db.query(User).filter(
+                User.email == new_email,
+                User.id != user_id
+            ).first()
+            
+            if existing_user:
+                return jsonify({'success': False, 'error': 'Email address is already in use'}), 409
+            
+            # Update user fields
+            user.name = new_name
+            user.email = new_email
+            
+            # Commit changes
+            db.commit()
+            
+            # Update session information
+            session['user_email'] = new_email
+            session['email'] = new_email
+            
+            return jsonify({
+                'success': True,
+                'message': 'Profile updated successfully',
+                'user': {
+                    'name': user.name,
+                    'email': user.email
+                }
+            })
+            
+    except Exception as e:
+        logger.error(f"Error updating profile: {str(e)}")
+        return jsonify({'success': False, 'error': 'Internal server error'}), 500
+
+@app.route('/api/change-password', methods=['POST'])
+@require_auth
+def change_password():
+    """Change user password"""
+    try:
+        data = request.get_json()
+        current_password = data.get('current_password', '')
+        new_password = data.get('new_password', '')
+        
+        if not current_password or not new_password:
+            return jsonify({'success': False, 'error': 'Current password and new password are required'}), 400
+        
+        if len(new_password) < 6:
+            return jsonify({'success': False, 'error': 'New password must be at least 6 characters long'}), 400
+        
+        # Get current user ID from session
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+        
+        # Verify current password and update to new password
+        billing_service = BillingService()
+        with billing_service.db_session() as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user:
+                return jsonify({'success': False, 'error': 'User not found'}), 404
+            
+            # Verify current password
+            from werkzeug.security import check_password_hash, generate_password_hash
+            if not user.password_hash or not check_password_hash(user.password_hash, current_password):
+                return jsonify({'success': False, 'error': 'Current password is incorrect'}), 401
+            
+            # Generate new password hash
+            new_password_hash = generate_password_hash(new_password)
+            
+            # Update password
+            user.password_hash = new_password_hash
+            
+            # Commit changes
+            db.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Password changed successfully'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error changing password: {str(e)}")
+        return jsonify({'success': False, 'error': 'Internal server error'}), 500
+
 # ==================== EMAIL SERVICE ENDPOINTS ====================
 
 @app.route('/api/send-welcome-email', methods=['POST'])
