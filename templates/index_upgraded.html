@@ -5049,8 +5049,11 @@
             const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 415000;
             const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/[^\d]/g, '')) || 30000;
             
-            // Use global minimum acceptable profit as assignment fee
-            const assignmentFee = window.globalMinAcceptableProfit || 15000;
+            // Read assignment fee from user input, fallback to global value if not set
+            const wholesaleAssignmentInput = document.getElementById('wholesale-assignment-fee');
+            const assignmentFee = wholesaleAssignmentInput ? 
+                parseFloat(wholesaleAssignmentInput.value.replace(/[^\d]/g, '')) || 15000 : 
+                window.globalMinAcceptableProfit || 15000;
             
             // Calculate MAO: ARV * 70% - Repairs - Assignment Fee
             const percent = parseFloat(document.getElementById('wholesale-arv-percent')?.value) / 100 || 0.70;
@@ -5096,12 +5099,6 @@
             // Update profit analysis
             updateElementIfExists('total-investment', (mao + repairs));
             updateElementIfExists('assignment-profit', assignmentFee);
-            
-            // Sync wholesale assignment fee input with global value
-            const wholesaleAssignmentInput = document.getElementById('wholesale-assignment-fee');
-            if (wholesaleAssignmentInput && wholesaleAssignmentInput.value !== assignmentFee.toLocaleString()) {
-                wholesaleAssignmentInput.value = assignmentFee.toLocaleString();
-            }
         }
 
         function recalculateInstallment() {
