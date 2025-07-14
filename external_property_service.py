@@ -260,8 +260,13 @@ class ExternalPropertyService:
                 "query": address
             }
             
+            rapidapi_key = os.environ.get('RAPIDAPI_KEY')
+            if not rapidapi_key:
+                logging.error("RAPIDAPI_KEY environment variable is required for Realtor.com API")
+                return {}
+            
             headers = {
-                "X-RapidAPI-Key": "YOUR_RAPIDAPI_KEY_HERE",  # User will need to provide this
+                "X-RapidAPI-Key": rapidapi_key,
                 "X-RapidAPI-Host": "realtor.p.rapidapi.com"
             }
             

@@ -5,7 +5,9 @@ import requests
 import json
 import os
 
-rapidapi_key = os.environ.get('RAPIDAPI_KEY', 'your_rapidapi_key_here')
+rapidapi_key = os.environ.get('RAPIDAPI_KEY')
+if not rapidapi_key:
+    raise ValueError("RAPIDAPI_KEY environment variable is required")
 
 def test_zillow_with_specific_address():
     """Test Zillow API with the failing address"""
