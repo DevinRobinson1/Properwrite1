@@ -128,6 +128,19 @@ class EnhancedCompsService:
                     best_comps.sort(key=lambda x: x.get('relevance_score', 0), reverse=True)
                     best_comps = best_comps[:6]  # Keep top 6
             
+            # FALLBACK STRATEGY: If no properties found, search for same bed/bath within 0.5-1 mile
+            if len(best_comps) == 0:
+                logger.info("🔄 No properties found with standard search - trying bed/bath fallback")
+                fallback_results = self._bed_bath_fallback_search(search_params)
+                if fallback_results.get('success') and fallback_results.get('properties'):
+                    filtered_comps = self._filter_and_score_properties(
+                        fallback_results['properties'],
+                        search_params,
+                        bed_bath_priority=True  # Prioritize exact bed/bath matches
+                    )
+                    best_comps.extend(filtered_comps)
+                    best_comps = best_comps[:6]  # Keep top 6
+            
             # Apply adjustments to final comps
             adjusted_comps = []
             for comp in best_comps[:3]:  # Use top 3 for final analysis
@@ -258,12 +271,14 @@ class EnhancedCompsService:
         
         return properties or []
     
-    def _filter_and_score_properties(self, properties: List[Dict], search_params: SearchParams) -> List[Dict]:
+    def _filter_and_score_properties(self, properties: List[Dict], search_params: SearchParams, bed_bath_priority: bool = False) -> List[Dict]:
         """Filter properties based on underwriting criteria and score for relevance"""
         filtered_properties = []
         same_zip_properties = []
         
         logger.info(f"🔍 Processing {len(properties)} properties for filtering")
+        if bed_bath_priority:
+            logger.info("🎯 Using bed/bath priority mode for fallback search")
         
         for i, prop in enumerate(properties):
             try:
@@ -273,22 +288,38 @@ class EnhancedCompsService:
                 if processed_prop:
                     logger.debug(f"📝 Processed property {i+1}: {processed_prop.get('address', 'Unknown')}")
                     
-                    if self._meets_underwriting_criteria(processed_prop, search_params):
-                        # Calculate relevance score
-                        relevance_score = self._calculate_relevance_score(processed_prop, search_params)
-                        processed_prop['relevance_score'] = relevance_score
-                        
-                        # Check if property is in same zip code
-                        prop_zip = self._extract_zip_code(processed_prop.get('address', ''))
-                        logger.debug(f"🔍 Prop zip: {prop_zip}, Target zip: {search_params.zip_code}")
-                        if prop_zip and search_params.zip_code and prop_zip == search_params.zip_code:
-                            same_zip_properties.append(processed_prop)
-                            logger.info(f"🎯 Same zip property {i+1}: {processed_prop.get('address', 'Unknown')} (zip: {prop_zip})")
-                        else:
+                    # For bed/bath priority mode, use more lenient criteria
+                    if bed_bath_priority:
+                        # Check for exact bed/bath match
+                        if (processed_prop.get('beds') == search_params.beds and 
+                            processed_prop.get('baths') == search_params.baths):
+                            relevance_score = self._calculate_relevance_score(processed_prop, search_params)
+                            processed_prop['relevance_score'] = relevance_score + 25  # Bonus for exact match
                             filtered_properties.append(processed_prop)
-                            logger.info(f"✅ Property {i+1} passed criteria: {processed_prop.get('address', 'Unknown')} (zip: {prop_zip})")
+                            logger.info(f"🎯 Exact bed/bath match: {processed_prop.get('address', 'Unknown')}")
+                        elif self._meets_underwriting_criteria(processed_prop, search_params):
+                            relevance_score = self._calculate_relevance_score(processed_prop, search_params)
+                            processed_prop['relevance_score'] = relevance_score
+                            filtered_properties.append(processed_prop)
+                            logger.info(f"✅ Property {i+1} passed fallback criteria: {processed_prop.get('address', 'Unknown')}")
                     else:
-                        logger.debug(f"❌ Property {i+1} failed criteria: {processed_prop.get('address', 'Unknown')}")
+                        # Standard search mode
+                        if self._meets_underwriting_criteria(processed_prop, search_params):
+                            # Calculate relevance score
+                            relevance_score = self._calculate_relevance_score(processed_prop, search_params)
+                            processed_prop['relevance_score'] = relevance_score
+                            
+                            # Check if property is in same zip code
+                            prop_zip = self._extract_zip_code(processed_prop.get('address', ''))
+                            logger.debug(f"🔍 Prop zip: {prop_zip}, Target zip: {search_params.zip_code}")
+                            if prop_zip and search_params.zip_code and prop_zip == search_params.zip_code:
+                                same_zip_properties.append(processed_prop)
+                                logger.info(f"🎯 Same zip property {i+1}: {processed_prop.get('address', 'Unknown')} (zip: {prop_zip})")
+                            else:
+                                filtered_properties.append(processed_prop)
+                                logger.info(f"✅ Property {i+1} passed criteria: {processed_prop.get('address', 'Unknown')} (zip: {prop_zip})")
+                        else:
+                            logger.debug(f"❌ Property {i+1} failed criteria: {processed_prop.get('address', 'Unknown')}")
                 else:
                     logger.debug(f"❌ Property {i+1} failed data processing")
                     
@@ -296,11 +327,16 @@ class EnhancedCompsService:
                 logger.warning(f"⚠️ Error processing property {i+1}: {e}")
                 continue
         
-        # Prioritize same zip code properties
-        prioritized_properties = same_zip_properties + filtered_properties
+        # For bed/bath priority mode, skip zip code prioritization
+        if bed_bath_priority:
+            prioritized_properties = filtered_properties
+        else:
+            # Prioritize same zip code properties
+            prioritized_properties = same_zip_properties + filtered_properties
         
         logger.info(f"📊 Filtered {len(prioritized_properties)} properties from {len(properties)} total")
-        logger.info(f"🎯 Found {len(same_zip_properties)} properties in same zip code")
+        if not bed_bath_priority:
+            logger.info(f"🎯 Found {len(same_zip_properties)} properties in same zip code")
         
         return prioritized_properties
     
@@ -507,6 +543,82 @@ class EnhancedCompsService:
         except Exception as e:
             logger.error(f"❌ Error generating analysis: {e}")
             return {}
+    
+    def _bed_bath_fallback_search(self, search_params: SearchParams) -> Dict:
+        """
+        Fallback search for properties with same bed/bath within 0.5-1 mile radius
+        Used when standard search finds no properties
+        """
+        logger.info("🔄 Starting bed/bath fallback search")
+        
+        try:
+            # Search strategies for bed/bath matching
+            fallback_strategies = [
+                {'time_window': 90, 'radius': 0.5},   # 3 months, 0.5 mile
+                {'time_window': 180, 'radius': 0.75}, # 6 months, 0.75 mile
+                {'time_window': 365, 'radius': 1.0},  # 1 year, 1.0 mile
+            ]
+            
+            for strategy in fallback_strategies:
+                logger.info(f"🎯 Fallback search: {strategy['time_window']} days, {strategy['radius']} miles")
+                
+                # Try city/state search with wider parameters
+                search_location = self._extract_city_state(search_params.address)
+                
+                response = requests.get(
+                    "https://zillow-com1.p.rapidapi.com/propertyExtendedSearch",
+                    headers=self.headers,
+                    params={
+                        "location": search_location,
+                        "status_type": "RecentlySold",
+                        "home_type": "Houses",
+                        "sort": "Newest",
+                        "bedrooms": str(search_params.beds),  # Exact bed match
+                        "bathrooms": str(search_params.baths)  # Exact bath match
+                    },
+                    timeout=10
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    properties = self._extract_properties_from_response(data)
+                    
+                    if properties:
+                        # Filter for properties within the radius
+                        filtered_properties = []
+                        for prop in properties:
+                            if prop.get('distance', 0) <= strategy['radius']:
+                                filtered_properties.append(prop)
+                        
+                        if filtered_properties:
+                            logger.info(f"✅ Fallback search found {len(filtered_properties)} properties")
+                            return {
+                                'success': True,
+                                'properties': filtered_properties,
+                                'search_type': 'bed_bath_fallback',
+                                'radius': strategy['radius'],
+                                'time_window': strategy['time_window']
+                            }
+                else:
+                    logger.warning(f"⚠️ Fallback API returned status {response.status_code}")
+            
+            # If no properties found even with fallback
+            logger.info("❌ No properties found even with bed/bath fallback")
+            return {
+                'success': False,
+                'properties': [],
+                'search_type': 'bed_bath_fallback',
+                'message': 'No properties found with matching bed/bath within 1 mile'
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Error in bed/bath fallback search: {e}")
+            return {
+                'success': False,
+                'properties': [],
+                'error': str(e),
+                'search_type': 'bed_bath_fallback'
+            }
     
     def _determine_confidence_level(self, comp_count: int) -> str:
         """Determine confidence level based on number of comps"""
