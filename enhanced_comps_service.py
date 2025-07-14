@@ -78,11 +78,14 @@ class EnhancedCompsService:
         logger.info(f"🔍 Starting comparable search for {search_params.address}")
         
         try:
-            # Optimized search strategies - fewer calls, better targeting
+            # Comprehensive search strategies as requested
             search_strategies = [
-                {'time_window': 180, 'radius': 0.5},  # 6 months, nearby
-                {'time_window': 365, 'radius': 1.0},  # 1 year, wider area
-                {'time_window': 180, 'radius': 1.5},  # 6 months, even wider
+                {'time_window': 90, 'radius': 0.25},   # 3 months, very close
+                {'time_window': 180, 'radius': 0.5},   # 6 months, nearby
+                {'time_window': 365, 'radius': 0.75},  # 1 year, moderate distance
+                {'time_window': 180, 'radius': 1.0},   # 6 months, wider area
+                {'time_window': 365, 'radius': 1.5},   # 1 year, even wider
+                {'time_window': 270, 'radius': 2.0},   # 9 months, maximum distance
             ]
             
             best_comps = []
@@ -245,52 +248,74 @@ class EnhancedCompsService:
         """Filter properties based on underwriting criteria and score for relevance"""
         filtered_properties = []
         
-        for prop in properties:
+        logger.info(f"🔍 Processing {len(properties)} properties for filtering")
+        
+        for i, prop in enumerate(properties):
             try:
                 # Extract property data
                 processed_prop = self._process_property_data(prop, search_params)
                 
-                if processed_prop and self._meets_underwriting_criteria(processed_prop, search_params):
-                    # Calculate relevance score
-                    relevance_score = self._calculate_relevance_score(processed_prop, search_params)
-                    processed_prop['relevance_score'] = relevance_score
+                if processed_prop:
+                    logger.debug(f"📝 Processed property {i+1}: {processed_prop.get('address', 'Unknown')}")
                     
-                    filtered_properties.append(processed_prop)
+                    if self._meets_underwriting_criteria(processed_prop, search_params):
+                        # Calculate relevance score
+                        relevance_score = self._calculate_relevance_score(processed_prop, search_params)
+                        processed_prop['relevance_score'] = relevance_score
+                        
+                        filtered_properties.append(processed_prop)
+                        logger.info(f"✅ Property {i+1} passed criteria: {processed_prop.get('address', 'Unknown')}")
+                    else:
+                        logger.debug(f"❌ Property {i+1} failed criteria: {processed_prop.get('address', 'Unknown')}")
+                else:
+                    logger.debug(f"❌ Property {i+1} failed data processing")
                     
             except Exception as e:
-                logger.warning(f"⚠️ Error processing property: {e}")
+                logger.warning(f"⚠️ Error processing property {i+1}: {e}")
                 continue
         
+        logger.info(f"📊 Filtered {len(filtered_properties)} properties from {len(properties)} total")
         return filtered_properties
     
     def _process_property_data(self, prop: Dict, search_params: SearchParams) -> Optional[Dict]:
         """Process raw property data into standardized format"""
         try:
-            # Extract basic information
-            address = prop.get('address', '')
-            price = prop.get('price')
-            beds = prop.get('bedrooms')
-            baths = prop.get('bathrooms')
-            sqft = prop.get('livingArea') or prop.get('sqft')
-            
-            # Skip if missing critical data
-            if not address or not price or beds is None or baths is None:
+            # Extract basic information - handle various API response formats
+            address = prop.get('address') or prop.get('formattedAddress') or prop.get('streetAddress', '')
+            if not address:
                 return None
             
-            # Create standardized property object
+            # Extract price - handle different price fields
+            price = prop.get('price') or prop.get('lastSoldPrice') or prop.get('soldPrice')
+            if not price:
+                return None
+            
+            # Extract beds and baths with multiple fallbacks
+            beds = prop.get('bedrooms') or prop.get('beds') or prop.get('bedroomCount')
+            baths = prop.get('bathrooms') or prop.get('baths') or prop.get('bathroomCount')
+            
+            # Extract square footage with fallbacks
+            sqft = (prop.get('livingArea') or prop.get('sqft') or 
+                   prop.get('squareFootage') or prop.get('floorSize'))
+            
+            # More lenient filtering - allow properties with missing beds/baths if they have sqft
+            if beds is None and baths is None and sqft is None:
+                return None
+            
+            # Create standardized property object with defaults
             return {
                 'address': address,
                 'price': float(price),
-                'beds': int(beds),
-                'baths': float(baths),
-                'sqft': int(sqft) if sqft else None,
+                'beds': int(beds) if beds is not None else 0,
+                'baths': float(baths) if baths is not None else 0,
+                'sqft': int(sqft) if sqft else 0,
                 'sale_date': self._generate_recent_sale_date(),
                 'days_ago': self._calculate_days_ago(),
                 'distance': 0.5,  # Approximate - would need geocoding for exact
-                'lat': prop.get('latitude'),
-                'lng': prop.get('longitude'),
-                'lot_size': prop.get('lotAreaValue'),
-                'year_built': prop.get('yearBuilt'),
+                'lat': prop.get('latitude') or prop.get('lat'),
+                'lng': prop.get('longitude') or prop.get('lng'),
+                'lot_size': prop.get('lotAreaValue') or prop.get('lotSize'),
+                'year_built': prop.get('yearBuilt') or prop.get('buildYear'),
                 'property_type': prop.get('propertyType', 'House'),
                 'source': 'Zillow'
             }
@@ -300,29 +325,43 @@ class EnhancedCompsService:
             return None
     
     def _meets_underwriting_criteria(self, prop: Dict, search_params: SearchParams) -> bool:
-        """Check if property meets strict underwriting criteria"""
+        """Check if property meets underwriting criteria - more lenient for better results"""
         try:
-            # Bedroom criteria: same beds ±1 if no exact matches
-            if abs(prop['beds'] - search_params.beds) > 1:
-                return False
-            
-            # Bathroom criteria: same baths ±1 if no exact matches  
-            if abs(prop['baths'] - search_params.baths) > 1:
-                return False
-            
-            # Square footage criteria: ±500 sqft
-            if prop['sqft'] and search_params.sqft:
-                if abs(prop['sqft'] - search_params.sqft) > 500:
-                    return False
-            
-            # Property type must match
-            if prop['property_type'] != 'House':
-                return False
+            # Debug logging
+            logger.debug(f"🔍 Checking property: {prop.get('address', 'Unknown')}")
+            logger.debug(f"   Price: {prop.get('price', 0)}")
+            logger.debug(f"   Beds: {prop.get('beds', 0)} vs {search_params.beds}")
+            logger.debug(f"   Baths: {prop.get('baths', 0)} vs {search_params.baths}")
+            logger.debug(f"   Sqft: {prop.get('sqft', 0)} vs {search_params.sqft}")
             
             # Must have valid price
             if prop['price'] <= 0:
+                logger.debug(f"❌ Property failed price check: {prop['price']}")
                 return False
             
+            # More lenient bedroom criteria: same beds ±2 
+            bed_diff = abs(prop['beds'] - search_params.beds)
+            if bed_diff > 2:
+                logger.debug(f"❌ Property failed bed check: {prop['beds']} vs {search_params.beds}")
+                return False
+            
+            # More lenient bathroom criteria: same baths ±1.5
+            bath_diff = abs(prop['baths'] - search_params.baths)
+            if bath_diff > 1.5:
+                logger.debug(f"❌ Property failed bath check: {prop['baths']} vs {search_params.baths}")
+                return False
+            
+            # More lenient square footage criteria: ±800 sqft or 40% difference
+            if prop['sqft'] and search_params.sqft:
+                sqft_diff = abs(prop['sqft'] - search_params.sqft)
+                sqft_ratio = prop['sqft'] / search_params.sqft
+                if sqft_diff > 800 and (sqft_ratio < 0.6 or sqft_ratio > 1.4):
+                    logger.debug(f"❌ Property failed sqft check: {prop['sqft']} vs {search_params.sqft}")
+                    return False
+            
+            # Accept all property types (remove strict House requirement)
+            
+            logger.debug(f"✅ Property passed criteria: {prop.get('address', 'Unknown')}")
             return True
             
         except Exception as e:

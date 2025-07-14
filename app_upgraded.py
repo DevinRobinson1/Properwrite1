@@ -48,8 +48,11 @@ if os.path.exists('.env'):
                 key, value = line.strip().split('=', 1)
                 os.environ[key] = value
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Configure logging - temporarily enable DEBUG for enhanced comps service
+logging.basicConfig(level=logging.DEBUG, format='%(name)s:%(levelname)s:%(message)s')
+# Set specific loggers to INFO to reduce noise
+logging.getLogger('urllib3').setLevel(logging.WARNING)
+logging.getLogger('werkzeug').setLevel(logging.WARNING)
 
 app = Flask(__name__)
 
@@ -2336,7 +2339,7 @@ def analyze_comps():
             
             # Use simple service as fallback
             try:
-                simple_result = simple_comps_service.search_comparable_sales(search_params)
+                simple_result = comps_service.search_comparable_sales(search_params)
                 if simple_result.get('success') and simple_result.get('comps'):
                     result = simple_result
                     result['fallback_used'] = True
