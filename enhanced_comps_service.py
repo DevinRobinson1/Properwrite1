@@ -7,6 +7,7 @@ import logging
 import requests
 import json
 import time
+import math
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
@@ -71,6 +72,30 @@ class EnhancedCompsService:
             'traffic_penalty': -5000  # -$5,000 for high traffic areas
         }
     
+    def _calculate_distance(self, lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+        """
+        Calculate the great circle distance between two points on Earth using Haversine formula.
+        Returns distance in miles.
+        """
+        if not all([lat1, lon1, lat2, lon2]):
+            return 999.0  # Return large distance if coordinates missing
+        
+        # Convert latitude and longitude from degrees to radians
+        lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
+        
+        # Haversine formula
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+        a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+        c = 2 * math.asin(math.sqrt(a))
+        
+        # Radius of Earth in miles
+        r = 3956
+        
+        # Distance in miles
+        distance = c * r
+        return round(distance, 2)
+    
     def search_comparable_sales(self, search_params: SearchParams) -> Dict:
         """
         Search for comparable sales with optimized search strategy
@@ -113,10 +138,11 @@ class EnhancedCompsService:
                 )
                 
                 if search_results.get('success') and search_results.get('properties'):
-                    # Filter and score properties
+                    # Filter and score properties with distance constraint
                     filtered_comps = self._filter_and_score_properties(
                         search_results['properties'],
-                        search_params
+                        search_params,
+                        max_distance=radius
                     )
                     
                     # Add to best comps
@@ -136,7 +162,8 @@ class EnhancedCompsService:
                     filtered_comps = self._filter_and_score_properties(
                         fallback_results['properties'],
                         search_params,
-                        bed_bath_priority=True  # Prioritize exact bed/bath matches
+                        bed_bath_priority=True,  # Prioritize exact bed/bath matches
+                        max_distance=fallback_results.get('radius', 1.0)  # Use fallback radius
                     )
                     best_comps.extend(filtered_comps)
                     best_comps = best_comps[:6]  # Keep top 6
@@ -271,7 +298,7 @@ class EnhancedCompsService:
         
         return properties or []
     
-    def _filter_and_score_properties(self, properties: List[Dict], search_params: SearchParams, bed_bath_priority: bool = False) -> List[Dict]:
+    def _filter_and_score_properties(self, properties: List[Dict], search_params: SearchParams, bed_bath_priority: bool = False, max_distance: float = None) -> List[Dict]:
         """Filter properties based on underwriting criteria and score for relevance"""
         filtered_properties = []
         same_zip_properties = []
@@ -279,6 +306,8 @@ class EnhancedCompsService:
         logger.info(f"🔍 Processing {len(properties)} properties for filtering")
         if bed_bath_priority:
             logger.info("🎯 Using bed/bath priority mode for fallback search")
+        if max_distance:
+            logger.info(f"📏 Maximum distance constraint: {max_distance} miles")
         
         for i, prop in enumerate(properties):
             try:
@@ -286,7 +315,12 @@ class EnhancedCompsService:
                 processed_prop = self._process_property_data(prop, search_params)
                 
                 if processed_prop:
-                    logger.debug(f"📝 Processed property {i+1}: {processed_prop.get('address', 'Unknown')}")
+                    # Check distance constraint first
+                    if max_distance and processed_prop.get('distance', 999) > max_distance:
+                        logger.debug(f"❌ Property {i+1} too far: {processed_prop.get('distance', 999):.2f} miles > {max_distance} miles")
+                        continue
+                    
+                    logger.debug(f"📝 Processed property {i+1}: {processed_prop.get('address', 'Unknown')} ({processed_prop.get('distance', 999):.2f} miles)")
                     
                     # For bed/bath priority mode, use more lenient criteria
                     if bed_bath_priority:
@@ -296,12 +330,12 @@ class EnhancedCompsService:
                             relevance_score = self._calculate_relevance_score(processed_prop, search_params)
                             processed_prop['relevance_score'] = relevance_score + 25  # Bonus for exact match
                             filtered_properties.append(processed_prop)
-                            logger.info(f"🎯 Exact bed/bath match: {processed_prop.get('address', 'Unknown')}")
+                            logger.info(f"🎯 Exact bed/bath match: {processed_prop.get('address', 'Unknown')} ({processed_prop.get('distance', 999):.2f} miles)")
                         elif self._meets_underwriting_criteria(processed_prop, search_params):
                             relevance_score = self._calculate_relevance_score(processed_prop, search_params)
                             processed_prop['relevance_score'] = relevance_score
                             filtered_properties.append(processed_prop)
-                            logger.info(f"✅ Property {i+1} passed fallback criteria: {processed_prop.get('address', 'Unknown')}")
+                            logger.info(f"✅ Property {i+1} passed fallback criteria: {processed_prop.get('address', 'Unknown')} ({processed_prop.get('distance', 999):.2f} miles)")
                     else:
                         # Standard search mode
                         if self._meets_underwriting_criteria(processed_prop, search_params):
@@ -314,10 +348,10 @@ class EnhancedCompsService:
                             logger.debug(f"🔍 Prop zip: {prop_zip}, Target zip: {search_params.zip_code}")
                             if prop_zip and search_params.zip_code and prop_zip == search_params.zip_code:
                                 same_zip_properties.append(processed_prop)
-                                logger.info(f"🎯 Same zip property {i+1}: {processed_prop.get('address', 'Unknown')} (zip: {prop_zip})")
+                                logger.info(f"🎯 Same zip property {i+1}: {processed_prop.get('address', 'Unknown')} (zip: {prop_zip}, {processed_prop.get('distance', 999):.2f} miles)")
                             else:
                                 filtered_properties.append(processed_prop)
-                                logger.info(f"✅ Property {i+1} passed criteria: {processed_prop.get('address', 'Unknown')} (zip: {prop_zip})")
+                                logger.info(f"✅ Property {i+1} passed criteria: {processed_prop.get('address', 'Unknown')} (zip: {prop_zip}, {processed_prop.get('distance', 999):.2f} miles)")
                         else:
                             logger.debug(f"❌ Property {i+1} failed criteria: {processed_prop.get('address', 'Unknown')}")
                 else:
@@ -365,6 +399,16 @@ class EnhancedCompsService:
             if beds is None and baths is None and sqft is None:
                 return None
             
+            # Extract coordinates with various field names
+            prop_lat = prop.get('latitude') or prop.get('lat')
+            prop_lng = prop.get('longitude') or prop.get('lng') or prop.get('lon')
+            
+            # Calculate actual distance from subject property
+            distance = self._calculate_distance(
+                search_params.lat, search_params.lng, 
+                prop_lat, prop_lng
+            ) if prop_lat and prop_lng else 999.0
+            
             # Create standardized property object with defaults
             return {
                 'address': address,
@@ -374,9 +418,9 @@ class EnhancedCompsService:
                 'sqft': int(sqft) if sqft else 0,
                 'sale_date': self._generate_recent_sale_date(),
                 'days_ago': self._calculate_days_ago(),
-                'distance': 0.5,  # Approximate - would need geocoding for exact
-                'lat': prop.get('latitude') or prop.get('lat'),
-                'lng': prop.get('longitude') or prop.get('lng'),
+                'distance': distance,
+                'lat': prop_lat,
+                'lng': prop_lng,
                 'lot_size': prop.get('lotAreaValue') or prop.get('lotSize'),
                 'year_built': prop.get('yearBuilt') or prop.get('buildYear'),
                 'property_type': prop.get('propertyType', 'House'),
@@ -584,14 +628,30 @@ class EnhancedCompsService:
                     properties = self._extract_properties_from_response(data)
                     
                     if properties:
-                        # Filter for properties within the radius
+                        # Filter for properties within the radius by calculating actual distance
                         filtered_properties = []
                         for prop in properties:
-                            if prop.get('distance', 0) <= strategy['radius']:
-                                filtered_properties.append(prop)
+                            # Calculate actual distance from subject property
+                            prop_lat = prop.get('latitude') or prop.get('lat')
+                            prop_lng = prop.get('longitude') or prop.get('lng') or prop.get('lon')
+                            
+                            if prop_lat and prop_lng:
+                                distance = self._calculate_distance(
+                                    search_params.lat, search_params.lng,
+                                    prop_lat, prop_lng
+                                )
+                                
+                                if distance <= strategy['radius']:
+                                    prop['distance'] = distance
+                                    filtered_properties.append(prop)
+                                    logger.debug(f"✅ Property within radius: {prop.get('address', 'Unknown')} ({distance:.2f} miles)")
+                                else:
+                                    logger.debug(f"❌ Property too far: {prop.get('address', 'Unknown')} ({distance:.2f} miles)")
+                            else:
+                                logger.debug(f"❌ Property missing coordinates: {prop.get('address', 'Unknown')}")
                         
                         if filtered_properties:
-                            logger.info(f"✅ Fallback search found {len(filtered_properties)} properties")
+                            logger.info(f"✅ Fallback search found {len(filtered_properties)} properties within {strategy['radius']} miles")
                             return {
                                 'success': True,
                                 'properties': filtered_properties,
