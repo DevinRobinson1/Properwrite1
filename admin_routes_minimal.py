@@ -227,8 +227,6 @@ def get_affiliates():
                     commission_rate,
                     tier,
                     status,
-                    affiliate_code,
-                    affiliate_link,
                     total_referrals,
                     total_commissions_earned,
                     active_referrals,
@@ -247,8 +245,6 @@ def get_affiliates():
                     'commission_rate': float(affiliate.commission_rate),
                     'tier': affiliate.tier,
                     'status': affiliate.status,
-                    'affiliate_code': affiliate.affiliate_code,
-                    'affiliate_link': affiliate.affiliate_link,
                     'total_referrals': affiliate.total_referrals,
                     'total_commissions_earned': float(affiliate.total_commissions_earned),
                     'active_referrals': affiliate.active_referrals,
@@ -290,15 +286,16 @@ def get_promo_codes():
                     pc.id,
                     pc.code,
                     pc.type,
-                    pc.discount_value,
+                    pc.discount_percentage,
+                    pc.credit_amount,
                     pc.max_uses,
-                    pc.current_uses,
-                    pc.status,
-                    pc.expires_at,
+                    pc.uses_count,
+                    pc.is_active,
+                    pc.valid_until,
                     pc.created_at,
                     a.name as affiliate_name
                 FROM promo_codes pc
-                LEFT JOIN affiliates a ON pc.affiliate_id = a.id
+                LEFT JOIN affiliates a ON pc.affiliate_id::text = a.id::text
                 ORDER BY pc.created_at DESC
             """)).fetchall()
             
@@ -308,12 +305,13 @@ def get_promo_codes():
                     'id': str(promo.id),
                     'code': promo.code,
                     'type': promo.type,
-                    'discount_value': float(promo.discount_value),
+                    'discount_percentage': float(promo.discount_percentage) if promo.discount_percentage else 0,
+                    'credit_amount': promo.credit_amount or 0,
                     'max_uses': promo.max_uses,
-                    'current_uses': promo.current_uses,
-                    'status': promo.status,
+                    'uses_count': promo.uses_count,
+                    'is_active': promo.is_active,
                     'affiliate_name': promo.affiliate_name or 'Direct',
-                    'expires_at': promo.expires_at.isoformat() if promo.expires_at else None,
+                    'valid_until': promo.valid_until.isoformat() if promo.valid_until else None,
                     'created_at': promo.created_at.isoformat() if promo.created_at else None
                 })
             
@@ -421,7 +419,7 @@ def get_ai_insights():
             user_stats = session.execute(text("""
                 SELECT 
                     COUNT(*) as total_users,
-                    COUNT(CASE WHEN active = true THEN 1 END) as active_users,
+                    COUNT(CASE WHEN is_active = true THEN 1 END) as active_users,
                     COUNT(CASE WHEN created_at >= NOW() - INTERVAL '7 days' THEN 1 END) as new_users_week
                 FROM users
             """)).fetchone()
@@ -590,35 +588,40 @@ def get_jv_deals_data():
                 SELECT 
                     id,
                     partner_id,
-                    property_address,
-                    property_city,
-                    property_state,
-                    asking_price,
-                    arv,
-                    repair_estimate,
-                    suggested_offer,
-                    status,
-                    created_at,
-                    updated_at
+                    deal_json,
+                    auto_status,
+                    final_status,
+                    reasons,
+                    created_at
                 FROM jv_deals
                 ORDER BY created_at DESC
             """)).fetchall()
             
             jv_deals_data = []
             for deal in jv_deals:
+                # Parse deal_json to extract property details
+                deal_data = {}
+                if deal.deal_json:
+                    try:
+                        import json
+                        deal_data = json.loads(deal.deal_json)
+                    except:
+                        deal_data = {}
+                
                 jv_deals_data.append({
                     'id': deal.id,
                     'partner_id': deal.partner_id,
-                    'property_address': deal.property_address,
-                    'property_city': deal.property_city,
-                    'property_state': deal.property_state,
-                    'asking_price': float(deal.asking_price) if deal.asking_price else 0,
-                    'arv': float(deal.arv) if deal.arv else 0,
-                    'repair_estimate': float(deal.repair_estimate) if deal.repair_estimate else 0,
-                    'suggested_offer': float(deal.suggested_offer) if deal.suggested_offer else 0,
-                    'status': deal.status,
-                    'created_at': deal.created_at.isoformat() if deal.created_at else None,
-                    'updated_at': deal.updated_at.isoformat() if deal.updated_at else None
+                    'property_address': deal_data.get('property_address', 'N/A'),
+                    'property_city': deal_data.get('property_city', 'N/A'),
+                    'property_state': deal_data.get('property_state', 'N/A'),
+                    'asking_price': float(deal_data.get('asking_price', 0)) if deal_data.get('asking_price') else 0,
+                    'arv': float(deal_data.get('arv', 0)) if deal_data.get('arv') else 0,
+                    'repair_estimate': float(deal_data.get('repair_estimate', 0)) if deal_data.get('repair_estimate') else 0,
+                    'suggested_offer': float(deal_data.get('suggested_offer', 0)) if deal_data.get('suggested_offer') else 0,
+                    'auto_status': deal.auto_status,
+                    'final_status': deal.final_status,
+                    'reasons': deal.reasons,
+                    'created_at': deal.created_at.isoformat() if deal.created_at else None
                 })
             
             return jsonify({
@@ -631,6 +634,33 @@ def get_jv_deals_data():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+
+@admin_bp.route('/api/users/delete', methods=['POST'])
+@require_admin
+def delete_users():
+    """Delete multiple users"""
+    try:
+        data = request.get_json()
+        user_ids = data.get('user_ids', [])
+        
+        if not user_ids:
+            return jsonify({'success': False, 'error': 'No user IDs provided'}), 400
+        
+        with Session(engine) as session:
+            # Delete users by ID
+            for user_id in user_ids:
+                session.execute(text("DELETE FROM users WHERE id = :user_id"), {'user_id': user_id})
+            
+            session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Successfully deleted {len(user_ids)} users'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error deleting users: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @admin_bp.route('/api/ai-assistant', methods=['POST'])
 @require_admin
