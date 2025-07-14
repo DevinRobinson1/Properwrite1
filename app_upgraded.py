@@ -2319,6 +2319,12 @@ def analyze_comps():
         
         # Extract zip code from address for prioritization
         zip_code = data.get('zip_code') or ""
+        
+        # Try to get zip code from session if not in request
+        if not zip_code:
+            zip_code = session.get('current_property', {}).get('zip', '')
+        
+        # If still no zip code, try to extract from address
         if not zip_code and address:
             import re
             # Look for 5-digit zip code after state abbreviation
