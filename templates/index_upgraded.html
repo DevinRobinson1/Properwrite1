@@ -4550,6 +4550,7 @@
                     // Initialize tab calculations and comparison
                     setTimeout(() => {
                         updateAllTabCalculations();
+                        updateComparisonResults();
                     }, 200);
                     
                     // Update comps subject property with analyzed data
@@ -5329,33 +5330,39 @@
         }
         
         function updateComparisonResults() {
-            // Update wholesale values
-            const wholesaleOffer = document.getElementById('wholesale-offer')?.textContent || '269,750';
-            const wholesaleProfit = document.getElementById('wholesale-assignment-fee')?.textContent || '15,000';
+            console.log("Updating comparison results with actual calculated values...");
             
-            updateElementIfExists('compare-wholesale-offer', wholesaleOffer);
-            updateElementIfExists('compare-wholesale-profit', wholesaleProfit);
+            // Update Cash Sale values (best performing buyer persona)
+            const rentRulePrice = document.getElementById('rent-rule-price')?.textContent?.replace(/[^\d]/g, '') || '132500';
+            const volumeFlipperPrice = document.getElementById('volume-flipper-price')?.textContent?.replace(/[^\d]/g, '') || '232000';
+            const brrrPrice = document.getElementById('brrr-investor-price')?.textContent?.replace(/[^\d]/g, '') || '260500';
+            const maxProfitPrice = document.getElementById('max-profit-flipper-price')?.textContent?.replace(/[^\d]/g, '') || '219000';
             
-            // Update installment values
-            const installmentOffer = document.getElementById('installment-mao')?.textContent || '269,750';
-            const installmentProfit = document.getElementById('installment-net-profit')?.textContent || '15,000';
+            // Find the highest cash sale price
+            const cashPrices = [parseInt(rentRulePrice), parseInt(volumeFlipperPrice), parseInt(brrrPrice), parseInt(maxProfitPrice)];
+            const bestCashPrice = Math.max(...cashPrices);
             
-            updateElementIfExists('compare-installment-offer', installmentOffer);
-            updateElementIfExists('compare-installment-profit', installmentProfit);
+            updateElementIfExists('compare-cash-price', '$' + bestCashPrice.toLocaleString());
+            
+            // Update MLS Net Proceeds
+            const mlsNetProceeds = document.getElementById('mls-novation-net-to-us')?.textContent?.replace(/[^\d]/g, '') || '312165';
+            updateElementIfExists('compare-mls-net', '$' + parseInt(mlsNetProceeds).toLocaleString());
             
             // Update Subject-To values
-            const subjectToOffer = document.getElementById('cash-to-seller')?.value?.replace(/[^\d]/g, '') || '24,000';
-            const subjectToCashFlow = document.getElementById('subject-to-monthly-cashflow')?.textContent || '200';
+            const subjectToCashClose = document.getElementById('subject-to-cash-close')?.textContent?.replace(/[^\d]/g, '') || '26000';
+            const subjectToCashFlow = document.getElementById('subject-to-cash-flow')?.textContent?.replace(/[^\d]/g, '') || '225';
             
-            updateElementIfExists('compare-subjectto-offer', subjectToOffer);
-            updateElementIfExists('compare-subjectto-cashflow', subjectToCashFlow);
+            updateElementIfExists('compare-subto-cash', '$' + parseInt(subjectToCashClose).toLocaleString());
+            updateElementIfExists('compare-subto-flow', '$' + parseInt(subjectToCashFlow).toLocaleString());
             
-            // Update Seller Finance values
-            const sellerFinancePrice = document.getElementById('sf-purchase-price')?.value?.replace(/[^\d]/g, '') || '395,000';
-            const sellerFinancePayment = document.getElementById('sf-monthly-payment')?.textContent || '2,402';
+            // Update SF Wrap values
+            const wrapDownPayment = document.getElementById('wrap-down-payment-amount')?.textContent?.replace(/[^\d]/g, '') || '45650';
+            const wrapMonthlyFlow = document.getElementById('wrap-monthly-cash-flow')?.textContent?.replace(/[^\d]/g, '') || '1540';
             
-            updateElementIfExists('compare-sellerfinance-price', sellerFinancePrice);
-            updateElementIfExists('compare-sellerfinance-payment', sellerFinancePayment);
+            updateElementIfExists('compare-wrap-down', '$' + parseInt(wrapDownPayment).toLocaleString());
+            updateElementIfExists('compare-wrap-flow', '$' + parseInt(wrapMonthlyFlow).toLocaleString());
+            
+            console.log("Comparison results updated successfully!");
         }
         
         function calculateBalloonProjection() {
@@ -6995,6 +7002,7 @@
         // Wrapper function for backward compatibility  
         function recalculateDispositions() {
             recalculateAllDispositionStrategies();
+            updateComparisonResults();
         }
 
         // Dynamic Fee Section Functions
@@ -8339,6 +8347,7 @@
                 console.log('Initializing all disposition calculations on page load');
                 recalculateAllDispositionStrategies();
                 calculateMLSNovation();
+                updateComparisonResults();
             }, 500);
             
             // Initialize default disposition tab (cash-sale)
