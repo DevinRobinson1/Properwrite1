@@ -77,6 +77,7 @@ class EnhancedCompsService:
         Implements strict underwriting rules from the specification
         """
         logger.info(f"🔍 Starting comparable search for {search_params.address}")
+        logger.info(f"🎯 Target zip code: {search_params.zip_code}")
         
         try:
             # Comprehensive search strategies as requested
@@ -556,13 +557,19 @@ class EnhancedCompsService:
         return address
     
     def _extract_zip_code(self, address: str) -> str:
-        """Extract zip code from address"""
+        """Extract zip code from address - look for 5-digit code after state"""
         try:
-            # Look for 5-digit zip code at the end
             import re
-            zip_match = re.search(r'\b(\d{5})\b', address)
+            # Look for 5-digit zip code after state abbreviation (like "NC 28262")
+            zip_match = re.search(r'\b[A-Z]{2}\s+(\d{5})\b', address)
             if zip_match:
                 return zip_match.group(1)
+            
+            # Fallback: look for 5-digit code at the very end
+            zip_match = re.search(r'\b(\d{5})(?:\s*,?\s*USA)?$', address)
+            if zip_match:
+                return zip_match.group(1)
+            
             return ""
         except Exception as e:
             logger.error(f"❌ Error extracting zip code: {e}")

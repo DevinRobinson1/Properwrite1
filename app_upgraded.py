@@ -2318,12 +2318,18 @@ def analyze_comps():
             }), 400
         
         # Extract zip code from address for prioritization
-        zip_code = ""
-        if address:
+        zip_code = data.get('zip_code') or ""
+        if not zip_code and address:
             import re
-            zip_match = re.search(r'\b(\d{5})\b', address)
+            # Look for 5-digit zip code after state abbreviation
+            zip_match = re.search(r'\b[A-Z]{2}\s+(\d{5})\b', address)
             if zip_match:
                 zip_code = zip_match.group(1)
+            else:
+                # Fallback: look for 5-digit code at the very end
+                zip_match = re.search(r'\b(\d{5})(?:\s*,?\s*USA)?$', address)
+                if zip_match:
+                    zip_code = zip_match.group(1)
         
         # Create search parameters for enhanced service
         search_params = SearchParams(
