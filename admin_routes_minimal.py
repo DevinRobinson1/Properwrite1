@@ -216,28 +216,64 @@ def dashboard():
 def get_affiliates():
     """Get all affiliates with filtering and pagination"""
     try:
-        # Get affiliates from in-memory storage
-        affiliates_data = affiliates_storage
-        
-        # Calculate stats
-        total_affiliates = len(affiliates_data)
-        total_commissions = sum(a['total_commissions_earned'] for a in affiliates_data)
-        active_referrals = sum(a['active_referrals'] for a in affiliates_data)
-        avg_commission_rate = sum(a['commission_rate'] for a in affiliates_data) / len(affiliates_data) if affiliates_data else 0
-        
-        stats = {
-            'total_affiliates': total_affiliates,
-            'total_commissions': total_commissions,
-            'active_referrals': active_referrals,
-            'avg_commission_rate': avg_commission_rate * 100
-        }
-        
-        return jsonify({
-            'success': True,
-            'affiliates': affiliates_data,
-            'stats': stats
-        })
-        
+        with Session(engine) as session:
+            # Get affiliates from database
+            affiliates = session.execute(text("""
+                SELECT 
+                    id,
+                    name,
+                    email,
+                    company,
+                    commission_rate,
+                    tier,
+                    status,
+                    affiliate_code,
+                    affiliate_link,
+                    total_referrals,
+                    total_commissions_earned,
+                    active_referrals,
+                    created_at
+                FROM affiliates
+                ORDER BY created_at DESC
+            """)).fetchall()
+            
+            affiliates_data = []
+            for affiliate in affiliates:
+                affiliates_data.append({
+                    'id': str(affiliate.id),
+                    'name': affiliate.name,
+                    'email': affiliate.email,
+                    'company': affiliate.company or '',
+                    'commission_rate': float(affiliate.commission_rate),
+                    'tier': affiliate.tier,
+                    'status': affiliate.status,
+                    'affiliate_code': affiliate.affiliate_code,
+                    'affiliate_link': affiliate.affiliate_link,
+                    'total_referrals': affiliate.total_referrals,
+                    'total_commissions_earned': float(affiliate.total_commissions_earned),
+                    'active_referrals': affiliate.active_referrals,
+                    'created_at': affiliate.created_at.isoformat() if affiliate.created_at else None
+                })
+            
+            # Calculate stats
+            total_affiliates = len(affiliates_data)
+            total_commissions = sum(a['total_commissions_earned'] for a in affiliates_data)
+            active_referrals = sum(a['active_referrals'] for a in affiliates_data)
+            avg_commission_rate = sum(a['commission_rate'] for a in affiliates_data) / len(affiliates_data) if affiliates_data else 0
+            
+            stats = {
+                'total_affiliates': total_affiliates,
+                'total_commissions': total_commissions,
+                'active_referrals': active_referrals,
+                'avg_commission_rate': avg_commission_rate
+            }
+            
+            return jsonify({
+                'success': True,
+                'affiliates': affiliates_data,
+                'stats': stats
+            })
+            
     except Exception as e:
         logger.error(f"Error getting affiliates: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -247,16 +283,224 @@ def get_affiliates():
 def get_promo_codes():
     """Get all promo codes"""
     try:
-        # Get promo codes from in-memory storage
-        promo_codes = promo_codes_storage
-        
-        return jsonify({
-            'success': True,
-            'promo_codes': promo_codes
-        })
-        
+        with Session(engine) as session:
+            # Get promo codes from database
+            promo_codes = session.execute(text("""
+                SELECT 
+                    pc.id,
+                    pc.code,
+                    pc.type,
+                    pc.discount_value,
+                    pc.max_uses,
+                    pc.current_uses,
+                    pc.status,
+                    pc.expires_at,
+                    pc.created_at,
+                    a.name as affiliate_name
+                FROM promo_codes pc
+                LEFT JOIN affiliates a ON pc.affiliate_id = a.id
+                ORDER BY pc.created_at DESC
+            """)).fetchall()
+            
+            promo_codes_data = []
+            for promo in promo_codes:
+                promo_codes_data.append({
+                    'id': str(promo.id),
+                    'code': promo.code,
+                    'type': promo.type,
+                    'discount_value': float(promo.discount_value),
+                    'max_uses': promo.max_uses,
+                    'current_uses': promo.current_uses,
+                    'status': promo.status,
+                    'affiliate_name': promo.affiliate_name or 'Direct',
+                    'expires_at': promo.expires_at.isoformat() if promo.expires_at else None,
+                    'created_at': promo.created_at.isoformat() if promo.created_at else None
+                })
+            
+            return jsonify({
+                'success': True,
+                'promo_codes': promo_codes_data
+            })
+            
     except Exception as e:
         logger.error(f"Error getting promo codes: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@admin_bp.route('/api/create-affiliate', methods=['POST'])
+@require_admin
+def create_affiliate():
+    """Create a new affiliate"""
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        email = data.get('email')
+        company = data.get('company', '')
+        commission_rate = float(data.get('commission_rate', 30.0))
+        tier = data.get('tier', 'standard')
+        
+        # Generate affiliate code
+        import random
+        import string
+        affiliate_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+        
+        # Create affiliate link
+        affiliate_link = f'https://properwrite.com/ref/{affiliate_code}'
+        
+        with Session(engine) as session:
+            # Insert new affiliate
+            session.execute(text("""
+                INSERT INTO affiliates (name, email, company, commission_rate, tier, affiliate_code, affiliate_link)
+                VALUES (:name, :email, :company, :commission_rate, :tier, :affiliate_code, :affiliate_link)
+            """), {
+                'name': name,
+                'email': email,
+                'company': company,
+                'commission_rate': commission_rate,
+                'tier': tier,
+                'affiliate_code': affiliate_code,
+                'affiliate_link': affiliate_link
+            })
+            session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Affiliate created successfully',
+                'affiliate_code': affiliate_code,
+                'affiliate_link': affiliate_link
+            })
+            
+    except Exception as e:
+        logger.error(f"Error creating affiliate: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@admin_bp.route('/api/create-promo-code', methods=['POST'])
+@require_admin
+def create_promo_code():
+    """Create a new promo code"""
+    try:
+        data = request.get_json()
+        code = data.get('code')
+        promo_type = data.get('type', 'percentage_discount')
+        discount_value = float(data.get('discount_value', 30.0))
+        max_uses = int(data.get('max_uses', 100))
+        affiliate_id = data.get('affiliate_id')
+        
+        with Session(engine) as session:
+            # Insert new promo code
+            session.execute(text("""
+                INSERT INTO promo_codes (code, type, discount_value, max_uses, affiliate_id)
+                VALUES (:code, :type, :discount_value, :max_uses, :affiliate_id)
+            """), {
+                'code': code,
+                'type': promo_type,
+                'discount_value': discount_value,
+                'max_uses': max_uses,
+                'affiliate_id': affiliate_id if affiliate_id else None
+            })
+            session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Promo code created successfully',
+                'code': code
+            })
+            
+    except Exception as e:
+        logger.error(f"Error creating promo code: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@admin_bp.route('/api/ai-insights', methods=['GET'])
+@require_admin
+def get_ai_insights():
+    """Get AI-powered insights based on real database data"""
+    try:
+        with Session(engine) as session:
+            insights = []
+            
+            # Get user statistics
+            user_stats = session.execute(text("""
+                SELECT 
+                    COUNT(*) as total_users,
+                    COUNT(CASE WHEN active = true THEN 1 END) as active_users,
+                    COUNT(CASE WHEN created_at >= NOW() - INTERVAL '7 days' THEN 1 END) as new_users_week
+                FROM users
+            """)).fetchone()
+            
+            # Get team statistics
+            team_stats = session.execute(text("""
+                SELECT 
+                    COUNT(*) as total_teams,
+                    COUNT(CASE WHEN plan_id = 'growth10' THEN 1 END) as growth_teams,
+                    COUNT(CASE WHEN last_login < NOW() - INTERVAL '7 days' THEN 1 END) as inactive_teams
+                FROM teams
+            """)).fetchone()
+            
+            # Get credit usage
+            credit_usage = session.execute(text("""
+                SELECT 
+                    SUM(CASE WHEN delta > 0 THEN delta ELSE 0 END) as total_credits_added,
+                    SUM(CASE WHEN delta < 0 THEN ABS(delta) ELSE 0 END) as total_credits_used
+                FROM credit_logs
+                WHERE created_at >= NOW() - INTERVAL '30 days'
+            """)).fetchone()
+            
+            # Generate insights based on actual data
+            if user_stats.new_users_week > 0:
+                insights.append({
+                    'type': 'growth',
+                    'icon': 'fa-chart-line',
+                    'bg_color': 'bg-blue-50',
+                    'title': 'New User Growth',
+                    'message': f'You gained {user_stats.new_users_week} new users this week. Consider sending welcome emails to improve onboarding.',
+                    'action': 'send_welcome_emails'
+                })
+            
+            if team_stats.inactive_teams > 0:
+                insights.append({
+                    'type': 'warning',
+                    'icon': 'fa-exclamation-triangle',
+                    'bg_color': 'bg-yellow-50',
+                    'title': 'User Engagement',
+                    'message': f'{team_stats.inactive_teams} teams haven\'t logged in for 7+ days. Send re-engagement campaigns.',
+                    'action': 'send_reengagement'
+                })
+            
+            if credit_usage.total_credits_used and credit_usage.total_credits_added:
+                usage_rate = (credit_usage.total_credits_used / credit_usage.total_credits_added) * 100
+                if usage_rate > 80:
+                    insights.append({
+                        'type': 'info',
+                        'icon': 'fa-coins',
+                        'bg_color': 'bg-green-50',
+                        'title': 'High Credit Usage',
+                        'message': f'Credits are being used at {usage_rate:.1f}% rate. Users are actively engaged!',
+                        'action': 'monitor_credits'
+                    })
+            
+            # Default insight if no data
+            if not insights:
+                insights.append({
+                    'type': 'info',
+                    'icon': 'fa-info-circle',
+                    'bg_color': 'bg-gray-50',
+                    'title': 'System Status',
+                    'message': 'All systems operational. Monitor user activity and engagement metrics.',
+                    'action': None
+                })
+            
+            return jsonify({
+                'success': True,
+                'insights': insights,
+                'stats': {
+                    'total_users': user_stats.total_users,
+                    'active_users': user_stats.active_users,
+                    'total_teams': team_stats.total_teams,
+                    'growth_teams': team_stats.growth_teams
+                }
+            })
+            
+    except Exception as e:
+        logger.error(f"Error getting AI insights: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @admin_bp.route('/api/teams', methods=['GET'])
@@ -272,13 +516,13 @@ def get_teams_data():
                     t.name,
                     t.tier as plan_type,
                     t.credit_balance,
-                    t.credits_used,
+                    0 as credits_used,
                     t.created_at,
                     COUNT(u.id) as member_count,
                     MAX(u.last_login) as last_active
                 FROM teams t
                 LEFT JOIN users u ON t.id = u.team_id
-                GROUP BY t.id, t.name, t.tier, t.credit_balance, t.credits_used, t.created_at
+                GROUP BY t.id, t.name, t.tier, t.credit_balance, t.created_at
                 ORDER BY t.created_at DESC
             """)).fetchall()
             
@@ -356,7 +600,7 @@ def get_jv_deals_data():
                     status,
                     created_at,
                     updated_at
-                FROM jv_deal_submissions
+                FROM jv_deals
                 ORDER BY created_at DESC
             """)).fetchall()
             
@@ -385,6 +629,8 @@ def get_jv_deals_data():
     except Exception as e:
         logger.error(f"Error getting JV deals: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
 
 @admin_bp.route('/api/ai-assistant', methods=['POST'])
 @require_admin
@@ -592,87 +838,9 @@ def get_affiliate(affiliate_id):
         logger.error(f"Error getting affiliate: {e}")
         return jsonify({'success': False, 'error': 'Internal server error'}), 500
 
-@admin_bp.route('/api/create-affiliate', methods=['POST'])
-@require_admin
-def create_affiliate():
-    """Create new affiliate"""
-    try:
-        data = request.get_json()
-        
-        # Create affiliate object and store it
-        affiliate = {
-            'id': f"affiliate-{len(affiliates_storage) + 1}",
-            'name': data.get('name', ''),
-            'email': data.get('email', ''),
-            'company': data.get('company', ''),
-            'commission_rate': float(data.get('commission_rate', 0)) / 100,
-            'tier': data.get('tier', 'bronze'),
-            'status': 'active',
-            'total_commissions_earned': 0,
-            'active_referrals': 0,
-            'total_referrals': 0,
-            'revenue_generated': 0,
-            'created_at': datetime.now().isoformat(),
-            'last_payout': None
-        }
-        
-        # Add to storage
-        affiliates_storage.append(affiliate)
-        
-        # Generate affiliate link with embedded promo code
-        affiliate_code = f"AFF{len(affiliates_storage):03d}"
-        base_url = request.host_url.rstrip('/')
-        affiliate_link = f"{base_url}/?ref={affiliate['id']}&code={affiliate_code}"
-        
-        # Store affiliate code for future reference
-        affiliate['affiliate_code'] = affiliate_code
-        affiliate['affiliate_link'] = affiliate_link
-        
-        return jsonify({
-            'success': True,
-            'message': 'Affiliate created successfully',
-            'affiliate_id': affiliate['id'],
-            'affiliate_code': affiliate_code,
-            'affiliate_link': affiliate_link
-        })
-        
-    except Exception as e:
-        logger.error(f"Create affiliate error: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
 
-@admin_bp.route('/api/create-promo-code', methods=['POST'])
-@require_admin
-def create_promo_code():
-    """Create new promo code"""
-    try:
-        data = request.get_json()
-        
-        # Create promo code object and store it
-        promo_code = {
-            'id': 'promo-' + str(int(time.time())),
-            'code': data.get('code', ''),
-            'type': data.get('type', ''),
-            'discount_value': data.get('value', 0),
-            'max_uses': data.get('max_uses', 0),
-            'uses': 0,
-            'affiliate_id': data.get('affiliate_id', ''),
-            'status': 'active',
-            'created_at': datetime.now().isoformat(),
-            'expires_at': data.get('expires_at', '')
-        }
-        
-        # Add to storage
-        promo_codes_storage.append(promo_code)
-        
-        return jsonify({
-            'success': True,
-            'message': 'Promo code created successfully',
-            'promo_code': promo_code
-        })
-        
-    except Exception as e:
-        logger.error(f"Error creating promo code: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 
 
 

@@ -522,23 +522,13 @@
             </button>
         </div>
         <div id="ai-insights-content" class="text-sm text-gray-600">
-            <div class="bg-blue-50 p-3 rounded-lg mb-3">
-                <strong>Growth Opportunity:</strong> You have 3 trial users who analyzed 10+ properties this week. Consider sending upgrade offers.
-            </div>
-            <div class="bg-green-50 p-3 rounded-lg mb-3">
-                <strong>Affiliate Success:</strong> John Martinez's COACH50 code has 23% conversion rate. Consider creating similar codes for other affiliates.
-            </div>
-            <div class="bg-yellow-50 p-3 rounded-lg">
-                <strong>Risk Alert:</strong> 2 Growth10 teams haven't logged in for 7 days. Send re-engagement email?
+            <div class="text-center py-4">
+                <i class="fas fa-spinner fa-spin text-gray-400 mb-2"></i>
+                <p class="text-gray-500">Loading insights...</p>
             </div>
         </div>
-        <div class="mt-4 flex gap-2">
-            <button onclick="generateAIAction('upgrade_offers')" class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">
-                Send Upgrades
-            </button>
-            <button onclick="generateAIAction('reengagement')" class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700">
-                Re-engage Users
-            </button>
+        <div id="ai-insights-actions" class="mt-4 flex gap-2 hidden">
+            <!-- Action buttons will be populated dynamically -->
         </div>
     </div>
 
@@ -1838,6 +1828,98 @@
                 });
             }
         }
+
+        // Load AI Insights
+        function loadAIInsights() {
+            fetch('/admin/api/ai-insights')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayAIInsights(data.insights);
+                    } else {
+                        console.error('Error loading AI insights:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading AI insights:', error);
+                });
+        }
+
+        function displayAIInsights(insights) {
+            const content = document.getElementById('ai-insights-content');
+            const actions = document.getElementById('ai-insights-actions');
+            
+            if (!insights || insights.length === 0) {
+                content.innerHTML = '<p class="text-gray-500">No insights available at this time.</p>';
+                actions.classList.add('hidden');
+                return;
+            }
+            
+            let html = '';
+            let actionButtons = '';
+            
+            insights.forEach(insight => {
+                html += `
+                    <div class="${insight.bg_color} p-3 rounded-lg mb-3">
+                        <div class="flex items-start">
+                            <i class="fas ${insight.icon} text-${insight.type === 'warning' ? 'yellow' : insight.type === 'growth' ? 'blue' : 'green'}-500 mr-2 mt-1"></i>
+                            <div>
+                                <strong>${insight.title}:</strong> ${insight.message}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                if (insight.action) {
+                    const actionColor = insight.type === 'warning' ? 'yellow' : insight.type === 'growth' ? 'blue' : 'green';
+                    actionButtons += `
+                        <button onclick="handleAIAction('${insight.action}')" 
+                                class="bg-${actionColor}-600 text-white px-3 py-1 rounded text-xs hover:bg-${actionColor}-700 mr-2">
+                            ${getActionButtonText(insight.action)}
+                        </button>
+                    `;
+                }
+            });
+            
+            content.innerHTML = html;
+            
+            if (actionButtons) {
+                actions.innerHTML = actionButtons;
+                actions.classList.remove('hidden');
+            } else {
+                actions.classList.add('hidden');
+            }
+        }
+
+        function getActionButtonText(action) {
+            switch (action) {
+                case 'send_welcome_emails': return 'Send Welcome Emails';
+                case 'send_reengagement': return 'Re-engage Users';
+                case 'monitor_credits': return 'Monitor Credits';
+                default: return 'Take Action';
+            }
+        }
+
+        function handleAIAction(action) {
+            switch (action) {
+                case 'send_welcome_emails':
+                    alert('Welcome email campaign feature coming soon!');
+                    break;
+                case 'send_reengagement':
+                    alert('Re-engagement campaign feature coming soon!');
+                    break;
+                case 'monitor_credits':
+                    alert('Credit monitoring dashboard feature coming soon!');
+                    break;
+                default:
+                    alert('Action not implemented yet.');
+            }
+        }
+
+        // Auto-load insights when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAIInsights();
+        });
 
     </script>
 </body>
