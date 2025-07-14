@@ -1,0 +1,34 @@
+{
+  "valuations": {
+    "rentcast": {
+      "estimate": 324000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Rentometer",
+    "Zillow",
+    "RentCast",
+    "Redfin"
+  ],
+  "sources_used": [
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "14303 Evening Flight Lane, Charlotte, NC",
+    "city": "Charlotte",
+    "state": "NC",
+    "zip_code": "28277",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-14T14:52:52.630839"
+}

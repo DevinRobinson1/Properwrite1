@@ -1009,6 +1009,23 @@ def analyze_property():
             if 'rentcast_rental' in valuations:
                 property_data['rental_estimate'] = valuations['rentcast_rental'].get('rent_estimate')
                 
+            # Extract Rentometer rent data
+            if 'rentometer' in valuations:
+                rentometer_data = valuations['rentometer']
+                property_data['rentometer_estimate'] = rentometer_data.get('rent_estimate')
+                property_data['rentometer_median'] = rentometer_data.get('rent_median')
+                property_data['rentometer_range'] = rentometer_data.get('rent_range')
+                property_data['rentometer_samples'] = rentometer_data.get('samples', 0)
+                property_data['rentometer_confidence'] = rentometer_data.get('confidence', 'medium')
+                property_data['rentometer_radius'] = rentometer_data.get('radius_miles', 0.2)
+                property_data['rentometer_credits'] = rentometer_data.get('credits_remaining')
+                
+                # Use Rentometer as primary rent estimate if available
+                if property_data.get('rentometer_estimate'):
+                    property_data['rent_estimate'] = property_data['rentometer_estimate']
+                    property_data['rent_data_source'] = 'Rentometer'
+                    logging.info(f"Using Rentometer as primary rent source: ${property_data['rentometer_estimate']:,}/month")
+                
             # Calculate ARV as average of Zillow and RentCast
             arv_estimates = []
             if property_data.get('zillow_estimate'):

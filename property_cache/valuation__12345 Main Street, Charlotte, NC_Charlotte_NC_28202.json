@@ -1,0 +1,33 @@
+{
+  "valuations": {
+    "rentcast": {
+      "estimate": 723000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin"
+  ],
+  "sources_used": [
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "12345 Main Street, Charlotte, NC",
+    "city": "Charlotte",
+    "state": "NC",
+    "zip_code": "28202",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-14T14:54:20.406057"
+}

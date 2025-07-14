@@ -1,0 +1,49 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 170000,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 53345918,
+      "matched_address": "1234 Park Avenue, Charlotte, NC, Charlotte, NC 28203",
+      "images": [
+        "https://photos.zillowstatic.com/fp/65b182db0f2bd646a1c69aa5323b3ba4-p_d.jpg"
+      ],
+      "bedrooms": 2.0,
+      "bathrooms": 1.0,
+      "square_feet": null,
+      "year_built": 1949
+    },
+    "rentcast": {
+      "estimate": 1225000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin",
+    "Rentometer"
+  ],
+  "sources_used": [
+    "Zillow",
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "1234 Park Avenue, Charlotte, NC",
+    "city": "Charlotte",
+    "state": "NC",
+    "zip_code": "28203",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-14T14:54:34.709525"
+}

@@ -1317,7 +1317,7 @@
                                 </div>
                                 <div>
                                     <div class="font-semibold text-gray-800">Monthly Rent</div>
-                                    <div class="text-xs text-gray-500">RentCast Estimate</div>
+                                    <div class="text-xs text-gray-500">Rentometer Estimate</div>
                                 </div>
                             </div>
                             <div class="rental-estimate-content">
@@ -1326,6 +1326,7 @@
                                     <input type="number" id="rental-value" class="w-full text-2xl font-bold border-none bg-transparent focus:outline-none focus:ring-2 focus:ring-purple-500 rounded p-1" style="color: #6B46C1;" placeholder="$0">
                                     <div class="text-xs text-gray-500 mt-1">
                                         <span id="rental-updated">Updated: --</span>
+                                        <span id="rental-samples" class="ml-2">--</span>
                                     </div>
                                 </div>
                                 <div id="rental-error" class="hidden text-sm text-gray-500">
@@ -8810,8 +8811,15 @@
                 showValuationError('redfin', 'Not available');
             }
             
-            // Update Rental Estimate (third box)
-            if (data.rental_estimate) {
+            // Update Rental Estimate (third box) - Prioritize Rentometer data
+            if (data.rentometer_estimate) {
+                const samplesText = data.rentometer_samples ? ` (${data.rentometer_samples} samples)` : '';
+                showValuation('rental', data.rentometer_estimate, 'Rentometer Rental Data' + samplesText);
+                
+                // Update samples display
+                const samplesEl = document.getElementById('rental-samples');
+                if (samplesEl) samplesEl.textContent = samplesText;
+            } else if (data.rental_estimate) {
                 showValuation('rental', data.rental_estimate, 'RentCast Rental Data');
             } else {
                 showValuationError('rental', 'Not available');
@@ -8834,9 +8842,19 @@
                 const arvInput = document.getElementById('arv');
                 if (arvInput) arvInput.value = data.calculated_arv;
             }
-            if (data.rental_estimate) {
+            // Use Rentometer data as primary source for rent, fallback to RentCast
+            if (data.rentometer_estimate) {
                 const rentInput = document.getElementById('monthly_rent');
-                if (rentInput) rentInput.value = data.rental_estimate;
+                if (rentInput) {
+                    rentInput.value = data.rentometer_estimate;
+                    console.log('🏠 Using Rentometer rent data: $' + data.rentometer_estimate);
+                }
+            } else if (data.rental_estimate) {
+                const rentInput = document.getElementById('monthly_rent');
+                if (rentInput) {
+                    rentInput.value = data.rental_estimate;
+                    console.log('🏠 Using RentCast rent data: $' + data.rental_estimate);
+                }
             }
             
             // Calculate and show average - using only Zillow and RentCast as per user requirement

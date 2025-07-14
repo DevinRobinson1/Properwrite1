@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Optional, List
 from address_utils import to_zillow_search_string
 from rentcast_api_service import RentCastAPIService
+from rentometer_service import get_rentometer_service
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -25,6 +26,14 @@ class ComprehensiveValuationService:
         
         # Initialize RentCast API service
         self.rentcast_service = RentCastAPIService()
+        
+        # Initialize Rentometer service
+        try:
+            self.rentometer_service = get_rentometer_service()
+            logging.info("🏠 Rentometer service initialized successfully")
+        except Exception as e:
+            logging.error(f"🏠 Failed to initialize Rentometer service: {e}")
+            self.rentometer_service = None
         
         if not self.rapidapi_key:
             logging.warning("RAPIDAPI_KEY not found in environment variables")
@@ -78,6 +87,9 @@ class ComprehensiveValuationService:
         self._try_redfin_valuation(valuation_data, address, city, state, zip_code)
         # Disabled Realtor.com - API only returns nearby properties, not exact matches
         # self._try_realtor_valuation(valuation_data, address, city, state, zip_code, latitude, longitude)
+        
+        # Get rent data from Rentometer after property details are available
+        self._try_rentometer_rent_data_after_property_details(valuation_data, address, latitude, longitude)
         
         # Cache the results
         self._cache_valuation(cache_key, valuation_data)
@@ -390,6 +402,107 @@ class ComprehensiveValuationService:
                 
         except Exception as e:
             logging.warning(f"RentCast valuation failed: {e}")
+    
+    def _try_rentometer_rent_data(self, valuation_data: Dict, address: str, bedrooms: int = None, 
+                                 bathrooms: str = None, latitude: float = None, longitude: float = None):
+        """Try Rentometer API for rent data"""
+        if not self.rentometer_service:
+            logging.warning("🏠 Rentometer service not available")
+            return
+            
+        valuation_data['sources_tried'].append('Rentometer')
+        
+        try:
+            # Get rent data from Rentometer
+            rent_data = self.rentometer_service.get_rent_summary(
+                address=address,
+                bedrooms=bedrooms,
+                baths=bathrooms,
+                building_type="house",  # Default to house, can be enhanced later
+                latitude=latitude,
+                longitude=longitude
+            )
+            
+            if rent_data and rent_data.get('success'):
+                formatted_data = self.rentometer_service.format_rent_data_for_display(rent_data)
+                
+                valuation_data['valuations']['rentometer'] = {
+                    'rent_estimate': rent_data['mean_rent'],
+                    'rent_median': rent_data['median_rent'],
+                    'rent_range': {
+                        'min': rent_data['min_rent'],
+                        'max': rent_data['max_rent']
+                    },
+                    'source': 'Rentometer',
+                    'confidence': formatted_data.get('confidence', 'medium'),
+                    'samples': rent_data.get('samples', 0),
+                    'radius_miles': rent_data.get('radius_miles', 0.2),
+                    'credits_remaining': rent_data.get('credits_remaining'),
+                    'updated': datetime.now().strftime('%Y-%m-%d')
+                }
+                
+                # Set as primary rent estimate
+                valuation_data['rent_estimate'] = rent_data['mean_rent']
+                valuation_data['rent_data_source'] = 'Rentometer'
+                
+                valuation_data['sources_used'].append('Rentometer')
+                logging.info(f"🏠 Rentometer rent estimate: ${rent_data['mean_rent']:,}/month (samples: {rent_data.get('samples', 0)})")
+                
+                # Log additional details
+                if rent_data.get('credits_remaining'):
+                    logging.info(f"🏠 Rentometer credits remaining: {rent_data['credits_remaining']}")
+                
+            else:
+                error_msg = rent_data.get('error', 'Unknown error') if rent_data else 'No data returned'
+                logging.warning(f"🏠 Rentometer API failed: {error_msg}")
+                
+        except Exception as e:
+            logging.warning(f"🏠 Rentometer rent data failed: {e}")
+    
+    def _try_rentometer_rent_data_after_property_details(self, valuation_data: Dict, address: str, latitude: float = None, longitude: float = None):
+        """Try Rentometer API after property details are available from other sources"""
+        if not self.rentometer_service:
+            logging.warning("🏠 Rentometer service not available")
+            return
+            
+        # Extract property details from other sources
+        bedrooms = None
+        bathrooms = None
+        
+        # Try to get bedrooms and bathrooms from Zillow data first
+        if 'zillow' in valuation_data.get('valuations', {}):
+            zillow_data = valuation_data['valuations']['zillow']
+            bedrooms = zillow_data.get('bedrooms')
+            bathrooms = zillow_data.get('bathrooms')
+            
+        # Fallback to RentCast data if Zillow doesn't have it
+        if not bedrooms and 'rentcast' in valuation_data.get('valuations', {}):
+            rentcast_data = valuation_data['valuations']['rentcast']
+            bedrooms = rentcast_data.get('bedrooms')
+            bathrooms = rentcast_data.get('bathrooms')
+            
+        # Format data according to Rentometer API requirements
+        # Bedrooms must be an integer
+        if bedrooms is not None:
+            bedrooms = int(bedrooms)
+        
+        # Bathrooms must be either blank, '1', or '1.5+'
+        if bathrooms is not None:
+            bathrooms = float(bathrooms)
+            if bathrooms >= 1.5:
+                bathrooms = "1.5+"
+            elif bathrooms >= 1.0:
+                bathrooms = "1"
+            else:
+                bathrooms = None  # Set to None if less than 1
+        
+        logging.info(f"🏠 Calling Rentometer with bedrooms={bedrooms}, bathrooms={bathrooms}")
+        
+        # Only call Rentometer if we have bedroom information
+        if bedrooms is not None:
+            self._try_rentometer_rent_data(valuation_data, address, bedrooms, bathrooms, latitude, longitude)
+        else:
+            logging.warning("🏠 Skipping Rentometer API call - no bedroom information available")
     
     def _try_redfin_valuation(self, valuation_data: Dict, address: str, city: str, state: str, zip_code: str):
         """Try Redfin valuation via RapidAPI with enhanced error handling"""
