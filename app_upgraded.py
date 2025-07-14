@@ -1027,12 +1027,16 @@ def analyze_property():
         if 'user_id' in session:
             try:
                 billing_service = BillingService()
-                with billing_service.get_session() as db_session:
-                    user = db_session.query(User).filter_by(id=int(session['user_id'])).first()
-                    if user and user.team:
-                        user.team.credit_balance -= 1
-                        db_session.commit()
-                        logging.info(f"Credit consumed. New balance: {user.team.credit_balance}")
+                # Get user's team ID
+                db = billing_service.db_session()
+                user = db.query(User).filter_by(id=session['user_id']).first()
+                if user and user.team_id:
+                    result = billing_service.consume_credit(str(user.team_id), 'property_analysis')
+                    if result.get('success'):
+                        logging.info(f"Credit consumed. Remaining balance: {result.get('remaining_credits')}")
+                    else:
+                        logging.warning(f"Credit consumption failed: {result.get('error')}")
+                db.close()
             except Exception as e:
                 logging.error(f"Failed to consume credit: {e}")
                 # Don't fail the analysis if credit consumption fails

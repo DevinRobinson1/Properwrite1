@@ -7089,17 +7089,30 @@
 
         // Authentication check for restricted sections
         function checkAuthAndShowSection(sectionName) {
-            // Check if user is logged in
-            const isLoggedIn = {{ "true" if session.get('user_id') else "false" }};
-            
-            if (!isLoggedIn) {
-                // Show blur gate modal for investment strategy sections
-                showBlurGateModal();
-                return;
+            // Check current authentication state dynamically
+            if (!window.userAuthenticated) {
+                // Check user status via API
+                fetch('/api/user-status')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.logged_in) {
+                            // User is logged in, show the section
+                            window.userAuthenticated = true;
+                            showSection(sectionName);
+                        } else {
+                            // Show blur gate modal for investment strategy sections
+                            showBlurGateModal();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking authentication:', error);
+                        // Show blur gate modal on error
+                        showBlurGateModal();
+                    });
+            } else {
+                // Already authenticated, show the section
+                showSection(sectionName);
             }
-            
-            // If authenticated, show the section
-            showSection(sectionName);
         }
 
         // Section functionality with animations
@@ -9895,6 +9908,12 @@
         }
         
         function showBlurGateModal() {
+            // Double-check authentication state before showing modal
+            if (window.userAuthenticated) {
+                console.log('🔐 User is authenticated - not showing blur gate modal');
+                return;
+            }
+            
             // Apply blur to main content sections
             const acquisitionsSection = document.getElementById('acquisitions-section');
             const dispositionsSection = document.getElementById('dispositions-section');
