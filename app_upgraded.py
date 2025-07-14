@@ -34,8 +34,7 @@ from admin_routes_minimal import admin_bp
 from admin_api import admin_api_bp
 from zapier_api import zapier_api_bp
 from bitcoin_payment_service import bitcoin_service
-from comps_service import CompsService
-from enhanced_comps_service import enhanced_comps_service
+from simple_comps_service import SimpleCompsService
 from email_service import email_service
 from affiliate_api import affiliate_api
 from construction_service import ConstructionService
@@ -101,7 +100,7 @@ engine = create_engine(
 )
 
 # Initialize comps service
-comps_service = CompsService()
+comps_service = SimpleCompsService()
 
 # Register admin blueprint (unified admin system)
 from admin_routes_minimal import admin_bp
@@ -2289,32 +2288,15 @@ def analyze_comps():
                 'error': 'Property address is required'
             }), 400
         
-        # Analyze comparables using enhanced service with fallback
-        result = enhanced_comps_service.search_comparable_sales(
-            address=address,
+        # Analyze comparables using simple service
+        result = comps_service.analyze_comparables(
+            subject_address=address,
             beds=int(beds),
             baths=float(baths),
             sqft=int(sqft),
             lat=lat,
             lng=lng
         )
-        
-        # If enhanced service fails, use original comps service as fallback
-        if result.get('error') or result.get('found_count', 0) < 3:
-            logging.info("Enhanced service failed, trying original comps service as fallback")
-            fallback_result = comps_service.analyze_comparables(
-                subject_address=address,
-                beds=int(beds),
-                baths=float(baths),
-                sqft=int(sqft),
-                lat=lat,
-                lng=lng
-            )
-            
-            # Use fallback result if it has better data
-            if fallback_result.get('comps') and len(fallback_result.get('comps', [])) > 0:
-                result = fallback_result
-                logging.info(f"Fallback service found {len(fallback_result.get('comps', []))} comparables")
         
         return jsonify(result)
         
