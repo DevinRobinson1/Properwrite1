@@ -2197,13 +2197,23 @@ INSTRUCTIONS:
 4. Offer one compelling solution or concession
 5. End with a soft close that invites the seller to talk further
 
-Output in markdown with sections:
-Empathy – [Empathetic acknowledgment]
-Questions – [2-3 bullet points with calibrated questions]
-Suggested Solution – [One compelling solution]
-Soft Close – [Invitation to continue conversation]
+Format your response in clear sections with proper paragraph breaks:
 
-IMPORTANT: Do not use asterisks (*) anywhere in your response. Use dashes (-) for bullet points and regular text for emphasis."""
+EMPATHY:
+[Empathetic acknowledgment in 1-2 sentences]
+
+QUESTIONS:
+- [First calibrated question]
+- [Second calibrated question]  
+- [Third calibrated question if needed]
+
+SUGGESTED SOLUTION:
+[One compelling solution or concession in 2-3 sentences]
+
+SOFT CLOSE:
+[Invitation to continue conversation in 1-2 sentences]
+
+IMPORTANT: Do not use asterisks (*) or markdown headers (###) anywhere in your response. Use simple formatting with clear section labels and dashes (-) for bullet points."""
 
         # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
         # do not change this unless explicitly requested by the user
@@ -3057,6 +3067,7 @@ def get_pending_invites():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/team/invite/<invite_id>/resend', methods=['POST'])
+@csrf.exempt
 def resend_invite(invite_id):
     """Resend a team invitation - consolidated with session auth"""
     try:
@@ -3105,6 +3116,7 @@ def resend_invite(invite_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/team/invite/<invite_id>/cancel', methods=['DELETE'])
+@csrf.exempt
 def cancel_invite(invite_id):
     """Cancel a team invitation"""
     try:
