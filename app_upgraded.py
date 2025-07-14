@@ -2267,6 +2267,7 @@ def analyze_property_risk():
         })
 
 @app.route('/api/comps/analyze', methods=['POST'])
+@csrf.exempt
 def analyze_comps():
     """
     Analyze comparable properties using Zillow API and OpenAI
