@@ -5116,9 +5116,6 @@
         }
 
         function recalculateInstallment() {
-            // Initialize refundable consideration field if needed
-            initializeRefundableConsideration();
-            
             const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 415000;
             const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/[^\d]/g, '')) || 30000;
             const discountToSellFast = parseFloat(document.getElementById('installment-discount')?.value?.replace(/[^\d]/g, '')) || 10000;
@@ -5417,6 +5414,7 @@
         // Ensure calculations run when page loads
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
+                initializeRefundableConsideration();
                 updateAllTabCalculations();
             }, 500);
         });
@@ -6383,10 +6381,12 @@
             recalculateInstallment();
         }
 
-        // Initialize refundable consideration field if it's showing 0
+        // Initialize refundable consideration field if it's showing 0 (only when not actively editing)
         function initializeRefundableConsideration() {
             const refundableField = document.getElementById('refundable-consideration');
-            if (refundableField && (refundableField.value === '0' || refundableField.value === '')) {
+            if (refundableField && 
+                (refundableField.value === '0' || refundableField.value === '') && 
+                document.activeElement !== refundableField) {
                 refundableField.value = '1,000';
             }
         }
@@ -6953,9 +6953,6 @@
         }
 
         function recalculateNovationMAO() {
-            // Initialize refundable consideration field if needed
-            initializeRefundableConsideration();
-            
             const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 200000;
             const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/[^\d]/g, '')) || 30000;
             const discountToSellFast = parseFloat(document.getElementById('installment-discount')?.value?.replace(/[^\d]/g, '')) || 10000;
@@ -8281,6 +8278,9 @@
                 depositStructure.classList.remove('hidden');
                 strategyDescription.textContent = 'Uses equitable deposit structure for buyer control';
             }
+            
+            // Initialize refundable consideration field if needed
+            initializeRefundableConsideration();
             
             // Recalculate based on selected strategy
             if (typeof recalculateInstallment === 'function') {
