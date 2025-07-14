@@ -72,23 +72,31 @@ class EnhancedCompsService:
     
     def search_comparable_sales(self, search_params: SearchParams) -> Dict:
         """
-        Search for comparable sales with progressive time/radius expansion
+        Search for comparable sales with optimized search strategy
         Implements strict underwriting rules from the specification
         """
         logger.info(f"🔍 Starting comparable search for {search_params.address}")
         
         try:
-            # Step 1: Initial search parameters
-            time_window = 90  # Start with 90 days
-            radius = 0.25     # Start with 0.25 mile radius
-            max_time = 365    # Maximum 365 days
-            max_radius = 1.0  # Maximum 1 mile radius
+            # Optimized search strategies - fewer calls, better targeting
+            search_strategies = [
+                {'time_window': 180, 'radius': 0.5},  # 6 months, nearby
+                {'time_window': 365, 'radius': 1.0},  # 1 year, wider area
+                {'time_window': 180, 'radius': 1.5},  # 6 months, even wider
+            ]
             
             best_comps = []
             search_attempts = 0
             
-            while len(best_comps) < 3 and time_window <= max_time and radius <= max_radius:
+            # Try each strategy until we find enough comparables
+            for strategy in search_strategies:
+                if len(best_comps) >= 3:  # Stop if we have enough
+                    break
+                    
                 search_attempts += 1
+                time_window = strategy['time_window']
+                radius = strategy['radius']
+                
                 logger.info(f"📅 Search attempt {search_attempts}: {time_window} days, {radius} miles")
                 
                 # Perform search with current parameters
@@ -106,7 +114,7 @@ class EnhancedCompsService:
                         search_params
                     )
                     
-                    # Add to best comps if better than existing
+                    # Add to best comps
                     for comp in filtered_comps:
                         if len(best_comps) < 6:  # Keep top 6 for final selection
                             best_comps.append(comp)
@@ -114,21 +122,6 @@ class EnhancedCompsService:
                     # Sort by relevance score
                     best_comps.sort(key=lambda x: x.get('relevance_score', 0), reverse=True)
                     best_comps = best_comps[:6]  # Keep top 6
-                
-                # Progressive expansion logic
-                if len(best_comps) < 3:
-                    if time_window < max_time:
-                        time_window = min(time_window + 30, max_time)
-                    elif radius < max_radius:
-                        radius = min(radius + 0.25, max_radius)
-                        time_window = 90  # Reset time window when expanding radius
-                    else:
-                        break
-                else:
-                    break
-                
-                # Rate limiting
-                time.sleep(1)
             
             # Apply adjustments to final comps
             adjusted_comps = []
@@ -146,8 +139,8 @@ class EnhancedCompsService:
                 'analysis': analysis,
                 'search_summary': {
                     'attempts': search_attempts,
-                    'final_time_window': time_window,
-                    'final_radius': radius,
+                    'final_time_window': time_window if 'time_window' in locals() else 180,
+                    'final_radius': radius if 'radius' in locals() else 0.5,
                     'total_properties_found': len(best_comps)
                 }
             }

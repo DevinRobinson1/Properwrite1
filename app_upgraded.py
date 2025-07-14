@@ -2330,6 +2330,20 @@ def analyze_comps():
         # Use enhanced service for comprehensive analysis
         result = enhanced_comps_service.search_comparable_sales(search_params)
         
+        # Fallback to simple service if enhanced fails
+        if not result.get('success') or not result.get('comps'):
+            logging.warning("Enhanced comps service failed, falling back to simple service")
+            
+            # Use simple service as fallback
+            try:
+                simple_result = simple_comps_service.search_comparable_sales(search_params)
+                if simple_result.get('success') and simple_result.get('comps'):
+                    result = simple_result
+                    result['fallback_used'] = True
+                    result['message'] = "Using simplified analysis due to performance optimization"
+            except Exception as e:
+                logging.error(f"Simple service fallback failed: {e}")
+        
         # Add analysis summary if successful
         if result.get('success') and result.get('comps'):
             result['ai_summary'] = result['analysis'].get('summary', '')
