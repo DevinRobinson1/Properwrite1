@@ -4702,6 +4702,11 @@
                 imageContainer.classList.remove('bg-gray-200');
                 imageContainer.classList.add('bg-white');
             }
+            
+            // Update all tab calculations including cash offer when property data is loaded
+            setTimeout(() => {
+                updateAllTabCalculations();
+            }, 200);
         }
 
         function updatePropertyValuations(data) {
@@ -5266,7 +5271,12 @@
             
             console.log('Cash Offer Calculation - Final Offer:', calculatedOffer);
             
-            updateElementIfExists('calculated-cash-offer', Math.round(calculatedOffer));
+            // Update the display with proper formatting
+            const calculatedOfferElement = document.getElementById('calculated-cash-offer');
+            if (calculatedOfferElement) {
+                calculatedOfferElement.textContent = Math.round(calculatedOffer).toLocaleString();
+                console.log('Updated calculated-cash-offer display to:', Math.round(calculatedOffer).toLocaleString());
+            }
             
             // Update the cash to seller field in deal structure
             const cashToSellerInput = document.getElementById('sub2-cash-seller');

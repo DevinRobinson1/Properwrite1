@@ -1,0 +1,51 @@
+{
+  "valuations": {
+    "rentcast": {
+      "estimate": 767000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    },
+    "rentometer": {
+      "rent_estimate": 3064,
+      "rent_median": 2748,
+      "rent_range": {
+        "min": 1820,
+        "max": 6000
+      },
+      "source": "Rentometer",
+      "confidence": "High",
+      "samples": 28,
+      "radius_miles": 1.0,
+      "credits_remaining": 994,
+      "updated": "2025-07-14"
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin",
+    "Rentometer"
+  ],
+  "sources_used": [
+    "RentCast",
+    "Rentometer"
+  ],
+  "address_info": {
+    "address": "1500 Central Ave, Charlotte, NC",
+    "city": "Charlotte",
+    "state": "NC",
+    "zip_code": "28205",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-14T15:56:56.593827",
+  "rent_estimate": 3064,
+  "rent_data_source": "Rentometer"
+}
