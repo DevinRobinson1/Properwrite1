@@ -738,6 +738,7 @@ def logout():
 
 @app.route('/api/login', methods=['POST'])
 @limiter.limit("5 per minute")
+@csrf.exempt
 def api_login():
     """Secure API login endpoint with proper password validation"""
     try:
