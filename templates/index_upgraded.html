@@ -2156,16 +2156,20 @@
                                     <h4 class="font-semibold text-blue-800 mb-2">Net Proceeds</h4>
                                     <div class="space-y-1 text-sm">
                                         <div class="flex justify-between">
-                                            <span>Gross Sale Price:</span>
-                                            <span id="mls-novation-gross-sale">$0</span>
+                                            <span>List Price Sales Price:</span>
+                                            <span id="mls-novation-list-price-display">$0</span>
                                         </div>
                                         <div class="flex justify-between">
-                                            <span>Total Commissions:</span>
-                                            <span id="mls-novation-commissions">$0</span>
+                                            <span>Sale Fast Price:</span>
+                                            <span id="mls-novation-sale-fast-price">$0</span>
                                         </div>
                                         <div class="flex justify-between">
-                                            <span>Our Fee:</span>
-                                            <span id="mls-novation-our-fee">$20,475</span>
+                                            <span>Under Contract Price:</span>
+                                            <span id="mls-novation-under-contract-price">$0</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Total Commissions and Fees:</span>
+                                            <span id="mls-novation-total-commissions-fees">$0</span>
                                         </div>
                                         <hr class="my-2">
                                         <div class="flex justify-between font-bold">
@@ -6083,20 +6087,29 @@
             // Fixed our fee
             const ourFee = 20475;
             
-            // Calculate net
-            const netToUs = listPrice - totalCommissions - ourFee;
+            // Calculate pricing tiers
+            const saleFastPrice = listPrice; // Same as list price for most cases
+            const underContractPrice = listPrice; // Final agreed price (same as list price)
+            const totalCommissionsAndFees = totalCommissions + ourFee;
+            
+            // Calculate net to us: List Price - Total Commissions and Fees
+            const netToUs = listPrice - totalCommissionsAndFees;
             
             console.log('MLS/Novation calculation:', {
                 listPrice,
+                saleFastPrice,
+                underContractPrice,
                 totalCommissions,
                 ourFee,
+                totalCommissionsAndFees,
                 netToUs
             });
             
-            // Update the display elements
-            updateElementIfExists('mls-novation-gross-sale', '$' + listPrice.toLocaleString());
-            updateElementIfExists('mls-novation-commissions', '$' + totalCommissions.toLocaleString());
-            updateElementIfExists('mls-novation-our-fee', '$' + ourFee.toLocaleString());
+            // Update the display elements with new structure
+            updateElementIfExists('mls-novation-list-price-display', '$' + listPrice.toLocaleString());
+            updateElementIfExists('mls-novation-sale-fast-price', '$' + saleFastPrice.toLocaleString());
+            updateElementIfExists('mls-novation-under-contract-price', '$' + underContractPrice.toLocaleString());
+            updateElementIfExists('mls-novation-total-commissions-fees', '$' + totalCommissionsAndFees.toLocaleString());
             updateElementIfExists('mls-novation-net-to-us', '$' + netToUs.toLocaleString());
         }
         
