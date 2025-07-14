@@ -5120,6 +5120,9 @@
             const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/[^\d]/g, '')) || 30000;
             const discountToSellFast = parseFloat(document.getElementById('installment-discount')?.value?.replace(/[^\d]/g, '')) || 10000;
             
+            // Check if we're in novation mode
+            const strategyType = document.getElementById('installment-strategy-type')?.value || 'installment';
+            
             // Calculate refundable and non-refundable costs
             const refundableConsideration = parseFloat(document.getElementById('refundable-consideration')?.value?.replace(/[^\d]/g, '')) || 1000;
             const nonRefundableCosts = parseFloat(document.getElementById('non-refundable-costs')?.value || 3500);
@@ -5136,15 +5139,26 @@
             // Use global minimum acceptable profit
             const ourMinimumProfit = window.globalMinAcceptableProfit || 15000;
             
-            // Calculate Maximum Allowable Offer using proper formula
-            // ARV - Repairs - Discount to Sell Fast - Closing Fees - Minimum Profit = MAO
-            const maxAllowableOffer = arv - repairs - discountToSellFast - totalCombinedFees - ourMinimumProfit - nonRefundableCosts;
+            // Calculate Maximum Allowable Offer based on mode
+            let maxAllowableOffer;
+            if (window.globalAcquisitionsPrice) {
+                maxAllowableOffer = window.globalAcquisitionsPrice;
+            } else {
+                // Base calculation: ARV - Repairs - Discount to Sell Fast - Total Combined Fees - Our Minimum Profit = MAO
+                maxAllowableOffer = arv - repairs - discountToSellFast - totalCombinedFees - ourMinimumProfit;
+                
+                // For installment method (not novation), include non-refundable costs
+                if (strategyType === 'installment') {
+                    maxAllowableOffer -= nonRefundableCosts;
+                }
+                // For novation method, we don't subtract the deposit structure costs
+            }
             
             // Calculate Ackerman offers as percentages of Maximum Allowable Offer
             const ackerman1st = Math.round(maxAllowableOffer * 0.65);
             const ackerman2nd = Math.round(maxAllowableOffer * 0.85);
             const ackerman3rd = Math.round(maxAllowableOffer * 0.95);
-            const ackerman4th = Math.round(maxAllowableOffer * 1.00); // 100% of MAO, not ARV
+            const ackerman4th = Math.round(maxAllowableOffer * 1.00); // 100% of MAO
             
             updateElementIfExists('ackerman-1st', ackerman1st);
             updateElementIfExists('ackerman-2nd', ackerman2nd);
@@ -5154,14 +5168,16 @@
             // Calculate final sales price (what we'll sell for)
             const finalSalesPrice = arv - discountToSellFast;
             
-            // Calculate our net profit (non-refundable costs reduce profit since they're not recovered)
-            const grossProfit = finalSalesPrice - maxAllowableOffer - repairs - totalCombinedFees - nonRefundableCosts;
+            // Calculate our net profit based on mode
+            let grossProfit;
+            if (strategyType === 'installment') {
+                // For installment, include non-refundable costs as they reduce profit
+                grossProfit = finalSalesPrice - maxAllowableOffer - repairs - totalCombinedFees - nonRefundableCosts;
+            } else {
+                // For novation, no deposit structure costs
+                grossProfit = finalSalesPrice - maxAllowableOffer - repairs - totalCombinedFees;
+            }
             const netProfit = Math.max(ourMinimumProfit, grossProfit);
-            
-            // Update display elements
-            updateElementIfExists('installment-purchase', maxAllowableOffer);
-            updateElementIfExists('installment-sales', finalSalesPrice);
-            updateElementIfExists('installment-profit', netProfit);
         }
 
 
@@ -6936,26 +6952,58 @@
             // Use global minimum acceptable profit
             const ourMinimumProfit = window.globalMinAcceptableProfit || 15000;
             
-            // Use global acquisitions price as MAO if set
+            // Check if we're in novation mode
+            const strategyType = document.getElementById('installment-strategy-type')?.value || 'installment';
+            
+            // Get refundable consideration but exclude it from MAO calculation in novation mode
+            const refundableConsideration = parseFloat(document.getElementById('refundable-consideration')?.value?.replace(/[^\d]/g, '')) || 1000;
+            const nonRefundableCosts = parseFloat(document.getElementById('non-refundable-costs')?.value || 3500);
+            
+            // Calculate Maximum Allowable Offer
             let maxAllowableOffer;
             if (window.globalAcquisitionsPrice) {
                 maxAllowableOffer = window.globalAcquisitionsPrice;
             } else {
-                // Calculate: ARV - Repairs - Discount to Sell Fast - Total Combined Fees - Our Minimum Profit = MAO
+                // Base calculation: ARV - Repairs - Discount to Sell Fast - Total Combined Fees - Our Minimum Profit = MAO
                 maxAllowableOffer = arv - repairs - discountToSellFast - totalCombinedFees - ourMinimumProfit;
+                
+                // For installment method (not novation), include non-refundable costs
+                if (strategyType === 'installment') {
+                    maxAllowableOffer -= nonRefundableCosts;
+                }
+                // For novation method, we don't subtract the deposit structure costs
             }
+            
+            // Calculate Ackerman offers as percentages of Maximum Allowable Offer
+            const ackerman1st = Math.round(maxAllowableOffer * 0.65);
+            const ackerman2nd = Math.round(maxAllowableOffer * 0.85);
+            const ackerman3rd = Math.round(maxAllowableOffer * 0.95);
+            const ackerman4th = Math.round(maxAllowableOffer * 1.00); // 100% of MAO
+            
+            // Update Ackerman offers in the HTML
+            updateElementIfExists('ackerman-1st', ackerman1st);
+            updateElementIfExists('ackerman-2nd', ackerman2nd);
+            updateElementIfExists('ackerman-3rd', ackerman3rd);
+            updateElementIfExists('ackerman-4th', ackerman4th);
             
             // Calculate final sales price (what we'll sell for)
             const finalSalesPrice = arv - discountToSellFast;
             
             // Calculate our net profit ensuring minimum is met
-            const grossProfit = finalSalesPrice - maxAllowableOffer - repairs - totalCombinedFees;
+            let grossProfit;
+            if (strategyType === 'installment') {
+                // For installment, include non-refundable costs as they reduce profit
+                grossProfit = finalSalesPrice - maxAllowableOffer - repairs - totalCombinedFees - nonRefundableCosts;
+            } else {
+                // For novation, no deposit structure costs
+                grossProfit = finalSalesPrice - maxAllowableOffer - repairs - totalCombinedFees;
+            }
             const netProfit = Math.max(ourMinimumProfit, grossProfit);
             
-            // Update display elements
-            updateElementIfExists('installment-purchase', maxAllowableOffer);
-            updateElementIfExists('installment-sales', finalSalesPrice);
-            updateElementIfExists('installment-profit', netProfit);
+            // Update deposit display elements
+            updateElementIfExists('total-refundable', refundableConsideration);
+            updateElementIfExists('total-non-refundable', nonRefundableCosts);
+            updateElementIfExists('total-equitable-deposit', refundableConsideration + nonRefundableCosts);
             
             // Update comparison if needed
             if (typeof updateComparisonResults === 'function') {
@@ -8223,6 +8271,11 @@
             // Recalculate based on selected strategy
             if (typeof recalculateInstallment === 'function') {
                 recalculateInstallment();
+            }
+            
+            // Also call novation recalculation to ensure all calculations are updated
+            if (typeof recalculateNovationMAO === 'function') {
+                recalculateNovationMAO();
             }
         }
 
