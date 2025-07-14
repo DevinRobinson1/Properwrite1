@@ -2283,7 +2283,7 @@ def analyze_comps():
                 'error': 'Property address is required'
             }), 400
         
-        # Analyze comparables using enhanced service
+        # Analyze comparables using enhanced service with fallback
         result = enhanced_comps_service.search_comparable_sales(
             address=address,
             beds=int(beds),
@@ -2292,6 +2292,23 @@ def analyze_comps():
             lat=lat,
             lng=lng
         )
+        
+        # If enhanced service fails, use original comps service as fallback
+        if result.get('error') or result.get('found_count', 0) < 3:
+            logging.info("Enhanced service failed, trying original comps service as fallback")
+            fallback_result = comps_service.analyze_comparables(
+                subject_address=address,
+                beds=int(beds),
+                baths=float(baths),
+                sqft=int(sqft),
+                lat=lat,
+                lng=lng
+            )
+            
+            # Use fallback result if it has better data
+            if fallback_result.get('comps') and len(fallback_result.get('comps', [])) > 0:
+                result = fallback_result
+                logging.info(f"Fallback service found {len(fallback_result.get('comps', []))} comparables")
         
         return jsonify(result)
         

@@ -102,12 +102,12 @@ class EnhancedCompsService:
         """
         logger.info(f"🔍 Starting comprehensive comps search for {address}")
         
-        # Progressive search strategy
+        # Progressive search strategy - more permissive
         search_strategies = [
-            {'days': 90, 'radius': 0.5, 'bed_variance': 1, 'sqft_variance': 15},
-            {'days': 180, 'radius': 0.75, 'bed_variance': 1, 'sqft_variance': 20},
-            {'days': 365, 'radius': 1.0, 'bed_variance': 2, 'sqft_variance': 25},
-            {'days': 365, 'radius': 1.5, 'bed_variance': 2, 'sqft_variance': 30}
+            {'days': 180, 'radius': 1.0, 'bed_variance': 1, 'sqft_variance': 25},
+            {'days': 365, 'radius': 1.5, 'bed_variance': 2, 'sqft_variance': 30},
+            {'days': 545, 'radius': 2.0, 'bed_variance': 2, 'sqft_variance': 35},
+            {'days': 730, 'radius': 3.0, 'bed_variance': 3, 'sqft_variance': 40}
         ]
         
         all_comps = []
@@ -127,7 +127,16 @@ class EnhancedCompsService:
                 strategy_comps.extend(zillow_results)
                 logger.info(f"✅ Zillow found {len(zillow_results)} comps")
             
-            # 2. RentCast Sales Data (Secondary)
+            # 2. Try broader location search if no results
+            if not strategy_comps and lat and lng:
+                broader_results = self._search_by_coordinates(
+                    lat, lng, beds, baths, sqft, strategy
+                )
+                if broader_results:
+                    strategy_comps.extend(broader_results)
+                    logger.info(f"✅ Coordinate search found {len(broader_results)} comps")
+            
+            # 3. RentCast Sales Data (Secondary)
             rentcast_results = self._search_rentcast_sales(
                 address, beds, baths, sqft, lat, lng, strategy
             )
@@ -183,12 +192,12 @@ class EnhancedCompsService:
         try:
             url = "https://zillow-com1.p.rapidapi.com/propertyExtendedSearch"
             
-            # Calculate search parameters
-            min_beds = max(1, beds - strategy['bed_variance'])
-            max_beds = beds + strategy['bed_variance']
+            # Calculate search parameters - make them more permissive
+            min_beds = max(1, beds - 2)  # More permissive
+            max_beds = beds + 2
             min_baths = max(1, baths - 1)
             max_baths = baths + 2
-            sqft_var = int(sqft * strategy['sqft_variance'] / 100)
+            sqft_var = int(sqft * 30 / 100)  # 30% variance
             min_sqft = max(500, sqft - sqft_var)
             max_sqft = sqft + sqft_var
             
@@ -202,8 +211,7 @@ class EnhancedCompsService:
                 "maxBaths": max_baths,
                 "minSqft": min_sqft,
                 "maxSqft": max_sqft,
-                "daysOnZillow": strategy['days'],
-                "sort": "sold_date_desc"  # Most recent sales first
+                "daysOnZillow": strategy['days']
             }
             
             logger.info(f"🏠 Zillow search: {min_beds}-{max_beds}BR, {min_baths}-{max_baths}BA, {min_sqft}-{max_sqft}sqft, {strategy['days']} days")
@@ -220,7 +228,23 @@ class EnhancedCompsService:
                 return []
             
             data = response.json()
-            properties = data if isinstance(data, list) else data.get('props', [])
+            logger.info(f"📊 Zillow API response: {data}")
+            
+            # Handle different response formats
+            properties = []
+            if isinstance(data, dict):
+                if 'zpid' in data:
+                    # Single property response - this is the subject property, not comps
+                    logger.info("📍 Zillow returned subject property only, trying broader search")
+                    return []
+                elif 'props' in data:
+                    properties = data['props']
+                elif 'results' in data:
+                    properties = data['results']
+            elif isinstance(data, list):
+                properties = data
+            
+            logger.info(f"📊 Found {len(properties)} properties from Zillow")
             
             # Convert to standardized format
             comps = []
@@ -237,13 +261,13 @@ class EnhancedCompsService:
     
     def _search_rentcast_sales(self, address: str, beds: int, baths: float, sqft: int,
                              lat: float, lng: float, strategy: Dict) -> List[ComparableProperty]:
-        """Search RentCast for sold properties (not rentals)"""
+        """Search RentCast for sold properties (using the correct endpoint)"""
         if not self.rentcast_api_key:
             return []
         
         try:
-            # RentCast sales history endpoint
-            url = "https://api.rentcast.io/v1/properties/sales"
+            # RentCast properties endpoint with sales filter
+            url = "https://api.rentcast.io/v1/properties"
             
             # Extract city and state from address
             parts = address.split(',')
@@ -253,10 +277,11 @@ class EnhancedCompsService:
             params = {
                 "city": city,
                 "state": state,
-                "bedrooms": f"{max(1, beds-1)}-{beds+1}",
-                "bathrooms": f"{max(1, int(baths-1))}-{int(baths+2)}",
-                "squareFootage": f"{max(500, sqft-500)}-{sqft+500}",
-                "saleType": "recent",
+                "bedrooms": f"{max(1, beds-1)},{beds+1}",
+                "bathrooms": f"{max(1, int(baths-1))},{int(baths+2)}",
+                "squareFootage": f"{max(500, sqft-500)},{sqft+500}",
+                "propertyType": "Single Family",
+                "status": "sold",
                 "limit": 20
             }
             
@@ -270,7 +295,7 @@ class EnhancedCompsService:
                 return []
             
             if response.status_code != 200:
-                logger.error(f"❌ RentCast API error: {response.status_code}")
+                logger.warning(f"⚠️ RentCast API unavailable: {response.status_code}")
                 return []
             
             data = response.json()
@@ -286,8 +311,88 @@ class EnhancedCompsService:
             return comps
             
         except Exception as e:
-            logger.error(f"❌ RentCast search error: {str(e)}")
+            logger.warning(f"⚠️ RentCast search unavailable: {str(e)}")
             return []
+    
+    def _search_by_coordinates(self, lat: float, lng: float, beds: int, baths: float, sqft: int, strategy: Dict) -> List[ComparableProperty]:
+        """Search by coordinates with different location strings"""
+        if not self.rapidapi_key:
+            return []
+        
+        # Try different location formats
+        location_variations = [
+            f"{lat},{lng}",
+            f"Kannapolis, NC",
+            f"Charlotte, NC",  # Nearby major city
+            f"Concord, NC",   # Nearby city
+            f"NC"             # State-wide search
+        ]
+        
+        for location in location_variations:
+            try:
+                url = "https://zillow-com1.p.rapidapi.com/propertyExtendedSearch"
+                
+                # Very permissive search parameters
+                min_beds = max(1, beds - 2)
+                max_beds = beds + 3
+                min_baths = max(1, baths - 1)
+                max_baths = baths + 2
+                sqft_var = int(sqft * 40 / 100)  # 40% variance
+                min_sqft = max(500, sqft - sqft_var)
+                max_sqft = sqft + sqft_var
+                
+                params = {
+                    "location": location,
+                    "status_type": "RecentlySold",
+                    "home_type": "Houses",
+                    "minBeds": min_beds,
+                    "maxBeds": max_beds,
+                    "minBaths": min_baths,
+                    "maxBaths": max_baths,
+                    "minSqft": min_sqft,
+                    "maxSqft": max_sqft,
+                    "daysOnZillow": strategy['days'],
+                    "limit": 20
+                }
+                
+                logger.info(f"🌐 Coordinate search: {location}")
+                
+                response = requests.get(url, headers=self.apis['zillow']['headers'], params=params)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    # Handle different response formats
+                    properties = []
+                    if isinstance(data, dict):
+                        if 'props' in data:
+                            properties = data['props']
+                        elif 'results' in data:
+                            properties = data['results']
+                    elif isinstance(data, list):
+                        properties = data
+                    
+                    if properties:
+                        logger.info(f"📍 Found {len(properties)} properties for {location}")
+                        
+                        # Convert to standardized format
+                        comps = []
+                        for prop in properties:
+                            comp = self._convert_zillow_to_standard(prop, lat, lng)
+                            if comp and self._validate_comp_quality(comp):
+                                comps.append(comp)
+                        
+                        if comps:
+                            logger.info(f"✅ Coordinate search successful with {len(comps)} valid comps")
+                            return comps
+                        
+                time.sleep(0.5)  # Small delay between requests
+                
+            except Exception as e:
+                logger.warning(f"⚠️ Coordinate search error for {location}: {str(e)}")
+                continue
+        
+        return []
     
     def _convert_zillow_to_standard(self, prop: Dict, subject_lat: float, subject_lng: float) -> Optional[ComparableProperty]:
         """Convert Zillow data to standardized format"""
@@ -303,14 +408,17 @@ class EnhancedCompsService:
             if not price or price <= 0:
                 return None
             
-            # Property details
-            beds = prop.get('bedrooms', 0) or prop.get('beds', 0)
-            baths = prop.get('bathrooms', 0) or prop.get('baths', 0)
-            sqft = prop.get('livingArea', 0) or prop.get('sqft', 0)
+            # Property details with safe conversion
+            beds = prop.get('bedrooms', 0) or prop.get('beds', 0) or 0
+            baths = prop.get('bathrooms', 0) or prop.get('baths', 0) or 0
+            sqft = prop.get('livingArea', 0) or prop.get('sqft', 0) or 0
+            lot_size = prop.get('lotSize', 0) or 0
+            year_built = prop.get('yearBuilt', 0) or 0
+            days_on_market = prop.get('daysOnMarket', 0) or 0
             
             # Location
-            lat = prop.get('latitude', 0)
-            lng = prop.get('longitude', 0)
+            lat = prop.get('latitude', 0) or 0
+            lng = prop.get('longitude', 0) or 0
             
             # Calculate distance if we have coordinates
             distance = None
@@ -318,7 +426,7 @@ class EnhancedCompsService:
                 distance = self._calculate_distance(subject_lat, subject_lng, lat, lng)
             
             # Sale date
-            sale_date = prop.get('dateSold', '') or prop.get('listingDateTime', '')
+            sale_date = prop.get('dateSold', '') or prop.get('listingDateTime', '') or ''
             
             return ComparableProperty(
                 address=f"{address}, {city}, {state} {zip_code}".strip(),
@@ -327,16 +435,16 @@ class EnhancedCompsService:
                 state=state,
                 zip_code=zip_code,
                 price=float(price),
-                bedrooms=int(beds),
-                bathrooms=float(baths),
-                square_footage=int(sqft) if sqft else 0,
-                lot_size=prop.get('lotSize', 0),
-                year_built=prop.get('yearBuilt', 0),
+                bedrooms=int(beds) if beds and beds > 0 else 0,
+                bathrooms=float(baths) if baths and baths > 0 else 0,
+                square_footage=int(sqft) if sqft and sqft > 0 else 0,
+                lot_size=float(lot_size) if lot_size and lot_size > 0 else None,
+                year_built=int(year_built) if year_built and year_built > 0 else None,
                 sale_date=sale_date,
-                days_on_market=prop.get('daysOnMarket', 0),
+                days_on_market=int(days_on_market) if days_on_market and days_on_market >= 0 else 0,
                 property_type=prop.get('propertyType', 'Single Family'),
-                latitude=lat,
-                longitude=lng,
+                latitude=float(lat) if lat and lat != 0 else None,
+                longitude=float(lng) if lng and lng != 0 else None,
                 distance=distance,
                 source='Zillow',
                 confidence_score=self._calculate_confidence_score(prop, 'zillow'),
@@ -423,8 +531,14 @@ class EnhancedCompsService:
         if not comp:
             return False
         
-        # Basic data validation
-        if comp.price <= 0 or comp.bedrooms <= 0 or comp.bathrooms <= 0:
+        # Basic data validation with None checks
+        if comp.price is None or comp.price <= 0:
+            return False
+        
+        if comp.bedrooms is None or comp.bedrooms <= 0:
+            return False
+        
+        if comp.bathrooms is None or comp.bathrooms <= 0:
             return False
         
         # Distance validation
