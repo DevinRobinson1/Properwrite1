@@ -2830,188 +2830,320 @@
 
                     <!-- New Construction Tab Content -->
                     <div id="new-construction-content" class="construction-tab-content hidden">
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
-                            <!-- Left Column: Project Setup -->
-                            <div class="lg:col-span-1">
-                                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                                        <i class="fas fa-file-alt mr-2 text-orange-500"></i>Project Setup
-                                    </h3>
-                                    <div class="space-y-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
-                                            <input type="text" id="nc-project-name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Enter project name">
+                        <div class="p-6">
+                            <!-- Key Legend -->
+                            <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
+                                <h3 class="text-lg font-semibold text-blue-800 mb-3">Key</h3>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                    <div class="flex items-center">
+                                        <div class="w-6 h-6 bg-white border-2 border-gray-300 rounded mr-2"></div>
+                                        <span>Editable fields</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-6 h-6 bg-gray-200 border-2 border-gray-300 rounded mr-2"></div>
+                                        <span>Do not change</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-6 h-6 bg-green-200 border-2 border-green-300 rounded mr-2"></div>
+                                        <span>Profit cells</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="w-6 h-6 bg-red-100 border-2 border-red-300 rounded mr-2"></div>
+                                        <span>Warnings</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Main Calculator Grid -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <!-- Left Column: Construction Numbers -->
+                                <div class="space-y-6">
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Construction Numbers</h3>
+                                        <div class="space-y-4">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Sell Home Price</label>
+                                                <input type="number" id="nc-sell-price" value="1500000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Project Duration (Days)</label>
+                                                <input type="number" id="nc-project-duration" value="365" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Gross Income</label>
+                                                <input type="number" id="nc-gross-income" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Target ROI @ 20%</label>
+                                                <input type="number" id="nc-target-roi" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Land (Pad Ready Cost) Purchase</label>
+                                                <input type="number" id="nc-land-pad-ready" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Number of Units</label>
+                                                <input type="number" id="nc-units" value="5" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Land Purchase Price</label>
+                                                <input type="number" id="nc-land-price" value="1350000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Pad price before pad ready</label>
+                                                <input type="number" id="nc-pad-price" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Build Cost Available after Land Acq</label>
+                                                <input type="number" id="nc-build-cost-available" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
                                         </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">Property Address</label>
-                                            <input type="text" id="nc-property-address" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Enter property address">
+                                    </div>
+
+                                    <!-- Development Costs -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Development Costs</h3>
+                                        <div class="space-y-4">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Sewer & Water Taps</label>
+                                                <input type="number" id="nc-sewer-water" value="15000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Surveys</label>
+                                                <input type="number" id="nc-surveys" value="7000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Soil test and environmentals</label>
+                                                <input type="number" id="nc-soil-test" value="4000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Clearing Lot</label>
+                                                <input type="number" id="nc-clearing" value="10000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Civil Plans and Engineering</label>
+                                                <input type="number" id="nc-civil-plans" value="25000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Entitlement Fees</label>
+                                                <input type="number" id="nc-entitlement" value="3000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Architectural Plans and Structural Engineering</label>
+                                                <input type="number" id="nc-architectural" value="25000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Grading and infrastructure</label>
+                                                <input type="number" id="nc-grading" value="1500" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Development Cost</label>
+                                                <input type="number" id="nc-development-cost" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Pad ready cost</label>
+                                                <input type="number" id="nc-pad-ready-cost" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
                                         </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">Square Footage</label>
-                                            <input type="number" id="nc-property-sqft" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Enter square footage">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">Land Cost ($)</label>
-                                            <input type="number" id="nc-land-cost" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" placeholder="Enter land cost" onchange="calculateNewConstructionTotal()">
+                                    </div>
+
+                                    <!-- Vertical Construction -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Vertical Construction</h3>
+                                        <div class="space-y-4">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Build Cost</label>
+                                                <input type="number" id="nc-build-cost" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Total Sq ft</label>
+                                                <input type="number" id="nc-total-sqft" value="3000" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Cost per sq ft</label>
+                                                <input type="number" id="nc-cost-per-sqft" value="1500" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Sq ft per unit</label>
+                                                <input type="number" id="nc-sqft-per-unit" value="1900" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Construction Project Time (Days)</label>
+                                                <input type="number" id="nc-construction-time" value="150" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Estimated Profit (w/o holding cost/CC/Realtor fees)</label>
+                                                <input type="number" id="nc-estimated-profit-basic" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Development Fee</label>
+                                                <input type="number" id="nc-development-fee" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Multipliers -->
-                                <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                                        <i class="fas fa-calculator mr-2 text-orange-500"></i>Cost Multipliers
-                                    </h3>
-                                    <div class="space-y-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                Overhead (%)
-                                                <button class="ml-1 text-gray-400 hover:text-gray-600" onclick="showTooltip('overhead')">
-                                                    <i class="fas fa-question-circle"></i>
-                                                </button>
-                                            </label>
-                                            <input type="number" id="nc-overhead-percent" value="15" min="0" max="50" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" onchange="calculateNewConstructionTotal()">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                Contingency (%)
-                                                <button class="ml-1 text-gray-400 hover:text-gray-600" onclick="showTooltip('contingency')">
-                                                    <i class="fas fa-question-circle"></i>
-                                                </button>
-                                            </label>
-                                            <input type="number" id="nc-contingency-percent" value="10" min="0" max="30" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" onchange="calculateNewConstructionTotal()">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                GC Fee (%)
-                                                <button class="ml-1 text-gray-400 hover:text-gray-600" onclick="showTooltip('gc-fee')">
-                                                    <i class="fas fa-question-circle"></i>
-                                                </button>
-                                            </label>
-                                            <input type="number" id="nc-gc-fee-percent" value="10" min="0" max="25" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" onchange="calculateNewConstructionTotal()">
+                                <!-- Right Column: Loan Numbers & Final Numbers -->
+                                <div class="space-y-6">
+                                    <!-- Loan Numbers -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Loan Numbers</h3>
+                                        <div class="space-y-4">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">AB Closing Cost (%)</label>
+                                                <input type="number" id="nc-ab-closing-percent" value="6" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">AB Closing Cost ($)</label>
+                                                <input type="number" id="nc-ab-closing-cost" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Other AB Purchase Cost</label>
+                                                <input type="number" id="nc-other-ab-cost" value="3000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">BC Selling Closing Cost (%)</label>
+                                                <input type="number" id="nc-bc-closing-percent" value="1" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">BC Selling Closing Cost ($)</label>
+                                                <input type="number" id="nc-bc-closing-cost" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Total CC (Excluding Realtor Fees)</label>
+                                                <input type="number" id="nc-total-cc" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Total Loan Amount</label>
+                                                <input type="number" id="nc-total-loan" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Rate (%)</label>
+                                                <input type="number" id="nc-rate" value="12" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Estimated Hold Time (Days)</label>
+                                                <input type="number" id="nc-hold-time" value="150" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Points (%)</label>
+                                                <input type="number" id="nc-points" value="2" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Total Hold Cost</label>
+                                                <input type="number" id="nc-total-hold-cost" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- Carry Cost Calculator -->
-                                <div class="bg-white rounded-lg shadow-lg p-6">
-                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                                        <i class="fas fa-credit-card mr-2 text-orange-500"></i>Carry Cost Calculator
-                                    </h3>
-                                    <div class="space-y-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                Loan % (LTV)
-                                                <button class="ml-1 text-gray-400 hover:text-gray-600" onclick="showTooltip('loan-percent')">
-                                                    <i class="fas fa-question-circle"></i>
-                                                </button>
-                                            </label>
-                                            <input type="number" id="nc-loan-percent" value="80" min="0" max="100" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" onchange="calculateNewConstructionTotal()">
+                                    <!-- Alternative Holding Cost -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Alternative Holding Cost</h3>
+                                        <div class="space-y-4">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Insurance</label>
+                                                <input type="number" id="nc-insurance" value="3000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Taxes</label>
+                                                <input type="number" id="nc-taxes" value="1000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Utilities</label>
+                                                <input type="number" id="nc-utilities" value="1000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Mowing/Maintenance</label>
+                                                <input type="number" id="nc-maintenance" value="0" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Other Expenses (HOA)</label>
+                                                <input type="number" id="nc-other-expenses" value="0" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Total Alternative Holding Cost</label>
+                                                <input type="number" id="nc-total-alt-holding" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Total Cost for Holding No. of Days</label>
+                                                <input type="number" id="nc-total-holding-days" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
                                         </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                Interest Rate (%)
-                                                <button class="ml-1 text-gray-400 hover:text-gray-600" onclick="showTooltip('interest-rate')">
-                                                    <i class="fas fa-question-circle"></i>
-                                                </button>
-                                            </label>
-                                            <input type="number" id="nc-interest-rate" value="8" min="0" max="20" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" onchange="calculateNewConstructionTotal()">
+                                    </div>
+
+                                    <!-- Realtor Fees -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Realtor Fees</h3>
+                                        <div class="space-y-4">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Realtor Fees (%)</label>
+                                                <input type="number" id="nc-realtor-percent" value="4.5" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Realtor Amount</label>
+                                                <input type="number" id="nc-realtor-amount" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Total Realtor Fees</label>
+                                                <input type="number" id="nc-total-realtor-fees" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
                                         </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                Construction Months
-                                                <button class="ml-1 text-gray-400 hover:text-gray-600" onclick="showTooltip('construction-months')">
-                                                    <i class="fas fa-question-circle"></i>
-                                                </button>
-                                            </label>
-                                            <input type="number" id="nc-construction-months" value="12" min="1" max="36" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500" onchange="calculateNewConstructionTotal()">
+                                    </div>
+
+                                    <!-- Final Numbers -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Final Numbers</h3>
+                                        <div class="space-y-4">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Sell Price</label>
+                                                <input type="number" id="nc-final-sell-price" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Purchase</label>
+                                                <input type="number" id="nc-final-purchase" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Development</label>
+                                                <input type="number" id="nc-final-development" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Vertical Construction</label>
+                                                <input type="number" id="nc-final-vertical" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Holding Cost</label>
+                                                <input type="number" id="nc-final-holding" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Alternative Holding Cost</label>
+                                                <input type="number" id="nc-final-alt-holding" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Closing Cost</label>
+                                                <input type="number" id="nc-final-closing" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Realtor Fees</label>
+                                                <input type="number" id="nc-final-realtor" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Total Expenses</label>
+                                                <input type="number" id="nc-total-expenses" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Profit</label>
+                                                <input type="number" id="nc-final-profit" readonly class="px-3 py-2 border border-gray-300 rounded bg-green-200 cursor-not-allowed">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Middle Column: Scope Builder -->
-                            <div class="lg:col-span-1">
-                                <div class="bg-white rounded-lg shadow-lg p-6">
-                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                                        <i class="fas fa-list mr-2 text-orange-500"></i>Scope Builder
-                                    </h3>
-                                    
-                                    <!-- Search and Add Items -->
-                                    <div class="mb-4">
-                                        <div class="relative">
-                                            <input type="text" id="nc-item-search" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 pl-10" placeholder="Search by trade or item..." onkeyup="searchConstructionItems('new_construction')">
-                                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                                        </div>
-                                        <div id="nc-search-results" class="mt-2 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto hidden"></div>
-                                    </div>
-
-                                    <!-- Selected Items -->
-                                    <div id="nc-selected-items" class="space-y-2 max-h-96 overflow-y-auto">
-                                        <!-- Items will be populated here -->
-                                    </div>
-
-                                    <!-- Add Custom Item -->
-                                    <button onclick="addCustomItem('new_construction')" class="w-full mt-4 bg-orange-100 hover:bg-orange-200 text-orange-700 font-medium py-2 px-4 rounded-lg border border-orange-300 transition-colors">
-                                        <i class="fas fa-plus mr-2"></i>Add Custom Item
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Right Column: Summary -->
-                            <div class="lg:col-span-1">
-                                <div class="bg-white rounded-lg shadow-lg p-6 sticky top-6">
-                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                                        <i class="fas fa-chart-pie mr-2 text-orange-500"></i>Cost Summary
-                                    </h3>
-                                    
-                                    <div class="space-y-3">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-600">Hard Costs:</span>
-                                            <span class="font-semibold" id="nc-hard-costs">$0</span>
-                                        </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-600">Overhead:</span>
-                                            <span class="font-semibold" id="nc-overhead-cost">$0</span>
-                                        </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-600">Contingency:</span>
-                                            <span class="font-semibold" id="nc-contingency-cost">$0</span>
-                                        </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-600">GC Fee:</span>
-                                            <span class="font-semibold" id="nc-gc-fee-cost">$0</span>
-                                        </div>
-                                        <hr class="border-gray-300">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-600">Construction Cost:</span>
-                                            <span class="font-semibold" id="nc-construction-cost">$0</span>
-                                        </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-600">Land Cost:</span>
-                                            <span class="font-semibold" id="nc-land-cost-display">$0</span>
-                                        </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-gray-600">Carry Cost:</span>
-                                            <span class="font-semibold" id="nc-carry-cost-display">$0</span>
-                                        </div>
-                                        <hr class="border-gray-300">
-                                        <div class="flex justify-between items-center text-lg font-bold">
-                                            <span>Total Project Cost:</span>
-                                            <span class="text-orange-600" id="nc-total-cost">$0</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Action Buttons -->
-                                    <div class="mt-6 space-y-3">
-                                        <button onclick="saveNewConstructionProject()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 rounded-lg transition-colors">
-                                            <i class="fas fa-save mr-2"></i>Save Project
-                                        </button>
-                                        <button onclick="exportNewConstructionProForma()" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg transition-colors">
-                                            <i class="fas fa-download mr-2"></i>Download Pro-Forma (.xlsx)
-                                        </button>
-                                    </div>
-                                </div>
+                            <!-- Export Button -->
+                            <div class="mt-8 text-center">
+                                <button onclick="exportNewConstructionBreakdown()" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-8 rounded-lg">
+                                    <i class="fas fa-download mr-2"></i>Export Breakdown
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -10145,6 +10277,166 @@
             document.getElementById('nc-land-cost-display').textContent = `$${landCost.toLocaleString()}`;
             document.getElementById('nc-carry-cost-display').textContent = `$${carryCost.toLocaleString()}`;
             document.getElementById('nc-total-cost').textContent = `$${finalTotalCost.toLocaleString()}`;
+        }
+
+        // Comprehensive New Construction Calculator based on Excel template
+        function calculateNewConstruction() {
+            try {
+                // Get input values
+                const sellPrice = parseFloat(document.getElementById('nc-sell-price').value) || 0;
+                const projectDuration = parseFloat(document.getElementById('nc-project-duration').value) || 0;
+                const units = parseFloat(document.getElementById('nc-units').value) || 0;
+                const landPrice = parseFloat(document.getElementById('nc-land-price').value) || 0;
+                const costPerSqft = parseFloat(document.getElementById('nc-cost-per-sqft').value) || 0;
+                const sqftPerUnit = parseFloat(document.getElementById('nc-sqft-per-unit').value) || 0;
+                const constructionTime = parseFloat(document.getElementById('nc-construction-time').value) || 0;
+                const rate = parseFloat(document.getElementById('nc-rate').value) || 0;
+                const realtorPercent = parseFloat(document.getElementById('nc-realtor-percent').value) || 0;
+                
+                // Development costs
+                const sewerWater = parseFloat(document.getElementById('nc-sewer-water').value) || 0;
+                const surveys = parseFloat(document.getElementById('nc-surveys').value) || 0;
+                const soilTest = parseFloat(document.getElementById('nc-soil-test').value) || 0;
+                const clearing = parseFloat(document.getElementById('nc-clearing').value) || 0;
+                const civilPlans = parseFloat(document.getElementById('nc-civil-plans').value) || 0;
+                const entitlement = parseFloat(document.getElementById('nc-entitlement').value) || 0;
+                const architectural = parseFloat(document.getElementById('nc-architectural').value) || 0;
+                const grading = parseFloat(document.getElementById('nc-grading').value) || 0;
+                const otherAbCost = parseFloat(document.getElementById('nc-other-ab-cost').value) || 0;
+                
+                // Alternative holding costs
+                const insurance = parseFloat(document.getElementById('nc-insurance').value) || 0;
+                const taxes = parseFloat(document.getElementById('nc-taxes').value) || 0;
+                const utilities = parseFloat(document.getElementById('nc-utilities').value) || 0;
+                const maintenance = parseFloat(document.getElementById('nc-maintenance').value) || 0;
+                const otherExpenses = parseFloat(document.getElementById('nc-other-expenses').value) || 0;
+                
+                // Basic calculations
+                const grossIncome = sellPrice * units;
+                const targetRoi = grossIncome * 0.20; // 20% ROI
+                const landPadReady = landPrice + (sewerWater + surveys + soilTest + clearing + civilPlans + entitlement + architectural + grading);
+                const padPrice = landPrice / units;
+                const buildCostAvailable = targetRoi - landPadReady;
+                
+                // Development costs
+                const developmentCost = sewerWater + surveys + soilTest + clearing + civilPlans + entitlement + architectural + grading;
+                const padReadyCost = landPrice + developmentCost;
+                
+                // Vertical construction
+                const totalSqft = units * sqftPerUnit;
+                const buildCost = totalSqft * costPerSqft;
+                const estimatedProfitBasic = grossIncome - landPadReady - buildCost;
+                const developmentFee = developmentCost * 0.10; // 10% development fee
+                
+                // Loan calculations
+                const abClosingPercent = 6; // Fixed at 6%
+                const abClosingCost = landPrice * (abClosingPercent / 100);
+                const bcClosingPercent = 1; // Fixed at 1%
+                const bcClosingCost = sellPrice * (bcClosingPercent / 100);
+                const totalCC = abClosingCost + bcClosingCost + otherAbCost;
+                const totalLoan = landPrice + developmentCost + buildCost + totalCC;
+                const holdTime = constructionTime; // Same as construction time
+                const points = 2; // Fixed at 2%
+                const totalHoldCost = (totalLoan * (rate / 100) * (holdTime / 365)) + (totalLoan * (points / 100));
+                
+                // Alternative holding costs
+                const totalAltHolding = insurance + taxes + utilities + maintenance + otherExpenses;
+                const totalHoldingDays = totalAltHolding * (holdTime / 365);
+                
+                // Realtor fees
+                const realtorAmount = sellPrice * (realtorPercent / 100);
+                const totalRealtorFees = realtorAmount * units;
+                
+                // Final calculations
+                const finalSellPrice = grossIncome;
+                const finalPurchase = landPrice;
+                const finalDevelopment = developmentCost;
+                const finalVertical = buildCost;
+                const finalHolding = totalHoldCost;
+                const finalAltHolding = totalHoldingDays;
+                const finalClosing = totalCC;
+                const finalRealtor = totalRealtorFees;
+                const totalExpenses = finalPurchase + finalDevelopment + finalVertical + finalHolding + finalAltHolding + finalClosing + finalRealtor;
+                const finalProfit = finalSellPrice - totalExpenses;
+                
+                // Update all fields
+                document.getElementById('nc-gross-income').value = grossIncome.toFixed(0);
+                document.getElementById('nc-target-roi').value = targetRoi.toFixed(0);
+                document.getElementById('nc-land-pad-ready').value = landPadReady.toFixed(0);
+                document.getElementById('nc-pad-price').value = padPrice.toFixed(0);
+                document.getElementById('nc-build-cost-available').value = buildCostAvailable.toFixed(0);
+                
+                document.getElementById('nc-development-cost').value = developmentCost.toFixed(0);
+                document.getElementById('nc-pad-ready-cost').value = padReadyCost.toFixed(0);
+                
+                document.getElementById('nc-build-cost').value = buildCost.toFixed(0);
+                document.getElementById('nc-total-sqft').value = totalSqft.toFixed(0);
+                document.getElementById('nc-estimated-profit-basic').value = estimatedProfitBasic.toFixed(0);
+                document.getElementById('nc-development-fee').value = developmentFee.toFixed(0);
+                
+                document.getElementById('nc-ab-closing-percent').value = abClosingPercent.toFixed(0);
+                document.getElementById('nc-ab-closing-cost').value = abClosingCost.toFixed(0);
+                document.getElementById('nc-bc-closing-percent').value = bcClosingPercent.toFixed(0);
+                document.getElementById('nc-bc-closing-cost').value = bcClosingCost.toFixed(0);
+                document.getElementById('nc-total-cc').value = totalCC.toFixed(0);
+                document.getElementById('nc-total-loan').value = totalLoan.toFixed(0);
+                document.getElementById('nc-hold-time').value = holdTime.toFixed(0);
+                document.getElementById('nc-points').value = points.toFixed(0);
+                document.getElementById('nc-total-hold-cost').value = totalHoldCost.toFixed(0);
+                
+                document.getElementById('nc-total-alt-holding').value = totalAltHolding.toFixed(0);
+                document.getElementById('nc-total-holding-days').value = totalHoldingDays.toFixed(0);
+                
+                document.getElementById('nc-realtor-amount').value = realtorAmount.toFixed(0);
+                document.getElementById('nc-total-realtor-fees').value = totalRealtorFees.toFixed(0);
+                
+                document.getElementById('nc-final-sell-price').value = finalSellPrice.toFixed(0);
+                document.getElementById('nc-final-purchase').value = finalPurchase.toFixed(0);
+                document.getElementById('nc-final-development').value = finalDevelopment.toFixed(0);
+                document.getElementById('nc-final-vertical').value = finalVertical.toFixed(0);
+                document.getElementById('nc-final-holding').value = finalHolding.toFixed(0);
+                document.getElementById('nc-final-alt-holding').value = finalAltHolding.toFixed(0);
+                document.getElementById('nc-final-closing').value = finalClosing.toFixed(0);
+                document.getElementById('nc-final-realtor').value = finalRealtor.toFixed(0);
+                document.getElementById('nc-total-expenses').value = totalExpenses.toFixed(0);
+                document.getElementById('nc-final-profit').value = finalProfit.toFixed(0);
+                
+                // Add visual feedback for profit
+                const profitElement = document.getElementById('nc-final-profit');
+                if (finalProfit > 0) {
+                    profitElement.classList.remove('bg-red-100');
+                    profitElement.classList.add('bg-green-200');
+                } else {
+                    profitElement.classList.remove('bg-green-200');
+                    profitElement.classList.add('bg-red-100');
+                }
+                
+            } catch (error) {
+                console.error('Error calculating new construction:', error);
+                showToast('Error calculating values. Please check your inputs.', 'error');
+            }
+        }
+
+        // Export function for new construction breakdown
+        function exportNewConstructionBreakdown() {
+            const data = {
+                sellPrice: parseFloat(document.getElementById('nc-sell-price').value) || 0,
+                projectDuration: parseFloat(document.getElementById('nc-project-duration').value) || 0,
+                units: parseFloat(document.getElementById('nc-units').value) || 0,
+                landPrice: parseFloat(document.getElementById('nc-land-price').value) || 0,
+                costPerSqft: parseFloat(document.getElementById('nc-cost-per-sqft').value) || 0,
+                sqftPerUnit: parseFloat(document.getElementById('nc-sqft-per-unit').value) || 0,
+                constructionTime: parseFloat(document.getElementById('nc-construction-time').value) || 0,
+                rate: parseFloat(document.getElementById('nc-rate').value) || 0,
+                realtorPercent: parseFloat(document.getElementById('nc-realtor-percent').value) || 0,
+                finalProfit: parseFloat(document.getElementById('nc-final-profit').value) || 0,
+                totalExpenses: parseFloat(document.getElementById('nc-total-expenses').value) || 0,
+                grossIncome: parseFloat(document.getElementById('nc-gross-income').value) || 0
+            };
+            
+            // For now, show a toast. In the future, this could generate an Excel file
+            showToast('Export functionality will be implemented soon!', 'info');
+            console.log('New Construction Data:', data);
         }
         
         // Save Fix & Flip project

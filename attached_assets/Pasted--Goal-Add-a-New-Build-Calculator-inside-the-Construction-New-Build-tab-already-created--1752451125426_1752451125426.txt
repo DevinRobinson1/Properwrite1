@@ -1,0 +1,63 @@
+📌 Goal  
+Add a **“New Build Calculator”** inside the Construction ➔ New Build tab (already created).  
+The calculator must reproduce every input, read-only cell, formula, and color-cue from the “Template – New Construction Breakdown” workbook (Sheet 1) exactly, but as a responsive React / Next-JS page that fits our existing UI theme.
+
+─────────────────────────────────────  
+🔸 Layout & UX
+1. **Two-column desktop grid**, single-column on mobile.  
+2. Keep identical section order and section headings from the sheet:  
+   - *Construction Numbers*, *Loan Numbers*, *Alternative Holding Cost*, *Realtor Fees*, *Final Numbers*.  
+3. **Color cues**  
+   - White inputs = editable fields.  
+   - Grey cells = read-only / formula outputs.  
+   - Green = profit cells.  
+   - Light-red = read-only warnings (“do not touch”).  
+4. Stick to our existing dark/light theme switcher.  
+
+─────────────────────────────────────  
+🔸 Exact Inputs (editable fields)  
+Replicate every white-cell field shown on the template (page 1). Key ones include:
+
+| Group | Field label | Default value |
+|-------|-------------|---------------|
+| Construction Numbers | Sell Home Price | $1,500,000 |
+| Construction Numbers | Project Duration (Days) | 365 |
+| Construction Numbers | Target ROI @ 20% | formula (20 % of Sell Price) |
+| Construction Numbers | Number of Units | 5 |
+| … | … | … |
+
+*(Continue the table with all white-cell fields visible on the sheet.)*
+
+─────────────────────────────────────  
+🔸 Formulas & Read-only outputs  
+• Recreate every grey cell formula 1-to-1.  
+• Use React Hook Form + Zod for validation and compute outputs in a dedicated util file.  
+• Follow the sheet’s exact math, including references such as:
+
+- **Pad Price Before Pad Ready** = 18 % of Land Purchase Price  
+- **Total Loan Amount** = Land Purchase + Development + Vertical Construction – Equity  
+- **Annual Hold-Cost** = (Rate × Loan Amount) + Insurance + Taxes + Utilities …  
+- See all grey-cell expressions on *page 1* of the PDF.:contentReference[oaicite:2]{index=2}  
+
+─────────────────────────────────────  
+🔸 Behavior
+1. **Auto-recalculate** on every field blur.  
+2. Persist last calculator state to `localStorage` per user.  
+3. **“Export to Excel / PDF”** button that downloads the filled-out breakdown.  
+4. **Credit usage**: subtract **1 credit** each time the user exports. Tie into the existing credit middleware; no changes to credit logic elsewhere.  
+
+─────────────────────────────────────  
+🔸 Tech stack & folder conventions  
+* `components/construction/NewBuildCalculator.tsx` – main component  
+* `utils/newBuildMath.ts` – all formulas, pure functions, unit-tested (Vitest)  
+* Use tailwind @apply to match spacing / fonts already in the app.  
+* No hard-coded demo values; pull defaults from a `constants/newBuildDefaults.ts`.
+
+─────────────────────────────────────  
+✅ Acceptance criteria  
+- All numbers in the web UI match the Excel sheet when the same inputs are entered (± 0.01).  
+- Mobile < 640 px collapses to single column without horizontal scroll.  
+- Exported PDF mirrors the on-screen layout.  
+- No regressions to existing Acquisitions / Dispositions / Comps pages.
+
+Run full Jest/Vitest + Cypress regression suite before merging.
