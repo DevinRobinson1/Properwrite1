@@ -48,11 +48,8 @@ if os.path.exists('.env'):
                 key, value = line.strip().split('=', 1)
                 os.environ[key] = value
 
-# Configure logging - temporarily enable DEBUG for enhanced comps service
-logging.basicConfig(level=logging.DEBUG, format='%(name)s:%(levelname)s:%(message)s')
-# Set specific loggers to INFO to reduce noise
-logging.getLogger('urllib3').setLevel(logging.WARNING)
-logging.getLogger('werkzeug').setLevel(logging.WARNING)
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 

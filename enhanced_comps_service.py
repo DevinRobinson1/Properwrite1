@@ -165,24 +165,36 @@ class EnhancedCompsService:
             end_date = datetime.now()
             start_date = end_date - timedelta(days=time_window)
             
-            # Clean address for search
+            # Clean address for search with zip code priority
             search_location = self._clean_address_for_search(address)
             
-            # Try multiple search strategies
-            search_strategies = [
-                {
-                    "location": search_location,
+            # Try multiple search strategies with zip code priority
+            search_strategies = []
+            
+            # Strategy 1: Try zip code first if available
+            if search_params.zip_code:
+                search_strategies.append({
+                    "location": search_params.zip_code,
                     "status_type": "RecentlySold",
                     "home_type": "Houses",
                     "sort": "Newest"
-                },
-                {
-                    "location": self._extract_city_state(address),
-                    "status_type": "RecentlySold", 
-                    "home_type": "Houses",
-                    "sort": "Newest"
-                }
-            ]
+                })
+            
+            # Strategy 2: Try full address
+            search_strategies.append({
+                "location": search_location,
+                "status_type": "RecentlySold",
+                "home_type": "Houses",
+                "sort": "Newest"
+            })
+            
+            # Strategy 3: Try city/state as fallback
+            search_strategies.append({
+                "location": self._extract_city_state(address),
+                "status_type": "RecentlySold", 
+                "home_type": "Houses",
+                "sort": "Newest"
+            })
             
             all_properties = []
             
@@ -247,6 +259,7 @@ class EnhancedCompsService:
     def _filter_and_score_properties(self, properties: List[Dict], search_params: SearchParams) -> List[Dict]:
         """Filter properties based on underwriting criteria and score for relevance"""
         filtered_properties = []
+        same_zip_properties = []
         
         logger.info(f"🔍 Processing {len(properties)} properties for filtering")
         
@@ -263,8 +276,14 @@ class EnhancedCompsService:
                         relevance_score = self._calculate_relevance_score(processed_prop, search_params)
                         processed_prop['relevance_score'] = relevance_score
                         
-                        filtered_properties.append(processed_prop)
-                        logger.info(f"✅ Property {i+1} passed criteria: {processed_prop.get('address', 'Unknown')}")
+                        # Check if property is in same zip code
+                        prop_zip = self._extract_zip_code(processed_prop.get('address', ''))
+                        if prop_zip and search_params.zip_code and prop_zip == search_params.zip_code:
+                            same_zip_properties.append(processed_prop)
+                            logger.info(f"🎯 Same zip property {i+1}: {processed_prop.get('address', 'Unknown')}")
+                        else:
+                            filtered_properties.append(processed_prop)
+                            logger.info(f"✅ Property {i+1} passed criteria: {processed_prop.get('address', 'Unknown')}")
                     else:
                         logger.debug(f"❌ Property {i+1} failed criteria: {processed_prop.get('address', 'Unknown')}")
                 else:
@@ -274,8 +293,13 @@ class EnhancedCompsService:
                 logger.warning(f"⚠️ Error processing property {i+1}: {e}")
                 continue
         
-        logger.info(f"📊 Filtered {len(filtered_properties)} properties from {len(properties)} total")
-        return filtered_properties
+        # Prioritize same zip code properties
+        prioritized_properties = same_zip_properties + filtered_properties
+        
+        logger.info(f"📊 Filtered {len(prioritized_properties)} properties from {len(properties)} total")
+        logger.info(f"🎯 Found {len(same_zip_properties)} properties in same zip code")
+        
+        return prioritized_properties
     
     def _process_property_data(self, prop: Dict, search_params: SearchParams) -> Optional[Dict]:
         """Process raw property data into standardized format"""
@@ -369,10 +393,16 @@ class EnhancedCompsService:
             return False
     
     def _calculate_relevance_score(self, prop: Dict, search_params: SearchParams) -> float:
-        """Calculate relevance score for property ranking"""
+        """Calculate relevance score for property ranking with zip code priority"""
         score = 100.0  # Base score
         
         try:
+            # ZIP CODE PRIORITY - massive bonus for same zip code
+            prop_zip = self._extract_zip_code(prop.get('address', ''))
+            if prop_zip and search_params.zip_code and prop_zip == search_params.zip_code:
+                score += 50  # Huge bonus for same zip code
+                logger.debug(f"🎯 Same zip code bonus: {prop_zip} vs {search_params.zip_code}")
+            
             # Bedroom match bonus
             bed_diff = abs(prop['beds'] - search_params.beds)
             score -= bed_diff * 10
@@ -523,6 +553,19 @@ class EnhancedCompsService:
                 return f"{parts[-2].strip()}, {parts[-1].strip()}"
         
         return address
+    
+    def _extract_zip_code(self, address: str) -> str:
+        """Extract zip code from address"""
+        try:
+            # Look for 5-digit zip code at the end
+            import re
+            zip_match = re.search(r'\b(\d{5})\b', address)
+            if zip_match:
+                return zip_match.group(1)
+            return ""
+        except Exception as e:
+            logger.error(f"❌ Error extracting zip code: {e}")
+            return ""
     
     def _generate_recent_sale_date(self) -> str:
         """Generate a recent sale date for mock data"""
