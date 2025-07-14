@@ -40,25 +40,22 @@ class SimpleCompsService:
             }
         
         try:
-            # Try multiple search strategies
+            # Try multiple search strategies with correct parameters
             search_strategies = [
                 {
                     "location": self._clean_address_for_search(address),
-                    "status_type": "Sold",
-                    "home_type": "Houses",
-                    "sort": "Newest"
-                },
-                {
-                    "location": self._clean_address_for_search(address),
                     "status_type": "RecentlySold",
-                    "home_type": "Houses",
-                    "sort": "Price_High_Low"
+                    "home_type": "Houses"
                 },
                 {
                     "location": self._extract_city_state(address),
-                    "status_type": "Sold",
-                    "home_type": "Houses",
-                    "sort": "Newest"
+                    "status_type": "RecentlySold",
+                    "home_type": "Houses"
+                },
+                {
+                    "location": self._clean_address_for_search(address),
+                    "status_type": "ForSale",
+                    "home_type": "Houses"
                 }
             ]
             
