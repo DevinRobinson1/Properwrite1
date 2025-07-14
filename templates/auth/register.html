@@ -11,27 +11,60 @@
     <div class="max-w-md w-full space-y-8">
         <!-- Header -->
         <div class="text-center">
-            <h2 class="text-3xl font-bold text-gray-900">Get 4 More Credits</h2>
-            <p class="mt-2 text-sm text-gray-600">
-                Register with your email to unlock 4 additional property analyses
-            </p>
+            {% if team_info %}
+                <h2 class="text-3xl font-bold text-gray-900">Join Team: {{ team_info.name }}</h2>
+                <p class="mt-2 text-sm text-gray-600">
+                    You've been invited to join {{ team_info.name }} with {{ team_info.role }} access
+                </p>
+            {% else %}
+                <h2 class="text-3xl font-bold text-gray-900">Get 4 More Credits</h2>
+                <p class="mt-2 text-sm text-gray-600">
+                    Register with your email to unlock 4 additional property analyses
+                </p>
+            {% endif %}
         </div>
 
         <!-- Benefits -->
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 class="font-semibold text-blue-900 mb-2">What you get:</h3>
-            <ul class="text-sm text-blue-800 space-y-1">
-                <li><i class="fas fa-check text-green-600 mr-2"></i>4 additional property analyses</li>
-                <li><i class="fas fa-check text-green-600 mr-2"></i>Save your analysis history</li>
-                <li><i class="fas fa-check text-green-600 mr-2"></i>Access to all strategy tools</li>
-                <li><i class="fas fa-check text-green-600 mr-2"></i>Option to purchase more credits</li>
-            </ul>
-        </div>
+        {% if team_info %}
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 class="font-semibold text-blue-900 mb-2">As a team member you get:</h3>
+                <ul class="text-sm text-blue-800 space-y-1">
+                    <li><i class="fas fa-check text-green-600 mr-2"></i>Access to team's shared credits</li>
+                    <li><i class="fas fa-check text-green-600 mr-2"></i>{{ team_info.role|title }} level permissions</li>
+                    <li><i class="fas fa-check text-green-600 mr-2"></i>Collaborate on property analyses</li>
+                    <li><i class="fas fa-check text-green-600 mr-2"></i>Team dashboard access</li>
+                </ul>
+            </div>
+        {% else %}
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 class="font-semibold text-blue-900 mb-2">What you get:</h3>
+                <ul class="text-sm text-blue-800 space-y-1">
+                    <li><i class="fas fa-check text-green-600 mr-2"></i>4 additional property analyses</li>
+                    <li><i class="fas fa-check text-green-600 mr-2"></i>Save your analysis history</li>
+                    <li><i class="fas fa-check text-green-600 mr-2"></i>Access to all strategy tools</li>
+                    <li><i class="fas fa-check text-green-600 mr-2"></i>Option to purchase more credits</li>
+                </ul>
+            </div>
+        {% endif %}
 
         <!-- What Happens Next -->
         <div class="bg-green-50 border border-green-200 rounded-lg p-4">
             <h3 class="font-semibold text-green-900 mb-2">What happens next:</h3>
             <div class="text-sm text-green-800 space-y-1">
+                {% if team_info %}
+                <div class="flex items-start">
+                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 text-green-800 text-xs font-medium mr-2 mt-0.5">1</span>
+                    <span>You'll be automatically added to {{ team_info.name }}</span>
+                </div>
+                <div class="flex items-start">
+                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 text-green-800 text-xs font-medium mr-2 mt-0.5">2</span>
+                    <span>Access your team dashboard with shared credits</span>
+                </div>
+                <div class="flex items-start">
+                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 text-green-800 text-xs font-medium mr-2 mt-0.5">3</span>
+                    <span>Start analyzing properties with your team</span>
+                </div>
+                {% else %}
                 <div class="flex items-start">
                     <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 text-green-800 text-xs font-medium mr-2 mt-0.5">1</span>
                     <span>You'll be taken to your account dashboard</span>
@@ -44,6 +77,7 @@
                     <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 text-green-800 text-xs font-medium mr-2 mt-0.5">3</span>
                     <span>Manage your credits and team from your dashboard</span>
                 </div>
+                {% endif %}
             </div>
         </div>
 
@@ -66,9 +100,10 @@
                 <div>
                     <label for="password" class="sr-only">Password</label>
                     <input id="password" name="password" type="password"
-                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" 
+                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 {% if team_info %}rounded-b-md{% endif %} focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" 
                            placeholder="Password (optional - email-only login available)">
                 </div>
+                {% if not team_info %}
                 <div>
                     <label for="credit_code" class="sr-only">Credit Code</label>
                     <input id="credit_code" name="credit_code" type="text"
@@ -76,13 +111,19 @@
                            placeholder="Credit Code (optional for bonus credits)"
                            oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')">
                 </div>
+                {% endif %}
             </div>
 
             <div>
                 <button type="submit" 
                         class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    <i class="fas fa-user-plus mr-2"></i>
-                    Create Account & Go to Dashboard
+                    {% if team_info %}
+                        <i class="fas fa-users mr-2"></i>
+                        Join Team & Go to Dashboard
+                    {% else %}
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Create Account & Go to Dashboard
+                    {% endif %}
                 </button>
             </div>
         </form>
