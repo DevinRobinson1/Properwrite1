@@ -35,6 +35,7 @@ from admin_api import admin_api_bp
 from zapier_api import zapier_api_bp
 from bitcoin_payment_service import bitcoin_service
 from comps_service import CompsService
+from enhanced_comps_service import enhanced_comps_service
 from email_service import email_service
 from affiliate_api import affiliate_api
 from construction_service import ConstructionService
@@ -2282,9 +2283,9 @@ def analyze_comps():
                 'error': 'Property address is required'
             }), 400
         
-        # Analyze comparables
-        result = comps_service.analyze_comparables(
-            subject_address=address,
+        # Analyze comparables using enhanced service
+        result = enhanced_comps_service.search_comparable_sales(
+            address=address,
             beds=int(beds),
             baths=float(baths),
             sqft=int(sqft),
