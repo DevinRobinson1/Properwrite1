@@ -637,7 +637,7 @@ def get_jv_deals_data():
 @admin_bp.route('/api/users/delete', methods=['POST'])
 @require_admin
 def delete_users():
-    """Delete multiple users"""
+    """Delete multiple users with proper foreign key handling"""
     try:
         data = request.get_json()
         user_ids = data.get('user_ids', [])
@@ -645,21 +645,66 @@ def delete_users():
         if not user_ids:
             return jsonify({'success': False, 'error': 'No user IDs provided'}), 400
         
+        deleted_count = 0
+        errors = []
+        
         with Session(engine) as session:
-            # Delete users by ID
             for user_id in user_ids:
-                session.execute(text("DELETE FROM users WHERE id = :user_id"), {'user_id': user_id})
+                try:
+                    # Step 1: Delete related records that reference this user
+                    
+                    # Delete credit logs for this user
+                    session.execute(text("DELETE FROM credit_logs WHERE user_id = :user_id"), {'user_id': user_id})
+                    
+                    # Delete team invites for this user
+                    session.execute(text("DELETE FROM team_invites WHERE email = (SELECT email FROM users WHERE id = :user_id)"), {'user_id': user_id})
+                    
+                    # Update team ownership if user is a team owner
+                    session.execute(text("""
+                        UPDATE teams 
+                        SET owner_id = NULL 
+                        WHERE owner_id = :user_id
+                    """), {'user_id': user_id})
+                    
+                    # Remove user from team memberships
+                    session.execute(text("DELETE FROM team_members WHERE user_id = :user_id"), {'user_id': user_id})
+                    
+                    # Delete JV deal submissions by this user (if any)
+                    session.execute(text("DELETE FROM jv_deals WHERE reviewed_by = :user_id"), {'user_id': user_id})
+                    
+                    # Step 2: Now delete the user
+                    result = session.execute(text("DELETE FROM users WHERE id = :user_id"), {'user_id': user_id})
+                    
+                    if result.rowcount > 0:
+                        deleted_count += 1
+                        logger.info(f"Successfully deleted user {user_id} and related records")
+                    else:
+                        errors.append(f"User {user_id} not found")
+                        
+                except Exception as user_error:
+                    logger.error(f"Error deleting user {user_id}: {str(user_error)}")
+                    errors.append(f"Failed to delete user {user_id}: {str(user_error)}")
+                    continue
             
+            # Commit all changes
             session.commit()
             
-            return jsonify({
+            # Prepare response
+            response_data = {
                 'success': True,
-                'message': f'Successfully deleted {len(user_ids)} users'
-            })
+                'deleted_count': deleted_count,
+                'message': f'Successfully deleted {deleted_count} users'
+            }
+            
+            if errors:
+                response_data['errors'] = errors
+                response_data['message'] += f' (with {len(errors)} errors)'
+            
+            return jsonify(response_data)
             
     except Exception as e:
         logger.error(f"Error deleting users: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({'success': False, 'error': f'Failed to delete users: {str(e)}'}), 500
 
 @admin_bp.route('/api/ai-assistant', methods=['POST'])
 @require_admin
