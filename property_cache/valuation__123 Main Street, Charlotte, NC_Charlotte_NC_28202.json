@@ -1,21 +1,21 @@
 {
   "valuations": {
     "zillow": {
-      "zestimate": 264900,
+      "zestimate": 822800,
       "source": "Zillow Property Data",
       "confidence": "high",
-      "zpid": 11156168,
-      "matched_address": "9 Catawba Trail, Myrtle Beach, SC, Myrtle Beach, South Carolina 29588",
+      "zpid": 2067875020,
+      "matched_address": "123 Main St #1 Charlotte, NC 28204",
       "images": [
-        "https://maps.googleapis.com/maps/api/streetview?location=9+Catawba+Trl%2C+Myrtle+Beach%2C+SC+29588&size=400x300&source=outdoor&signature=mBEjoEXjaCAyffitmDSRMtUR99E%3D"
+        "https://maps.googleapis.com/maps/api/streetview?location=123+Main+St%2C+Charlotte%2C+NC+28204&size=400x300&source=outdoor&signature=Z-6oiea19Hl30pjY2YJePEK-f28%3D"
       ],
-      "bedrooms": 3.0,
-      "bathrooms": 2.0,
+      "bedrooms": null,
+      "bathrooms": null,
       "square_feet": null,
-      "year_built": 1986
+      "year_built": null
     },
     "rentcast": {
-      "estimate": 323000,
+      "estimate": 370000,
       "source": "RentCast Property Data",
       "confidence": "high",
       "matched_address": null,
@@ -36,13 +36,13 @@
     "RentCast"
   ],
   "address_info": {
-    "address": "9 Catawba Trail, Myrtle Beach, SC",
-    "city": "Myrtle Beach",
-    "state": "South Carolina",
-    "zip_code": "29588",
+    "address": "123 Main Street, Charlotte, NC",
+    "city": "Charlotte",
+    "state": "NC",
+    "zip_code": "28202",
     "latitude": null,
     "longitude": null
   },
   "cache_used": false,
-  "timestamp": "2025-07-12T02:29:05.324780"
+  "timestamp": "2025-07-14T15:05:12.237815"
 }

@@ -1,0 +1,66 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 415600,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 333139337,
+      "matched_address": "2000 Park Avenue, Charlotte, NC, Charlotte, NC 28203",
+      "images": [
+        "https://photos.zillowstatic.com/fp/e0bc343bb400c771e317af5a0280f8ac-p_d.jpg"
+      ],
+      "bedrooms": 2.0,
+      "bathrooms": 3.0,
+      "square_feet": null,
+      "year_built": 2018
+    },
+    "rentcast": {
+      "estimate": 554000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    },
+    "rentometer": {
+      "rent_estimate": 2454,
+      "rent_median": 2400,
+      "rent_range": {
+        "min": 1650,
+        "max": 3795
+      },
+      "source": "Rentometer",
+      "confidence": "High",
+      "samples": 18,
+      "radius_miles": 2.0,
+      "credits_remaining": 999,
+      "updated": "2025-07-14"
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin",
+    "Rentometer"
+  ],
+  "sources_used": [
+    "Zillow",
+    "RentCast",
+    "Rentometer"
+  ],
+  "address_info": {
+    "address": "2000 Park Avenue, Charlotte, NC",
+    "city": "Charlotte",
+    "state": "NC",
+    "zip_code": "28203",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-14T15:06:27.998144",
+  "rent_estimate": 2454,
+  "rent_data_source": "Rentometer"
+}

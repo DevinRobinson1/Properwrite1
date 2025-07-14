@@ -481,6 +481,14 @@ class ComprehensiveValuationService:
             bedrooms = rentcast_data.get('bedrooms')
             bathrooms = rentcast_data.get('bathrooms')
             
+        # Use default values if no property details are found (same as in app_upgraded.py)
+        if not bedrooms:
+            bedrooms = 3  # Default bedroom count
+            logging.info("🏠 Using default bedrooms (3) for Rentometer API call")
+        if not bathrooms:
+            bathrooms = 2.0  # Default bathroom count
+            logging.info("🏠 Using default bathrooms (2.0) for Rentometer API call")
+            
         # Format data according to Rentometer API requirements
         # Bedrooms must be an integer
         if bedrooms is not None:
@@ -498,11 +506,8 @@ class ComprehensiveValuationService:
         
         logging.info(f"🏠 Calling Rentometer with bedrooms={bedrooms}, bathrooms={bathrooms}")
         
-        # Only call Rentometer if we have bedroom information
-        if bedrooms is not None:
-            self._try_rentometer_rent_data(valuation_data, address, bedrooms, bathrooms, latitude, longitude)
-        else:
-            logging.warning("🏠 Skipping Rentometer API call - no bedroom information available")
+        # Call Rentometer with the bedroom/bathroom information (including defaults)
+        self._try_rentometer_rent_data(valuation_data, address, bedrooms, bathrooms, latitude, longitude)
     
     def _try_redfin_valuation(self, valuation_data: Dict, address: str, city: str, state: str, zip_code: str):
         """Try Redfin valuation via RapidAPI with enhanced error handling"""

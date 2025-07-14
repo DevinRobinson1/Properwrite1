@@ -1,7 +1,7 @@
 {
   "valuations": {
     "rentcast": {
-      "estimate": 277000,
+      "estimate": 1182000,
       "source": "RentCast Property Data",
       "confidence": "high",
       "matched_address": null,
@@ -21,13 +21,13 @@
     "RentCast"
   ],
   "address_info": {
-    "address": "1323 Graces Reserve Cir, Kannapolis, NC",
-    "city": "",
-    "state": "",
-    "zip_code": "",
+    "address": "1000 East Blvd, Charlotte, NC",
+    "city": "Charlotte",
+    "state": "NC",
+    "zip_code": "28203",
     "latitude": null,
     "longitude": null
   },
   "cache_used": false,
-  "timestamp": "2025-07-14T11:53:50.206896"
+  "timestamp": "2025-07-14T15:05:24.906294"
 }
