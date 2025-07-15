@@ -1265,7 +1265,7 @@
                             <div class="zillow-estimate-content">
                                 <div id="zillow-loading" class="text-sm text-gray-400">Loading...</div>
                                 <div id="zillow-estimate" class="hidden">
-                                    <input type="number" id="zillow-value" class="w-full text-2xl font-bold border-none bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 rounded p-1" style="color: #0074e4;" placeholder="$0">
+                                    <input type="text" id="zillow-value" class="w-full text-2xl font-bold border-none bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 rounded p-1" style="color: #0074e4;" placeholder="$0" readonly>
                                     <div class="text-xs text-gray-500 mt-1">
                                         <span id="zillow-updated">Updated: --</span>
                                     </div>
@@ -1294,7 +1294,7 @@
                             <div class="redfin-estimate-content">
                                 <div id="redfin-loading" class="text-sm text-gray-400">Loading...</div>
                                 <div id="redfin-estimate" class="hidden">
-                                    <input type="number" id="redfin-value" class="w-full text-2xl font-bold border-none bg-transparent focus:outline-none focus:ring-2 focus:ring-red-500 rounded p-1" style="color: #A02040;" placeholder="$0">
+                                    <input type="text" id="redfin-value" class="w-full text-2xl font-bold border-none bg-transparent focus:outline-none focus:ring-2 focus:ring-red-500 rounded p-1" style="color: #A02040;" placeholder="$0" readonly>
                                     <div class="text-xs text-gray-500 mt-1">
                                         <span id="redfin-updated">Updated: --</span>
                                     </div>
@@ -1323,7 +1323,7 @@
                             <div class="rental-estimate-content">
                                 <div id="rental-loading" class="text-sm text-gray-400">Loading...</div>
                                 <div id="rental-estimate" class="hidden">
-                                    <input type="number" id="rental-value" class="w-full text-2xl font-bold border-none bg-transparent focus:outline-none focus:ring-2 focus:ring-purple-500 rounded p-1" style="color: #6B46C1;" placeholder="$0">
+                                    <input type="text" id="rental-value" class="w-full text-2xl font-bold border-none bg-transparent focus:outline-none focus:ring-2 focus:ring-purple-500 rounded p-1" style="color: #6B46C1;" placeholder="$0" readonly>
                                     <div class="text-xs text-gray-500 mt-1">
                                         <span id="rental-updated">Updated: --</span>
                                         <span id="rental-samples" class="ml-2">--</span>
@@ -5171,7 +5171,7 @@
                 // Update the rental-value field in the Monthly Rent section
                 const rentalValueInput = document.getElementById('rental-value');
                 if (rentalValueInput) {
-                    rentalValueInput.value = data.rent_estimate;
+                    rentalValueInput.value = '$' + data.rent_estimate.toLocaleString();
                 }
             }
             
@@ -5226,7 +5226,7 @@
                 zillowLoading.classList.add('hidden');
                 zillowEstimate.classList.remove('hidden');
                 zillowError.classList.add('hidden');
-                zillowValue.value = data.zillow_estimate;
+                zillowValue.value = '$' + data.zillow_estimate.toLocaleString();
             } else {
                 zillowLoading.classList.add('hidden');
                 zillowEstimate.classList.add('hidden');
@@ -5243,7 +5243,7 @@
                 redfinLoading.classList.add('hidden');
                 redfinEstimate.classList.remove('hidden');
                 redfinError.classList.add('hidden');
-                redfinValue.value = data.redfin_estimate;
+                redfinValue.value = '$' + data.redfin_estimate.toLocaleString();
             } else {
                 redfinLoading.classList.add('hidden');
                 redfinEstimate.classList.add('hidden');
@@ -5260,7 +5260,7 @@
                 realtorLoading.classList.add('hidden');
                 realtorEstimate.classList.remove('hidden');
                 realtorError.classList.add('hidden');
-                realtorValue.value = data.realtor_estimate;
+                realtorValue.value = '$' + data.realtor_estimate.toLocaleString();
             } else {
                 realtorLoading.classList.add('hidden');
                 realtorEstimate.classList.add('hidden');
@@ -9576,13 +9576,13 @@
             const estimateEl = document.getElementById(`${platform}-estimate`);
             if (estimateEl && estimateEl.classList) estimateEl.classList.remove('hidden');
             
-            // For input fields, set numeric value without dollar sign
+            // For input fields, set formatted value for text fields
             const valueInput = document.getElementById(`${platform}-value`);
             if (valueInput) {
                 if (valueInput.type === 'number') {
                     valueInput.value = value; // Just the number for input fields
                 } else {
-                    valueInput.textContent = '$' + value.toLocaleString(); // Formatted for display elements
+                    valueInput.value = '$' + value.toLocaleString(); // Formatted for text input fields
                 }
             }
             
