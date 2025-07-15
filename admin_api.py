@@ -419,6 +419,32 @@ def get_users():
         logging.error(f"Error getting users: {e}")
         return jsonify({'error': str(e)}), 500
 
+@admin_api_bp.route('/users/<user_id>/suspend', methods=['POST'])
+@require_admin_api
+def suspend_user(user_id):
+    """Suspend a user account"""
+    try:
+        with get_db_session() as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+            
+            # Toggle user active status
+            user.is_active = not user.is_active
+            db.commit()
+            
+            status = 'suspended' if not user.is_active else 'activated'
+            return jsonify({
+                'success': True,
+                'message': f'User {status} successfully',
+                'user_id': user_id,
+                'is_active': user.is_active
+            })
+            
+    except Exception as e:
+        logging.error(f"Error suspending user {user_id}: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @admin_api_bp.route('/teams', methods=['GET'])
 @require_admin_api
 def get_teams():

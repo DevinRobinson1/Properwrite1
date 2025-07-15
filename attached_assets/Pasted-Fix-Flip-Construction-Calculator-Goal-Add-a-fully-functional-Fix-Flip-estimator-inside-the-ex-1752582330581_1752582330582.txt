@@ -1,0 +1,135 @@
+Fix & Flip Construction Calculator
+
+Goal
+Add a fully-functional “Fix & Flip” estimator inside the existing Construction tab (sibling to New Build). The estimator must read unit-costs from the Excel price sheet the user just uploaded and let users edit those costs in-app without touching any other sections (Acquisitions, Dispositions, Comps, etc.).
+
+1 . Tab & Route
+Level	Route / File	Notes
+Construction (parent)	/construction	Already exists – keep style/layout.
+└── Fix & Flip	/construction/fix-flip or <ConstructionFixFlip.jsx>	New page/component. Use React + Tailwind (same design tokens). DO NOT alter existing routes.
+
+Add the new tab item next to New Build in ConstructionTabs.tsx. Clicking it should lazy-load the new component.
+
+2 . Estimator Layout
+vbnet
+Copy
+Edit
+<FixFlipEstimator>
+ ├─ Step 1: Subject-Property Snapshot
+ │   • Beds, Baths, GLA, Year Built, Target ARV
+ │   • Pull pre-filled values from store when user arrived from “Analyze Property”
+ │   • Editable with inline validation
+ ├─ Step 2: Scope of Work
+ │   • Accordion sections for each major trade:
+ │        - Exterior  (roof, siding, gutters…)
+ │        - Interior  (demo, framing, drywall…)
+ │        - Mechanical (HVAC, plumbing, electrical)
+ │        - Kitchen
+ │        - Baths
+ │        - Flooring
+ │        - Paint
+ │        - Misc / Contingency
+ │   • Every line item shows:
+ │        Quantity ⟶ Unit (SF, LF, EA) ⟶ **Unit Cost** ⟶ Line Total
+ │   • **Unit Cost is pulled live** from the Price Sheet state (see §3).
+ │   • Quantity input updates Total in real-time.  Use controlled form + debounce.
+ ├─ Step 3: Summary
+ │   • Hard + Soft Costs
+ │   • Contingency %
+ │   • Total Rehab Budget
+ │   • Cost / SF
+ │   • Download PDF & “Save to Deal” buttons
+ └─ Sidebar / Drawer:
+     [Price Sheet ⚙️]  (opens modal/tab – see below)
+Follow the color tokens already used in Acquisition/Disposition cards.
+Highlight editable inputs with ring-primary so users instantly know what’s changeable (UX feedback from earlier video).
+
+3 . Dynamic Price Sheet
+Create a reusable usePriceSheet() hook that:
+
+Loads default costs from priceSheet table (PostgreSQL) seeded from Copy of Full Renovation Estimator (Installer).xlsx “Price Sheet” tab.
+
+Allows Org Admins to edit any unit price in a Price Sheet Modal (<PriceSheetEditor/>).
+
+Persists edits via Supabase RPC; caches in Zustand for fast reads across the estimator.
+
+Emits priceSheetUpdated event so open estimators recalculate instantly.
+
+UI pattern:
+• “Price Sheet ⚙️” pill in the estimator’s top-right.
+• Opens a full-screen modal with a spreadsheet-like table (ag-Grid, editable).
+• Columns: Category – Item – Unit – Default Cost – Org Override Cost.
+• “Revert to Default” & “Save” CTA.
+
+No hard-coded numbers in components – always call the hook.
+
+4 . Excel → DB Seeder
+Add a one-time scripts/seedPriceSheet.ts to parse both uploaded Excel files:
+
+Sheet “Price Sheet”: for Fix & Flip.
+
+Sheet “New Construction Breakdown – Costs”: already used in the New-Build calculator.
+
+Map columns → (category, item, unit, default_cost_cents).
+
+On deploy / npm run seed, populate priceSheet table if empty.
+
+Use xlsx npm package (already in project) – do NOT bundle Excel files in client build.
+
+5 . State, Validation & Credits
+Each estimator page consumes 1 credit on first Save. Re-opens of same deal are free.
+
+Add useCredits() guard – if credits exhausted show existing “Upgrade / Buy Pack / Pay-with-Bitcoin” modal.
+
+Validate:
+
+Quantity ≥ 0 and sensible (e.g., 0–10 000).
+
+Required fields (ARV, Total SF) must be numbers.
+
+Summary total >= $0 before enable “Save”.
+
+6 . Mobile & A11y
+All inputs flex-wrap into 1 column at md< viewports.
+
+Sticky bottom bar on mobile with Total Budget + Save CTA.
+
+Use semantic <fieldset> / <legend> for screen readers.
+
+7 . Testing & QA
+Write unit tests for computeLineTotal() and computeBudget() util functions – jest.
+
+Cypress E2E:
+
+Load estimator → update quantity → price updates in <200 ms.
+
+Edit price sheet → estimator reflects new cost without reload.
+
+Credits decrement on first save.
+
+Mobile viewport 375 px passes Lighthouse contrast.
+
+8 . Non-negotiables
+DO NOT touch Acquisitions, Dispositions, Comps or existing New-Build calculator.
+
+Keep global styling, header, credit-logic exactly as is.
+
+No duplicate code – reuse shared InputNumber, CurrencyDisplay, and SectionCard atoms.
+
+Commit under feature/fix-flip-calculator branch, PR with screenshots + test runs.
+
+Deliverables
+
+components/construction/FixFlipEstimator.jsx (+ child components)
+
+components/construction/PriceSheetEditor.jsx
+
+hooks/usePriceSheet.ts
+
+scripts/seedPriceSheet.ts
+
+Jest & Cypress tests
+
+Migration SQL for priceSheet table
+
+Run all lint, type-check, and tests before merging.
