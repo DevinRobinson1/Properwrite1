@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JV Deal Queue - Team View</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .status-badge {
+            @apply px-2 py-1 text-xs font-medium rounded-full;
+        }
+        .status-approved {
+            @apply bg-green-100 text-green-800;
+        }
+        .status-denied {
+            @apply bg-red-100 text-red-800;
+        }
+        .status-pending {
+            @apply bg-yellow-100 text-yellow-800;
+        }
+        .status-withdrawn {
+            @apply bg-gray-100 text-gray-800;
+        }
+        .metrics-chip {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-2xl font-bold text-gray-900">JV Deal Queue</h1>
+                    <div class="flex space-x-4">
+                        <!-- Team Metrics -->
+                        <div class="metrics-chip bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-handshake mr-1"></i>
+                            Submitted: <span id="team-submitted">0</span>
+                        </div>
+                        <div class="metrics-chip bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-clock mr-1"></i>
+                            Under Review: <span id="team-pending">0</span>
+                        </div>
+                        <div class="metrics-chip bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            Approved: <span id="team-approved">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="refreshData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        Refresh
+                    </button>
+                    <a href="/jv-submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                        <i class="fas fa-plus mr-2"></i>
+                        New Deal
+                    </a>
+                    <a href="/dashboard" class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Instructions Card -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div class="flex items-center">
+                <i class="fas fa-info-circle text-blue-600 mr-3"></i>
+                <div>
+                    <h3 class="text-blue-900 font-medium">About JV Deal Queue</h3>
+                    <p class="text-blue-700 text-sm mt-1">
+                        This is a read-only view of all JV deals submitted by your team. Deals are automatically reviewed and you'll receive notifications when status changes.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="bg-white rounded-lg shadow-sm mb-6 p-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                    <input type="text" id="search-input" placeholder="Search by address, city..." 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="status-filter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Status</option>
+                        <option value="pending">Under Review</option>
+                        <option value="approved">Approved</option>
+                        <option value="denied">Denied</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Submitted By</label>
+                    <select id="submitted-by-filter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Team Members</option>
+                        <!-- Will be populated with team members -->
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deals Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="deals-grid">
+            <!-- Deal cards will be populated here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-12">
+            <i class="fas fa-handshake text-gray-400 text-6xl mb-4"></i>
+            <h3 class="text-gray-600 text-xl font-medium mb-2">No JV Deals Yet</h3>
+            <p class="text-gray-500 mb-6">Your team hasn't submitted any JV deals yet.</p>
+            <a href="/jv-submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 inline-flex items-center">
+                <i class="fas fa-plus mr-2"></i>
+                Submit Your First Deal
+            </a>
+        </div>
+    </main>
+
+    <!-- Deal Detail Modal -->
+    <div id="deal-detail-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
+                <div class="px-6 py-4 border-b flex items-center justify-between">
+                    <h2 class="text-xl font-semibold">Deal Details</h2>
+                    <button onclick="closeDealModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div id="deal-detail-content">
+                        <!-- Deal details will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDeals = [];
+        let teamMembers = [];
+
+        // Initialize page
+        $(document).ready(function() {
+            loadTeamDeals();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            $('#search-input').on('keyup', debounce(applyFilters, 300));
+            $('#status-filter').on('change', applyFilters);
+            $('#submitted-by-filter').on('change', applyFilters);
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function loadTeamDeals() {
+            fetch('/api/team/jv-deals')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        currentDeals = data.deals;
+                        teamMembers = data.team_members;
+                        updateMetrics(data.metrics);
+                        populateTeamMemberFilter();
+                        renderDeals(currentDeals);
+                    } else {
+                        console.error('Error loading deals:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading deals:', error);
+                });
+        }
+
+        function updateMetrics(metrics) {
+            $('#team-submitted').text(metrics.total_submitted);
+            $('#team-pending').text(metrics.pending_count);
+            $('#team-approved').text(metrics.approved_count);
+        }
+
+        function populateTeamMemberFilter() {
+            const select = $('#submitted-by-filter');
+            select.find('option:not(:first)').remove();
+            
+            teamMembers.forEach(member => {
+                select.append(`<option value="${member.id}">${member.name}</option>`);
+            });
+        }
+
+        function applyFilters() {
+            const search = $('#search-input').val().toLowerCase();
+            const status = $('#status-filter').val();
+            const submittedBy = $('#submitted-by-filter').val();
+
+            let filteredDeals = currentDeals;
+
+            if (search) {
+                filteredDeals = filteredDeals.filter(deal => 
+                    deal.property.address.toLowerCase().includes(search) ||
+                    deal.property.city.toLowerCase().includes(search) ||
+                    deal.property.state.toLowerCase().includes(search)
+                );
+            }
+
+            if (status) {
+                filteredDeals = filteredDeals.filter(deal => deal.status === status);
+            }
+
+            if (submittedBy) {
+                filteredDeals = filteredDeals.filter(deal => deal.partner.id === submittedBy);
+            }
+
+            renderDeals(filteredDeals);
+        }
+
+        function renderDeals(deals) {
+            const grid = $('#deals-grid');
+            const emptyState = $('#empty-state');
+
+            if (deals.length === 0) {
+                grid.html('');
+                emptyState.removeClass('hidden');
+                return;
+            }
+
+            emptyState.addClass('hidden');
+            
+            let html = '';
+            deals.forEach(deal => {
+                html += createDealCard(deal);
+            });
+
+            grid.html(html);
+        }
+
+        function createDealCard(deal) {
+            const statusColors = {
+                pending: 'yellow',
+                approved: 'green',
+                denied: 'red',
+                withdrawn: 'gray'
+            };
+
+            const statusColor = statusColors[deal.status] || 'gray';
+            
+            return `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">${deal.property.address}</h3>
+                                <p class="text-gray-600">${deal.property.city}, ${deal.property.state} ${deal.property.zip}</p>
+                            </div>
+                            <span class="status-badge status-${deal.status}">${deal.status}</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <p class="text-sm text-gray-500">Asking Price</p>
+                                <p class="text-lg font-semibold text-gray-900">
+                                    ${deal.financials.asking_price ? '$' + parseInt(deal.financials.asking_price).toLocaleString() : 'N/A'}
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Suggested Offer</p>
+                                <p class="text-lg font-semibold text-blue-600">
+                                    ${deal.financials.suggested_offer ? '$' + parseInt(deal.financials.suggested_offer).toLocaleString() : 'N/A'}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <p class="text-sm text-gray-500">ARV</p>
+                                <p class="text-sm font-medium text-gray-700">
+                                    ${deal.financials.arv ? '$' + parseInt(deal.financials.arv).toLocaleString() : 'N/A'}
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Repairs</p>
+                                <p class="text-sm font-medium text-gray-700">
+                                    ${deal.financials.repairs ? '$' + parseInt(deal.financials.repairs).toLocaleString() : 'N/A'}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center pt-4 border-t">
+                            <div>
+                                <p class="text-sm text-gray-500">Submitted by</p>
+                                <p class="text-sm font-medium text-gray-700">${deal.partner.name}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm text-gray-500">Submitted</p>
+                                <p class="text-sm font-medium text-gray-700">${new Date(deal.created_at).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button onclick="openDealModal('${deal.id}')" 
+                                    class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-eye mr-2"></i>
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openDealModal(dealId) {
+            const deal = currentDeals.find(d => d.id === dealId);
+            if (!deal) return;
+
+            const modalContent = `
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3">Property Information</h3>
+                            <div class="space-y-2">
+                                <p><strong>Address:</strong> ${deal.property.address}</p>
+                                <p><strong>City:</strong> ${deal.property.city}</p>
+                                <p><strong>State:</strong> ${deal.property.state}</p>
+                                <p><strong>ZIP Code:</strong> ${deal.property.zip}</p>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-3">Financial Details</h3>
+                            <div class="space-y-2">
+                                <p><strong>Asking Price:</strong> ${deal.financials.asking_price ? '$' + parseInt(deal.financials.asking_price).toLocaleString() : 'N/A'}</p>
+                                <p><strong>ARV:</strong> ${deal.financials.arv ? '$' + parseInt(deal.financials.arv).toLocaleString() : 'N/A'}</p>
+                                <p><strong>Repair Estimate:</strong> ${deal.financials.repairs ? '$' + parseInt(deal.financials.repairs).toLocaleString() : 'N/A'}</p>
+                                <p><strong>Suggested Offer:</strong> ${deal.financials.suggested_offer ? '$' + parseInt(deal.financials.suggested_offer).toLocaleString() : 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Submission Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <p><strong>Submitted by:</strong> ${deal.partner.name}</p>
+                                <p><strong>Email:</strong> ${deal.partner.email}</p>
+                                <p><strong>Phone:</strong> ${deal.partner.phone}</p>
+                            </div>
+                            <div>
+                                <p><strong>Company:</strong> ${deal.partner.company || 'N/A'}</p>
+                                <p><strong>Markets:</strong> ${deal.partner.markets ? deal.partner.markets.join(', ') : 'N/A'}</p>
+                                <p><strong>Submitted:</strong> ${new Date(deal.created_at).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-medium mb-2">Current Status</h4>
+                        <div class="flex items-center space-x-3">
+                            <span class="status-badge status-${deal.status}">${deal.status}</span>
+                            ${deal.status === 'pending' ? '<span class="text-sm text-gray-600">Under review by admin team</span>' : ''}
+                            ${deal.status === 'approved' ? '<span class="text-sm text-green-600">Deal approved! Admin will contact you soon.</span>' : ''}
+                            ${deal.status === 'denied' ? '<span class="text-sm text-red-600">Deal not approved for JV partnership.</span>' : ''}
+                        </div>
+                        ${deal.admin_notes ? `<div class="mt-3"><strong>Admin Notes:</strong><p class="text-sm text-gray-700 mt-1">${deal.admin_notes}</p></div>` : ''}
+                    </div>
+                </div>
+            `;
+
+            $('#deal-detail-content').html(modalContent);
+            $('#deal-detail-modal').removeClass('hidden');
+        }
+
+        function closeDealModal() {
+            $('#deal-detail-modal').addClass('hidden');
+        }
+
+        function refreshData() {
+            loadTeamDeals();
+        }
+
+        // Close modal when clicking outside
+        $(document).on('click', function(e) {
+            if (e.target.id === 'deal-detail-modal') {
+                closeDealModal();
+            }
+        });
+    </script>
+</body>
+</html>

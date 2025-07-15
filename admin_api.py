@@ -1052,22 +1052,40 @@ def update_jv_deal(deal_id):
                 
                 # Trigger Zapier webhook for status update
                 webhook_data = {
-                    'event_type': 'jv_deal_status_updated',
-                    'deal_id': deal_id,
-                    'new_status': new_status,
+                    'id': deal_id,
+                    'property_address': deal['deal_json'].get('property_address'),
+                    'property_city': deal['deal_json'].get('property_city'),
+                    'property_state': deal['deal_json'].get('property_state'),
+                    'asking_price': deal['deal_json'].get('asking_price'),
+                    'suggested_offer': deal['deal_json'].get('suggested_offer'),
+                    'arv': deal['deal_json'].get('arv'),
+                    'repair_estimate': deal['deal_json'].get('repair_estimate'),
                     'partner_name': deal['partner_name'],
                     'partner_email': deal['partner_email'],
-                    'property_address': deal['deal_json'].get('property_address'),
-                    'asking_price': deal['deal_json'].get('asking_price'),
-                    'admin_notes': admin_notes,
-                    'timestamp': datetime.now().isoformat()
+                    'partner_phone': deal['deal_json'].get('partner_phone'),
+                    'partner_company': deal['deal_json'].get('partner_company'),
+                    'partner_markets': deal['deal_json'].get('partner_markets'),
+                    'created_at': deal['created_at'].isoformat(),
+                    'auto_evaluation': deal['auto_evaluation'],
+                    'evaluation_reasons': deal['evaluation_reasons']
                 }
                 
                 # Send webhook (async)
                 try:
                     from zapier_webhook_service import ZapierWebhookService
                     webhook_service = ZapierWebhookService()
-                    webhook_service.trigger_jv_deal_decision(webhook_data)
+                    
+                    # Get old status for status changed webhook
+                    old_status = deal['status']
+                    
+                    if new_status == 'approved':
+                        webhook_service.trigger_jv_deal_approved(webhook_data, admin_notes)
+                    elif new_status == 'denied':
+                        webhook_service.trigger_jv_deal_denied(webhook_data, admin_notes)
+                    
+                    # Also trigger general status changed webhook
+                    webhook_service.trigger_jv_deal_status_changed(webhook_data, old_status, new_status, admin_notes)
+                    
                 except Exception as webhook_error:
                     logging.error(f"Webhook error: {webhook_error}")
                     # Don't fail the main operation if webhook fails

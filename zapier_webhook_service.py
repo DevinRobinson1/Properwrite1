@@ -23,6 +23,8 @@ class ZapierWebhookService:
             'NEW_JV_SUBMISSION': os.environ.get('ZAPIER_HOOK_NEW_JV_SUBMISSION'),
             'PAYMENT_RECEIVED': os.environ.get('ZAPIER_HOOK_PAYMENT_RECEIVED'),
             'JV_DEAL_APPROVED': os.environ.get('ZAPIER_HOOK_JV_DEAL_APPROVED'),
+            'JV_DEAL_DENIED': os.environ.get('ZAPIER_HOOK_JV_DEAL_DENIED'),
+            'JV_DEAL_STATUS_CHANGED': os.environ.get('ZAPIER_HOOK_JV_DEAL_STATUS_CHANGED'),
             'SUBSCRIPTION_CANCELLED': os.environ.get('ZAPIER_HOOK_SUBSCRIPTION_CANCELLED'),
             'TEAM_MEMBER_ADDED': os.environ.get('ZAPIER_HOOK_TEAM_MEMBER_ADDED'),
             'ERROR_THRESHOLD_REACHED': os.environ.get('ZAPIER_HOOK_ERROR_THRESHOLD_REACHED')
@@ -70,6 +72,79 @@ class ZapierWebhookService:
     def validate_zapier_secret(self, provided_secret: str) -> bool:
         """Validate the Zapier shared secret"""
         return provided_secret == self.shared_secret
+    
+    # JV Deal Trigger Methods
+    def trigger_new_jv_submission(self, deal_data: Dict[str, Any]) -> bool:
+        """Trigger when a new JV deal is submitted"""
+        payload = {
+            'deal_id': deal_data.get('id'),
+            'property_address': deal_data.get('property_address'),
+            'property_city': deal_data.get('property_city'),
+            'property_state': deal_data.get('property_state'),
+            'asking_price': deal_data.get('asking_price'),
+            'suggested_offer': deal_data.get('suggested_offer'),
+            'arv': deal_data.get('arv'),
+            'repairs': deal_data.get('repair_estimate'),
+            'partner_name': deal_data.get('partner_name'),
+            'partner_email': deal_data.get('partner_email'),
+            'partner_phone': deal_data.get('partner_phone'),
+            'partner_company': deal_data.get('partner_company'),
+            'partner_markets': deal_data.get('partner_markets'),
+            'submission_date': deal_data.get('created_at'),
+            'auto_evaluation': deal_data.get('auto_evaluation'),
+            'evaluation_reasons': deal_data.get('evaluation_reasons')
+        }
+        return self.fire_webhook('NEW_JV_SUBMISSION', payload)
+    
+    def trigger_jv_deal_approved(self, deal_data: Dict[str, Any], admin_notes: str = None) -> bool:
+        """Trigger when a JV deal is approved"""
+        payload = {
+            'deal_id': deal_data.get('id'),
+            'property_address': deal_data.get('property_address'),
+            'property_city': deal_data.get('property_city'),
+            'property_state': deal_data.get('property_state'),
+            'asking_price': deal_data.get('asking_price'),
+            'suggested_offer': deal_data.get('suggested_offer'),
+            'partner_name': deal_data.get('partner_name'),
+            'partner_email': deal_data.get('partner_email'),
+            'partner_phone': deal_data.get('partner_phone'),
+            'admin_notes': admin_notes,
+            'approved_date': datetime.utcnow().isoformat(),
+            'notification_message': f"JV Deal Approved: {deal_data.get('property_address')} - Contact {deal_data.get('partner_name')} at {deal_data.get('partner_email')}"
+        }
+        return self.fire_webhook('JV_DEAL_APPROVED', payload)
+    
+    def trigger_jv_deal_denied(self, deal_data: Dict[str, Any], admin_notes: str = None) -> bool:
+        """Trigger when a JV deal is denied"""
+        payload = {
+            'deal_id': deal_data.get('id'),
+            'property_address': deal_data.get('property_address'),
+            'property_city': deal_data.get('property_city'),
+            'property_state': deal_data.get('property_state'),
+            'asking_price': deal_data.get('asking_price'),
+            'suggested_offer': deal_data.get('suggested_offer'),
+            'partner_name': deal_data.get('partner_name'),
+            'partner_email': deal_data.get('partner_email'),
+            'admin_notes': admin_notes,
+            'denied_date': datetime.utcnow().isoformat(),
+            'notification_message': f"JV Deal Denied: {deal_data.get('property_address')} - {admin_notes or 'No reason provided'}"
+        }
+        return self.fire_webhook('JV_DEAL_DENIED', payload)
+    
+    def trigger_jv_deal_status_changed(self, deal_data: Dict[str, Any], old_status: str, new_status: str, admin_notes: str = None) -> bool:
+        """Trigger when a JV deal status changes"""
+        payload = {
+            'deal_id': deal_data.get('id'),
+            'property_address': deal_data.get('property_address'),
+            'partner_name': deal_data.get('partner_name'),
+            'partner_email': deal_data.get('partner_email'),
+            'old_status': old_status,
+            'new_status': new_status,
+            'admin_notes': admin_notes,
+            'status_changed_date': datetime.utcnow().isoformat(),
+            'notification_message': f"JV Deal Status Changed: {deal_data.get('property_address')} - {old_status} → {new_status}"
+        }
+        return self.fire_webhook('JV_DEAL_STATUS_CHANGED', payload)
 
 def require_zapier_auth(f):
     """Decorator to require Zapier authentication"""

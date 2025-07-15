@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JV Deals Admin Panel - Enhanced</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <style>
+        .metrics-chip {
+            animation: pulse 2s infinite;
+        }
+        .drawer-slide-in {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .drawer-slide-in.open {
+            transform: translateX(0);
+        }
+        .status-badge {
+            @apply px-2 py-1 text-xs font-medium rounded-full;
+        }
+        .status-approved {
+            @apply bg-green-100 text-green-800;
+        }
+        .status-denied {
+            @apply bg-red-100 text-red-800;
+        }
+        .status-pending {
+            @apply bg-yellow-100 text-yellow-800;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header with Metrics -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-2xl font-bold text-gray-900">JV Deals Admin Panel</h1>
+                    <div class="flex space-x-4">
+                        <!-- Metrics Chips -->
+                        <div class="metrics-chip bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-handshake mr-1"></i>
+                            Total: <span id="total-deals">0</span>
+                        </div>
+                        <div class="metrics-chip bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-clock mr-1"></i>
+                            Pending: <span id="pending-deals">0</span>
+                        </div>
+                        <div class="metrics-chip bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            Approval Rate: <span id="approval-rate">0%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="refreshData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        Refresh
+                    </button>
+                    <a href="/admin" class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        Back to Admin
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Filters -->
+        <div class="bg-white rounded-lg shadow-sm mb-6 p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                    <input type="text" id="search-input" placeholder="Search deals..." 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                    <select id="state-filter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All States</option>
+                        <option value="NC">North Carolina</option>
+                        <option value="SC">South Carolina</option>
+                        <option value="GA">Georgia</option>
+                        <option value="TN">Tennessee</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="status-filter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="denied">Denied</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Submitted By</label>
+                    <input type="text" id="submitted-by-filter" placeholder="Partner name..." 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced DataTable -->
+        <div class="bg-white rounded-lg shadow-sm">
+            <table id="jv-deals-table" class="w-full">
+                <thead>
+                    <tr class="bg-gray-50 border-b">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted By</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asking Price</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Suggested Offer</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="deals-table-body">
+                    <!-- Data will be populated via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- User Portfolio Drawer -->
+    <div id="user-portfolio-drawer" class="drawer-slide-in fixed right-0 top-0 h-full w-96 bg-white shadow-xl z-50">
+        <div class="flex flex-col h-full">
+            <div class="flex items-center justify-between px-6 py-4 border-b">
+                <h2 class="text-lg font-semibold">User Portfolio</h2>
+                <button onclick="closeUserPortfolio()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6 border-b">
+                <div id="user-profile-section">
+                    <!-- User profile will be populated here -->
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto">
+                <div class="p-6">
+                    <h3 class="text-md font-medium mb-4">Deal History</h3>
+                    <div id="user-deals-list">
+                        <!-- User deals will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deal Detail Modal -->
+    <div id="deal-detail-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg max-w-4xl w-full max-h-screen overflow-y-auto">
+                <div class="px-6 py-4 border-b flex items-center justify-between">
+                    <h2 class="text-xl font-semibold">Deal Details</h2>
+                    <button onclick="closeDealModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div id="deal-detail-content">
+                        <!-- Deal details will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for drawer -->
+    <div id="drawer-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40" onclick="closeUserPortfolio()"></div>
+
+    <script>
+        let dealsTable;
+        let currentDeals = [];
+
+        // Initialize DataTable
+        $(document).ready(function() {
+            initializeDataTable();
+            loadMetrics();
+            loadDeals();
+            setupEventListeners();
+        });
+
+        function initializeDataTable() {
+            dealsTable = $('#jv-deals-table').DataTable({
+                pageLength: 25,
+                order: [[6, 'desc']], // Sort by submitted date
+                columnDefs: [
+                    { orderable: false, targets: [7] } // Disable sorting for Actions column
+                ],
+                responsive: true,
+                searching: false, // We'll use custom search
+                dom: 'lrtip' // Remove default search box
+            });
+        }
+
+        function setupEventListeners() {
+            // Custom search and filters
+            $('#search-input').on('keyup', debounce(applyFilters, 300));
+            $('#state-filter').on('change', applyFilters);
+            $('#status-filter').on('change', applyFilters);
+            $('#submitted-by-filter').on('keyup', debounce(applyFilters, 300));
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function applyFilters() {
+            const search = $('#search-input').val();
+            const state = $('#state-filter').val();
+            const status = $('#status-filter').val();
+            const submittedBy = $('#submitted-by-filter').val();
+
+            loadDeals(search, state, status, submittedBy);
+        }
+
+        function loadMetrics() {
+            fetch('/admin/api/jv-deals/metrics')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        $('#total-deals').text(data.metrics.total_deals);
+                        $('#pending-deals').text(data.metrics.pending_review);
+                        $('#approval-rate').text(data.metrics.approval_rate + '%');
+                    }
+                })
+                .catch(error => console.error('Error loading metrics:', error));
+        }
+
+        function loadDeals(search = '', state = '', status = '', submittedBy = '') {
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (state) params.append('state', state);
+            if (status) params.append('status', status);
+            if (submittedBy) params.append('submitted_by', submittedBy);
+            params.append('limit', '100');
+
+            fetch(`/admin/api/jv-deals?${params}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        currentDeals = data.deals;
+                        populateDealsTable(data.deals);
+                    }
+                })
+                .catch(error => console.error('Error loading deals:', error));
+        }
+
+        function populateDealsTable(deals) {
+            dealsTable.clear();
+            
+            deals.forEach(deal => {
+                const row = [
+                    `<button onclick="openUserPortfolio('${deal.partner.id}')" class="text-blue-600 hover:text-blue-800 font-medium">
+                        ${deal.partner.name}
+                    </button>`,
+                    deal.property.address || 'N/A',
+                    `${deal.property.city}, ${deal.property.state} ${deal.property.zip}`,
+                    deal.financials.asking_price ? `$${parseInt(deal.financials.asking_price).toLocaleString()}` : 'N/A',
+                    deal.financials.suggested_offer ? `$${parseInt(deal.financials.suggested_offer).toLocaleString()}` : 'N/A',
+                    `<span class="status-badge status-${deal.status}">${deal.status}</span>`,
+                    new Date(deal.created_at).toLocaleDateString(),
+                    `<div class="flex space-x-2">
+                        <button onclick="openDealModal('${deal.id}')" class="text-blue-600 hover:text-blue-800 text-sm">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        ${deal.status === 'pending' ? `
+                            <button onclick="updateDealStatus('${deal.id}', 'approved')" class="text-green-600 hover:text-green-800 text-sm">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                            <button onclick="updateDealStatus('${deal.id}', 'denied')" class="text-red-600 hover:text-red-800 text-sm">
+                                <i class="fas fa-times"></i> Deny
+                            </button>
+                        ` : ''}
+                    </div>`
+                ];
+                dealsTable.row.add(row);
+            });
+            
+            dealsTable.draw();
+        }
+
+        function openUserPortfolio(userId) {
+            fetch(`/admin/api/users/${userId}/jv-deals`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        populateUserPortfolio(data);
+                        $('#user-portfolio-drawer').addClass('open');
+                        $('#drawer-overlay').removeClass('hidden');
+                    }
+                })
+                .catch(error => console.error('Error loading user portfolio:', error));
+        }
+
+        function populateUserPortfolio(data) {
+            const partner = data.partner;
+            const stats = data.stats;
+            const deals = data.deals;
+
+            $('#user-profile-section').html(`
+                <div class="text-center">
+                    <div class="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user text-blue-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold">${partner.name}</h3>
+                    <p class="text-gray-600">${partner.email}</p>
+                    <p class="text-gray-600">${partner.phone}</p>
+                    ${partner.company ? `<p class="text-gray-600">${partner.company}</p>` : ''}
+                </div>
+                <div class="grid grid-cols-3 gap-4 mt-6">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600">${stats.total_submissions}</div>
+                        <div class="text-sm text-gray-600">Total</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600">${stats.approved_count}</div>
+                        <div class="text-sm text-gray-600">Approved</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-red-600">${stats.denied_count}</div>
+                        <div class="text-sm text-gray-600">Denied</div>
+                    </div>
+                </div>
+                <div class="mt-4 text-center">
+                    <div class="text-lg font-semibold text-gray-800">${stats.approval_rate}%</div>
+                    <div class="text-sm text-gray-600">Approval Rate</div>
+                </div>
+            `);
+
+            let dealsHtml = '';
+            deals.forEach(deal => {
+                dealsHtml += `
+                    <div class="border rounded-lg p-4 mb-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-medium">${deal.property.address}</h4>
+                                <p class="text-sm text-gray-600">${deal.property.city}, ${deal.property.state}</p>
+                                <p class="text-sm text-gray-600">Asked: $${parseInt(deal.financials.asking_price || 0).toLocaleString()}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="status-badge status-${deal.status}">${deal.status}</span>
+                                <p class="text-sm text-gray-600 mt-1">${new Date(deal.created_at).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button onclick="openDealModal('${deal.id}')" class="text-blue-600 hover:text-blue-800 text-sm">
+                                <i class="fas fa-eye mr-1"></i> View Details
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            $('#user-deals-list').html(dealsHtml || '<p class="text-gray-500">No deals found</p>');
+        }
+
+        function closeUserPortfolio() {
+            $('#user-portfolio-drawer').removeClass('open');
+            $('#drawer-overlay').addClass('hidden');
+        }
+
+        function openDealModal(dealId) {
+            const deal = currentDeals.find(d => d.id === dealId);
+            if (!deal) return;
+
+            const modalContent = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Property Details</h3>
+                        <div class="space-y-2">
+                            <p><strong>Address:</strong> ${deal.property.address}</p>
+                            <p><strong>City:</strong> ${deal.property.city}</p>
+                            <p><strong>State:</strong> ${deal.property.state}</p>
+                            <p><strong>ZIP:</strong> ${deal.property.zip}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Financial Details</h3>
+                        <div class="space-y-2">
+                            <p><strong>Asking Price:</strong> $${parseInt(deal.financials.asking_price || 0).toLocaleString()}</p>
+                            <p><strong>ARV:</strong> $${parseInt(deal.financials.arv || 0).toLocaleString()}</p>
+                            <p><strong>Repairs:</strong> $${parseInt(deal.financials.repairs || 0).toLocaleString()}</p>
+                            <p><strong>Suggested Offer:</strong> $${parseInt(deal.financials.suggested_offer || 0).toLocaleString()}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <h3 class="text-lg font-semibold mb-4">Partner Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p><strong>Name:</strong> ${deal.partner.name}</p>
+                            <p><strong>Email:</strong> ${deal.partner.email}</p>
+                        </div>
+                        <div>
+                            <p><strong>Phone:</strong> ${deal.partner.phone}</p>
+                            <p><strong>Company:</strong> ${deal.partner.company || 'N/A'}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <h3 class="text-lg font-semibold mb-4">Deal Status</h3>
+                    <div class="flex items-center space-x-4">
+                        <span class="status-badge status-${deal.status}">${deal.status}</span>
+                        <span class="text-sm text-gray-600">Submitted: ${new Date(deal.created_at).toLocaleDateString()}</span>
+                    </div>
+                    ${deal.admin_notes ? `<div class="mt-4"><strong>Admin Notes:</strong><p class="text-gray-700">${deal.admin_notes}</p></div>` : ''}
+                </div>
+                ${deal.status === 'pending' ? `
+                    <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                        <h4 class="font-medium mb-3">Update Status</h4>
+                        <div class="space-y-3">
+                            <textarea id="admin-notes" placeholder="Add admin notes..." class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+                            <div class="flex space-x-3">
+                                <button onclick="updateDealStatus('${deal.id}', 'approved')" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                                    <i class="fas fa-check mr-2"></i> Approve
+                                </button>
+                                <button onclick="updateDealStatus('${deal.id}', 'denied')" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                                    <i class="fas fa-times mr-2"></i> Deny
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            $('#deal-detail-content').html(modalContent);
+            $('#deal-detail-modal').removeClass('hidden');
+        }
+
+        function closeDealModal() {
+            $('#deal-detail-modal').addClass('hidden');
+        }
+
+        function updateDealStatus(dealId, status) {
+            const notes = $('#admin-notes').val() || '';
+            
+            fetch(`/admin/api/jv-deals/${dealId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    status: status,
+                    notes: notes
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Deal ${status} successfully!`);
+                    closeDealModal();
+                    refreshData();
+                } else {
+                    alert('Error updating deal: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating deal:', error);
+                alert('Error updating deal');
+            });
+        }
+
+        function refreshData() {
+            loadMetrics();
+            applyFilters();
+        }
+
+        // Close modal when clicking outside
+        $(document).on('click', function(e) {
+            if (e.target.id === 'deal-detail-modal') {
+                closeDealModal();
+            }
+        });
+    </script>
+</body>
+</html>

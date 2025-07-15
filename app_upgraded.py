@@ -2969,17 +2969,34 @@ def jv_submit_deal():
         )
         
         # Trigger Zapier webhook for new JV submission
-        from zapier_webhook_service import trigger_jv_submission
+        from zapier_webhook_service import ZapierWebhookService
         from datetime import datetime
-        trigger_jv_submission({
+        
+        webhook_data = {
             'id': deal_id,
-            'address': data.get('property_address'),
-            'user_id': partner_id,  # Using partner_id as user_id for now
+            'property_address': data.get('property_address'),
+            'property_city': data.get('city'),
+            'property_state': data.get('state'),
+            'asking_price': data.get('seller_asking_price'),
+            'suggested_offer': data.get('purchase_price'),
+            'arv': data.get('arv'),
+            'repair_estimate': data.get('rehab_cost'),
             'partner_name': data.get('partner_name'),
             'partner_email': data.get('partner_email'),
-            'status': 'pending',
-            'created_at': datetime.utcnow().isoformat()
-        })
+            'partner_phone': data.get('partner_phone'),
+            'partner_company': data.get('partner_company'),
+            'partner_markets': data.get('partner_markets', []),
+            'created_at': datetime.utcnow().isoformat(),
+            'auto_evaluation': underwrite_result.get('status'),
+            'evaluation_reasons': underwrite_result.get('reasons', [])
+        }
+        
+        try:
+            webhook_service = ZapierWebhookService()
+            webhook_service.trigger_new_jv_submission(webhook_data)
+        except Exception as webhook_error:
+            logging.error(f"Webhook error: {webhook_error}")
+            # Don't fail the main operation if webhook fails
         
         return jsonify({
             'success': True,
@@ -3869,6 +3886,82 @@ def affiliate_redirect(affiliate_code):
 def affiliate_links():
     """Show affiliate links for easy copying"""
     return render_template('affiliate_links.html')
+
+# ===============================
+# JV Deals Admin Panel Routes
+# ===============================
+
+@app.route('/admin/jv-deals-enhanced')
+@require_auth
+def admin_jv_deals_enhanced():
+    """Enhanced JV Deals Admin Panel with DataGrid functionality"""
+    # Check if user has admin permissions
+    user_email = session.get('user_email')
+    if user_email not in ['devin@pfpsolutions.us', 'admin@properwrite.com']:
+        flash('Access denied. Admin permissions required.', 'error')
+        return redirect(url_for('index'))
+    
+    return render_template('admin_jv_deals_enhanced.html')
+
+# ===============================
+# Team JV Queue Routes
+# ===============================
+
+@app.route('/team/jv-queue')
+@require_auth
+def team_jv_queue():
+    """Team-side JV queue viewer (read-only)"""
+    return render_template('team_jv_queue.html')
+
+@app.route('/api/team/jv-deals', methods=['GET'])
+@require_auth
+def get_team_jv_deals():
+    """Get JV deals for current team"""
+    try:
+        # Get user's team ID
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'success': False, 'error': 'User not authenticated'}), 401
+        
+        # Get user's team information
+        billing_service = BillingService()
+        user_info = billing_service.get_user_info(user_id)
+        if not user_info:
+            return jsonify({'success': False, 'error': 'User not found'}), 404
+            
+        team_id = user_info.get('team_id')
+        if not team_id:
+            return jsonify({'success': False, 'error': 'User not part of any team'}), 400
+        
+        # Get team deals from database
+        from jv_database import JVDatabase
+        jv_db = JVDatabase()
+        
+        # Get team deals
+        deals = jv_db.get_team_jv_deals(team_id)
+        
+        # Get team members for filter
+        team_members = jv_db.get_team_members(team_id)
+        
+        # Calculate metrics
+        total_submitted = len(deals)
+        pending_count = len([d for d in deals if d.get('status') == 'pending'])
+        approved_count = len([d for d in deals if d.get('status') == 'approved'])
+        
+        return jsonify({
+            'success': True,
+            'deals': deals,
+            'team_members': team_members,
+            'metrics': {
+                'total_submitted': total_submitted,
+                'pending_count': pending_count,
+                'approved_count': approved_count
+            }
+        })
+        
+    except Exception as e:
+        logging.error(f"Error getting team JV deals: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
