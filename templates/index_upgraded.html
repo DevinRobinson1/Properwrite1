@@ -2835,9 +2835,14 @@
 
                             <!-- Property Specifics -->
                             <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                                    <i class="fas fa-home mr-2 text-blue-500"></i>Property Specifics
-                                </h3>
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-lg font-semibold text-gray-800">
+                                        <i class="fas fa-home mr-2 text-blue-500"></i>Property Specifics
+                                    </h3>
+                                    <button onclick="populateRenovationFromPropertyData()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                                        <i class="fas fa-sync-alt mr-2"></i>Load Current Property Data
+                                    </button>
+                                </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Property Address</label>
@@ -10825,6 +10830,8 @@
                 document.getElementById('renovation-estimator-content').classList.remove('hidden');
                 document.getElementById('renovation-estimator-tab-btn').classList.add('bg-orange-600', 'text-white');
                 document.getElementById('renovation-estimator-tab-btn').classList.remove('bg-gray-300', 'text-gray-700');
+                // Auto-populate renovation estimator with current property data
+                populateRenovationFromPropertyData();
             } else if (tabName === 'new-construction') {
                 document.getElementById('new-construction-content').classList.remove('hidden');
                 document.getElementById('new-construction-tab-btn').classList.add('bg-orange-600', 'text-white');
@@ -10855,6 +10862,57 @@
 
         function updateRenovationEstimate() {
             // Auto-calculate based on input changes
+            calculateRenovationEstimate();
+        }
+
+        function populateRenovationFromPropertyData() {
+            // Get current property data from the main analysis section
+            const currentAddress = document.getElementById('address').value || '';
+            const currentSqft = document.getElementById('sqft').value || '';
+            const currentBedrooms = document.getElementById('bedrooms').value || '';
+            const currentBathrooms = document.getElementById('bathrooms').value || '';
+            const currentArv = document.getElementById('arv').value || '';
+            
+            // Get property data from the global property analysis if available
+            if (window.currentPropertyData) {
+                const propData = window.currentPropertyData;
+                
+                // Auto-populate renovation estimator fields
+                if (propData.address) {
+                    document.getElementById('ren-property-address').value = propData.address;
+                }
+                if (propData.sqft) {
+                    document.getElementById('ren-sqft').value = propData.sqft;
+                }
+                if (propData.bedrooms) {
+                    document.getElementById('ren-bedrooms').value = propData.bedrooms;
+                }
+                if (propData.bathrooms) {
+                    document.getElementById('ren-bathrooms').value = propData.bathrooms;
+                }
+                if (propData.arv) {
+                    document.getElementById('ren-arv').value = formatNumber(propData.arv);
+                }
+            } else {
+                // Fallback to current form values
+                if (currentAddress) {
+                    document.getElementById('ren-property-address').value = currentAddress;
+                }
+                if (currentSqft) {
+                    document.getElementById('ren-sqft').value = currentSqft;
+                }
+                if (currentBedrooms) {
+                    document.getElementById('ren-bedrooms').value = currentBedrooms;
+                }
+                if (currentBathrooms) {
+                    document.getElementById('ren-bathrooms').value = currentBathrooms;
+                }
+                if (currentArv) {
+                    document.getElementById('ren-arv').value = currentArv;
+                }
+            }
+            
+            // Auto-calculate the estimate with the new data
             calculateRenovationEstimate();
         }
 

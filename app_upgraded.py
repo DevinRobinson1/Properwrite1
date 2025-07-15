@@ -39,7 +39,7 @@ from enhanced_comps_service import EnhancedCompsService, SearchParams
 from email_service import email_service
 from affiliate_api import affiliate_api
 from construction_service import ConstructionService
-from renovation_estimator_service import RenovationEstimatorService
+from renovation_estimator_backend import RenovationEstimatorService
 
 # Load environment variables from .env file
 if os.path.exists('.env'):
@@ -2295,6 +2295,87 @@ def analyze_property_risk():
             'status': 'error',
             'error': str(e)
         })
+
+@app.route('/api/renovation/estimate', methods=['POST'])
+@csrf.exempt
+def renovation_estimate():
+    """
+    Calculate comprehensive renovation estimate based on property data and renovation scope
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No data provided'
+            }), 400
+        
+        property_data = data.get('property_data', {})
+        renovation_scope = data.get('renovation_scope', {})
+        
+        if not property_data:
+            return jsonify({
+                'success': False,
+                'error': 'Property data is required'
+            }), 400
+        
+        # Initialize renovation estimator service
+        renovation_service = RenovationEstimatorService()
+        
+        # Calculate estimate
+        estimate = renovation_service.calculate_renovation_estimate(
+            property_data=property_data,
+            renovation_scope=renovation_scope
+        )
+        
+        return jsonify({
+            'success': True,
+            'estimate': estimate
+        })
+        
+    except Exception as e:
+        print(f"Error calculating renovation estimate: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/renovation/save', methods=['POST'])
+@csrf.exempt  
+def save_renovation_estimate():
+    """
+    Save renovation project to database
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No data provided'
+            }), 400
+        
+        project_data = data.get('project_data', {})
+        estimate_data = data.get('estimate_data', {})
+        
+        # Initialize renovation estimator service
+        renovation_service = RenovationEstimatorService()
+        
+        # Save project
+        result = renovation_service.save_renovation_project(
+            project_data=project_data,
+            estimate_data=estimate_data
+        )
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        print(f"Error saving renovation project: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 @app.route('/api/comps/analyze', methods=['POST'])
 @csrf.exempt
