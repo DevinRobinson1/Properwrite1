@@ -2025,12 +2025,34 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.credits || 0}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.last_login || 'Never'}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button onclick="viewUser('${user.id}', '${user.email}', '${user.name}', '${user.team}', '${user.plan}', '${user.credits}', '${user.last_login || 'Never'}')" class="text-blue-600 hover:text-blue-900 mr-3">View</button>
+                        <button class="view-user-btn text-blue-600 hover:text-blue-900 mr-3" 
+                                data-user-id="${user.id}" 
+                                data-user-email="${user.email}" 
+                                data-user-name="${user.name || ''}" 
+                                data-user-team="${user.team || ''}" 
+                                data-user-plan="${user.plan}" 
+                                data-user-credits="${user.credits}" 
+                                data-user-last-login="${user.last_login || 'Never'}">View</button>
                         <button onclick="suspendUser('${user.id}')" class="text-red-600 hover:text-red-900">Suspend</button>
                     </td>
                 `;
                 
                 tbody.appendChild(row);
+            });
+            
+            // Add event listeners to view buttons
+            document.querySelectorAll('.view-user-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-user-id');
+                    const email = this.getAttribute('data-user-email');
+                    const name = this.getAttribute('data-user-name');
+                    const team = this.getAttribute('data-user-team');
+                    const plan = this.getAttribute('data-user-plan');
+                    const credits = this.getAttribute('data-user-credits');
+                    const lastLogin = this.getAttribute('data-user-last-login');
+                    
+                    viewUser(id, email, name, team, plan, credits, lastLogin);
+                });
             });
         }
 
