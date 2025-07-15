@@ -1,0 +1,51 @@
+{
+  "valuations": {
+    "rentcast": {
+      "estimate": 736000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    },
+    "rentometer": {
+      "rent_estimate": 3414,
+      "rent_median": 3050,
+      "rent_range": {
+        "min": 1800,
+        "max": 7000
+      },
+      "source": "Rentometer",
+      "confidence": "High",
+      "samples": 30,
+      "radius_miles": 1.5,
+      "credits_remaining": 958,
+      "updated": "2025-07-15"
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin",
+    "Rentometer"
+  ],
+  "sources_used": [
+    "RentCast",
+    "Rentometer"
+  ],
+  "address_info": {
+    "address": "123 Main St, Charlotte, NC, 28202",
+    "city": "Charlotte",
+    "state": "NC",
+    "zip_code": "28202",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-15T18:43:04.662324",
+  "rent_estimate": 3414,
+  "rent_data_source": "Rentometer"
+}

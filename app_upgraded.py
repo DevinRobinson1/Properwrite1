@@ -40,6 +40,7 @@ from email_service import email_service
 from affiliate_api import affiliate_api
 from construction_service import ConstructionService
 from renovation_estimator_backend import RenovationEstimatorService
+from services.unified_property_data_service import get_unified_property_service
 
 # Load environment variables from .env file
 if os.path.exists('.env'):
@@ -877,7 +878,7 @@ def analyze_property():
         # Initialize valuation_data to avoid unbound variable error
         valuation_data = {}
         
-        # Get comprehensive property valuation from multiple sources
+        # Get comprehensive property valuation from multiple sources using unified service
         try:
             # Clean up the formatted address to remove duplicates before sending to APIs
             from address_utils import to_zillow_search_string, normalize_address_for_apis
@@ -887,15 +888,38 @@ def analyze_property():
             
             logging.info(f"🐛 Cleaned address for APIs: {clean_address}")
             
-            valuation_data = comprehensive_valuation_service.get_comprehensive_valuation(
-                place_id=canonical_address.get('place_id', ''),
-                address=clean_address,  # Use cleaned address without duplicates
+            # Use unified property service for cache-aware data retrieval
+            unified_service = get_unified_property_service()
+            
+            # Get property data with intelligent caching
+            property_response = unified_service.get_property_data(
+                address=clean_address,
                 city=canonical_address['city'],
                 state=canonical_address['state'],
                 zip_code=canonical_address['zip'],
+                place_id=canonical_address.get('place_id', ''),
                 latitude=latitude,
                 longitude=longitude
             )
+            
+            # Extract valuation data from unified response
+            valuation_data = property_response.get('valuations', {})
+            
+            # Format valuation data for backward compatibility
+            if not valuation_data:
+                valuation_data = {
+                    'valuations': {},
+                    'sources_tried': property_response.get('data_sources', []),
+                    'sources_used': property_response.get('data_sources', [])
+                }
+            else:
+                # Ensure valuation_data has expected structure
+                if isinstance(valuation_data, dict) and 'valuations' not in valuation_data:
+                    valuation_data = {
+                        'valuations': valuation_data,
+                        'sources_tried': property_response.get('data_sources', []),
+                        'sources_used': property_response.get('data_sources', [])
+                    }
             
             # Extract best property estimate from comprehensive valuation
             best_estimate = comprehensive_valuation_service.get_best_estimate(valuation_data)
@@ -1081,6 +1105,84 @@ def analyze_property():
         return jsonify({
             'success': False,
             'error': 'Failed to analyze property. Please check the address and try again.'
+        }), 500
+
+@app.route('/api/cache/stats', methods=['GET'])
+@csrf.exempt
+def get_cache_stats():
+    """Get cache statistics"""
+    try:
+        unified_service = get_unified_property_service()
+        stats = unified_service.get_cache_stats()
+        return jsonify({
+            'success': True,
+            'stats': stats
+        })
+    except Exception as e:
+        logging.error(f"Cache stats error: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to get cache statistics'
+        }), 500
+
+@app.route('/api/cache/clear', methods=['POST'])
+@csrf.exempt
+def clear_cache():
+    """Clear cache for specific address or all cache"""
+    try:
+        data = request.get_json()
+        address = data.get('address') if data else None
+        
+        unified_service = get_unified_property_service()
+        unified_service.clear_cache(address)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Cache cleared for {address}' if address else 'All expired cache cleared'
+        })
+    except Exception as e:
+        logging.error(f"Cache clear error: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to clear cache'
+        }), 500
+
+@app.route('/api/cache/refresh', methods=['POST'])
+@csrf.exempt
+def refresh_cache():
+    """Force refresh cache for specific address"""
+    try:
+        data = request.get_json()
+        if not data or not data.get('address'):
+            return jsonify({
+                'success': False,
+                'error': 'Address is required'
+            }), 400
+        
+        address = data.get('address')
+        city = data.get('city', '')
+        state = data.get('state', '')
+        zip_code = data.get('zip_code', '')
+        
+        unified_service = get_unified_property_service()
+        property_data = unified_service.get_property_data(
+            address=address,
+            city=city,
+            state=state,
+            zip_code=zip_code,
+            force_refresh=True
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Cache refreshed successfully',
+            'data': property_data
+        })
+    except Exception as e:
+        logging.error(f"Cache refresh error: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to refresh cache'
         }), 500
 
 def _assess_investment_potential(property_data: dict) -> str:
@@ -2439,34 +2541,54 @@ def analyze_comps():
             zip_code=zip_code
         )
         
-        # ENHANCED COMPS SERVICE INTEGRATION
-        # This service uses RapidAPI-Zillow credentials with:
-        # - API Key injection: RAPIDAPI_KEY from environment variables
-        # - Endpoint: zillow-com1.p.rapidapi.com/propertyExtendedSearch
-        # - Parameters: status_type=RecentlySold, home_type=Houses
-        # - Rule filters: Time frame (≤90 days → 180 days → 365 days), Radius (0.25 → 0.5 → 1 mile)
-        result = enhanced_comps_service.search_comparable_sales(search_params)
+        # UNIFIED COMPS SERVICE INTEGRATION
+        # This service uses cache-aware property data service with:
+        # - Intelligent caching with TTL (24-72 hours)
+        # - Stale-while-revalidate pattern for fresh data
+        # - Distributed locking for API calls
+        # - Automatic fallback to enhanced/simple services
+        unified_service = get_unified_property_service()
         
-        # Fallback to simple service if enhanced fails
+        # Get comparable properties with caching
+        result = unified_service.get_comparable_properties(
+            address=address,
+            beds=int(beds),
+            baths=float(baths),
+            sqft=int(sqft),
+            lat=lat or 0.0,
+            lng=lng or 0.0
+        )
+        
+        # If unified service fails, fallback to enhanced service
         if not result.get('success') or not result.get('comps'):
-            logging.warning("Enhanced comps service failed, falling back to simple service")
+            logging.warning("Unified service failed, falling back to enhanced service")
             
-            # Use simple service as fallback
+            # Use enhanced service as fallback
             try:
-                simple_result = comps_service.search_comparable_sales(
-                    address=address,
-                    beds=int(beds),
-                    baths=float(baths),
-                    sqft=int(sqft),
-                    lat=lat or 0.0,
-                    lng=lng or 0.0
-                )
-                if simple_result.get('success') and simple_result.get('comps'):
-                    result = simple_result
+                enhanced_result = enhanced_comps_service.search_comparable_sales(search_params)
+                if enhanced_result.get('success') and enhanced_result.get('comps'):
+                    result = enhanced_result
                     result['fallback_used'] = True
-                    result['message'] = "Using simplified analysis due to performance optimization"
+                    result['message'] = "Using enhanced service due to cache miss"
             except Exception as e:
-                logging.error(f"Simple service fallback failed: {e}")
+                logging.error(f"Enhanced service fallback failed: {e}")
+                
+                # Final fallback to simple service
+                try:
+                    simple_result = comps_service.search_comparable_sales(
+                        address=address,
+                        beds=int(beds),
+                        baths=float(baths),
+                        sqft=int(sqft),
+                        lat=lat or 0.0,
+                        lng=lng or 0.0
+                    )
+                    if simple_result.get('success') and simple_result.get('comps'):
+                        result = simple_result
+                        result['fallback_used'] = True
+                        result['message'] = "Using simplified analysis due to performance optimization"
+                except Exception as e:
+                    logging.error(f"Simple service fallback failed: {e}")
         
         # Add analysis summary if successful
         if result.get('success') and result.get('comps'):

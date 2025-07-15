@@ -1,0 +1,49 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 822800,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 2067875020,
+      "matched_address": "123 Main St, Charlotte, NC, Charlotte, NC, 28202, Charlotte, NC 28202",
+      "images": [
+        "https://maps.googleapis.com/maps/api/streetview?location=123+Main+St%2C+Charlotte%2C+NC+28204&size=400x300&source=outdoor&signature=Z-6oiea19Hl30pjY2YJePEK-f28%3D"
+      ],
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "year_built": null
+    },
+    "rentcast": {
+      "estimate": 736000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin",
+    "Rentometer"
+  ],
+  "sources_used": [
+    "Zillow",
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "123 Main St, Charlotte, NC, Charlotte, NC, 28202",
+    "city": "Charlotte",
+    "state": "NC",
+    "zip_code": "28202",
+    "latitude": 35.2271,
+    "longitude": -80.8431
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-15T18:42:57.469000"
+}
