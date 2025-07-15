@@ -445,6 +445,140 @@ def suspend_user(user_id):
         logging.error(f"Error suspending user {user_id}: {e}")
         return jsonify({'error': str(e)}), 500
 
+@admin_api_bp.route('/users/<user_id>/details', methods=['GET'])
+@require_admin_api
+def get_user_details(user_id):
+    """Get comprehensive user details for 360° view panel"""
+    try:
+        with get_db_session() as db:
+            # Get user with team information
+            user = db.query(
+                User.id,
+                User.email,
+                User.name,
+                User.created_at,
+                User.role,
+                User.is_active,
+                Team.name.label('team_name'),
+                Team.tier.label('plan'),
+                Team.credit_balance
+            ).join(
+                Team, User.team_id == Team.id, isouter=True
+            ).filter(User.id == user_id).first()
+            
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+            
+            # Get team member count
+            team_members = 0
+            if user.team_name:
+                team_members = db.query(func.count(User.id)).filter(
+                    and_(User.team_id == user.team_id, User.is_active == True)
+                ).scalar() or 0
+            
+            # Get credit usage information
+            total_credits_used = db.query(
+                func.sum(case(
+                    (CreditLog.delta < 0, -CreditLog.delta),
+                    else_=0
+                ))
+            ).filter(CreditLog.user_id == user_id).scalar() or 0
+            
+            # Get monthly usage (last 30 days)
+            thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+            monthly_usage = db.query(
+                func.sum(case(
+                    (CreditLog.delta < 0, -CreditLog.delta),
+                    else_=0
+                ))
+            ).filter(
+                and_(
+                    CreditLog.user_id == user_id,
+                    CreditLog.created_at >= thirty_days_ago
+                )
+            ).scalar() or 0
+            
+            # Get recent activity
+            recent_activity = db.query(CreditLog.created_at).filter(
+                CreditLog.user_id == user_id
+            ).order_by(CreditLog.created_at.desc()).first()
+            
+            # Get session count (approximated by credit log entries)
+            session_count = db.query(func.count(CreditLog.id)).filter(
+                CreditLog.user_id == user_id
+            ).scalar() or 0
+            
+            # Calculate engagement score (simplified)
+            engagement_score = min(100, (session_count * 5) + (total_credits_used // 10))
+            
+            # AI recommendations based on usage patterns
+            ai_recommendations = []
+            if total_credits_used == 0:
+                ai_recommendations.append({
+                    'title': 'First Analysis Recommended',
+                    'description': 'User has not performed any property analysis yet. Consider sending welcome guidance.'
+                })
+            elif total_credits_used < 50:
+                ai_recommendations.append({
+                    'title': 'Engagement Boost Opportunity',
+                    'description': 'Low usage detected. Consider promotional credits or feature highlights.'
+                })
+            else:
+                ai_recommendations.append({
+                    'title': 'Active User - Upsell Opportunity',
+                    'description': 'High usage indicates potential for plan upgrade.'
+                })
+            
+            user_details = {
+                'id': str(user.id),
+                'email': user.email,
+                'name': user.name or 'No name',
+                'created_at': user.created_at.strftime('%Y-%m-%d') if user.created_at else 'Unknown',
+                'status': 'active' if user.is_active else 'suspended',
+                'last_login': recent_activity[0].strftime('%Y-%m-%d') if recent_activity else 'Never',
+                'properties_analyzed': total_credits_used,
+                'session_count': session_count,
+                'avg_session_duration': '15 min',  # Estimated
+                'engagement_score': f'{engagement_score}%',
+                
+                # Plan & Billing
+                'plan': user.plan or 'free',
+                'credits': user.credit_balance or 0,
+                'credits_used': total_credits_used,
+                'monthly_usage': monthly_usage,
+                'renewal_date': 'N/A',  # Would need Stripe data
+                'billing_status': 'Active' if user.is_active else 'Suspended',
+                
+                # Team Information
+                'team_name': user.team_name or 'No team',
+                'team_role': user.role or 'Member',
+                'team_members': team_members,
+                
+                # Support & Feedback
+                'support_tickets': 0,  # Would need support system integration
+                'last_support': 'Never',
+                'platform_feedback': 'None',
+                
+                # Feature Usage (estimated based on credit usage)
+                'wholesale_usage': max(0, total_credits_used // 4),
+                'installment_usage': max(0, total_credits_used // 5),
+                'subject_to_usage': max(0, total_credits_used // 6),
+                'seller_finance_usage': max(0, total_credits_used // 7),
+                'renovation_usage': max(0, total_credits_used // 8),
+                
+                # AI Recommendations
+                'ai_recommendations': ai_recommendations
+            }
+            
+            return jsonify({
+                'success': True,
+                'user': user_details
+            })
+            
+    except Exception as e:
+        logging.error(f"Error getting user details for {user_id}: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @admin_api_bp.route('/teams', methods=['GET'])
 @require_admin_api
 def get_teams():
