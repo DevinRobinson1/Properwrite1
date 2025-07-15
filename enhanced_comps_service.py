@@ -50,10 +50,12 @@ class EnhancedCompsService:
     """Enhanced comparable properties service with strict underwriting rules"""
     
     def __init__(self):
+        # API KEY INJECTION POINT: RapidAPI-Zillow credentials from environment
         self.rapidapi_key = os.environ.get('RAPIDAPI_KEY')
         if not self.rapidapi_key:
             raise ValueError("RAPIDAPI_KEY not found in environment variables")
         
+        # API headers for RapidAPI-Zillow integration
         self.headers = {
             "X-RapidAPI-Key": self.rapidapi_key,
             "X-RapidAPI-Host": "zillow-com1.p.rapidapi.com"
@@ -105,7 +107,10 @@ class EnhancedCompsService:
         logger.info(f"🎯 Target zip code: {search_params.zip_code}")
         
         try:
-            # Comprehensive search strategies as requested
+            # COMP-SELECTION RULES APPLIED HERE:
+            # Time frame: start with ≤90 days, then 180 days, expand by 30-day steps up to 365 days
+            # Radius: 0.25 mi → 0.5 mi → 1 mi (stop expanding once ≥3 comps)
+            # Same property type + style; beds/baths must match subject; sqft ± 500
             search_strategies = [
                 {'time_window': 90, 'radius': 0.25},   # 3 months, very close
                 {'time_window': 180, 'radius': 0.5},   # 6 months, nearby
@@ -213,28 +218,32 @@ class EnhancedCompsService:
             # Try multiple search strategies with zip code priority
             search_strategies = []
             
+            # RAPIDAPI-ZILLOW API PARAMETERS CONFIGURED HERE:
+            # Using propertyExtendedSearch endpoint with status_type=RecentlySold
+            # home_type=Houses to match subject property type
+            
             # Strategy 1: Try zip code first if available
             if search_params.zip_code:
                 search_strategies.append({
                     "location": search_params.zip_code,
-                    "status_type": "RecentlySold",
-                    "home_type": "Houses",
+                    "status_type": "RecentlySold",  # Pull "Recently Sold" comparables
+                    "home_type": "Houses",          # Mirror subject property type
                     "sort": "Newest"
                 })
             
             # Strategy 2: Try full address
             search_strategies.append({
                 "location": search_location,
-                "status_type": "RecentlySold",
-                "home_type": "Houses",
+                "status_type": "RecentlySold",  # Pull "Recently Sold" comparables
+                "home_type": "Houses",          # Mirror subject property type
                 "sort": "Newest"
             })
             
             # Strategy 3: Try city/state as fallback
             search_strategies.append({
                 "location": self._extract_city_state(address),
-                "status_type": "RecentlySold", 
-                "home_type": "Houses",
+                "status_type": "RecentlySold",  # Pull "Recently Sold" comparables
+                "home_type": "Houses",          # Mirror subject property type
                 "sort": "Newest"
             })
             
@@ -242,9 +251,11 @@ class EnhancedCompsService:
             
             for strategy in search_strategies:
                 try:
+                    # API KEY INJECTION: Using RapidAPI-Zillow credentials
+                    # Endpoint: propertyExtendedSearch for "Recently Sold" properties
                     response = requests.get(
                         "https://zillow-com1.p.rapidapi.com/propertyExtendedSearch",
-                        headers=self.headers,
+                        headers=self.headers,  # Contains RAPIDAPI_KEY from environment
                         params=strategy,
                         timeout=10
                     )

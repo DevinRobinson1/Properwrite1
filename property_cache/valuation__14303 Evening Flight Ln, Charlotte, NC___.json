@@ -36,8 +36,8 @@
       "confidence": "High",
       "samples": 31,
       "radius_miles": 1.5,
-      "credits_remaining": 997,
-      "updated": "2025-07-14"
+      "credits_remaining": 964,
+      "updated": "2025-07-15"
     }
   },
   "sources_tried": [
@@ -60,7 +60,7 @@
     "longitude": null
   },
   "cache_used": false,
-  "timestamp": "2025-07-14T15:10:31.497178",
+  "timestamp": "2025-07-15T15:13:08.056375",
   "rent_estimate": 2123,
   "rent_data_source": "Rentometer"
 }

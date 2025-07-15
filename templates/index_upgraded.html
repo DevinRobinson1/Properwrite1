@@ -7068,19 +7068,30 @@
                 return;
             }
             
-            // Try to get address from multiple possible sources
-            const address = document.getElementById('address')?.value || 
+            // Auto-populate subject property from header data if available
+            populateCompsSubjectProperty();
+            
+            // Try to get address from multiple possible sources, prioritizing subject property data
+            const address = document.getElementById('comps-subject-address')?.textContent ||
+                           document.getElementById('address')?.value || 
                            document.getElementById('street-address')?.value ||
                            window.lastPropertyData?.address;
             
-            if (!address) {
-                showToast('Please enter a property address first', 'error');
+            if (!address || address === 'Loading...') {
+                showToast('Please enter a property address first and run property analysis', 'error');
                 return;
             }
 
-            const beds = parseInt(document.getElementById('bedrooms')?.value || document.getElementById('beds')?.value) || 3;
-            const baths = parseFloat(document.getElementById('bathrooms')?.value || document.getElementById('baths')?.value) || 2;
-            const sqft = parseInt((document.getElementById('square_feet')?.value || document.getElementById('sqft')?.value || '1500').replace(/,/g, ''));
+            // Get property data from subject property inputs (populated from header)
+            const beds = parseInt(document.getElementById('comps-subject-beds-input')?.value) || 
+                        parseInt(document.getElementById('bedrooms')?.value) || 
+                        parseInt(document.getElementById('beds')?.value) || 3;
+            const baths = parseFloat(document.getElementById('comps-subject-baths-input')?.value) || 
+                         parseFloat(document.getElementById('bathrooms')?.value) || 
+                         parseFloat(document.getElementById('baths')?.value) || 2;
+            const sqft = parseInt((document.getElementById('comps-subject-sqft-input')?.value || 
+                                 document.getElementById('square_feet')?.value || 
+                                 document.getElementById('sqft')?.value || '1500').replace(/,/g, ''));
             const maxDistance = parseFloat(document.getElementById('comps-max-distance')?.value) || 0.5;
             const daysFilter = parseInt(document.getElementById('comps-days-filter')?.value) || 180;
 
@@ -7092,6 +7103,18 @@
             // Get property coordinates if available
             const lat = window.lastPropertyData?.latitude;
             const lng = window.lastPropertyData?.longitude;
+            
+            // Get city, state, zip from property data or form fields
+            const city = window.lastPropertyData?.city || document.getElementById('city')?.value;
+            const state = window.lastPropertyData?.state || document.getElementById('state')?.value;
+            const zip_code = window.lastPropertyData?.zip_code || document.getElementById('zip-code')?.value;
+            const yearBuilt = document.getElementById('comps-subject-year-input')?.value || 
+                             window.lastPropertyData?.year_built || 1950;
+
+            console.log('🔍 Starting Comps Analysis with RapidAPI-Zillow integration');
+            console.log('📍 Address:', address);
+            console.log('🏠 Property specs:', {beds, baths, sqft, yearBuilt});
+            console.log('📏 Search parameters:', {maxDistance, daysFilter});
 
             fetch('/api/comps/analyze', {
                 method: 'POST',
@@ -7100,9 +7123,13 @@
                 },
                 body: JSON.stringify({
                     address: address,
+                    city: city,
+                    state: state,
+                    zip_code: zip_code,
                     beds: beds,
                     baths: baths,
                     sqft: sqft,
+                    year_built: yearBuilt,
                     lat: lat,
                     lng: lng,
                     max_distance: maxDistance,
@@ -7119,21 +7146,22 @@
                     if (errorEl) {
                         errorEl.classList.remove('hidden');
                         const errorMsgEl = document.getElementById('comps-error-message');
-                        if (errorMsgEl) errorMsgEl.textContent = data.error || 'Failed to analyze comparable properties';
+                        if (errorMsgEl) errorMsgEl.textContent = data.error || 'Failed to analyze comparable properties. Please ensure the address is valid and try again.';
                     }
                 } else {
+                    console.log('✅ Comps analysis successful:', data);
                     displayCompsResults(data);
                 }
             })
             .catch(error => {
-                console.error('Comps analysis error:', error);
+                console.error('❌ Comps analysis error:', error);
                 const loadingEl = document.getElementById('comps-loading');
                 if (loadingEl) loadingEl.classList.add('hidden');
                 const errorEl = document.getElementById('comps-error');
                 if (errorEl) {
                     errorEl.classList.remove('hidden');
                     const errorMsgEl = document.getElementById('comps-error-message');
-                    if (errorMsgEl) errorMsgEl.textContent = 'Failed to analyze comparable properties';
+                    if (errorMsgEl) errorMsgEl.textContent = 'Network error: Unable to connect to comparable properties service. Please check your connection and try again.';
                 }
             });
         }

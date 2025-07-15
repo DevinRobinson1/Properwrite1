@@ -2381,7 +2381,8 @@ def save_renovation_estimate():
 @csrf.exempt
 def analyze_comps():
     """
-    Analyze comparable properties using Zillow API and OpenAI
+    Analyze comparable properties using RapidAPI-Zillow integration
+    Retrieves "Recently Sold" properties matching comp-selection rules
     """
     try:
         data = request.get_json()
@@ -2391,23 +2392,24 @@ def analyze_comps():
         beds = data.get('beds') or session.get('current_property', {}).get('beds') or 3
         baths = data.get('baths') or session.get('current_property', {}).get('baths') or 2
         sqft = data.get('sqft') or session.get('current_property', {}).get('sqft') or 1500
-        lat = data.get('latitude') or session.get('current_property', {}).get('latitude')
-        lng = data.get('longitude') or session.get('current_property', {}).get('longitude')
+        lat = data.get('lat') or data.get('latitude') or session.get('current_property', {}).get('latitude')
+        lng = data.get('lng') or data.get('longitude') or session.get('current_property', {}).get('longitude')
+        
+        # Additional parameters from frontend
+        city = data.get('city') or session.get('current_property', {}).get('city') or ""
+        state = data.get('state') or session.get('current_property', {}).get('state') or ""
+        zip_code = data.get('zip_code') or session.get('current_property', {}).get('zip_code') or ""
+        year_built = data.get('year_built') or session.get('current_property', {}).get('year_built') or 1950
+        max_distance = data.get('max_distance', 0.5)
+        days_filter = data.get('days_filter', 180)
         
         if not address:
             return jsonify({
                 'success': False,
-                'error': 'Property address is required'
+                'error': 'Property address is required for comparable analysis'
             }), 400
         
-        # Extract zip code from address for prioritization
-        zip_code = data.get('zip_code') or ""
-        
-        # Try to get zip code from session if not in request
-        if not zip_code:
-            zip_code = session.get('current_property', {}).get('zip', '')
-        
-        # If still no zip code, try to extract from address
+        # Extract zip code from address if not provided
         if not zip_code and address:
             import re
             # Look for 5-digit zip code after state abbreviation
@@ -2420,7 +2422,13 @@ def analyze_comps():
                 if zip_match:
                     zip_code = zip_match.group(1)
         
+        logging.info(f"🔍 Comps analysis starting for: {address}")
+        logging.info(f"🎯 Property specs: {beds} bed, {baths} bath, {sqft} sqft")
+        logging.info(f"📅 Search parameters: {days_filter} days, {max_distance} mile radius")
+        logging.info(f"🗺️ Location data: {city}, {state} {zip_code}")
+        
         # Create search parameters for enhanced service
+        # Uses beds/baths/sqft from Subject Property header for matching
         search_params = SearchParams(
             beds=int(beds),
             baths=float(baths),
@@ -2431,7 +2439,12 @@ def analyze_comps():
             zip_code=zip_code
         )
         
-        # Use enhanced service for comprehensive analysis
+        # ENHANCED COMPS SERVICE INTEGRATION
+        # This service uses RapidAPI-Zillow credentials with:
+        # - API Key injection: RAPIDAPI_KEY from environment variables
+        # - Endpoint: zillow-com1.p.rapidapi.com/propertyExtendedSearch
+        # - Parameters: status_type=RecentlySold, home_type=Houses
+        # - Rule filters: Time frame (≤90 days → 180 days → 365 days), Radius (0.25 → 0.5 → 1 mile)
         result = enhanced_comps_service.search_comparable_sales(search_params)
         
         # Fallback to simple service if enhanced fails
@@ -2459,6 +2472,22 @@ def analyze_comps():
         if result.get('success') and result.get('comps'):
             result['ai_summary'] = result['analysis'].get('summary', '')
             result['recommended_arv'] = result['analysis'].get('recommended_arv', 0)
+            
+            # Add search metadata to response
+            result['search_metadata'] = {
+                'address': address,
+                'beds': beds,
+                'baths': baths,
+                'sqft': sqft,
+                'zip_code': zip_code,
+                'max_distance': max_distance,
+                'days_filter': days_filter,
+                'coordinates': {'lat': lat, 'lng': lng} if lat and lng else None
+            }
+            
+            logging.info(f"✅ Comps analysis successful: {result.get('found_count', 0)} properties found")
+        else:
+            logging.error(f"❌ Comps analysis failed: {result.get('error', 'Unknown error')}")
         
         return jsonify(result)
         
@@ -2466,7 +2495,7 @@ def analyze_comps():
         logging.error(f"Error analyzing comparables: {e}")
         return jsonify({
             'success': False,
-            'error': str(e)
+            'error': f'Comparable analysis failed: {str(e)}'
         }), 500
 
 # Construction API Endpoints
