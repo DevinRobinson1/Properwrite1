@@ -57,6 +57,21 @@ class JVDatabase:
                     cur.execute("CREATE INDEX IF NOT EXISTS idx_jv_deals_partner_id ON jv_deals(partner_id)")
                     cur.execute("CREATE INDEX IF NOT EXISTS idx_jv_deals_created_at ON jv_deals(created_at)")
                     cur.execute("CREATE INDEX IF NOT EXISTS idx_jv_deals_auto_status ON jv_deals(auto_status)")
+                    cur.execute("CREATE INDEX IF NOT EXISTS idx_jv_deals_final_status ON jv_deals(final_status)")
+                    
+                    # Add composite indices for enhanced filtering
+                    cur.execute("CREATE INDEX IF NOT EXISTS idx_jv_deals_state ON jv_deals ((deal_json->>'property_state'))")
+                    cur.execute("CREATE INDEX IF NOT EXISTS idx_jv_deals_city ON jv_deals ((deal_json->>'property_city'))")
+                    cur.execute("CREATE INDEX IF NOT EXISTS idx_jv_deals_zip ON jv_deals ((deal_json->>'property_zip'))")
+                    cur.execute("CREATE INDEX IF NOT EXISTS idx_jv_deals_partner_status ON jv_deals(partner_id, final_status)")
+                    
+                    # Add additional fields to jv_deals for better querying
+                    cur.execute("ALTER TABLE jv_deals ADD COLUMN IF NOT EXISTS submitted_by TEXT")
+                    cur.execute("ALTER TABLE jv_deals ADD COLUMN IF NOT EXISTS admin_notes TEXT")
+                    cur.execute("ALTER TABLE jv_deals ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+                    
+                    # Ensure phone_number is not nullable in partners table
+                    cur.execute("ALTER TABLE partners ALTER COLUMN phone SET NOT NULL")
                     
                     conn.commit()
                     logging.info("Database tables initialized successfully")

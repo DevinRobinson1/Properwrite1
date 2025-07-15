@@ -776,26 +776,97 @@ def get_revenue_metrics():
 @admin_api_bp.route('/jv-deals', methods=['GET'])
 @require_admin_api
 def get_jv_deals():
-    """Get JV deal submissions"""
+    """Get JV deal submissions with advanced filtering and sorting"""
     try:
-        status_filter = request.args.get('status', 'all')
+        # Get query parameters
+        state = request.args.get('state', '')
+        city = request.args.get('city', '')
+        zip_code = request.args.get('zip', '')
+        submitted_by = request.args.get('submitted_by', '')
+        status = request.args.get('status', '')
+        page = int(request.args.get('page', 1))
+        limit = int(request.args.get('limit', 50))
+        sort_by = request.args.get('sort_by', 'created_at')
+        sort_order = request.args.get('sort_order', 'desc')
+        search = request.args.get('search', '')
+        
+        offset = (page - 1) * limit
         
         jv_db = JVDatabase()
         with jv_db.get_connection() as conn:
             with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+                # Build query with filters
                 query = """
                     SELECT d.*, p.name as partner_name, p.email as partner_email,
                            p.phone as partner_phone, p.company as partner_company
                     FROM jv_deals d
                     JOIN partners p ON d.partner_id = p.id
+                    WHERE 1=1
                 """
+                params = []
                 
-                if status_filter != 'all':
-                    query += f" WHERE d.final_status = '{status_filter}'"
+                # Add filters
+                if state:
+                    query += " AND d.deal_json->>'property_state' = %s"
+                    params.append(state)
                 
-                query += " ORDER BY d.created_at DESC"
+                if city:
+                    query += " AND d.deal_json->>'property_city' ILIKE %s"
+                    params.append(f"%{city}%")
                 
-                cur.execute(query)
+                if zip_code:
+                    query += " AND d.deal_json->>'property_zip' = %s"
+                    params.append(zip_code)
+                
+                if submitted_by:
+                    query += " AND p.name ILIKE %s"
+                    params.append(f"%{submitted_by}%")
+                
+                if status:
+                    query += " AND COALESCE(d.final_status, d.auto_status) = %s"
+                    params.append(status)
+                
+                # Global search across text fields
+                if search:
+                    query += """
+                        AND (
+                            p.name ILIKE %s OR
+                            p.email ILIKE %s OR
+                            d.deal_json->>'property_address' ILIKE %s OR
+                            d.deal_json->>'property_city' ILIKE %s OR
+                            d.admin_notes ILIKE %s
+                        )
+                    """
+                    search_param = f"%{search}%"
+                    params.extend([search_param] * 5)
+                
+                # Count total records for pagination
+                count_query = f"SELECT COUNT(*) FROM ({query}) as count_subquery"
+                cur.execute(count_query, params)
+                total_count = cur.fetchone()[0]
+                
+                # Add sorting
+                valid_sort_columns = {
+                    'created_at': 'd.created_at',
+                    'partner_name': 'p.name',
+                    'property_state': "d.deal_json->>'property_state'",
+                    'property_city': "d.deal_json->>'property_city'",
+                    'asking_price': "(d.deal_json->>'asking_price')::numeric",
+                    'status': 'COALESCE(d.final_status, d.auto_status)'
+                }
+                
+                if sort_by in valid_sort_columns:
+                    sort_column = valid_sort_columns[sort_by]
+                    sort_direction = 'ASC' if sort_order.lower() == 'asc' else 'DESC'
+                    query += f" ORDER BY {sort_column} {sort_direction}"
+                else:
+                    query += " ORDER BY d.created_at DESC"
+                
+                # Add pagination
+                query += " LIMIT %s OFFSET %s"
+                params.extend([limit, offset])
+                
+                cur.execute(query, params)
                 deals = cur.fetchall()
                 
                 deal_data = []
@@ -804,6 +875,7 @@ def get_jv_deals():
                     deal_data.append({
                         'id': deal['id'],
                         'partner': {
+                            'id': deal['partner_id'],
                             'name': deal['partner_name'],
                             'email': deal['partner_email'],
                             'phone': deal['partner_phone'],
@@ -823,15 +895,228 @@ def get_jv_deals():
                         },
                         'status': deal['final_status'] or deal['auto_status'],
                         'auto_status': deal['auto_status'],
+                        'final_status': deal['final_status'],
+                        'reasons': deal['reasons'],
+                        'admin_notes': deal.get('admin_notes'),
+                        'submitted_by': deal['partner_name'],
+                        'created_at': deal['created_at'].isoformat(),
+                        'updated_at': deal.get('updated_at').isoformat() if deal.get('updated_at') else None
+                    })
+                
+                return jsonify({
+                    'success': True,
+                    'deals': deal_data,
+                    'pagination': {
+                        'page': page,
+                        'limit': limit,
+                        'total': total_count,
+                        'pages': (total_count + limit - 1) // limit
+                    }
+                })
+                
+    except Exception as e:
+        logging.error(f"Error getting JV deals: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@admin_api_bp.route('/users/<user_id>/jv-deals', methods=['GET'])
+@require_admin_api  
+def get_user_jv_deals(user_id):
+    """Get JV deals for a specific user (for portfolio drawer)"""
+    try:
+        page = int(request.args.get('page', 1))
+        limit = int(request.args.get('limit', 10))
+        offset = (page - 1) * limit
+        
+        jv_db = JVDatabase()
+        with jv_db.get_connection() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+                # Get user's partner record
+                cur.execute("SELECT * FROM partners WHERE id = %s", (user_id,))
+                partner = cur.fetchone()
+                
+                if not partner:
+                    return jsonify({'error': 'Partner not found'}), 404
+                
+                # Get user's deals with pagination
+                cur.execute("""
+                    SELECT d.*, COUNT(*) OVER() as total_count
+                    FROM jv_deals d
+                    WHERE d.partner_id = %s
+                    ORDER BY d.created_at DESC
+                    LIMIT %s OFFSET %s
+                """, (user_id, limit, offset))
+                
+                deals = cur.fetchall()
+                total_count = deals[0]['total_count'] if deals else 0
+                
+                # Get user stats
+                cur.execute("""
+                    SELECT 
+                        COUNT(*) as total_submissions,
+                        COUNT(CASE WHEN COALESCE(final_status, auto_status) = 'approved' THEN 1 END) as approved_count,
+                        COUNT(CASE WHEN COALESCE(final_status, auto_status) = 'denied' THEN 1 END) as denied_count
+                    FROM jv_deals
+                    WHERE partner_id = %s
+                """, (user_id,))
+                
+                stats = cur.fetchone()
+                
+                deal_data = []
+                for deal in deals:
+                    deal_json = deal['deal_json']
+                    deal_data.append({
+                        'id': deal['id'],
+                        'property': {
+                            'address': deal_json.get('property_address'),
+                            'city': deal_json.get('property_city'),
+                            'state': deal_json.get('property_state'),
+                            'zip': deal_json.get('property_zip')
+                        },
+                        'financials': {
+                            'asking_price': deal_json.get('asking_price'),
+                            'arv': deal_json.get('arv'),
+                            'repairs': deal_json.get('repairs'),
+                            'suggested_offer': deal_json.get('suggested_offer')
+                        },
+                        'status': deal['final_status'] or deal['auto_status'],
+                        'auto_status': deal['auto_status'],
+                        'final_status': deal['final_status'],
                         'reasons': deal['reasons'],
                         'created_at': deal['created_at'].isoformat()
                     })
                 
                 return jsonify({
                     'success': True,
-                    'deals': deal_data
+                    'partner': {
+                        'id': partner['id'],
+                        'name': partner['name'],
+                        'email': partner['email'],
+                        'phone': partner['phone'],
+                        'company': partner.get('company'),
+                        'markets': partner.get('markets', [])
+                    },
+                    'stats': {
+                        'total_submissions': stats['total_submissions'],
+                        'approved_count': stats['approved_count'],
+                        'denied_count': stats['denied_count'],
+                        'approval_rate': round((stats['approved_count'] / max(stats['total_submissions'], 1)) * 100, 1)
+                    },
+                    'deals': deal_data,
+                    'pagination': {
+                        'page': page,
+                        'limit': limit,
+                        'total': total_count,
+                        'pages': (total_count + limit - 1) // limit
+                    }
                 })
                 
     except Exception as e:
-        logging.error(f"Error getting JV deals: {e}")
+        logging.error(f"Error getting user JV deals: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@admin_api_bp.route('/jv-deals/<deal_id>', methods=['PATCH'])
+@require_admin_api
+def update_jv_deal(deal_id):
+    """Update JV deal status and notes"""
+    try:
+        data = request.get_json()
+        new_status = data.get('status')
+        admin_notes = data.get('notes', '')
+        
+        if new_status not in ['approved', 'denied']:
+            return jsonify({'error': 'Invalid status'}), 400
+        
+        jv_db = JVDatabase()
+        with jv_db.get_connection() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+                # Get current deal data for webhook
+                cur.execute("""
+                    SELECT d.*, p.name as partner_name, p.email as partner_email
+                    FROM jv_deals d
+                    JOIN partners p ON d.partner_id = p.id
+                    WHERE d.id = %s
+                """, (deal_id,))
+                
+                deal = cur.fetchone()
+                if not deal:
+                    return jsonify({'error': 'Deal not found'}), 404
+                
+                # Update deal status
+                cur.execute("""
+                    UPDATE jv_deals 
+                    SET final_status = %s, admin_notes = %s, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = %s
+                """, (new_status, admin_notes, deal_id))
+                
+                conn.commit()
+                
+                # Trigger Zapier webhook for status update
+                webhook_data = {
+                    'event_type': 'jv_deal_status_updated',
+                    'deal_id': deal_id,
+                    'new_status': new_status,
+                    'partner_name': deal['partner_name'],
+                    'partner_email': deal['partner_email'],
+                    'property_address': deal['deal_json'].get('property_address'),
+                    'asking_price': deal['deal_json'].get('asking_price'),
+                    'admin_notes': admin_notes,
+                    'timestamp': datetime.now().isoformat()
+                }
+                
+                # Send webhook (async)
+                try:
+                    from zapier_webhook_service import ZapierWebhookService
+                    webhook_service = ZapierWebhookService()
+                    webhook_service.trigger_jv_deal_decision(webhook_data)
+                except Exception as webhook_error:
+                    logging.error(f"Webhook error: {webhook_error}")
+                    # Don't fail the main operation if webhook fails
+                
+                return jsonify({
+                    'success': True,
+                    'message': f'Deal {new_status} successfully',
+                    'deal_id': deal_id,
+                    'new_status': new_status
+                })
+                
+    except Exception as e:
+        logging.error(f"Error updating JV deal: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@admin_api_bp.route('/jv-deals/metrics', methods=['GET'])
+@require_admin_api
+def get_jv_deal_metrics():
+    """Get JV deal metrics for header chips"""
+    try:
+        jv_db = JVDatabase()
+        with jv_db.get_connection() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+                cur.execute("""
+                    SELECT 
+                        COUNT(*) as total_deals,
+                        COUNT(CASE WHEN COALESCE(final_status, auto_status) = 'pending' THEN 1 END) as pending_deals,
+                        COUNT(CASE WHEN COALESCE(final_status, auto_status) = 'approved' THEN 1 END) as approved_deals,
+                        COUNT(CASE WHEN COALESCE(final_status, auto_status) = 'denied' THEN 1 END) as denied_deals
+                    FROM jv_deals
+                """)
+                
+                metrics = cur.fetchone()
+                
+                # Calculate approval rate
+                total_reviewed = metrics['approved_deals'] + metrics['denied_deals']
+                approval_rate = round((metrics['approved_deals'] / max(total_reviewed, 1)) * 100, 1)
+                
+                return jsonify({
+                    'success': True,
+                    'metrics': {
+                        'total_deals': metrics['total_deals'],
+                        'pending_review': metrics['pending_deals'],
+                        'approval_rate': approval_rate,
+                        'approved_deals': metrics['approved_deals'],
+                        'denied_deals': metrics['denied_deals']
+                    }
+                })
+                
+    except Exception as e:
+        logging.error(f"Error getting JV deal metrics: {e}")
         return jsonify({'error': str(e)}), 500
