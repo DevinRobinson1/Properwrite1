@@ -459,6 +459,8 @@ def get_user_details(user_id):
                 User.created_at,
                 User.role,
                 User.is_active,
+                User.team_id,
+                Team.id.label('team_id_full'),
                 Team.name.label('team_name'),
                 Team.tier.label('plan'),
                 Team.credit_balance
@@ -471,7 +473,7 @@ def get_user_details(user_id):
             
             # Get team member count
             team_members = 0
-            if user.team_name:
+            if user.team_id:
                 team_members = db.query(func.count(User.id)).filter(
                     and_(User.team_id == user.team_id, User.is_active == True)
                 ).scalar() or 0
