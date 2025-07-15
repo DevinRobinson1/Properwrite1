@@ -2081,14 +2081,83 @@
         function viewUser(id, email, name, team, plan, credits, lastActive) {
             currentUserData = { id, email, name, team, plan, credits, lastActive };
             
-            document.getElementById('modal-user-id').textContent = id;
-            document.getElementById('modal-email').textContent = email;
-            document.getElementById('modal-name').textContent = name || 'No name';
-            document.getElementById('modal-team').textContent = team || 'No team';
-            document.getElementById('modal-plan').textContent = plan;
-            document.getElementById('modal-credits').textContent = credits;
-            document.getElementById('modal-last-active').textContent = lastActive;
+            // Load comprehensive user data from API
+            fetch(`/admin/api/users/${id}/details`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        populateUserViewPanel(data.user);
+                    } else {
+                        alert('Error loading user details: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading user details:', error);
+                    alert('Error loading user details');
+                });
+        }
+
+        function populateUserViewPanel(user) {
+            // Basic Info
+            document.getElementById('user-detail-name').textContent = user.name || 'No name';
+            document.getElementById('user-detail-email').textContent = user.email;
+            document.getElementById('user-detail-id').textContent = user.id;
+            document.getElementById('user-detail-avatar').textContent = user.email[0].toUpperCase();
             
+            // Activity & Engagement
+            document.getElementById('user-last-login').textContent = user.last_login || 'Never';
+            document.getElementById('user-properties-analyzed').textContent = user.properties_analyzed || 0;
+            document.getElementById('user-signup-date').textContent = user.created_at || 'Unknown';
+            document.getElementById('user-session-count').textContent = user.session_count || 0;
+            document.getElementById('user-avg-session-duration').textContent = user.avg_session_duration || '0 min';
+            document.getElementById('user-engagement-score').textContent = user.engagement_score || '0%';
+            
+            // Plan & Billing
+            document.getElementById('user-current-plan').textContent = user.plan || 'Free';
+            document.getElementById('user-credits-remaining').textContent = user.credits || 0;
+            document.getElementById('user-credits-used').textContent = user.credits_used || 0;
+            document.getElementById('user-monthly-usage').textContent = user.monthly_usage || 0;
+            document.getElementById('user-renewal-date').textContent = user.renewal_date || 'N/A';
+            document.getElementById('user-billing-status').textContent = user.billing_status || 'N/A';
+            
+            // Team Information
+            document.getElementById('user-team-name').textContent = user.team_name || 'No team';
+            document.getElementById('user-team-role').textContent = user.team_role || 'N/A';
+            document.getElementById('user-team-members').textContent = user.team_members || 0;
+            
+            // Support & Activity
+            document.getElementById('user-support-tickets').textContent = user.support_tickets || 0;
+            document.getElementById('user-last-support').textContent = user.last_support || 'Never';
+            document.getElementById('user-platform-feedback').textContent = user.platform_feedback || 'None';
+            
+            // AI Recommendations
+            const recommendationsHtml = user.ai_recommendations?.map(rec => 
+                `<div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2">
+                    <div class="flex items-start">
+                        <i class="fas fa-lightbulb text-blue-600 mr-2 mt-1"></i>
+                        <div>
+                            <p class="text-sm font-medium text-blue-900">${rec.title}</p>
+                            <p class="text-xs text-blue-700">${rec.description}</p>
+                        </div>
+                    </div>
+                </div>`
+            ).join('') || '<p class="text-sm text-gray-500">No recommendations available</p>';
+            
+            document.getElementById('user-ai-recommendations').innerHTML = recommendationsHtml;
+            
+            // Feature Usage
+            document.getElementById('user-wholesale-usage').textContent = user.wholesale_usage || 0;
+            document.getElementById('user-installment-usage').textContent = user.installment_usage || 0;
+            document.getElementById('user-subject-to-usage').textContent = user.subject_to_usage || 0;
+            document.getElementById('user-seller-finance-usage').textContent = user.seller_finance_usage || 0;
+            document.getElementById('user-renovation-usage').textContent = user.renovation_usage || 0;
+            
+            // Status indicators
+            const statusColor = user.status === 'active' ? 'green' : user.status === 'suspended' ? 'red' : 'yellow';
+            document.getElementById('user-status-badge').className = `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${statusColor}-100 text-${statusColor}-800`;
+            document.getElementById('user-status-badge').textContent = user.status || 'Unknown';
+            
+            // Show the modal
             document.getElementById('user-details-modal').classList.remove('hidden');
         }
 
@@ -2145,61 +2214,485 @@
             }
         });
 
+        // Comprehensive User View Panel Action Functions
+        function addUserCredits() {
+            if (!currentUserData) return;
+            
+            const credits = prompt('Enter the number of credits to add:');
+            if (credits && !isNaN(credits) && credits > 0) {
+                fetch(`/admin/api/users/${currentUserData.id}/add-credits`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ credits: parseInt(credits) })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Successfully added ${credits} credits to user account`);
+                        // Refresh the user data
+                        viewUser(currentUserData.id, currentUserData.email, currentUserData.name, currentUserData.team, currentUserData.plan, currentUserData.credits, currentUserData.lastActive);
+                    } else {
+                        alert('Error adding credits: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding credits:', error);
+                    alert('Error adding credits');
+                });
+            }
+        }
+
+        function resetUserPassword() {
+            if (!currentUserData) return;
+            
+            if (confirm('Are you sure you want to reset this user\'s password? They will receive an email with reset instructions.')) {
+                fetch(`/admin/api/users/${currentUserData.id}/reset-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Password reset email sent successfully');
+                    } else {
+                        alert('Error sending password reset: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error resetting password:', error);
+                    alert('Error sending password reset');
+                });
+            }
+        }
+
+        function upgradeUserPlan() {
+            if (!currentUserData) return;
+            
+            const plans = ['free', 'pro', 'team5', 'growth10'];
+            const planName = prompt('Enter the plan to upgrade to (free, pro, team5, growth10):');
+            
+            if (planName && plans.includes(planName)) {
+                fetch(`/admin/api/users/${currentUserData.id}/upgrade-plan`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ plan: planName })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Successfully upgraded user to ${planName} plan`);
+                        // Refresh the user data
+                        viewUser(currentUserData.id, currentUserData.email, currentUserData.name, currentUserData.team, currentUserData.plan, currentUserData.credits, currentUserData.lastActive);
+                    } else {
+                        alert('Error upgrading plan: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error upgrading plan:', error);
+                    alert('Error upgrading plan');
+                });
+            }
+        }
+
+        function sendWelcomeEmail() {
+            if (!currentUserData) return;
+            
+            fetch(`/admin/api/users/${currentUserData.id}/send-welcome-email`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Welcome email sent successfully');
+                } else {
+                    alert('Error sending welcome email: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error sending welcome email:', error);
+                alert('Error sending welcome email');
+            });
+        }
+
+        function grantTrialExtension() {
+            if (!currentUserData) return;
+            
+            const days = prompt('Enter the number of days to extend trial:');
+            if (days && !isNaN(days) && days > 0) {
+                fetch(`/admin/api/users/${currentUserData.id}/grant-trial-extension`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ days: parseInt(days) })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Successfully granted ${days} day trial extension`);
+                        // Refresh the user data
+                        viewUser(currentUserData.id, currentUserData.email, currentUserData.name, currentUserData.team, currentUserData.plan, currentUserData.credits, currentUserData.lastActive);
+                    } else {
+                        alert('Error granting trial extension: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error granting trial extension:', error);
+                    alert('Error granting trial extension');
+                });
+            }
+        }
+
+        function flagForReview() {
+            if (!currentUserData) return;
+            
+            const reason = prompt('Enter the reason for flagging this user for review:');
+            if (reason) {
+                fetch(`/admin/api/users/${currentUserData.id}/flag-for-review`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ reason: reason })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('User flagged for review successfully');
+                    } else {
+                        alert('Error flagging user: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error flagging user:', error);
+                    alert('Error flagging user');
+                });
+            }
+        }
+
+        function exportUserData() {
+            if (!currentUserData) return;
+            
+            fetch(`/admin/api/users/${currentUserData.id}/export-data`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `user_${currentUserData.id}_data.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error('Error exporting user data:', error);
+                alert('Error exporting user data');
+            });
+        }
+
+        function viewUserActivity() {
+            if (!currentUserData) return;
+            
+            // Open activity log in a new window or modal
+            window.open(`/admin/users/${currentUserData.id}/activity-log`, '_blank');
+        }
+
+        function viewUserBilling() {
+            if (!currentUserData) return;
+            
+            // Open billing history in a new window or modal
+            window.open(`/admin/users/${currentUserData.id}/billing-history`, '_blank');
+        }
+
+        function reactivateUser() {
+            if (!currentUserData) return;
+            
+            if (confirm('Are you sure you want to reactivate this user?')) {
+                fetch(`/admin/api/users/${currentUserData.id}/reactivate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('User reactivated successfully');
+                        // Refresh the user data
+                        viewUser(currentUserData.id, currentUserData.email, currentUserData.name, currentUserData.team, currentUserData.plan, currentUserData.credits, currentUserData.lastActive);
+                    } else {
+                        alert('Error reactivating user: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error reactivating user:', error);
+                    alert('Error reactivating user');
+                });
+            }
+        }
+
     </script>
 
-    <!-- User Details Modal -->
+    <!-- Comprehensive User View Panel -->
     <div id="user-details-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 transition-opacity" aria-hidden="true">
                 <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-                <div class="sm:flex sm:items-start">
-                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
-                        <i class="fas fa-user text-blue-600"></i>
+            <div class="inline-block align-bottom bg-white rounded-lg px-6 pt-6 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full">
+                
+                <!-- Header Section -->
+                <div class="flex items-center justify-between border-b border-gray-200 pb-4 mb-6">
+                    <div class="flex items-center">
+                        <div class="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center text-xl font-bold text-blue-600" id="user-detail-avatar">
+                            D
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-2xl font-bold text-gray-900" id="user-detail-name">Loading...</h3>
+                            <p class="text-gray-600" id="user-detail-email">Loading...</p>
+                            <div class="flex items-center mt-1">
+                                <span class="text-sm text-gray-500 mr-2">ID:</span>
+                                <span class="text-sm text-gray-900" id="user-detail-id">Loading...</span>
+                                <span class="ml-3" id="user-status-badge">Loading...</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">User Details</h3>
-                        <div class="mt-4 space-y-3">
-                            <div class="flex justify-between">
-                                <span class="text-sm font-medium text-gray-500">Email:</span>
-                                <span class="text-sm text-gray-900" id="modal-email"></span>
+                    <div class="flex space-x-2">
+                        <button onclick="addUserCredits()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm">
+                            <i class="fas fa-plus mr-2"></i>Add Credits
+                        </button>
+                        <button onclick="resetUserPassword()" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 text-sm">
+                            <i class="fas fa-key mr-2"></i>Reset Password
+                        </button>
+                        <button onclick="upgradeUserPlan()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 text-sm">
+                            <i class="fas fa-arrow-up mr-2"></i>Upgrade Plan
+                        </button>
+                        <button onclick="suspendUserFromModal()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 text-sm">
+                            <i class="fas fa-ban mr-2"></i>Suspend User
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Main Content Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Left Column - Activity & Engagement -->
+                    <div class="space-y-6">
+                        
+                        <!-- Activity Overview -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                                <i class="fas fa-chart-line text-blue-600 mr-2"></i>Activity Overview
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Last Login:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-last-login">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Properties Analyzed:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-properties-analyzed">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Signup Date:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-signup-date">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Session Count:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-session-count">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Avg Session Duration:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-avg-session-duration">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Engagement Score:</span>
+                                    <span class="text-sm font-medium text-green-600" id="user-engagement-score">Loading...</span>
+                                </div>
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-sm font-medium text-gray-500">Name:</span>
-                                <span class="text-sm text-gray-900" id="modal-name"></span>
+                        </div>
+                        
+                        <!-- Feature Usage -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                                <i class="fas fa-tools text-orange-600 mr-2"></i>Feature Usage
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Wholesale:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-wholesale-usage">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Installment:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-installment-usage">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Subject-To:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-subject-to-usage">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Seller Finance:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-seller-finance-usage">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Renovation Calculator:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-renovation-usage">Loading...</span>
+                                </div>
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-sm font-medium text-gray-500">Team:</span>
-                                <span class="text-sm text-gray-900" id="modal-team"></span>
+                        </div>
+                        
+                        <!-- Support Information -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                                <i class="fas fa-headset text-purple-600 mr-2"></i>Support & Feedback
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Support Tickets:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-support-tickets">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Last Support:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-last-support">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Platform Feedback:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-platform-feedback">Loading...</span>
+                                </div>
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-sm font-medium text-gray-500">Plan:</span>
-                                <span class="text-sm text-gray-900" id="modal-plan"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Middle Column - Plan & Billing -->
+                    <div class="space-y-6">
+                        
+                        <!-- Plan & Billing -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                                <i class="fas fa-credit-card text-green-600 mr-2"></i>Plan & Billing
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Current Plan:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-current-plan">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Credits Remaining:</span>
+                                    <span class="text-sm font-medium text-green-600" id="user-credits-remaining">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Credits Used:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-credits-used">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Monthly Usage:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-monthly-usage">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Next Renewal:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-renewal-date">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Billing Status:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-billing-status">Loading...</span>
+                                </div>
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-sm font-medium text-gray-500">Credits:</span>
-                                <span class="text-sm text-gray-900" id="modal-credits"></span>
+                        </div>
+                        
+                        <!-- Team Information -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                                <i class="fas fa-users text-blue-600 mr-2"></i>Team Information
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Team Name:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-team-name">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Role:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-team-role">Loading...</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">Team Members:</span>
+                                    <span class="text-sm font-medium text-gray-900" id="user-team-members">Loading...</span>
+                                </div>
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-sm font-medium text-gray-500">Last Active:</span>
-                                <span class="text-sm text-gray-900" id="modal-last-active"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column - AI Recommendations -->
+                    <div class="space-y-6">
+                        
+                        <!-- AI Recommendations -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                                <i class="fas fa-brain text-purple-600 mr-2"></i>AI Recommendations
+                            </h4>
+                            <div id="user-ai-recommendations" class="space-y-2">
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <p class="text-sm text-gray-500">Loading recommendations...</p>
+                                </div>
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-sm font-medium text-gray-500">User ID:</span>
-                                <span class="text-sm text-gray-900" id="modal-user-id"></span>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                                <i class="fas fa-bolt text-yellow-600 mr-2"></i>Quick Actions
+                            </h4>
+                            <div class="space-y-2">
+                                <button onclick="sendWelcomeEmail()" class="w-full bg-blue-50 text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-100 text-sm text-left">
+                                    <i class="fas fa-envelope mr-2"></i>Send Welcome Email
+                                </button>
+                                <button onclick="grantTrialExtension()" class="w-full bg-green-50 text-green-700 px-3 py-2 rounded-lg hover:bg-green-100 text-sm text-left">
+                                    <i class="fas fa-gift mr-2"></i>Grant Trial Extension
+                                </button>
+                                <button onclick="flagForReview()" class="w-full bg-orange-50 text-orange-700 px-3 py-2 rounded-lg hover:bg-orange-100 text-sm text-left">
+                                    <i class="fas fa-flag mr-2"></i>Flag for Review
+                                </button>
+                                <button onclick="exportUserData()" class="w-full bg-gray-50 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-100 text-sm text-left">
+                                    <i class="fas fa-download mr-2"></i>Export User Data
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                    <button type="button" onclick="closeUserModal()" class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
-                        Close
-                    </button>
-                    <button type="button" onclick="suspendUserFromModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:mt-0 sm:w-auto sm:text-sm">
-                        Suspend User
-                    </button>
+                
+                <!-- Footer Actions -->
+                <div class="mt-8 pt-6 border-t border-gray-200 flex justify-between">
+                    <div class="flex space-x-2">
+                        <button onclick="viewUserActivity()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
+                            <i class="fas fa-chart-bar mr-2"></i>View Activity Log
+                        </button>
+                        <button onclick="viewUserBilling()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm">
+                            <i class="fas fa-dollar-sign mr-2"></i>View Billing History
+                        </button>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button type="button" onclick="closeUserModal()" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                            Close
+                        </button>
+                        <button onclick="reactivateUser()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm">
+                            <i class="fas fa-check mr-2"></i>Reactivate User
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

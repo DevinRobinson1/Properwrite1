@@ -500,6 +500,283 @@ def get_ai_insights():
         logger.error(f"Error getting AI insights: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@admin_bp.route('/api/user/<user_id>', methods=['GET'])
+@require_admin
+def get_user_details(user_id):
+    """Get comprehensive user details for admin view panel"""
+    try:
+        with Session(engine) as session:
+            # Get user basic info
+            user = session.execute(text("""
+                SELECT 
+                    u.id,
+                    u.email,
+                    u.name,
+                    u.created_at,
+                    u.last_login,
+                    u.is_active,
+                    u.team_id,
+                    u.team_role,
+                    t.name as team_name,
+                    t.tier as plan,
+                    t.credit_balance,
+                    t.created_at as team_created_at
+                FROM users u
+                LEFT JOIN teams t ON u.team_id = t.id
+                WHERE u.id = :user_id
+            """), {'user_id': user_id}).fetchone()
+            
+            if not user:
+                return jsonify({'success': False, 'error': 'User not found'}), 404
+            
+            # Get credit usage activity
+            credit_activity = session.execute(text("""
+                SELECT 
+                    COUNT(CASE WHEN delta < 0 THEN 1 END) as total_credits_used,
+                    COUNT(CASE WHEN delta < 0 AND created_at >= NOW() - INTERVAL '30 days' THEN 1 END) as credits_used_30_days,
+                    COUNT(CASE WHEN delta > 0 THEN 1 END) as credits_added,
+                    MIN(CASE WHEN delta < 0 THEN created_at END) as first_activity,
+                    MAX(CASE WHEN delta < 0 THEN created_at END) as last_activity
+                FROM credit_logs
+                WHERE team_id = :team_id
+            """), {'team_id': user.team_id}).fetchone()
+            
+            # Get team members if user is on a team
+            team_members = []
+            if user.team_id:
+                members = session.execute(text("""
+                    SELECT 
+                        u.id,
+                        u.email,
+                        u.name,
+                        u.team_role,
+                        u.created_at,
+                        u.last_login
+                    FROM users u
+                    WHERE u.team_id = :team_id
+                    ORDER BY u.created_at
+                """), {'team_id': user.team_id}).fetchall()
+                
+                for member in members:
+                    team_members.append({
+                        'id': str(member.id),
+                        'email': member.email,
+                        'name': member.name or 'Unknown',
+                        'role': member.team_role,
+                        'joined': member.created_at.strftime('%Y-%m-%d') if member.created_at else 'Unknown',
+                        'last_login': member.last_login.strftime('%Y-%m-%d') if member.last_login else 'Never'
+                    })
+            
+            # Get recent credit transactions
+            recent_transactions = session.execute(text("""
+                SELECT 
+                    cl.delta,
+                    cl.reason,
+                    cl.created_at,
+                    cl.balance_after
+                FROM credit_logs cl
+                WHERE cl.team_id = :team_id
+                ORDER BY cl.created_at DESC
+                LIMIT 10
+            """), {'team_id': user.team_id}).fetchall()
+            
+            transactions = []
+            for transaction in recent_transactions:
+                transactions.append({
+                    'delta': transaction.delta,
+                    'reason': transaction.reason,
+                    'created_at': transaction.created_at.strftime('%Y-%m-%d %H:%M') if transaction.created_at else 'Unknown',
+                    'balance_after': transaction.balance_after
+                })
+            
+            # Get team invitations sent by this user
+            invitations = session.execute(text("""
+                SELECT 
+                    ti.email,
+                    ti.status,
+                    ti.created_at,
+                    ti.accepted_at
+                FROM team_invites ti
+                WHERE ti.team_id = :team_id
+                ORDER BY ti.created_at DESC
+                LIMIT 5
+            """), {'team_id': user.team_id}).fetchall()
+            
+            invites = []
+            for invite in invitations:
+                invites.append({
+                    'email': invite.email,
+                    'status': invite.status,
+                    'sent': invite.created_at.strftime('%Y-%m-%d') if invite.created_at else 'Unknown',
+                    'accepted': invite.accepted_at.strftime('%Y-%m-%d') if invite.accepted_at else None
+                })
+            
+            # Calculate usage statistics
+            days_since_join = (datetime.now() - user.created_at).days if user.created_at else 0
+            avg_credits_per_day = credit_activity.total_credits_used / max(days_since_join, 1) if credit_activity.total_credits_used else 0
+            
+            # Generate AI recommendations based on usage patterns
+            ai_recommendations = []
+            
+            if credit_activity.total_credits_used == 0:
+                ai_recommendations.append({
+                    'type': 'warning',
+                    'message': 'User has never used any credits. Consider sending onboarding tutorial or demo video.',
+                    'action': 'send_onboarding'
+                })
+            elif credit_activity.credits_used_30_days > 50:
+                ai_recommendations.append({
+                    'type': 'success',
+                    'message': 'High engagement user - excellent candidate for plan upgrade or expansion.',
+                    'action': 'offer_upgrade'
+                })
+            elif not user.last_login or (datetime.now() - user.last_login).days > 14:
+                ai_recommendations.append({
+                    'type': 'alert',
+                    'message': 'User inactive for 14+ days. High churn risk - trigger re-engagement campaign.',
+                    'action': 'send_reengagement'
+                })
+            
+            if user.team_role == 'owner' and len(team_members) == 1:
+                ai_recommendations.append({
+                    'type': 'info',
+                    'message': 'Team owner with no members. Suggest team features or collaboration benefits.',
+                    'action': 'promote_team_features'
+                })
+            
+            # Build comprehensive user profile
+            user_profile = {
+                'basic_info': {
+                    'id': str(user.id),
+                    'email': user.email,
+                    'name': user.name or 'Unknown',
+                    'joined': user.created_at.strftime('%Y-%m-%d') if user.created_at else 'Unknown',
+                    'last_active': user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never',
+                    'is_active': user.is_active,
+                    'team_name': user.team_name or 'No Team',
+                    'team_role': user.team_role or 'member',
+                    'plan': user.plan or 'Free',
+                    'affiliate_source': 'Direct'  # TODO: Add affiliate tracking
+                },
+                'usage_activity': {
+                    'total_credits_used': credit_activity.total_credits_used or 0,
+                    'credits_used_30_days': credit_activity.credits_used_30_days or 0,
+                    'credits_remaining': user.credit_balance or 0,
+                    'avg_credits_per_day': round(avg_credits_per_day, 2),
+                    'first_activity': credit_activity.first_activity.strftime('%Y-%m-%d') if credit_activity.first_activity else 'Never',
+                    'last_activity': credit_activity.last_activity.strftime('%Y-%m-%d') if credit_activity.last_activity else 'Never',
+                    'properties_analyzed': credit_activity.total_credits_used or 0,  # Assuming 1 credit per analysis
+                    'offers_created': credit_activity.total_credits_used or 0,
+                    'most_used_feature': 'Property Analysis',  # TODO: Add feature tracking
+                    'tools_used': ['MAO Calculator', 'Property Analysis', 'Renovation Estimator']
+                },
+                'billing_info': {
+                    'current_plan': user.plan or 'Free',
+                    'plan_status': 'Active' if user.is_active else 'Inactive',
+                    'credits_remaining': user.credit_balance or 0,
+                    'next_billing_date': 'N/A',  # TODO: Add billing date tracking
+                    'upgrade_history': [],  # TODO: Add upgrade tracking
+                    'pending_invoices': 0
+                },
+                'team_info': {
+                    'team_size': len(team_members),
+                    'members': team_members,
+                    'invites_sent': invites
+                },
+                'support_feedback': {
+                    'support_tickets': 0,  # TODO: Add support ticket tracking
+                    'user_type': 'Flipper',  # TODO: Add user type classification
+                    'custom_notes': ''  # TODO: Add custom notes field
+                },
+                'recent_activity': {
+                    'transactions': transactions
+                },
+                'ai_recommendations': ai_recommendations
+            }
+            
+            return jsonify({
+                'success': True,
+                'user': user_profile
+            })
+            
+    except Exception as e:
+        logger.error(f"Error getting user details: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@admin_bp.route('/api/user/<user_id>/add-credits', methods=['POST'])
+@require_admin
+def add_user_credits(user_id):
+    """Add credits to a user's account"""
+    try:
+        data = request.get_json()
+        credits = int(data.get('credits', 0))
+        reason = data.get('reason', 'Admin credit grant')
+        
+        with Session(engine) as session:
+            # Get user's team
+            user = session.execute(text("""
+                SELECT team_id FROM users WHERE id = :user_id
+            """), {'user_id': user_id}).fetchone()
+            
+            if not user:
+                return jsonify({'success': False, 'error': 'User not found'}), 404
+            
+            # Update team credit balance
+            session.execute(text("""
+                UPDATE teams 
+                SET credit_balance = credit_balance + :credits
+                WHERE id = :team_id
+            """), {'credits': credits, 'team_id': user.team_id})
+            
+            # Log the credit transaction
+            session.execute(text("""
+                INSERT INTO credit_logs (team_id, delta, reason, balance_after)
+                VALUES (:team_id, :delta, :reason, 
+                    (SELECT credit_balance FROM teams WHERE id = :team_id))
+            """), {
+                'team_id': user.team_id,
+                'delta': credits,
+                'reason': reason
+            })
+            
+            session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Added {credits} credits to user account'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error adding credits: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@admin_bp.route('/api/user/<user_id>/suspend', methods=['POST'])
+@require_admin
+def suspend_user(user_id):
+    """Suspend or reactivate a user account"""
+    try:
+        data = request.get_json()
+        suspend = data.get('suspend', True)
+        
+        with Session(engine) as session:
+            session.execute(text("""
+                UPDATE users 
+                SET is_active = :is_active
+                WHERE id = :user_id
+            """), {'is_active': not suspend, 'user_id': user_id})
+            
+            session.commit()
+            
+            status = 'suspended' if suspend else 'reactivated'
+            return jsonify({
+                'success': True,
+                'message': f'User {status} successfully'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error suspending user: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @admin_bp.route('/api/teams', methods=['GET'])
 @require_admin
 def get_teams_data():
