@@ -2680,6 +2680,9 @@
                             <button id="fix-flip-tab-btn" class="construction-tab-button px-6 py-3 font-semibold text-lg rounded-lg transition-all duration-300 bg-orange-600 text-white" onclick="showConstructionTab('fix-flip')">
                                 <i class="fas fa-tools mr-2"></i>🧰 Fix & Flip
                             </button>
+                            <button id="renovation-estimator-tab-btn" class="construction-tab-button px-6 py-3 font-semibold text-lg rounded-lg transition-all duration-300 bg-gray-300 text-gray-700 hover:bg-orange-500 hover:text-white" onclick="showConstructionTab('renovation-estimator')">
+                                <i class="fas fa-calculator mr-2"></i>📊 Renovation Estimator
+                            </button>
                             <button id="new-construction-tab-btn" class="construction-tab-button px-6 py-3 font-semibold text-lg rounded-lg transition-all duration-300 bg-gray-300 text-gray-700 hover:bg-orange-500 hover:text-white" onclick="showConstructionTab('new-construction')">
                                 <i class="fas fa-building mr-2"></i>🏗️ New Construction
                             </button>
@@ -2816,6 +2819,461 @@
                                             <i class="fas fa-download mr-2"></i>Download SOW (.xlsx)
                                         </button>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Renovation Estimator Tab Content -->
+                    <div id="renovation-estimator-content" class="construction-tab-content hidden">
+                        <div class="p-6">
+                            <!-- Header -->
+                            <div class="mb-6">
+                                <h2 class="text-2xl font-bold text-gray-800 mb-2">Comprehensive Renovation Estimator</h2>
+                                <p class="text-gray-600">Professional renovation cost calculator based on detailed template structure</p>
+                            </div>
+
+                            <!-- Property Specifics -->
+                            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                    <i class="fas fa-home mr-2 text-blue-500"></i>Property Specifics
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Property Address</label>
+                                        <input type="text" id="ren-property-address" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Enter property address">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Square Footage</label>
+                                        <input type="number" id="ren-sqft" value="1511" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
+                                        <input type="number" id="ren-bedrooms" value="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
+                                        <input type="number" id="ren-bathrooms" value="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Purchase Price</label>
+                                        <div class="relative">
+                                            <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                            <input type="text" id="ren-purchase-price" value="80,000" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 pl-8" onchange="updateRenovationEstimate()" oninput="formatNumber(this)">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">ARV</label>
+                                        <div class="relative">
+                                            <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                            <input type="text" id="ren-arv" value="235,000" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 pl-8" onchange="updateRenovationEstimate()" oninput="formatNumber(this)">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">House Length (ft)</label>
+                                        <input type="number" id="ren-house-length" value="40" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">House Width (ft)</label>
+                                        <input type="number" id="ren-house-width" value="32" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">House Height (ft)</label>
+                                        <input type="number" id="ren-house-height" value="10" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Renovation Scope Tabs -->
+                            <div class="mb-6">
+                                <div class="flex space-x-2 bg-gray-100 p-1 rounded-lg">
+                                    <button id="ren-exterior-tab" class="renovation-scope-tab px-4 py-2 rounded-lg font-medium transition-all duration-300 bg-blue-600 text-white" onclick="showRenovationScope('exterior')">
+                                        <i class="fas fa-building mr-2"></i>Exterior
+                                    </button>
+                                    <button id="ren-mechanical-tab" class="renovation-scope-tab px-4 py-2 rounded-lg font-medium transition-all duration-300 bg-gray-300 text-gray-700 hover:bg-blue-500 hover:text-white" onclick="showRenovationScope('mechanical')">
+                                        <i class="fas fa-cogs mr-2"></i>Mechanical
+                                    </button>
+                                    <button id="ren-interior-tab" class="renovation-scope-tab px-4 py-2 rounded-lg font-medium transition-all duration-300 bg-gray-300 text-gray-700 hover:bg-blue-500 hover:text-white" onclick="showRenovationScope('interior')">
+                                        <i class="fas fa-paint-roller mr-2"></i>Interior
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Exterior Scope -->
+                            <div id="ren-exterior-scope" class="renovation-scope-content">
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <!-- Roof Section -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                                            <i class="fas fa-home mr-2 text-orange-500"></i>Roof Detail
+                                        </h4>
+                                        <div class="space-y-4">
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-roof-tearoff" class="mr-3 text-blue-600">
+                                                <label for="ren-roof-tearoff" class="text-sm font-medium text-gray-700">Tear Off Existing Roof</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-roof-reshingle" class="mr-3 text-blue-600">
+                                                <label for="ren-roof-reshingle" class="text-sm font-medium text-gray-700">Reshingle</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-roof-resheet" class="mr-3 text-blue-600">
+                                                <label for="ren-roof-resheet" class="text-sm font-medium text-gray-700">Resheet</label>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Replacement Squares</label>
+                                                <input type="number" id="ren-roof-squares" value="15" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Siding Section -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                                            <i class="fas fa-warehouse mr-2 text-green-500"></i>Siding Detail
+                                        </h4>
+                                        <div class="space-y-4">
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-siding-replace" class="mr-3 text-blue-600">
+                                                <label for="ren-siding-replace" class="text-sm font-medium text-gray-700">Replace Siding</label>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Replacement Sq Ft</label>
+                                                <input type="number" id="ren-siding-squares" value="1000" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Paint Section -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                                            <i class="fas fa-paint-roller mr-2 text-blue-500"></i>Paint Detail
+                                        </h4>
+                                        <div class="space-y-4">
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-paint-ext-siding" class="mr-3 text-blue-600">
+                                                <label for="ren-paint-ext-siding" class="text-sm font-medium text-gray-700">Paint Exterior Siding</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-paint-ext-trim" class="mr-3 text-blue-600">
+                                                <label for="ren-paint-ext-trim" class="text-sm font-medium text-gray-700">Paint Exterior Trim</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-paint-foundation" class="mr-3 text-blue-600">
+                                                <label for="ren-paint-foundation" class="text-sm font-medium text-gray-700">Paint Foundation</label>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Siding Sq Ft</label>
+                                                <input type="number" id="ren-paint-siding-sq" value="15" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Foundation Section -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                                            <i class="fas fa-building mr-2 text-red-500"></i>Foundation Detail
+                                        </h4>
+                                        <div class="space-y-4">
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-foundation-straighten" class="mr-3 text-blue-600">
+                                                <label for="ren-foundation-straighten" class="text-sm font-medium text-gray-700">Straighten Foundation</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-foundation-rebuild" class="mr-3 text-blue-600">
+                                                <label for="ren-foundation-rebuild" class="text-sm font-medium text-gray-700">Rebuild Foundation</label>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Repair Distance (ft)</label>
+                                                <input type="number" id="ren-foundation-repair-ft" value="15" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Windows Section -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                                            <i class="fas fa-window-maximize mr-2 text-purple-500"></i>Windows Detail
+                                        </h4>
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Window Replacements</label>
+                                                <input type="number" id="ren-window-replacements" value="8" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Historic Window Replacements</label>
+                                                <input type="number" id="ren-historic-windows" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Glass Replacements</label>
+                                                <input type="number" id="ren-glass-replacements" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Additional exterior sections... -->
+                                </div>
+                            </div>
+
+                            <!-- Mechanical Scope -->
+                            <div id="ren-mechanical-scope" class="renovation-scope-content hidden">
+                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    <!-- HVAC Section -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                                            <i class="fas fa-fan mr-2 text-blue-500"></i>HVAC Detail
+                                        </h4>
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Gas Meter Installs</label>
+                                                <input type="number" id="ren-hvac-gas-meter" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Furnace Installs</label>
+                                                <input type="number" id="ren-hvac-furnace" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">New AC Installs</label>
+                                                <input type="number" id="ren-hvac-ac" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Bath Fans</label>
+                                                <input type="number" id="ren-hvac-bath-fans" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-hvac-reduct" class="mr-3 text-blue-600">
+                                                <label for="ren-hvac-reduct" class="text-sm font-medium text-gray-700">Reduct Entire House</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Electrical Section -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                                            <i class="fas fa-bolt mr-2 text-yellow-500"></i>Electrical Detail
+                                        </h4>
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Electric Panels</label>
+                                                <input type="number" id="ren-elec-panels" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Vanity Light Replacements</label>
+                                                <input type="number" id="ren-elec-vanity-lights" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Ceiling Fan Replacements</label>
+                                                <input type="number" id="ren-elec-ceiling-fans" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Smoke Detectors</label>
+                                                <input type="number" id="ren-elec-smoke-detectors" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-elec-rewire" class="mr-3 text-blue-600">
+                                                <label for="ren-elec-rewire" class="text-sm font-medium text-gray-700">Rewire Entire House</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Plumbing Section -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                                            <i class="fas fa-faucet mr-2 text-blue-600"></i>Plumbing Detail
+                                        </h4>
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Water Heater</label>
+                                                <input type="number" id="ren-plumb-water-heater" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Sink Locations</label>
+                                                <input type="number" id="ren-plumb-sink-locations" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Toilet Locations</label>
+                                                <input type="number" id="ren-plumb-toilet-locations" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Tub/Shower Locations</label>
+                                                <input type="number" id="ren-plumb-tub-locations" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-plumb-repipe" class="mr-3 text-blue-600">
+                                                <label for="ren-plumb-repipe" class="text-sm font-medium text-gray-700">Repipe Entire House</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Interior Scope -->
+                            <div id="ren-interior-scope" class="renovation-scope-content hidden">
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <!-- Kitchen Section -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                                            <i class="fas fa-utensils mr-2 text-green-500"></i>Kitchen Detail
+                                        </h4>
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Kitchen Sq Ft</label>
+                                                <input type="number" id="ren-kitchen-sqft" value="230" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Countertop Linear Ft</label>
+                                                <input type="number" id="ren-kitchen-countertop" value="30" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-kitchen-cabinets" class="mr-3 text-blue-600">
+                                                <label for="ren-kitchen-cabinets" class="text-sm font-medium text-gray-700">Install New Cabinets</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-kitchen-appliances" class="mr-3 text-blue-600">
+                                                <label for="ren-kitchen-appliances" class="text-sm font-medium text-gray-700">New Appliances</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-kitchen-flooring" class="mr-3 text-blue-600">
+                                                <label for="ren-kitchen-flooring" class="text-sm font-medium text-gray-700">New Flooring</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-kitchen-paint" class="mr-3 text-blue-600">
+                                                <label for="ren-kitchen-paint" class="text-sm font-medium text-gray-700">Paint Walls</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bathrooms Section -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                                            <i class="fas fa-bath mr-2 text-blue-500"></i>Bathrooms Detail
+                                        </h4>
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Number of Bathrooms</label>
+                                                <input type="number" id="ren-num-bathrooms" value="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Bathroom Sq Ft Each</label>
+                                                <input type="number" id="ren-bathroom-sqft" value="100" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-bathroom-fixtures" class="mr-3 text-blue-600">
+                                                <label for="ren-bathroom-fixtures" class="text-sm font-medium text-gray-700">Replace Fixtures</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-bathroom-tile" class="mr-3 text-blue-600">
+                                                <label for="ren-bathroom-tile" class="text-sm font-medium text-gray-700">Install New Tile</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-bathroom-vanity" class="mr-3 text-blue-600">
+                                                <label for="ren-bathroom-vanity" class="text-sm font-medium text-gray-700">Replace Vanity</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Living Areas Section -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                                            <i class="fas fa-couch mr-2 text-purple-500"></i>Living Areas Detail
+                                        </h4>
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Living Areas Sq Ft</label>
+                                                <input type="number" id="ren-living-sqft" value="500" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-living-flooring" class="mr-3 text-blue-600">
+                                                <label for="ren-living-flooring" class="text-sm font-medium text-gray-700">New Flooring</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-living-paint" class="mr-3 text-blue-600">
+                                                <label for="ren-living-paint" class="text-sm font-medium text-gray-700">Paint Walls</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bedrooms Section -->
+                                    <div class="bg-white rounded-lg shadow-lg p-6">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                                            <i class="fas fa-bed mr-2 text-indigo-500"></i>Bedrooms Detail
+                                        </h4>
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Number of Bedrooms</label>
+                                                <input type="number" id="ren-num-bedrooms" value="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Bedroom Sq Ft Each</label>
+                                                <input type="number" id="ren-bedroom-sqft" value="200" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-bedroom-flooring" class="mr-3 text-blue-600">
+                                                <label for="ren-bedroom-flooring" class="text-sm font-medium text-gray-700">New Flooring</label>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <input type="checkbox" id="ren-bedroom-paint" class="mr-3 text-blue-600">
+                                                <label for="ren-bedroom-paint" class="text-sm font-medium text-gray-700">Paint Walls</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Results Section -->
+                            <div class="mt-6 bg-white rounded-lg shadow-lg p-6">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                    <i class="fas fa-calculator mr-2 text-green-500"></i>Renovation Cost Breakdown
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                                    <div class="bg-blue-50 p-4 rounded-lg">
+                                        <h4 class="font-semibold text-blue-800">Exterior Costs</h4>
+                                        <p class="text-2xl font-bold text-blue-600" id="ren-exterior-total">$0</p>
+                                    </div>
+                                    <div class="bg-yellow-50 p-4 rounded-lg">
+                                        <h4 class="font-semibold text-yellow-800">Mechanical Costs</h4>
+                                        <p class="text-2xl font-bold text-yellow-600" id="ren-mechanical-total">$0</p>
+                                    </div>
+                                    <div class="bg-green-50 p-4 rounded-lg">
+                                        <h4 class="font-semibold text-green-800">Interior Costs</h4>
+                                        <p class="text-2xl font-bold text-green-600" id="ren-interior-total">$0</p>
+                                    </div>
+                                    <div class="bg-purple-50 p-4 rounded-lg">
+                                        <h4 class="font-semibold text-purple-800">Total Cost</h4>
+                                        <p class="text-2xl font-bold text-purple-600" id="ren-total-cost">$0</p>
+                                    </div>
+                                </div>
+
+                                <!-- Profit Analysis -->
+                                <div class="bg-gray-50 p-6 rounded-lg">
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-4">Profit Analysis</h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div class="text-center">
+                                            <p class="text-sm text-gray-600">Total Investment</p>
+                                            <p class="text-xl font-bold text-gray-800" id="ren-total-investment">$0</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-sm text-gray-600">Expected Profit</p>
+                                            <p class="text-xl font-bold text-green-600" id="ren-profit-dollars">$0</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-sm text-gray-600">Deal Rating</p>
+                                            <p class="text-xl font-bold text-blue-600" id="ren-deal-rating">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="mt-6 flex space-x-4">
+                                    <button onclick="calculateRenovationEstimate()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                                        <i class="fas fa-calculator mr-2"></i>Calculate Estimate
+                                    </button>
+                                    <button onclick="saveRenovationProject()" class="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                                        <i class="fas fa-save mr-2"></i>Save Project
+                                    </button>
+                                    <button onclick="exportRenovationReport()" class="bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                                        <i class="fas fa-download mr-2"></i>Export Report
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -10363,11 +10821,268 @@
                 document.getElementById('fix-flip-content').classList.remove('hidden');
                 document.getElementById('fix-flip-tab-btn').classList.add('bg-orange-600', 'text-white');
                 document.getElementById('fix-flip-tab-btn').classList.remove('bg-gray-300', 'text-gray-700');
+            } else if (tabName === 'renovation-estimator') {
+                document.getElementById('renovation-estimator-content').classList.remove('hidden');
+                document.getElementById('renovation-estimator-tab-btn').classList.add('bg-orange-600', 'text-white');
+                document.getElementById('renovation-estimator-tab-btn').classList.remove('bg-gray-300', 'text-gray-700');
             } else if (tabName === 'new-construction') {
                 document.getElementById('new-construction-content').classList.remove('hidden');
                 document.getElementById('new-construction-tab-btn').classList.add('bg-orange-600', 'text-white');
                 document.getElementById('new-construction-tab-btn').classList.remove('bg-gray-300', 'text-gray-700');
             }
+        }
+
+        // Renovation Estimator Functions
+        function showRenovationScope(scope) {
+            // Hide all renovation scope content
+            const contents = document.querySelectorAll('.renovation-scope-content');
+            contents.forEach(content => content.classList.add('hidden'));
+            
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.renovation-scope-tab');
+            buttons.forEach(button => {
+                button.classList.remove('bg-blue-600', 'text-white');
+                button.classList.add('bg-gray-300', 'text-gray-700');
+            });
+            
+            // Show selected scope content
+            document.getElementById('ren-' + scope + '-scope').classList.remove('hidden');
+            
+            // Add active class to selected button
+            document.getElementById('ren-' + scope + '-tab').classList.add('bg-blue-600', 'text-white');
+            document.getElementById('ren-' + scope + '-tab').classList.remove('bg-gray-300', 'text-gray-700');
+        }
+
+        function updateRenovationEstimate() {
+            // Auto-calculate based on input changes
+            calculateRenovationEstimate();
+        }
+
+        function calculateRenovationEstimate() {
+            const propertyData = {
+                property_address: document.getElementById('ren-property-address').value,
+                sqft: parseFloat(document.getElementById('ren-sqft').value) || 0,
+                bedrooms: parseInt(document.getElementById('ren-bedrooms').value) || 0,
+                bathrooms: parseInt(document.getElementById('ren-bathrooms').value) || 0,
+                purchase_price: parseFloat(document.getElementById('ren-purchase-price').value.replace(/,/g, '')) || 0,
+                arv: parseFloat(document.getElementById('ren-arv').value.replace(/,/g, '')) || 0,
+                length: parseFloat(document.getElementById('ren-house-length').value) || 0,
+                width: parseFloat(document.getElementById('ren-house-width').value) || 0,
+                height: parseFloat(document.getElementById('ren-house-height').value) || 0
+            };
+
+            const renovationScope = {
+                exterior: {
+                    roof: {
+                        tearoff: document.getElementById('ren-roof-tearoff').checked,
+                        reshingle: document.getElementById('ren-roof-reshingle').checked,
+                        resheet: document.getElementById('ren-roof-resheet').checked,
+                        squares: parseFloat(document.getElementById('ren-roof-squares').value) || 0
+                    },
+                    siding: {
+                        replace: document.getElementById('ren-siding-replace').checked,
+                        squares: parseFloat(document.getElementById('ren-siding-squares').value) || 0
+                    },
+                    paint: {
+                        ext_siding: document.getElementById('ren-paint-ext-siding').checked,
+                        ext_trim: document.getElementById('ren-paint-ext-trim').checked,
+                        foundation: document.getElementById('ren-paint-foundation').checked,
+                        siding_sq: parseFloat(document.getElementById('ren-paint-siding-sq').value) || 0
+                    },
+                    foundation: {
+                        straighten: document.getElementById('ren-foundation-straighten').checked,
+                        rebuild: document.getElementById('ren-foundation-rebuild').checked,
+                        repair_ft: parseFloat(document.getElementById('ren-foundation-repair-ft').value) || 0
+                    },
+                    windows: {
+                        replacements: parseInt(document.getElementById('ren-window-replacements').value) || 0,
+                        historic: parseInt(document.getElementById('ren-historic-windows').value) || 0,
+                        glass: parseInt(document.getElementById('ren-glass-replacements').value) || 0
+                    }
+                },
+                mechanical: {
+                    hvac: {
+                        gas_meter: parseInt(document.getElementById('ren-hvac-gas-meter').value) || 0,
+                        furnace: parseInt(document.getElementById('ren-hvac-furnace').value) || 0,
+                        ac: parseInt(document.getElementById('ren-hvac-ac').value) || 0,
+                        bath_fans: parseInt(document.getElementById('ren-hvac-bath-fans').value) || 0,
+                        reduct: document.getElementById('ren-hvac-reduct').checked
+                    },
+                    electrical: {
+                        panels: parseInt(document.getElementById('ren-elec-panels').value) || 0,
+                        vanity_lights: parseInt(document.getElementById('ren-elec-vanity-lights').value) || 0,
+                        ceiling_fans: parseInt(document.getElementById('ren-elec-ceiling-fans').value) || 0,
+                        smoke_detectors: parseInt(document.getElementById('ren-elec-smoke-detectors').value) || 0,
+                        rewire: document.getElementById('ren-elec-rewire').checked
+                    },
+                    plumbing: {
+                        water_heater: parseInt(document.getElementById('ren-plumb-water-heater').value) || 0,
+                        sink_locations: parseInt(document.getElementById('ren-plumb-sink-locations').value) || 0,
+                        toilet_locations: parseInt(document.getElementById('ren-plumb-toilet-locations').value) || 0,
+                        tub_locations: parseInt(document.getElementById('ren-plumb-tub-locations').value) || 0,
+                        repipe: document.getElementById('ren-plumb-repipe').checked
+                    }
+                },
+                interior: {
+                    kitchen: {
+                        sqft: parseFloat(document.getElementById('ren-kitchen-sqft').value) || 0,
+                        countertop: parseFloat(document.getElementById('ren-kitchen-countertop').value) || 0,
+                        cabinets: document.getElementById('ren-kitchen-cabinets').checked,
+                        appliances: document.getElementById('ren-kitchen-appliances').checked,
+                        flooring: document.getElementById('ren-kitchen-flooring').checked,
+                        paint: document.getElementById('ren-kitchen-paint').checked
+                    },
+                    bathrooms: {
+                        count: parseInt(document.getElementById('ren-num-bathrooms').value) || 0,
+                        sqft: parseFloat(document.getElementById('ren-bathroom-sqft').value) || 0,
+                        fixtures: document.getElementById('ren-bathroom-fixtures').checked,
+                        tile: document.getElementById('ren-bathroom-tile').checked,
+                        vanity: document.getElementById('ren-bathroom-vanity').checked
+                    },
+                    living_areas: {
+                        sqft: parseFloat(document.getElementById('ren-living-sqft').value) || 0,
+                        flooring: document.getElementById('ren-living-flooring').checked,
+                        paint: document.getElementById('ren-living-paint').checked
+                    },
+                    bedrooms: {
+                        count: parseInt(document.getElementById('ren-num-bedrooms').value) || 0,
+                        sqft: parseFloat(document.getElementById('ren-bedroom-sqft').value) || 0,
+                        flooring: document.getElementById('ren-bedroom-flooring').checked,
+                        paint: document.getElementById('ren-bedroom-paint').checked
+                    }
+                }
+            };
+
+            // Call the API to calculate estimate
+            fetch('/api/renovation/estimate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    property_data: propertyData,
+                    renovation_scope: renovationScope
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateRenovationResults(data.estimate);
+                } else {
+                    console.error('Error calculating renovation estimate:', data.error);
+                    showToast('Error calculating renovation estimate', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error calculating renovation estimate', 'error');
+            });
+        }
+
+        function updateRenovationResults(estimate) {
+            // Update cost breakdown
+            document.getElementById('ren-exterior-total').textContent = formatCurrency(estimate.exterior_costs.total);
+            document.getElementById('ren-mechanical-total').textContent = formatCurrency(estimate.mechanical_costs.total);
+            document.getElementById('ren-interior-total').textContent = formatCurrency(estimate.interior_costs.total);
+            document.getElementById('ren-total-cost').textContent = formatCurrency(estimate.total_costs);
+
+            // Update profit analysis
+            document.getElementById('ren-total-investment').textContent = formatCurrency(estimate.profit_analysis.total_investment);
+            document.getElementById('ren-profit-dollars').textContent = formatCurrency(estimate.profit_analysis.profit_dollars);
+            document.getElementById('ren-deal-rating').textContent = estimate.profit_analysis.deal_rating;
+        }
+
+        function saveRenovationProject() {
+            // Get all form data
+            const propertyData = {
+                property_address: document.getElementById('ren-property-address').value,
+                sqft: parseFloat(document.getElementById('ren-sqft').value) || 0,
+                bedrooms: parseInt(document.getElementById('ren-bedrooms').value) || 0,
+                bathrooms: parseInt(document.getElementById('ren-bathrooms').value) || 0,
+                purchase_price: parseFloat(document.getElementById('ren-purchase-price').value.replace(/,/g, '')) || 0,
+                arv: parseFloat(document.getElementById('ren-arv').value.replace(/,/g, '')) || 0,
+                length: parseFloat(document.getElementById('ren-house-length').value) || 0,
+                width: parseFloat(document.getElementById('ren-house-width').value) || 0,
+                height: parseFloat(document.getElementById('ren-house-height').value) || 0
+            };
+
+            const estimateData = {
+                // Get current estimate data from the UI
+                exterior_total: parseFloat(document.getElementById('ren-exterior-total').textContent.replace(/[$,]/g, '')) || 0,
+                mechanical_total: parseFloat(document.getElementById('ren-mechanical-total').textContent.replace(/[$,]/g, '')) || 0,
+                interior_total: parseFloat(document.getElementById('ren-interior-total').textContent.replace(/[$,]/g, '')) || 0,
+                total_cost: parseFloat(document.getElementById('ren-total-cost').textContent.replace(/[$,]/g, '')) || 0
+            };
+
+            // Save to server
+            fetch('/api/renovation/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    project_data: propertyData,
+                    estimate_data: estimateData
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Project saved successfully!', 'success');
+                } else {
+                    console.error('Error saving project:', data.error);
+                    showToast('Error saving project', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error saving project', 'error');
+            });
+        }
+
+        function exportRenovationReport() {
+            // Generate and download renovation report
+            const reportData = {
+                property_address: document.getElementById('ren-property-address').value,
+                sqft: document.getElementById('ren-sqft').value,
+                bedrooms: document.getElementById('ren-bedrooms').value,
+                bathrooms: document.getElementById('ren-bathrooms').value,
+                purchase_price: document.getElementById('ren-purchase-price').value,
+                arv: document.getElementById('ren-arv').value,
+                exterior_cost: document.getElementById('ren-exterior-total').textContent,
+                mechanical_cost: document.getElementById('ren-mechanical-total').textContent,
+                interior_cost: document.getElementById('ren-interior-total').textContent,
+                total_cost: document.getElementById('ren-total-cost').textContent,
+                profit: document.getElementById('ren-profit-dollars').textContent,
+                deal_rating: document.getElementById('ren-deal-rating').textContent
+            };
+
+            // Create CSV content
+            const csvContent = [
+                ['Property Address', reportData.property_address],
+                ['Square Footage', reportData.sqft],
+                ['Bedrooms', reportData.bedrooms],
+                ['Bathrooms', reportData.bathrooms],
+                ['Purchase Price', reportData.purchase_price],
+                ['ARV', reportData.arv],
+                ['Exterior Costs', reportData.exterior_cost],
+                ['Mechanical Costs', reportData.mechanical_cost],
+                ['Interior Costs', reportData.interior_cost],
+                ['Total Renovation Cost', reportData.total_cost],
+                ['Expected Profit', reportData.profit],
+                ['Deal Rating', reportData.deal_rating]
+            ].map(row => row.join(',')).join('\n');
+
+            // Download the file
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'renovation-estimate-report.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
         }
         
         // Global variables for construction projects

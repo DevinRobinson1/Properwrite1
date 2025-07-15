@@ -39,6 +39,7 @@ from enhanced_comps_service import EnhancedCompsService, SearchParams
 from email_service import email_service
 from affiliate_api import affiliate_api
 from construction_service import ConstructionService
+from renovation_estimator_service import RenovationEstimatorService
 
 # Load environment variables from .env file
 if os.path.exists('.env'):
@@ -81,6 +82,7 @@ billing_service = BillingService()
 
 # Initialize construction service
 construction_service = ConstructionService()
+renovation_estimator = RenovationEstimatorService()
 
 # Database connection with proper connection pool settings and SSL handling
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -2534,6 +2536,78 @@ def get_construction_trades():
             'success': False,
             'error': str(e)
         }), 500
+
+
+@app.route('/api/renovation/estimate', methods=['POST'])
+@require_auth
+def calculate_renovation_estimate():
+    """
+    Calculate comprehensive renovation estimate based on professional template
+    """
+    try:
+        data = request.get_json()
+        
+        # Extract property data
+        property_data = data.get('property_data', {})
+        
+        # Extract renovation scope
+        renovation_scope = data.get('renovation_scope', {})
+        
+        # Calculate comprehensive estimate
+        estimate = renovation_estimator.calculate_comprehensive_estimate(
+            property_data, renovation_scope
+        )
+        
+        return jsonify({
+            'success': True,
+            'estimate': estimate
+        })
+    except Exception as e:
+        logging.error(f"Error calculating renovation estimate: {e}")
+        return jsonify({'error': 'Failed to calculate renovation estimate'}), 500
+
+
+@app.route('/api/renovation/save', methods=['POST'])
+@require_auth
+def save_renovation_project():
+    """
+    Save renovation project estimate
+    """
+    try:
+        data = request.get_json()
+        
+        # Extract project data
+        project_data = data.get('project_data', {})
+        estimate_data = data.get('estimate_data', {})
+        
+        # Save to database
+        result = renovation_estimator.save_renovation_estimate(
+            project_data, estimate_data
+        )
+        
+        return jsonify(result)
+    except Exception as e:
+        logging.error(f"Error saving renovation project: {e}")
+        return jsonify({'error': 'Failed to save renovation project'}), 500
+
+
+@app.route('/api/renovation/load/<project_id>', methods=['GET'])
+@require_auth
+def load_renovation_project(project_id):
+    """
+    Load saved renovation project
+    """
+    try:
+        # Load from database
+        project = renovation_estimator.get_renovation_estimate(project_id)
+        
+        return jsonify({
+            'success': True,
+            'project': project
+        })
+    except Exception as e:
+        logging.error(f"Error loading renovation project: {e}")
+        return jsonify({'error': 'Failed to load renovation project'}), 500
 
 # ===============================
 # JV Deal Submit Routes
