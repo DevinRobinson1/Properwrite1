@@ -16,6 +16,10 @@ from jv_database import JVDatabase
 
 admin_api_bp = Blueprint('admin_api', __name__, url_prefix='/admin/api')
 
+# Import CSRF for exemption
+from flask_wtf.csrf import CSRFProtect
+csrf = CSRFProtect()
+
 # Database connection
 def get_db_session():
     """Get database session from billing service"""
@@ -32,6 +36,7 @@ def require_admin_api(f):
     return decorated_function
 
 @admin_api_bp.route('/dashboard/stats', methods=['GET'])
+@csrf.exempt
 @require_admin_api
 def get_dashboard_stats():
     """Get main dashboard KPIs"""
@@ -119,6 +124,7 @@ def get_dashboard_stats():
         return jsonify({'error': str(e)}), 500
 
 @admin_api_bp.route('/activity/recent', methods=['GET'])
+@csrf.exempt
 @require_admin_api
 def get_recent_activity():
     """Get recent activity feed"""
@@ -208,6 +214,7 @@ def get_recent_activity():
         return jsonify({'error': str(e)}), 500
 
 @admin_api_bp.route('/affiliates/leaderboard', methods=['GET'])
+@csrf.exempt
 @require_admin_api
 def get_affiliate_leaderboard():
     """Get affiliate leaderboard data"""
@@ -224,6 +231,7 @@ def get_affiliate_leaderboard():
         return jsonify({'error': str(e)}), 500
 
 @admin_api_bp.route('/subscriptions/active', methods=['GET'])
+@csrf.exempt
 @require_admin_api
 def get_active_subscriptions():
     """Get active subscriptions table data"""
@@ -300,6 +308,7 @@ def get_active_subscriptions():
         return jsonify({'error': str(e)}), 500
 
 @admin_api_bp.route('/errors/recent', methods=['GET'])
+@csrf.exempt
 @require_admin_api
 def get_recent_errors():
     """Get recent error logs"""
@@ -345,6 +354,7 @@ def get_recent_errors():
         return jsonify({'error': str(e)}), 500
 
 @admin_api_bp.route('/users', methods=['GET'])
+@csrf.exempt
 @require_admin_api
 def get_users():
     """Get all users with pagination and search"""
@@ -420,6 +430,7 @@ def get_users():
         return jsonify({'error': str(e)}), 500
 
 @admin_api_bp.route('/users/<user_id>/suspend', methods=['POST'])
+@csrf.exempt
 @require_admin_api
 def suspend_user(user_id):
     """Suspend a user account"""
@@ -446,6 +457,7 @@ def suspend_user(user_id):
         return jsonify({'error': str(e)}), 500
 
 @admin_api_bp.route('/users/<user_id>/details', methods=['GET'])
+@csrf.exempt
 @require_admin_api
 def get_user_details(user_id):
     """Get comprehensive user details for 360° view panel"""
@@ -582,6 +594,7 @@ def get_user_details(user_id):
         return jsonify({'error': str(e)}), 500
 
 @admin_api_bp.route('/users/<user_id>/add-credits', methods=['POST'])
+@csrf.exempt
 @require_admin_api
 def add_user_credits(user_id):
     """Add credits to a user account"""
@@ -626,6 +639,7 @@ def add_user_credits(user_id):
         return jsonify({'error': str(e)}), 500
 
 @admin_api_bp.route('/users/<user_id>/activity-log', methods=['GET'])
+@csrf.exempt
 @require_admin_api
 def get_user_activity_log(user_id):
     """Get user activity log"""
