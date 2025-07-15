@@ -581,6 +581,81 @@ def get_user_details(user_id):
         logging.error(f"Error getting user details for {user_id}: {e}")
         return jsonify({'error': str(e)}), 500
 
+@admin_api_bp.route('/users/<user_id>/add-credits', methods=['POST'])
+@require_admin_api
+def add_user_credits(user_id):
+    """Add credits to a user account"""
+    try:
+        data = request.get_json()
+        credits = data.get('credits', 0)
+        
+        if not credits or credits <= 0:
+            return jsonify({'error': 'Invalid credits amount'}), 400
+        
+        with get_db_session() as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+            
+            # Get user's team
+            team = db.query(Team).filter(Team.id == user.team_id).first()
+            if not team:
+                return jsonify({'error': 'User team not found'}), 404
+            
+            # Add credits to team balance
+            team.credit_balance += credits
+            
+            # Create credit log entry
+            credit_log = CreditLog(
+                team_id=team.id,
+                user_id=user.id,
+                delta=credits,
+                reason=f"Admin credit addition: {credits} credits"
+            )
+            db.add(credit_log)
+            db.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Successfully added {credits} credits to user account',
+                'new_balance': team.credit_balance
+            })
+            
+    except Exception as e:
+        logging.error(f"Error adding credits to user {user_id}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@admin_api_bp.route('/users/<user_id>/activity-log', methods=['GET'])
+@require_admin_api
+def get_user_activity_log(user_id):
+    """Get user activity log"""
+    try:
+        with get_db_session() as db:
+            # Get credit log entries for this user
+            credit_logs = db.query(CreditLog).filter(
+                CreditLog.user_id == user_id
+            ).order_by(CreditLog.created_at.desc()).limit(50).all()
+            
+            activity_data = []
+            for log in credit_logs:
+                activity_data.append({
+                    'id': str(log.id),
+                    'timestamp': log.created_at.isoformat(),
+                    'action': 'Credit Change',
+                    'description': log.reason or 'Credit transaction',
+                    'delta': log.delta,
+                    'details': f"{'Added' if log.delta > 0 else 'Used'} {abs(log.delta)} credits"
+                })
+            
+            return jsonify({
+                'success': True,
+                'activity': activity_data
+            })
+            
+    except Exception as e:
+        logging.error(f"Error getting activity log for user {user_id}: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @admin_api_bp.route('/teams', methods=['GET'])
 @require_admin_api
 def get_teams():
