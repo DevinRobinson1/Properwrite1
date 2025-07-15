@@ -3281,7 +3281,7 @@ def update_member_role(member_id):
 
 @app.route('/api/team/pending-invites', methods=['GET'])
 def get_pending_invites():
-    """Get pending team invites"""
+    """Get all team invites (pending, accepted, cancelled)"""
     try:
         user_id = session.get('user_id')
         if not user_id:
@@ -3294,21 +3294,26 @@ def get_pending_invites():
             if not user:
                 return jsonify({'success': False, 'error': 'User not found'}), 404
             
-            # Get pending invites for this team
+            # Get all invites for this team (pending, accepted, cancelled)
             invites = db.query(TeamInvite).filter(
-                TeamInvite.team_id == user.team_id,
-                TeamInvite.status == 'pending'
-            ).all()
+                TeamInvite.team_id == user.team_id
+            ).order_by(TeamInvite.created_at.desc()).all()
             
             invite_list = []
             for invite in invites:
-                invite_list.append({
+                invite_data = {
                     'id': str(invite.id),
                     'email': invite.email,
                     'role': invite.role,
                     'created_at': invite.created_at.isoformat(),
                     'status': invite.status
-                })
+                }
+                
+                # Add accepted_at timestamp if the invite was accepted
+                if invite.accepted_at:
+                    invite_data['accepted_at'] = invite.accepted_at.isoformat()
+                
+                invite_list.append(invite_data)
             
             return jsonify({
                 'success': True,

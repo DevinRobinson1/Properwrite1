@@ -475,10 +475,10 @@
                         </div>
                     </div>
 
-                    <!-- Pending Invites -->
+                    <!-- Team Invites -->
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900">Pending Invites</h3>
+                            <h3 class="text-lg font-semibold text-gray-900">Team Invites</h3>
                             <span id="pending-invites-count" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                 <i class="fas fa-clock mr-1"></i>
                                 Loading...
@@ -1894,6 +1894,42 @@
             downloadAnchorNode.remove();
         }
 
+        // Status info helper function
+        function getStatusInfo(status) {
+            switch(status) {
+                case 'pending':
+                    return {
+                        displayText: 'Pending',
+                        badgeColor: 'bg-yellow-100 text-yellow-800',
+                        avatarColor: 'bg-gradient-to-r from-yellow-500 to-orange-600'
+                    };
+                case 'accepted':
+                    return {
+                        displayText: 'Accepted',
+                        badgeColor: 'bg-green-100 text-green-800',
+                        avatarColor: 'bg-gradient-to-r from-green-500 to-emerald-600'
+                    };
+                case 'cancelled':
+                    return {
+                        displayText: 'Cancelled',
+                        badgeColor: 'bg-red-100 text-red-800',
+                        avatarColor: 'bg-gradient-to-r from-red-500 to-pink-600'
+                    };
+                case 'expired':
+                    return {
+                        displayText: 'Expired',
+                        badgeColor: 'bg-gray-100 text-gray-800',
+                        avatarColor: 'bg-gradient-to-r from-gray-500 to-gray-600'
+                    };
+                default:
+                    return {
+                        displayText: 'Unknown',
+                        badgeColor: 'bg-gray-100 text-gray-800',
+                        avatarColor: 'bg-gradient-to-r from-gray-500 to-gray-600'
+                    };
+            }
+        }
+
         // Pending invites functionality
         async function loadPendingInvites() {
             try {
@@ -1902,7 +1938,7 @@
                 
                 if (data.success) {
                     updatePendingInvitesList(data.invites || []);
-                    updatePendingInvitesCount(data.invites ? data.invites.length : 0);
+                    updatePendingInvitesCount(data.invites || []);
                 } else {
                     console.error('Error loading pending invites:', data.error);
                     showPendingInvitesError();
@@ -1920,7 +1956,7 @@
             inviteTableBody.innerHTML = '';
             
             if (invites.length === 0) {
-                inviteTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500 py-8">No pending invites</td></tr>';
+                inviteTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500 py-8">No team invites</td></tr>';
                 return;
             }
             
@@ -1929,10 +1965,32 @@
                 const inviteDate = new Date(invite.created_at).toLocaleDateString();
                 const daysAgo = Math.floor((Date.now() - new Date(invite.created_at).getTime()) / (1000 * 60 * 60 * 24));
                 
+                // Get status-specific styling and display
+                const statusInfo = getStatusInfo(invite.status);
+                
+                // For accepted invites, show acceptance date instead of creation date
+                let dateDisplay = `${inviteDate} (${daysAgo} days ago)`;
+                if (invite.status === 'accepted' && invite.accepted_at) {
+                    const acceptedDate = new Date(invite.accepted_at).toLocaleDateString();
+                    const acceptedDaysAgo = Math.floor((Date.now() - new Date(invite.accepted_at).getTime()) / (1000 * 60 * 60 * 24));
+                    dateDisplay = `Accepted: ${acceptedDate} (${acceptedDaysAgo} days ago)`;
+                }
+                
+                // Actions based on status
+                let actions = '';
+                if (invite.status === 'pending') {
+                    actions = `
+                        <button onclick="resendInvite('${invite.id}')" class="text-blue-600 hover:text-blue-900 mr-3">Resend</button>
+                        <button onclick="cancelInvite('${invite.id}')" class="text-red-600 hover:text-red-900">Cancel</button>
+                    `;
+                } else {
+                    actions = '<span class="text-gray-400">No actions</span>';
+                }
+                
                 row.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-500 to-orange-600 flex items-center justify-center text-white text-sm font-medium">
+                            <div class="w-8 h-8 rounded-full ${statusInfo.avatarColor} flex items-center justify-center text-white text-sm font-medium">
                                 ${invite.email.charAt(0).toUpperCase()}
                             </div>
                             <div class="ml-3">
@@ -1946,31 +2004,40 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${inviteDate} (${daysAgo} days ago)
+                        ${dateDisplay}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                            Pending
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusInfo.badgeColor}">
+                            ${statusInfo.displayText}
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button onclick="resendInvite('${invite.id}')" class="text-blue-600 hover:text-blue-900 mr-3">Resend</button>
-                        <button onclick="cancelInvite('${invite.id}')" class="text-red-600 hover:text-red-900">Cancel</button>
+                        ${actions}
                     </td>
                 `;
                 inviteTableBody.appendChild(row);
             });
         }
 
-        function updatePendingInvitesCount(count) {
+        function updatePendingInvitesCount(allInvites) {
             const countElement = document.getElementById('pending-invites-count');
             if (countElement) {
-                if (count === 0) {
+                if (allInvites.length === 0) {
                     countElement.innerHTML = '<i class="fas fa-check mr-1"></i>None';
                     countElement.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
                 } else {
-                    countElement.innerHTML = `<i class="fas fa-clock mr-1"></i>${count}`;
-                    countElement.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800';
+                    // Count different statuses
+                    const pendingCount = allInvites.filter(invite => invite.status === 'pending').length;
+                    const acceptedCount = allInvites.filter(invite => invite.status === 'accepted').length;
+                    const total = allInvites.length;
+                    
+                    if (pendingCount > 0) {
+                        countElement.innerHTML = `<i class="fas fa-clock mr-1"></i>${pendingCount} pending`;
+                        countElement.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800';
+                    } else {
+                        countElement.innerHTML = `<i class="fas fa-check mr-1"></i>${total} total`;
+                        countElement.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800';
+                    }
                 }
             }
         }
