@@ -2672,19 +2672,7 @@
                     </div>
 
                     <!-- Under Construction Disclaimer -->
-                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 mb-6">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
-                            </div>
-                            <div class="ml-3">
-                                <h3 class="text-lg font-semibold text-yellow-800">Under Construction!</h3>
-                                <p class="text-yellow-700 mt-1">
-                                    Still not finished and finalized with the data and formatting, will let you know when done
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+
 
                     <!-- Construction Tab Navigation -->
                     <div class="mb-6">
@@ -2868,7 +2856,10 @@
                                         <div class="space-y-4">
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Sell Home Price</label>
-                                                <input type="number" id="nc-sell-price" value="1500000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                                <div class="relative">
+                                                    <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                                    <input type="text" id="nc-sell-price" value="1,500,000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white pl-8" onchange="calculateNewConstruction()" oninput="formatNumber(this)">
+                                                </div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Project Duration (Days)</label>
@@ -2892,7 +2883,10 @@
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Land Purchase Price</label>
-                                                <input type="number" id="nc-land-price" value="1350000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                                <div class="relative">
+                                                    <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                                    <input type="text" id="nc-land-price" value="1,350,000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white pl-8" onchange="calculateNewConstruction()" oninput="formatNumber(this)">
+                                                </div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Pad price before pad ready</label>
@@ -2911,35 +2905,59 @@
                                         <div class="space-y-4">
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Sewer & Water Taps</label>
-                                                <input type="number" id="nc-sewer-water" value="15000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                                <div class="relative">
+                                                    <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                                    <input type="text" id="nc-sewer-water" value="15,000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white pl-8" onchange="calculateNewConstruction()" oninput="formatNumber(this)">
+                                                </div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Surveys</label>
-                                                <input type="number" id="nc-surveys" value="7000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                                <div class="relative">
+                                                    <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                                    <input type="text" id="nc-surveys" value="7,000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white pl-8" onchange="calculateNewConstruction()" oninput="formatNumber(this)">
+                                                </div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Soil test and environmentals</label>
-                                                <input type="number" id="nc-soil-test" value="4000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                                <div class="relative">
+                                                    <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                                    <input type="text" id="nc-soil-test" value="4,000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white pl-8" onchange="calculateNewConstruction()" oninput="formatNumber(this)">
+                                                </div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Clearing Lot</label>
-                                                <input type="number" id="nc-clearing" value="10000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                                <div class="relative">
+                                                    <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                                    <input type="text" id="nc-clearing" value="10,000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white pl-8" onchange="calculateNewConstruction()" oninput="formatNumber(this)">
+                                                </div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Civil Plans and Engineering</label>
-                                                <input type="number" id="nc-civil-plans" value="25000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                                <div class="relative">
+                                                    <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                                    <input type="text" id="nc-civil-plans" value="25,000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white pl-8" onchange="calculateNewConstruction()" oninput="formatNumber(this)">
+                                                </div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Entitlement Fees</label>
-                                                <input type="number" id="nc-entitlement" value="3000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                                <div class="relative">
+                                                    <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                                    <input type="text" id="nc-entitlement" value="3,000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white pl-8" onchange="calculateNewConstruction()" oninput="formatNumber(this)">
+                                                </div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Architectural Plans and Structural Engineering</label>
-                                                <input type="number" id="nc-architectural" value="25000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                                <div class="relative">
+                                                    <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                                    <input type="text" id="nc-architectural" value="25,000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white pl-8" onchange="calculateNewConstruction()" oninput="formatNumber(this)">
+                                                </div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Grading and infrastructure</label>
-                                                <input type="number" id="nc-grading" value="1500" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                                <div class="relative">
+                                                    <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                                    <input type="text" id="nc-grading" value="1,500" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white pl-8" onchange="calculateNewConstruction()" oninput="formatNumber(this)">
+                                                </div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Development Cost</label>
@@ -2966,7 +2984,10 @@
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Cost per sq ft</label>
-                                                <input type="number" id="nc-cost-per-sqft" value="1500" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                                <div class="relative">
+                                                    <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                                    <input type="text" id="nc-cost-per-sqft" value="1,500" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white pl-8" onchange="calculateNewConstruction()" oninput="formatNumber(this)">
+                                                </div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Sq ft per unit</label>
@@ -6472,17 +6493,33 @@
         }
 
         function formatNumber(input) {
-            // Remove all non-digit characters except decimals
-            let value = input.value.replace(/[^\d.]/g, '');
-            
-            // Split by decimal point
-            let parts = value.split('.');
+            // Remove all non-digit characters
+            let value = input.value.replace(/[^\d]/g, '');
             
             // Add commas to the integer part
-            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
             
-            // Rejoin and update input
-            input.value = parts.join('.');
+            // Update input value
+            input.value = value;
+        }
+
+        // Utility function to format currency values
+        function formatUSD(value) {
+            if (!value || value === 0) return '$0';
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        }
+
+        // Utility function to parse currency values
+        function parseCurrency(value) {
+            if (typeof value === 'string') {
+                return parseFloat(value.replace(/[^0-9.-]/g, '')) || 0;
+            }
+            return parseFloat(value) || 0;
         }
 
         function updateElementIfExists(id, value) {
@@ -6491,7 +6528,19 @@
             if (element) {
                 try {
                     if (typeof value === 'number') {
-                        element.textContent = Math.round(value).toLocaleString();
+                        // Check if this is a currency field by ID naming convention
+                        const isCurrency = id.includes('price') || id.includes('cost') || id.includes('profit') || 
+                                          id.includes('cash') || id.includes('payment') || id.includes('equity') || 
+                                          id.includes('flow') || id.includes('fee') || id.includes('income') || 
+                                          id.includes('expense') || id.includes('revenue') || id.includes('total') ||
+                                          id.includes('mao') || id.includes('arv') || id.includes('repair') ||
+                                          id.includes('offer') || id.includes('down') || id.includes('wrap');
+                        
+                        if (isCurrency) {
+                            element.textContent = formatUSD(value);
+                        } else {
+                            element.textContent = Math.round(value).toLocaleString();
+                        }
                     } else {
                         element.textContent = value;
                     }
@@ -8403,7 +8452,7 @@
         function formatCurrencyInput(input) {
             let value = input.value.replace(/[^\d]/g, '');
             if (value) {
-                value = parseInt(value).toLocaleString();
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
                 input.value = value;
             }
         }
@@ -8411,7 +8460,7 @@
         function formatNumberInput(input) {
             let value = input.value.replace(/[^\d]/g, '');
             if (value) {
-                value = parseInt(value).toLocaleString();
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
                 input.value = value;
             }
         }
@@ -10571,11 +10620,11 @@
             const gcFeeCost = hardCosts * (gcFeePercent / 100);
             const totalCost = hardCosts + overheadCost + contingencyCost + gcFeeCost;
             
-            document.getElementById('ff-hard-costs').textContent = `$${hardCosts.toLocaleString()}`;
-            document.getElementById('ff-overhead-cost').textContent = `$${overheadCost.toLocaleString()}`;
-            document.getElementById('ff-contingency-cost').textContent = `$${contingencyCost.toLocaleString()}`;
-            document.getElementById('ff-gc-fee-cost').textContent = `$${gcFeeCost.toLocaleString()}`;
-            document.getElementById('ff-total-cost').textContent = `$${totalCost.toLocaleString()}`;
+            document.getElementById('ff-hard-costs').textContent = formatUSD(hardCosts);
+            document.getElementById('ff-overhead-cost').textContent = formatUSD(overheadCost);
+            document.getElementById('ff-contingency-cost').textContent = formatUSD(contingencyCost);
+            document.getElementById('ff-gc-fee-cost').textContent = formatUSD(gcFeeCost);
+            document.getElementById('ff-total-cost').textContent = formatUSD(totalCost);
         }
         
         // Calculate New Construction total
@@ -10604,40 +10653,40 @@
             
             const finalTotalCost = totalProjectCost + carryCost;
             
-            document.getElementById('nc-hard-costs').textContent = `$${hardCosts.toLocaleString()}`;
-            document.getElementById('nc-overhead-cost').textContent = `$${overheadCost.toLocaleString()}`;
-            document.getElementById('nc-contingency-cost').textContent = `$${contingencyCost.toLocaleString()}`;
-            document.getElementById('nc-gc-fee-cost').textContent = `$${gcFeeCost.toLocaleString()}`;
-            document.getElementById('nc-construction-cost').textContent = `$${constructionCost.toLocaleString()}`;
-            document.getElementById('nc-land-cost-display').textContent = `$${landCost.toLocaleString()}`;
-            document.getElementById('nc-carry-cost-display').textContent = `$${carryCost.toLocaleString()}`;
-            document.getElementById('nc-total-cost').textContent = `$${finalTotalCost.toLocaleString()}`;
+            document.getElementById('nc-hard-costs').textContent = formatUSD(hardCosts);
+            document.getElementById('nc-overhead-cost').textContent = formatUSD(overheadCost);
+            document.getElementById('nc-contingency-cost').textContent = formatUSD(contingencyCost);
+            document.getElementById('nc-gc-fee-cost').textContent = formatUSD(gcFeeCost);
+            document.getElementById('nc-construction-cost').textContent = formatUSD(constructionCost);
+            document.getElementById('nc-land-cost-display').textContent = formatUSD(landCost);
+            document.getElementById('nc-carry-cost-display').textContent = formatUSD(carryCost);
+            document.getElementById('nc-total-cost').textContent = formatUSD(finalTotalCost);
         }
 
         // Comprehensive New Construction Calculator based on Excel template
         function calculateNewConstruction() {
             try {
-                // Get input values
-                const sellPrice = parseFloat(document.getElementById('nc-sell-price').value) || 0;
+                // Get input values using parseCurrency for formatted inputs
+                const sellPrice = parseCurrency(document.getElementById('nc-sell-price').value);
                 const projectDuration = parseFloat(document.getElementById('nc-project-duration').value) || 0;
                 const units = parseFloat(document.getElementById('nc-units').value) || 0;
-                const landPrice = parseFloat(document.getElementById('nc-land-price').value) || 0;
-                const costPerSqft = parseFloat(document.getElementById('nc-cost-per-sqft').value) || 0;
+                const landPrice = parseCurrency(document.getElementById('nc-land-price').value);
+                const costPerSqft = parseCurrency(document.getElementById('nc-cost-per-sqft').value);
                 const sqftPerUnit = parseFloat(document.getElementById('nc-sqft-per-unit').value) || 0;
                 const constructionTime = parseFloat(document.getElementById('nc-construction-time').value) || 0;
                 const rate = parseFloat(document.getElementById('nc-rate').value) || 0;
                 const realtorPercent = parseFloat(document.getElementById('nc-realtor-percent').value) || 0;
                 
-                // Development costs
-                const sewerWater = parseFloat(document.getElementById('nc-sewer-water').value) || 0;
-                const surveys = parseFloat(document.getElementById('nc-surveys').value) || 0;
-                const soilTest = parseFloat(document.getElementById('nc-soil-test').value) || 0;
-                const clearing = parseFloat(document.getElementById('nc-clearing').value) || 0;
-                const civilPlans = parseFloat(document.getElementById('nc-civil-plans').value) || 0;
-                const entitlement = parseFloat(document.getElementById('nc-entitlement').value) || 0;
-                const architectural = parseFloat(document.getElementById('nc-architectural').value) || 0;
-                const grading = parseFloat(document.getElementById('nc-grading').value) || 0;
-                const otherAbCost = parseFloat(document.getElementById('nc-other-ab-cost').value) || 0;
+                // Development costs using parseCurrency
+                const sewerWater = parseCurrency(document.getElementById('nc-sewer-water').value);
+                const surveys = parseCurrency(document.getElementById('nc-surveys').value);
+                const soilTest = parseCurrency(document.getElementById('nc-soil-test').value);
+                const clearing = parseCurrency(document.getElementById('nc-clearing').value);
+                const civilPlans = parseCurrency(document.getElementById('nc-civil-plans').value);
+                const entitlement = parseCurrency(document.getElementById('nc-entitlement').value);
+                const architectural = parseCurrency(document.getElementById('nc-architectural').value);
+                const grading = parseCurrency(document.getElementById('nc-grading').value);
+                const otherAbCost = parseCurrency(document.getElementById('nc-other-ab-cost').value);
                 
                 // Alternative holding costs
                 const insurance = parseFloat(document.getElementById('nc-insurance').value) || 0;
@@ -10694,47 +10743,47 @@
                 const totalExpenses = finalPurchase + finalDevelopment + finalVertical + finalHolding + finalAltHolding + finalClosing + finalRealtor;
                 const finalProfit = finalSellPrice - totalExpenses;
                 
-                // Update all fields with comma formatting
-                document.getElementById('nc-gross-income').value = Math.round(grossIncome).toLocaleString();
-                document.getElementById('nc-target-roi').value = Math.round(targetRoi).toLocaleString();
-                document.getElementById('nc-land-pad-ready').value = Math.round(landPadReady).toLocaleString();
-                document.getElementById('nc-pad-price').value = Math.round(padPrice).toLocaleString();
-                document.getElementById('nc-build-cost-available').value = Math.round(buildCostAvailable).toLocaleString();
+                // Update all fields with formatUSD for consistent currency formatting
+                document.getElementById('nc-gross-income').value = formatUSD(grossIncome);
+                document.getElementById('nc-target-roi').value = formatUSD(targetRoi);
+                document.getElementById('nc-land-pad-ready').value = formatUSD(landPadReady);
+                document.getElementById('nc-pad-price').value = formatUSD(padPrice);
+                document.getElementById('nc-build-cost-available').value = formatUSD(buildCostAvailable);
                 
-                document.getElementById('nc-development-cost').value = Math.round(developmentCost).toLocaleString();
-                document.getElementById('nc-pad-ready-cost').value = Math.round(padReadyCost).toLocaleString();
+                document.getElementById('nc-development-cost').value = formatUSD(developmentCost);
+                document.getElementById('nc-pad-ready-cost').value = formatUSD(padReadyCost);
                 
-                document.getElementById('nc-build-cost').value = Math.round(buildCost).toLocaleString();
+                document.getElementById('nc-build-cost').value = formatUSD(buildCost);
                 document.getElementById('nc-total-sqft').value = Math.round(totalSqft).toLocaleString();
-                document.getElementById('nc-estimated-profit-basic').value = Math.round(estimatedProfitBasic).toLocaleString();
-                document.getElementById('nc-development-fee').value = Math.round(developmentFee).toLocaleString();
+                document.getElementById('nc-estimated-profit-basic').value = formatUSD(estimatedProfitBasic);
+                document.getElementById('nc-development-fee').value = formatUSD(developmentFee);
                 
-                document.getElementById('nc-ab-closing-percent').value = Math.round(abClosingPercent).toLocaleString();
-                document.getElementById('nc-ab-closing-cost').value = Math.round(abClosingCost).toLocaleString();
-                document.getElementById('nc-bc-closing-percent').value = Math.round(bcClosingPercent).toLocaleString();
-                document.getElementById('nc-bc-closing-cost').value = Math.round(bcClosingCost).toLocaleString();
-                document.getElementById('nc-total-cc').value = Math.round(totalCC).toLocaleString();
-                document.getElementById('nc-total-loan').value = Math.round(totalLoan).toLocaleString();
+                document.getElementById('nc-ab-closing-percent').value = abClosingPercent + '%';
+                document.getElementById('nc-ab-closing-cost').value = formatUSD(abClosingCost);
+                document.getElementById('nc-bc-closing-percent').value = bcClosingPercent + '%';
+                document.getElementById('nc-bc-closing-cost').value = formatUSD(bcClosingCost);
+                document.getElementById('nc-total-cc').value = formatUSD(totalCC);
+                document.getElementById('nc-total-loan').value = formatUSD(totalLoan);
                 document.getElementById('nc-hold-time').value = Math.round(holdTime).toLocaleString();
-                document.getElementById('nc-points').value = Math.round(points).toLocaleString();
-                document.getElementById('nc-total-hold-cost').value = Math.round(totalHoldCost).toLocaleString();
+                document.getElementById('nc-points').value = points + '%';
+                document.getElementById('nc-total-hold-cost').value = formatUSD(totalHoldCost);
                 
-                document.getElementById('nc-total-alt-holding').value = Math.round(totalAltHolding).toLocaleString();
+                document.getElementById('nc-total-alt-holding').value = formatUSD(totalAltHolding);
                 document.getElementById('nc-total-holding-days').value = Math.round(totalHoldingDays).toLocaleString();
                 
-                document.getElementById('nc-realtor-amount').value = Math.round(realtorAmount).toLocaleString();
-                document.getElementById('nc-total-realtor-fees').value = Math.round(totalRealtorFees).toLocaleString();
+                document.getElementById('nc-realtor-amount').value = formatUSD(realtorAmount);
+                document.getElementById('nc-total-realtor-fees').value = formatUSD(totalRealtorFees);
                 
-                document.getElementById('nc-final-sell-price').value = Math.round(finalSellPrice).toLocaleString();
-                document.getElementById('nc-final-purchase').value = Math.round(finalPurchase).toLocaleString();
-                document.getElementById('nc-final-development').value = Math.round(finalDevelopment).toLocaleString();
-                document.getElementById('nc-final-vertical').value = Math.round(finalVertical).toLocaleString();
-                document.getElementById('nc-final-holding').value = Math.round(finalHolding).toLocaleString();
-                document.getElementById('nc-final-alt-holding').value = Math.round(finalAltHolding).toLocaleString();
-                document.getElementById('nc-final-closing').value = Math.round(finalClosing).toLocaleString();
-                document.getElementById('nc-final-realtor').value = Math.round(finalRealtor).toLocaleString();
-                document.getElementById('nc-total-expenses').value = Math.round(totalExpenses).toLocaleString();
-                document.getElementById('nc-final-profit').value = Math.round(finalProfit).toLocaleString();
+                document.getElementById('nc-final-sell-price').value = formatUSD(finalSellPrice);
+                document.getElementById('nc-final-purchase').value = formatUSD(finalPurchase);
+                document.getElementById('nc-final-development').value = formatUSD(finalDevelopment);
+                document.getElementById('nc-final-vertical').value = formatUSD(finalVertical);
+                document.getElementById('nc-final-holding').value = formatUSD(finalHolding);
+                document.getElementById('nc-final-alt-holding').value = formatUSD(finalAltHolding);
+                document.getElementById('nc-final-closing').value = formatUSD(finalClosing);
+                document.getElementById('nc-final-realtor').value = formatUSD(finalRealtor);
+                document.getElementById('nc-total-expenses').value = formatUSD(totalExpenses);
+                document.getElementById('nc-final-profit').value = formatUSD(finalProfit);
                 
                 // Add visual feedback for profit
                 const profitElement = document.getElementById('nc-final-profit');
