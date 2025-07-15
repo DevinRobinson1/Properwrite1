@@ -273,12 +273,16 @@ def api_signup():
             if existing_user:
                 return jsonify({"error": "Email already registered"}), 400
         
+        # Get invite token from session if present
+        invite_token = session.get('team_invite_token')
+        
         # Create new user with billing service
-        result = billing_service.create_user(
-            name=name,
-            email=email,
-            password=password
-        )
+        result = billing_service.create_user({
+            'name': name,
+            'email': email,
+            'password': password,
+            'invite_token': invite_token
+        })
         
         if result.get('success'):
             # Set consolidated session with permanent flag
@@ -287,9 +291,13 @@ def api_signup():
             session['user_email'] = email
             session['email'] = email  # Keep for backward compatibility
             session['user_name'] = name
-            session['team_id'] = result['team_id']
-            session['team_role'] = 'owner'  # Keep for backward compatibility
+            session['team_id'] = result.get('team_id')
+            session['team_role'] = result.get('role', 'owner')
             session['new_user_welcome'] = True
+            
+            # Clear invite token if used
+            if invite_token:
+                session.pop('team_invite_token', None)
             
             # Send welcome email
             try:
@@ -399,20 +407,28 @@ def signup():
         
         # Create user with billing service
         billing_service = BillingService()
+        
+        # Get invite token from session if present
+        invite_token = session.get('team_invite_token')
+        
         result = billing_service.create_user({
             'email': email,
             'name': name or email.split('@')[0],
             'password': password,
-            'credit_code': credit_code
+            'credit_code': credit_code,
+            'invite_token': invite_token
         })
         
         if result.get('success'):
             user_id = result.get('user_id')
+            team_name = result.get('team_name')
             
             # Set up consolidated session
             session['user_id'] = user_id
             session['user_email'] = email
             session['email'] = email  # Keep for backward compatibility
+            session['team_id'] = result.get('team_id')
+            session['team_role'] = result.get('role')
             
             # Send welcome email immediately after successful registration
             try:
@@ -425,17 +441,12 @@ def signup():
             except Exception as e:
                 logging.error(f"Error sending welcome email to {email}: {str(e)}")
             
-            # If there's a team invite token, accept it
-            invite_token = session.get('team_invite_token')
+            # Show appropriate welcome message
             if invite_token:
-                invite_result = billing_service.accept_team_invite(invite_token, user_id)
-                if invite_result.get('success'):
-                    flash(f'Welcome! You\'ve successfully joined {invite_result.get("team_name")} and received 4 analysis credits. Visit your dashboard to start analyzing properties.', 'success')
-                else:
-                    flash('Account created but failed to join team: ' + invite_result.get('error'), 'warning')
+                flash(f'Welcome! You\'ve successfully joined {team_name} and received analysis credits. Visit your dashboard to start analyzing properties.', 'success')
                 session.pop('team_invite_token', None)
             else:
-                flash('Welcome to Properwrite! Your account has been created and you\'ve received 4 analysis credits. Visit your dashboard to manage your account or start analyzing properties.', 'success')
+                flash('Welcome to Properwrite! Your account has been created and you\'ve received analysis credits. Visit your dashboard to manage your account or start analyzing properties.', 'success')
             
             # Set a flag to show new user welcome message
             session['new_user_welcome'] = True

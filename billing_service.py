@@ -574,14 +574,45 @@ class BillingService:
                 if existing_user:
                     return {'success': False, 'error': 'User with this email already exists'}
                 
-                # Create a new team for the user
-                team = Team(
-                    id=uuid.uuid4(),
-                    name=f"{user_data.get('name', user_data['email'].split('@')[0])}'s Team",
-                    tier='starter',
-                    credit_balance=5,  # Starting credits
-                    seats_max=1
-                )
+                # Check if user is joining via team invite
+                invite_token = user_data.get('invite_token')
+                team = None
+                user_role = 'owner'
+                
+                if invite_token:
+                    # Find the invite and validate it
+                    invite = db.query(TeamInvite).filter(TeamInvite.token == invite_token).first()
+                    
+                    if invite and invite.expires_at >= datetime.utcnow():
+                        # Get the team from the invite
+                        team = db.query(Team).filter(Team.id == invite.team_id).first()
+                        
+                        if team:
+                            # Check team capacity
+                            active_users = db.query(User).filter(
+                                and_(User.team_id == team.id, User.is_active == True)
+                            ).count()
+                            
+                            if active_users >= team.seats_max:
+                                return {'success': False, 'error': 'Team is out of seats; ask your admin to upgrade.'}
+                            
+                            user_role = invite.role
+                            
+                            # Mark invite as accepted
+                            invite.status = 'accepted'
+                            invite.accepted_at = datetime.utcnow()
+                            invite.used = True
+                
+                # If no valid invite, create a new team for the user
+                if not team:
+                    team = Team(
+                        id=uuid.uuid4(),
+                        name=f"{user_data.get('name', user_data['email'].split('@')[0])}'s Team",
+                        tier='starter',
+                        credit_balance=5,  # Starting credits
+                        seats_max=1
+                    )
+                    db.add(team)
                 
                 # Create new user
                 user = User(
@@ -589,7 +620,7 @@ class BillingService:
                     email=user_data['email'],
                     name=user_data.get('name', user_data['email'].split('@')[0]),
                     team=team,
-                    role='owner',
+                    role=user_role,
                     is_active=True
                 )
                 
@@ -598,8 +629,7 @@ class BillingService:
                     from werkzeug.security import generate_password_hash
                     user.password_hash = generate_password_hash(user_data['password'])
                 
-                # Add both team and user to database
-                db.add(team)
+                # Add user to database
                 db.add(user)
                 db.commit()
                 db.refresh(user)
@@ -610,7 +640,9 @@ class BillingService:
                     self._fire_webhook('new_user_signup', {
                         'user_id': str(user.id),
                         'email': user.email,
-                        'name': user.name
+                        'name': user.name,
+                        'team_id': str(team.id),
+                        'joined_via_invite': bool(invite_token)
                     })
                 except Exception as e:
                     logging.warning(f"Webhook firing failed: {e}")
@@ -618,7 +650,10 @@ class BillingService:
                 return {
                     'success': True,
                     'user_id': str(user.id),
-                    'email': user.email
+                    'email': user.email,
+                    'team_id': str(team.id),
+                    'team_name': team.name,
+                    'role': user_role
                 }
                 
         except Exception as e:
@@ -628,6 +663,7 @@ class BillingService:
     def accept_team_invite(self, token: str, user_id: str) -> Dict:
         """
         Accept a team invitation and add user to the team
+        This method is now primarily for existing users accepting invites
         """
         try:
             with self.db_session() as db:
@@ -651,20 +687,36 @@ class BillingService:
                 ).count()
                 
                 if active_users >= team.seats_max:
-                    return {'success': False, 'error': 'Team is at maximum capacity'}
+                    return {'success': False, 'error': 'Team is out of seats; ask your admin to upgrade.'}
                 
                 # Get the user
                 user = db.query(User).filter(User.id == user_id).first()
                 if not user:
                     return {'success': False, 'error': 'User not found'}
                 
-                # Add user to team
-                user.team_id = team.id
-                user.team_role = invite.role
+                # Check if user has their own single-user team that should be cleaned up
+                old_team = user.team
+                should_cleanup_old_team = False
                 
-                # Mark the invite as accepted instead of deleting it
+                if old_team and old_team.id != team.id:
+                    # Check if it's a single-user team that can be safely removed
+                    team_users = db.query(User).filter(User.team_id == old_team.id).count()
+                    if team_users == 1 and old_team.seats_max == 1:
+                        should_cleanup_old_team = True
+                
+                # Add user to new team
+                user.team_id = team.id
+                user.role = invite.role
+                
+                # Mark the invite as accepted
                 invite.status = 'accepted'
                 invite.accepted_at = datetime.utcnow()
+                invite.used = True
+                
+                # Clean up the old single-user team if appropriate
+                if should_cleanup_old_team:
+                    db.delete(old_team)
+                
                 db.commit()
                 
                 return {

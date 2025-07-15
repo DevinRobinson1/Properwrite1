@@ -381,6 +381,9 @@ def create_promo_code():
         max_uses = int(data.get('max_uses', 100))
         affiliate_id = data.get('affiliate_id')
         
+        # Convert promo type to uppercase to match database enum
+        promo_type_upper = promo_type.upper()
+        
         with Session(engine) as session:
             # Insert new promo code
             session.execute(text("""
@@ -388,9 +391,9 @@ def create_promo_code():
                 VALUES (:code, :type, :discount_percentage, :credit_amount, :max_uses, :affiliate_id)
             """), {
                 'code': code,
-                'type': promo_type,
+                'type': promo_type_upper,
                 'discount_percentage': discount_value if promo_type == 'percentage_discount' else None,
-                'credit_amount': int(discount_value) if promo_type == 'credit_bonus' else None,
+                'credit_amount': int(discount_value) if promo_type == 'credit_pack' else None,
                 'max_uses': max_uses,
                 'affiliate_id': affiliate_id if affiliate_id else None
             })
