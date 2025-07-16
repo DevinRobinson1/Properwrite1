@@ -22,6 +22,22 @@
 
 <!-- Main Wizard Container -->
 <section id="jv-wizard" class="max-w-4xl mx-auto px-4 py-8">
+  <!-- Animated Progress Bar -->
+  <div class="mb-8">
+    <div class="max-w-2xl mx-auto mb-6">
+      <div class="relative">
+        <div class="h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+          <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-500 via-green-500 via-purple-500 to-orange-500 rounded-full transition-all duration-700 ease-out transform origin-left" style="width: 25%"></div>
+        </div>
+        <div class="absolute -top-1 left-0 w-5 h-5 bg-white border-4 border-blue-500 rounded-full shadow-lg transform -translate-x-2 transition-all duration-700 ease-out" id="progress-dot" style="left: calc(25% - 8px)"></div>
+      </div>
+      <div class="flex justify-between text-sm text-gray-600 mt-3">
+        <span id="progress-text" class="font-medium">Step 1 of 4</span>
+        <span id="progress-percent" class="font-medium">25%</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Modern Progress Bar -->
   <div class="mb-12">
     <div class="flex items-center justify-between">
@@ -283,5 +299,6 @@
 </section>
 
 <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_KEY }}&libraries=places"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script src="{{ url_for('static', filename='js/jv_submit.js') }}"></script>
 {% endblock %}

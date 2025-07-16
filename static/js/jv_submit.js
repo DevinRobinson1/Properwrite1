@@ -155,6 +155,32 @@ class JVWizard {
         fieldset.hidden = true;
       }
     });
+
+    // Update animated progress bar
+    this.updateProgressBar();
+  }
+
+  updateProgressBar() {
+    const progressBar = document.getElementById('progress-bar');
+    const progressDot = document.getElementById('progress-dot');
+    const progressText = document.getElementById('progress-text');
+    const progressPercent = document.getElementById('progress-percent');
+    
+    if (progressBar && progressDot && progressText && progressPercent) {
+      const progress = (this.currentStep / this.maxSteps) * 100;
+      
+      // Animate progress bar
+      progressBar.style.width = progress + '%';
+      progressDot.style.left = `calc(${progress}% - 8px)`;
+      
+      // Update text
+      progressText.textContent = `Step ${this.currentStep} of ${this.maxSteps}`;
+      progressPercent.textContent = Math.round(progress) + '%';
+      
+      // Change dot color based on step
+      const colors = ['border-blue-500', 'border-green-500', 'border-purple-500', 'border-orange-500'];
+      progressDot.className = `absolute -top-1 left-0 w-5 h-5 bg-white border-4 ${colors[this.currentStep - 1]} rounded-full shadow-lg transform -translate-x-2 transition-all duration-700 ease-out`;
+    }
   }
 
   generateReview() {
@@ -307,6 +333,9 @@ class JVWizard {
       const result = await response.json();
 
       if (response.ok) {
+        // Trigger confetti celebration
+        this.triggerConfetti();
+        
         this.showMessage('Deal submitted successfully! We\'ll review it and get back to you soon.', 'success');
         this.clearStorage();
         
@@ -324,6 +353,58 @@ class JVWizard {
       submitButton.disabled = false;
       submitButton.textContent = 'Submit JV Deal';
     }
+  }
+
+  triggerConfetti() {
+    // Create multiple confetti bursts
+    const colors = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B'];
+    
+    // First burst
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: colors
+    });
+    
+    // Second burst with delay
+    setTimeout(() => {
+      confetti({
+        particleCount: 80,
+        spread: 60,
+        origin: { y: 0.7 },
+        colors: colors
+      });
+    }, 200);
+    
+    // Third burst with different settings
+    setTimeout(() => {
+      confetti({
+        particleCount: 60,
+        spread: 90,
+        origin: { y: 0.5 },
+        colors: colors,
+        shapes: ['star', 'circle']
+      });
+    }, 400);
+    
+    // Final burst from both sides
+    setTimeout(() => {
+      confetti({
+        particleCount: 50,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors: colors
+      });
+      confetti({
+        particleCount: 50,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors: colors
+      });
+    }, 600);
   }
 
   showMessage(text, type) {
