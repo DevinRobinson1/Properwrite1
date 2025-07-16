@@ -116,6 +116,7 @@
                     </button>
                     <button onclick="showTab('jv-deals')" class="tab-button py-4 px-1 border-b-2 font-medium text-sm">
                         JV Deals
+                        <span class="ml-2 bg-blue-500 text-white px-2 py-1 rounded-full text-xs">Enhanced</span>
                     </button>
                     <button onclick="showTab('activity')" class="tab-button py-4 px-1 border-b-2 font-medium text-sm">
                         Recent Activity
@@ -670,7 +671,9 @@
             const data = {
                 code: code || null, // Let backend generate if empty
                 type: type,
-                max_uses: parseInt(maxUses) || null
+                max_uses: parseInt(maxUses) || null,
+                affiliate_id: null, // Allow null for non-affiliate promo codes
+                created_by: 'admin_dashboard' // Identify the source
             };
             
             // Set value based on type
