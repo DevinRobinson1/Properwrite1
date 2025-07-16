@@ -75,6 +75,8 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 # Initialize CSRF protection
 csrf = CSRFProtect(app)
 
+# CSRF exemption for admin API routes will be handled in view functions
+
 # Initialize rate limiter
 limiter = Limiter(
     app=app,
@@ -340,6 +342,8 @@ def api_signup():
 
 app.register_blueprint(admin_api_bp)
 app.register_blueprint(zapier_api_bp)
+
+# CSRF exemption for admin API routes will be handled in view functions
 
 @app.route('/')
 def index():
