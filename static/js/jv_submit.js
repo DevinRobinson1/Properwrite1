@@ -433,6 +433,10 @@ class JVWizard {
       // Add analysis to form data
       formData.append('mao_analysis', JSON.stringify(maoAnalysis));
       
+      // Debug: Log form data
+      console.log('Form data being submitted:', Array.from(formData.entries()));
+      console.log('MAO analysis:', maoAnalysis);
+      
       const response = await fetch('/api/jv-deals', {
         method: 'POST',
         body: formData  // Don't set Content-Type header with FormData
@@ -470,6 +474,8 @@ class JVWizard {
     const askingPrice = parseFloat(dealData.asking_price?.replace(/,/g, '') || 0);
     const arv = parseFloat(dealData.arv?.replace(/,/g, '') || 0);
     const rehabCost = parseFloat(dealData.rehab_cost?.replace(/,/g, '') || 0);
+    
+    console.log('Calculating MAO with:', { askingPrice, arv, rehabCost });
     
     // Standard wholesale MAO calculation
     const wholesaleMAO = arv * 0.70 - rehabCost;

@@ -22,7 +22,7 @@ from wholesale_calculator import calculate_wholesale_offers
 from installment_calculator import calculate_installment_offers
 from subject_to_calculator import calculate_subject_to_offer
 from seller_finance_calculator import calculate_seller_finance_offer
-from jv_auto_underwrite import auto_underwrite_deal
+from jv_auto_underwrite import auto_underwrite_deal, auto_underwrite_deal_with_mao
 from billing_service import BillingService
 from auth_middleware import require_auth, require_seat, require_role, require_credits
 from billing_models import User
