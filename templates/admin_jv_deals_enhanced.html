@@ -109,21 +109,21 @@
         </div>
 
         <!-- Enhanced DataTable -->
-        <div class="bg-white rounded-lg shadow-sm">
-            <table id="jv-deals-table" class="w-full">
-                <thead>
-                    <tr class="bg-gray-50 border-b">
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted By</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asking Price</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Suggested Offer</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+            <table id="jv-deals-table" class="w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Partner</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property Address</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                        <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Asking Price</th>
+                        <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Suggested Offer</th>
+                        <th class="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+                        <th class="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="deals-table-body">
+                <tbody id="deals-table-body" class="bg-white divide-y divide-gray-200">
                     <!-- Data will be populated via JavaScript -->
                 </tbody>
             </table>
@@ -279,34 +279,86 @@
             dealsTable.clear();
             
             deals.forEach(deal => {
+                // Format location properly
+                const location = formatLocation(deal.property.city, deal.property.state, deal.property.zip);
+                
+                // Format property address
+                const propertyAddress = deal.property.address || '<span class="text-gray-400 italic">No address provided</span>';
+                
+                // Format financial values
+                const askingPrice = deal.financials.asking_price ? 
+                    `<span class="font-medium text-green-600">$${parseInt(deal.financials.asking_price).toLocaleString()}</span>` : 
+                    '<span class="text-gray-400">—</span>';
+                
+                const suggestedOffer = deal.financials.suggested_offer ? 
+                    `<span class="font-medium text-blue-600">$${parseInt(deal.financials.suggested_offer).toLocaleString()}</span>` : 
+                    '<span class="text-gray-400">—</span>';
+                
+                // Format status badge
+                const statusBadge = getStatusBadge(deal.status);
+                
+                // Format date
+                const submittedDate = new Date(deal.created_at).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                
                 const row = [
-                    `<button onclick="openUserPortfolio('${deal.partner.id}')" class="text-blue-600 hover:text-blue-800 font-medium">
-                        ${deal.partner.name}
-                    </button>`,
-                    deal.property.address || 'N/A',
-                    `${deal.property.city}, ${deal.property.state} ${deal.property.zip}`,
-                    deal.financials.asking_price ? `$${parseInt(deal.financials.asking_price).toLocaleString()}` : 'N/A',
-                    deal.financials.suggested_offer ? `$${parseInt(deal.financials.suggested_offer).toLocaleString()}` : 'N/A',
-                    `<span class="status-badge status-${deal.status}">${deal.status}</span>`,
-                    new Date(deal.created_at).toLocaleDateString(),
-                    `<div class="flex space-x-2">
-                        <button onclick="openDealModal('${deal.id}')" class="text-blue-600 hover:text-blue-800 text-sm">
-                            <i class="fas fa-eye"></i> View
+                    `<div class="py-2">
+                        <button onclick="openUserPortfolio('${deal.partner.id}')" class="text-blue-600 hover:text-blue-800 font-medium hover:underline">
+                            ${deal.partner.name}
                         </button>
-                        ${deal.status === 'pending' ? `
-                            <button onclick="updateDealStatus('${deal.id}', 'approved')" class="text-green-600 hover:text-green-800 text-sm">
-                                <i class="fas fa-check"></i> Approve
+                        ${deal.partner.company ? `<div class="text-xs text-gray-500">${deal.partner.company}</div>` : ''}
+                    </div>`,
+                    `<div class="py-2 max-w-xs">
+                        <div class="text-sm font-medium text-gray-900 truncate" title="${deal.property.address || 'No address provided'}">
+                            ${propertyAddress}
+                        </div>
+                    </div>`,
+                    `<div class="py-2 text-sm text-gray-600">${location}</div>`,
+                    `<div class="py-2 text-right">${askingPrice}</div>`,
+                    `<div class="py-2 text-right">${suggestedOffer}</div>`,
+                    `<div class="py-2 text-center">${statusBadge}</div>`,
+                    `<div class="py-2 text-sm text-gray-600">${submittedDate}</div>`,
+                    `<div class="py-2">
+                        <div class="flex space-x-2 justify-center">
+                            <button onclick="openDealModal('${deal.id}')" class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors">
+                                <i class="fas fa-eye mr-1"></i> View
                             </button>
-                            <button onclick="updateDealStatus('${deal.id}', 'denied')" class="text-red-600 hover:text-red-800 text-sm">
-                                <i class="fas fa-times"></i> Deny
-                            </button>
-                        ` : ''}
+                            ${deal.status === 'pending' ? `
+                                <button onclick="updateDealStatus('${deal.id}', 'approved')" class="inline-flex items-center px-2 py-1 text-xs font-medium text-green-600 bg-green-50 rounded hover:bg-green-100 transition-colors">
+                                    <i class="fas fa-check mr-1"></i> Approve
+                                </button>
+                                <button onclick="updateDealStatus('${deal.id}', 'denied')" class="inline-flex items-center px-2 py-1 text-xs font-medium text-red-600 bg-red-50 rounded hover:bg-red-100 transition-colors">
+                                    <i class="fas fa-times mr-1"></i> Deny
+                                </button>
+                            ` : ''}
+                        </div>
                     </div>`
                 ];
                 dealsTable.row.add(row);
             });
             
             dealsTable.draw();
+        }
+
+        function formatLocation(city, state, zip) {
+            const parts = [];
+            if (city && city !== 'null') parts.push(city);
+            if (state && state !== 'null') parts.push(state);
+            if (zip && zip !== 'null') parts.push(zip);
+            
+            return parts.length > 0 ? parts.join(', ') : '<span class="text-gray-400 italic">Location not provided</span>';
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'pending': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending Review</span>',
+                'approved': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Approved</span>',
+                'denied': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Denied</span>'
+            };
+            return badges[status] || '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Unknown</span>';
         }
 
         function openUserPortfolio(userId) {
