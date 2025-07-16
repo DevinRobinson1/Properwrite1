@@ -1,3 +1,11 @@
+// Google Maps API callback function
+function initJVAutocomplete() {
+  console.log('Google Maps API loaded - initializing JV autocomplete');
+  if (window.jvWizard) {
+    window.jvWizard.initGooglePlaces();
+  }
+}
+
 // JV Submit Wizard JavaScript
 class JVWizard {
   constructor() {
