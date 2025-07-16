@@ -414,64 +414,84 @@ def signup():
     
     elif request.method == 'POST':
         # Handle registration
+        logging.info("POST signup request received")
+        
         email = request.form.get('email')
         password = request.form.get('password')
         name = request.form.get('name')
         credit_code = request.form.get('credit_code')
         
+        logging.info(f"Form data: email={email}, name={name}, credit_code={credit_code}")
+        
         if not email:
+            logging.error("Email is required")
             flash('Email is required', 'error')
             return render_template('auth/register.html')
         
-        # Create user with billing service
-        billing_service = BillingService()
-        
-        # Get invite token from session if present
-        invite_token = session.get('team_invite_token')
-        
-        result = billing_service.create_user({
-            'email': email,
-            'name': name or email.split('@')[0],
-            'password': password,
-            'credit_code': credit_code,
-            'invite_token': invite_token
-        })
-        
-        if result.get('success'):
-            user_id = result.get('user_id')
-            team_name = result.get('team_name')
+        try:
+            # Create user with billing service
+            billing_service = BillingService()
             
-            # Set up consolidated session
-            session['user_id'] = user_id
-            session['user_email'] = email
-            session['email'] = email  # Keep for backward compatibility
-            session['team_id'] = result.get('team_id')
-            session['team_role'] = result.get('role')
+            # Get invite token from session if present
+            invite_token = session.get('team_invite_token')
             
-            # Send welcome email immediately after successful registration
-            try:
-                user_name = name or email.split('@')[0]
-                welcome_email_sent = email_service.send_welcome_email(email, user_name)
-                if welcome_email_sent:
-                    logging.info(f"Welcome email sent successfully to {email}")
+            logging.info(f"Creating user with billing service: {email}")
+            result = billing_service.create_user({
+                'email': email,
+                'name': name or email.split('@')[0],
+                'password': password,
+                'credit_code': credit_code,
+                'invite_token': invite_token
+            })
+            
+            logging.info(f"User creation result: {result}")
+            
+            if result.get('success'):
+                user_id = result.get('user_id')
+                team_name = result.get('team_name')
+                
+                # Set up consolidated session
+                session['user_id'] = user_id
+                session['user_email'] = email
+                session['email'] = email  # Keep for backward compatibility
+                session['team_id'] = result.get('team_id')
+                session['team_role'] = result.get('role')
+                
+                logging.info(f"Session created for user: {email}")
+                
+                # Send welcome email immediately after successful registration
+                try:
+                    user_name = name or email.split('@')[0]
+                    welcome_email_sent = email_service.send_welcome_email(email, user_name)
+                    if welcome_email_sent:
+                        logging.info(f"Welcome email sent successfully to {email}")
+                    else:
+                        logging.warning(f"Failed to send welcome email to {email}")
+                except Exception as e:
+                    logging.error(f"Error sending welcome email to {email}: {str(e)}")
+                
+                # Show appropriate welcome message
+                if invite_token:
+                    flash(f'Welcome! You\'ve successfully joined {team_name} and received analysis credits. Visit your dashboard to start analyzing properties.', 'success')
+                    session.pop('team_invite_token', None)
                 else:
-                    logging.warning(f"Failed to send welcome email to {email}")
-            except Exception as e:
-                logging.error(f"Error sending welcome email to {email}: {str(e)}")
-            
-            # Show appropriate welcome message
-            if invite_token:
-                flash(f'Welcome! You\'ve successfully joined {team_name} and received analysis credits. Visit your dashboard to start analyzing properties.', 'success')
-                session.pop('team_invite_token', None)
+                    flash('Welcome to Properwrite! Your account has been created and you\'ve received analysis credits. Visit your dashboard to manage your account or start analyzing properties.', 'success')
+                
+                # Set a flag to show new user welcome message
+                session['new_user_welcome'] = True
+                
+                logging.info(f"Redirecting to dashboard for user: {email}")
+                return redirect(url_for('dashboard'))
             else:
-                flash('Welcome to Properwrite! Your account has been created and you\'ve received analysis credits. Visit your dashboard to manage your account or start analyzing properties.', 'success')
-            
-            # Set a flag to show new user welcome message
-            session['new_user_welcome'] = True
-            
-            return redirect(url_for('dashboard'))
-        else:
-            flash(result.get('error', 'Registration failed'), 'error')
+                logging.error(f"User creation failed: {result.get('error')}")
+                flash(result.get('error', 'Registration failed'), 'error')
+                return render_template('auth/register.html')
+                
+        except Exception as e:
+            logging.error(f"Exception during signup: {str(e)}")
+            import traceback
+            logging.error(f"Signup traceback: {traceback.format_exc()}")
+            flash('An error occurred during registration. Please try again.', 'error')
             return render_template('auth/register.html')
 
 @app.route('/login', methods=['GET', 'POST'])

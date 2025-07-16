@@ -3,150 +3,266 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - properwrite.com</title>
+    <title>Create Account - properwrite.com</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .input-focus:focus {
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
     <div class="max-w-md w-full space-y-8">
-        <!-- Header -->
-        <div class="text-center">
-            {% if team_info %}
-                <h2 class="text-3xl font-bold text-gray-900">Join Team: {{ team_info.name }}</h2>
-                <p class="mt-2 text-sm text-gray-600">
-                    You've been invited to join {{ team_info.name }} with {{ team_info.role }} access
-                </p>
-            {% else %}
-                <h2 class="text-3xl font-bold text-gray-900">Get 4 More Credits</h2>
-                <p class="mt-2 text-sm text-gray-600">
-                    Register with your email to unlock 4 additional property analyses
-                </p>
-            {% endif %}
-        </div>
-
-        <!-- Benefits -->
-        {% if team_info %}
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="font-semibold text-blue-900 mb-2">As a team member you get:</h3>
-                <ul class="text-sm text-blue-800 space-y-1">
-                    <li><i class="fas fa-check text-green-600 mr-2"></i>Access to team's shared credits</li>
-                    <li><i class="fas fa-check text-green-600 mr-2"></i>{{ team_info.role|title }} level permissions</li>
-                    <li><i class="fas fa-check text-green-600 mr-2"></i>Collaborate on property analyses</li>
-                    <li><i class="fas fa-check text-green-600 mr-2"></i>Team dashboard access</li>
-                </ul>
-            </div>
-        {% else %}
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="font-semibold text-blue-900 mb-2">What you get:</h3>
-                <ul class="text-sm text-blue-800 space-y-1">
-                    <li><i class="fas fa-check text-green-600 mr-2"></i>4 additional property analyses</li>
-                    <li><i class="fas fa-check text-green-600 mr-2"></i>Save your analysis history</li>
-                    <li><i class="fas fa-check text-green-600 mr-2"></i>Access to all strategy tools</li>
-                    <li><i class="fas fa-check text-green-600 mr-2"></i>Option to purchase more credits</li>
-                </ul>
-            </div>
-        {% endif %}
-
-        <!-- What Happens Next -->
-        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-            <h3 class="font-semibold text-green-900 mb-2">What happens next:</h3>
-            <div class="text-sm text-green-800 space-y-1">
+        <!-- Modern Card Container -->
+        <div class="bg-white rounded-2xl card-shadow overflow-hidden">
+            <!-- Header Section -->
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-12 text-center">
+                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-home text-2xl text-blue-600"></i>
+                </div>
                 {% if team_info %}
-                <div class="flex items-start">
-                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 text-green-800 text-xs font-medium mr-2 mt-0.5">1</span>
-                    <span>You'll be automatically added to {{ team_info.name }}</span>
-                </div>
-                <div class="flex items-start">
-                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 text-green-800 text-xs font-medium mr-2 mt-0.5">2</span>
-                    <span>Access your team dashboard with shared credits</span>
-                </div>
-                <div class="flex items-start">
-                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 text-green-800 text-xs font-medium mr-2 mt-0.5">3</span>
-                    <span>Start analyzing properties with your team</span>
-                </div>
+                    <h2 class="text-3xl font-bold text-white mb-2">Join Team</h2>
+                    <p class="text-blue-100 text-lg">{{ team_info.name }}</p>
+                    <p class="text-blue-200 text-sm mt-2">
+                        You've been invited with {{ team_info.role }} access
+                    </p>
                 {% else %}
-                <div class="flex items-start">
-                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 text-green-800 text-xs font-medium mr-2 mt-0.5">1</span>
-                    <span>You'll be taken to your account dashboard</span>
-                </div>
-                <div class="flex items-start">
-                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 text-green-800 text-xs font-medium mr-2 mt-0.5">2</span>
-                    <span>Click "Underwrite Properties Now" to start analyzing</span>
-                </div>
-                <div class="flex items-start">
-                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 text-green-800 text-xs font-medium mr-2 mt-0.5">3</span>
-                    <span>Manage your credits and team from your dashboard</span>
-                </div>
+                    <h2 class="text-3xl font-bold text-white mb-2">Start Your Journey</h2>
+                    <p class="text-blue-100 text-lg">Professional Real Estate Analysis</p>
+                    <p class="text-blue-200 text-sm mt-2">
+                        Get 4 free property analyses + unlimited access to tools
+                    </p>
                 {% endif %}
             </div>
-        </div>
+            
+            <!-- Content Section -->
+            <div class="px-8 py-6">
 
-        <!-- Registration Form -->
-        <form class="mt-8 space-y-6" action="/signup" method="POST">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <div class="rounded-md shadow-sm -space-y-px">
-                <div>
-                    <label for="name" class="sr-only">Full Name</label>
-                    <input id="name" name="name" type="text"
-                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" 
-                           placeholder="Full Name (optional)">
-                </div>
-                <div>
-                    <label for="email" class="sr-only">Email address</label>
-                    <input id="email" name="email" type="email" required 
-                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" 
-                           placeholder="Email address">
-                </div>
-                <div>
-                    <label for="password" class="sr-only">Password</label>
-                    <input id="password" name="password" type="password"
-                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 {% if team_info %}rounded-b-md{% endif %} focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" 
-                           placeholder="Password (optional - email-only login available)">
-                </div>
-                {% if not team_info %}
-                <div>
-                    <label for="credit_code" class="sr-only">Credit Code</label>
-                    <input id="credit_code" name="credit_code" type="text"
-                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm font-mono uppercase" 
-                           placeholder="Credit Code (optional for bonus credits)"
-                           oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')">
-                </div>
-                {% endif %}
-            </div>
-
-            <div>
-                <button type="submit" 
-                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <!-- Benefits Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     {% if team_info %}
-                        <i class="fas fa-users mr-2"></i>
-                        Join Team & Go to Dashboard
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-users text-blue-600 mr-2"></i>
+                                <h3 class="font-semibold text-blue-900">Team Access</h3>
+                            </div>
+                            <p class="text-sm text-blue-700">Shared credits & {{ team_info.role|title }} permissions</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-chart-line text-green-600 mr-2"></i>
+                                <h3 class="font-semibold text-green-900">Collaboration</h3>
+                            </div>
+                            <p class="text-sm text-green-700">Work together on property analyses</p>
+                        </div>
                     {% else %}
-                        <i class="fas fa-user-plus mr-2"></i>
-                        Create Account & Go to Dashboard
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-gift text-blue-600 mr-2"></i>
+                                <h3 class="font-semibold text-blue-900">4 Free Credits</h3>
+                            </div>
+                            <p class="text-sm text-blue-700">Instant property analysis access</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-tools text-green-600 mr-2"></i>
+                                <h3 class="font-semibold text-green-900">Full Toolkit</h3>
+                            </div>
+                            <p class="text-sm text-green-700">All investment strategy tools</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-100">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-save text-purple-600 mr-2"></i>
+                                <h3 class="font-semibold text-purple-900">Save History</h3>
+                            </div>
+                            <p class="text-sm text-purple-700">Track all your analyses</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-4 border border-orange-100">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-credit-card text-orange-600 mr-2"></i>
+                                <h3 class="font-semibold text-orange-900">Upgrade Option</h3>
+                            </div>
+                            <p class="text-sm text-orange-700">Add credits when you need them</p>
+                        </div>
                     {% endif %}
-                </button>
-            </div>
-        </form>
+                </div>
 
-        <!-- Login Link -->
-        <div class="text-center">
-            <p class="text-sm text-gray-600">
-                Already have an account?
-                <a href="/login" class="font-medium text-blue-600 hover:text-blue-500">
-                    Sign in
-                </a>
-            </p>
+                <!-- Process Steps -->
+                <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 mb-6 border border-green-100">
+                    <h3 class="font-semibold text-green-900 mb-4 flex items-center">
+                        <i class="fas fa-route text-green-600 mr-2"></i>
+                        What happens next:
+                    </h3>
+                    <div class="space-y-3">
+                        {% if team_info %}
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center font-bold mr-3">1</div>
+                            <span class="text-green-800">Automatically join {{ team_info.name }}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center font-bold mr-3">2</div>
+                            <span class="text-green-800">Access team dashboard with shared credits</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center font-bold mr-3">3</div>
+                            <span class="text-green-800">Start analyzing properties with your team</span>
+                        </div>
+                        {% else %}
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center font-bold mr-3">1</div>
+                            <span class="text-green-800">Access your personal dashboard</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center font-bold mr-3">2</div>
+                            <span class="text-green-800">Click "Underwrite Properties Now"</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center font-bold mr-3">3</div>
+                            <span class="text-green-800">Manage credits and analyze properties</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Registration Form -->
+                <form class="space-y-6" action="/signup" method="POST" id="signup-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    
+                    <!-- Error Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                                        <span class="text-red-700 text-sm">{{ message }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user text-gray-400 mr-2"></i>Full Name
+                            </label>
+                            <input id="name" name="name" type="text"
+                                   class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                   placeholder="Enter your full name">
+                        </div>
+                        
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-envelope text-gray-400 mr-2"></i>Email Address*
+                            </label>
+                            <input id="email" name="email" type="email" required 
+                                   class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                   placeholder="Enter your email address">
+                        </div>
+                        
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-lock text-gray-400 mr-2"></i>Password
+                            </label>
+                            <input id="password" name="password" type="password"
+                                   class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                                   placeholder="Create a secure password (optional)">
+                            <p class="text-xs text-gray-500 mt-1">Leave blank for email-only login</p>
+                        </div>
+                        
+                        {% if not team_info %}
+                        <div>
+                            <label for="credit_code" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-gift text-gray-400 mr-2"></i>Bonus Credit Code
+                            </label>
+                            <input id="credit_code" name="credit_code" type="text"
+                                   class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 font-mono uppercase" 
+                                   placeholder="Enter bonus credit code (optional)"
+                                   oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')">
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" id="submit-btn"
+                                class="group relative w-full flex justify-center py-4 px-6 border border-transparent text-base font-medium rounded-xl text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 transform hover:scale-105">
+                            {% if team_info %}
+                                <i class="fas fa-users mr-2"></i>
+                                <span id="btn-text">Join Team & Go to Dashboard</span>
+                            {% else %}
+                                <i class="fas fa-rocket mr-2"></i>
+                                <span id="btn-text">Create Account & Go to Dashboard</span>
+                            {% endif %}
+                            <div id="loading-spinner" class="hidden ml-2">
+                                <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Login Link -->
+                <div class="text-center pt-4">
+                    <p class="text-sm text-gray-600">
+                        Already have an account?
+                        <a href="/login" class="font-medium text-blue-600 hover:text-blue-500 transition-colors">
+                            Sign in here
+                        </a>
+                    </p>
+                </div>
+            </div>
         </div>
 
         <!-- Back to Analyzer -->
-        <div class="text-center">
-            <a href="/" class="text-blue-600 hover:text-blue-500 text-sm">
-                <i class="fas fa-arrow-left mr-1"></i>
-                Back to Analyzer
+        <div class="text-center mt-6">
+            <a href="/" class="text-white hover:text-blue-100 text-sm transition-colors flex items-center justify-center">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Property Analyzer
             </a>
         </div>
     </div>
+
+    <script>
+        // Add form submission handling with loading state
+        document.getElementById('signup-form').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('btn-text');
+            const spinner = document.getElementById('loading-spinner');
+            
+            submitBtn.disabled = true;
+            btnText.textContent = 'Creating Account...';
+            spinner.classList.remove('hidden');
+            submitBtn.classList.add('opacity-75');
+        });
+        
+        // Add smooth animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const card = document.querySelector('.card-shadow');
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.6s ease-out';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
 </body>
 </html>
