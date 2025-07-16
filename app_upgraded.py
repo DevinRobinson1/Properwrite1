@@ -2996,7 +2996,11 @@ def jv_submit_deal():
     Submit and auto-underwrite JV deal with partner information
     """
     try:
-        data = request.get_json()
+        # Handle both JSON and form data
+        if request.is_json:
+            data = request.get_json()
+        else:
+            data = request.form.to_dict()
         
         # Validate required partner fields
         partner_required_fields = ['partner_name', 'partner_email', 'partner_phone', 'partner_markets']
@@ -3015,35 +3019,25 @@ def jv_submit_deal():
                 'error': 'Full name must contain at least two words'
             }), 400
         
-        # Validate markets selection
-        if not data.get('partner_markets') or len(data.get('partner_markets', [])) == 0:
+        # Validate markets selection - handle both string and list formats
+        partner_markets = data.get('partner_markets', [])
+        if isinstance(partner_markets, str):
+            partner_markets = [partner_markets] if partner_markets else []
+        
+        if not partner_markets or len(partner_markets) == 0:
             return jsonify({
                 'success': False,
                 'error': 'At least one market state must be selected'
             }), 400
         
-        # Validate required deal fields
-        deal_required_fields = ['property_address', 'deal_type', 'seller_asking_price', 'arv', 'rehab_needed', 'property_status', 'closing_date']
+        # Validate required deal fields - updated for actual form fields
+        deal_required_fields = ['property_address', 'asking_price', 'arv']
         for field in deal_required_fields:
             if not data.get(field):
                 return jsonify({
                     'success': False,
                     'error': f'Missing required deal field: {field}'
                 }), 400
-        
-        # Additional validation for wholesale deals
-        if data.get('deal_type') == 'wholesale' and not data.get('purchase_price'):
-            return jsonify({
-                'success': False,
-                'error': 'Purchase price is required for wholesale deals'
-            }), 400
-        
-        # Additional validation for rehab cost
-        if data.get('rehab_needed') == 'yes' and not data.get('rehab_cost'):
-            return jsonify({
-                'success': False,
-                'error': 'Rehab cost is required when rehab is needed'
-            }), 400
         
         # Create or get partner record
         from jv_database import jv_db
@@ -3053,7 +3047,7 @@ def jv_submit_deal():
             email=data.get('partner_email'),
             phone=data.get('partner_phone'),
             company=data.get('partner_company'),
-            markets=data.get('partner_markets', [])
+            markets=partner_markets
         )
         
         # Auto-underwrite the deal
@@ -3066,16 +3060,16 @@ def jv_submit_deal():
             'city': data.get('city', ''),
             'state': data.get('state', ''),
             'zip': data.get('zip', ''),
-            'deal_type': data.get('deal_type'),
+            'deal_type': data.get('deal_type', 'Cash'),
             'purchase_price': data.get('purchase_price'),
-            'seller_asking_price': data.get('seller_asking_price'),
+            'seller_asking_price': data.get('asking_price'),  # Form uses 'asking_price'
             'arv': data.get('arv'),
             'rehab_needed': data.get('rehab_needed'),
             'rehab_cost': data.get('rehab_cost'),
             'property_description': data.get('property_description', ''),
             'photos_link': data.get('photos_link', ''),
-            'property_status': data.get('property_status'),
-            'closing_date': data.get('closing_date'),
+            'property_status': data.get('property_status', 'Vacant'),
+            'closing_date': data.get('closing_date', ''),
             'additional_notes': data.get('additional_notes', ''),
             'underwrite_result': underwrite_result,
             'partner_info': {
@@ -3083,7 +3077,7 @@ def jv_submit_deal():
                 'email': data.get('partner_email'),
                 'phone': data.get('partner_phone'),
                 'company': data.get('partner_company'),
-                'markets': data.get('partner_markets', [])
+                'markets': partner_markets
             }
         }
         
@@ -3104,7 +3098,7 @@ def jv_submit_deal():
             'property_address': data.get('property_address'),
             'property_city': data.get('city'),
             'property_state': data.get('state'),
-            'asking_price': data.get('seller_asking_price'),
+            'asking_price': data.get('asking_price'),  # Form uses 'asking_price'
             'suggested_offer': data.get('purchase_price'),
             'arv': data.get('arv'),
             'repair_estimate': data.get('rehab_cost'),
@@ -3112,7 +3106,7 @@ def jv_submit_deal():
             'partner_email': data.get('partner_email'),
             'partner_phone': data.get('partner_phone'),
             'partner_company': data.get('partner_company'),
-            'partner_markets': data.get('partner_markets', []),
+            'partner_markets': partner_markets,
             'created_at': datetime.utcnow().isoformat(),
             'auto_evaluation': underwrite_result.get('status'),
             'evaluation_reasons': underwrite_result.get('reasons', [])
