@@ -1,0 +1,89 @@
+ Google Maps Places Autocomplete not loading (API-key error)
+
+🔧 Frontend + UX
+
+Your form renders but the browser console shows maps-no-account / "You must use an API key..." → the <script> tag that loads the Maps JS SDK is arriving without a key= query-string.
+
+Until the key is injected, Google blocks the whole SDK; autocomplete silently fails and throws that red error for every keystroke.
+
+Quick visual patch while you test: show a slim banner (“📍 Address helper disabled – check API key”) whenever window.google is undefined after 3 s.
+
+🧩 Backend Logic
+
+Expose the key at render-time ( safest in dev )
+
+js
+Copy
+Edit
+// routes/jv.js  (Express example)
+router.get('/jv-submit', (req,res)=>{
+  res.render('jv-submit', {
+    GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY    // ✅
+  });
+});
+Insert it in the template (EJS/Pug/Handlebars—pick yours)
+
+html
+Copy
+Edit
+<!-- jv-submit.ejs -->
+<script async defer
+  src="https://maps.googleapis.com/maps/api/js?key=<%= GOOGLE_MAPS_API_KEY %>&libraries=places&callback=initAutocomplete">
+</script>
+Gotcha: client-side code cannot read process.env.*—you must inject the value on the server or fetch it from a safe config endpoint.
+
+Domain restrictions
+
+For Replit previews, add *.repl.co and *.replit.dev to the Key’s HTTP referrers list, or temporarily set the key to “none” while you’re in dev.
+
+If this same key works “elsewhere,” check that the other environment, domain, or sub-domain is included in the allowed referrers list and replicate that here.
+
+💾 No schema changes – just an env var. Verify it exists:
+
+bash
+Copy
+Edit
+echo $GOOGLE_MAPS_API_KEY   # should print a 40-char key
+💻 Quick sanity snippet (put anywhere server-side)
+
+js
+Copy
+Edit
+import assert from 'assert';
+assert(process.env.GOOGLE_MAPS_API_KEY, '🚨  GOOGLE_MAPS_API_KEY is undefined');
+📦 File/Config Tips
+
+php-template
+Copy
+Edit
+.env
+  GOOGLE_MAPS_API_KEY=AIzaSy...
+src/
+ └─ routes/
+     └─ jv.js          ← injects key
+ views/
+     └─ jv-submit.ejs  ← <script …key=<%= … %>>
+Keep public API keys in dev only. For prod, proxy a tiny /maps.js that appends the key server-side so the real value never appears in Git.
+
+Commit a comment in README.md reminding future devs that Maps fails silently if the key or referrer list is wrong.
+
+🔎 5-minute debug checklist
+Network tab → Does the request to maps.googleapis.com/maps/api/js?* contain key=?
+
+Console → Still shows InvalidKeyMapError? Referrer restriction.
+
+Environment → console.log(process.env.GOOGLE_MAPS_API_KEY) server-side = undefined? It’s not set in Replit Secrets.
+
+Template → View page source, search for your key. Not there → template variable mismatch.
+
+Google Cloud → Ensure Maps JavaScript API and Places API are both enabled for that project.
+
+Apply those fixes, refresh the Replit preview, and the autocomplete dropdown should appear after the first few characters. If it still doesn’t fire, ping me with the current script tag that’s rendering and we’ll dig deeper.
+
+
+
+
+
+
+
+Ask ChatGPT
