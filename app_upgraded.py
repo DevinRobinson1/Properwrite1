@@ -4,6 +4,10 @@ Enhanced with external data pulling, cleaner UI, and comprehensive strategy comp
 """
 import os
 import logging
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 import json
 import uuid
 from datetime import datetime, timedelta
