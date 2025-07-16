@@ -862,61 +862,12 @@ def get_subscriptions_data():
         logger.error(f"Error getting subscriptions: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@admin_bp.route('/api/jv-deals', methods=['GET'])
-@require_admin
-def get_jv_deals_data():
-    """Get JV deals data"""
-    try:
-        with Session(engine) as session:
-            # Get JV deals
-            jv_deals = session.execute(text("""
-                SELECT 
-                    id,
-                    partner_id,
-                    deal_json,
-                    auto_status,
-                    final_status,
-                    reasons,
-                    created_at
-                FROM jv_deals
-                ORDER BY created_at DESC
-            """)).fetchall()
-            
-            jv_deals_data = []
-            for deal in jv_deals:
-                # Parse deal_json to extract property details
-                deal_data = {}
-                if deal.deal_json:
-                    try:
-                        import json
-                        deal_data = json.loads(deal.deal_json)
-                    except:
-                        deal_data = {}
-                
-                jv_deals_data.append({
-                    'id': deal.id,
-                    'partner_id': deal.partner_id,
-                    'property_address': deal_data.get('property_address', 'N/A'),
-                    'property_city': deal_data.get('property_city', 'N/A'),
-                    'property_state': deal_data.get('property_state', 'N/A'),
-                    'asking_price': float(deal_data.get('asking_price', 0)) if deal_data.get('asking_price') else 0,
-                    'arv': float(deal_data.get('arv', 0)) if deal_data.get('arv') else 0,
-                    'repair_estimate': float(deal_data.get('repair_estimate', 0)) if deal_data.get('repair_estimate') else 0,
-                    'suggested_offer': float(deal_data.get('suggested_offer', 0)) if deal_data.get('suggested_offer') else 0,
-                    'auto_status': deal.auto_status,
-                    'final_status': deal.final_status,
-                    'reasons': deal.reasons,
-                    'created_at': deal.created_at.isoformat() if deal.created_at else None
-                })
-            
-            return jsonify({
-                'success': True,
-                'jv_deals': jv_deals_data
-            })
-            
-    except Exception as e:
-        logger.error(f"Error getting JV deals: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+# Disabled - conflicting endpoint, using admin_api.py version instead
+# @admin_bp.route('/api/jv-deals', methods=['GET'])
+# @require_admin
+# def get_jv_deals_data():
+#     """Get JV deals data - DISABLED: Using admin_api.py version"""
+#     pass
 
 
 
