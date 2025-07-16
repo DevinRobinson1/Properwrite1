@@ -3976,5 +3976,129 @@ def get_team_jv_deals():
         logging.error(f"Error getting team JV deals: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/jv-submit')
+def jv_submit():
+    """Serve the JV submission page"""
+    try:
+        # Get Google Maps API key for the template
+        google_maps_key = os.environ.get('GOOGLE_PLACES_API_KEY', '')
+        return render_template('jv_submit.html', GOOGLE_MAPS_KEY=google_maps_key)
+    except Exception as e:
+        logging.error(f"Error serving JV submit page: {e}")
+        flash('Error loading JV submission page', 'error')
+        return redirect(url_for('index'))
+
+@app.route('/api/jv-deals', methods=['POST'])
+def submit_jv_deal():
+    """Submit a new JV deal"""
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['email', 'phone', 'address', 'deal_type', 'asking_price', 'arv']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
+        # Validate email format
+        import re
+        email_regex = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+        if not re.match(email_regex, data['email']):
+            return jsonify({'error': 'Invalid email format'}), 400
+        
+        # Validate phone format
+        phone_regex = r'^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$'
+        if not re.match(phone_regex, data['phone']):
+            return jsonify({'error': 'Invalid phone format'}), 400
+        
+        # Import JV database
+        from jv_database import JVDatabase
+        jv_db = JVDatabase()
+        
+        # Check if address is cached for optimization
+        cached_address = None
+        try:
+            from services.unified_property_data_service import get_unified_property_service
+            unified_service = get_unified_property_service()
+            cached_address = unified_service.get_cached_address_data(data['address'])
+        except Exception as e:
+            logging.warning(f"Could not check address cache: {e}")
+        
+        # Auto-underwrite the deal
+        try:
+            underwriting_result = auto_underwrite_deal({
+                'address': data['address'],
+                'asking_price': float(data['asking_price']),
+                'arv': float(data['arv']),
+                'rehab_cost': float(data.get('rehab_cost', 0)),
+                'deal_type': data['deal_type']
+            })
+        except Exception as e:
+            logging.warning(f"Auto-underwriting failed: {e}")
+            underwriting_result = {'status': 'needs_review', 'reason': 'Auto-underwriting unavailable'}
+        
+        # Create partner record
+        partner_data = {
+            'email': data['email'],
+            'phone': data['phone'],
+            'name': data.get('name', ''),
+            'company': data.get('company', ''),
+            'markets': data.get('markets', [])
+        }
+        
+        partner_id = jv_db.create_or_update_partner(partner_data)
+        
+        # Create JV deal record
+        deal_data = {
+            'partner_id': partner_id,
+            'address': data['address'],
+            'deal_type': data['deal_type'],
+            'asking_price': float(data['asking_price']),
+            'arv': float(data['arv']),
+            'rehab_cost': float(data.get('rehab_cost', 0)),
+            'photo_link': data.get('photo_link', ''),
+            'status': underwriting_result.get('status', 'pending'),
+            'auto_evaluation': underwriting_result.get('status', 'needs_review'),
+            'evaluation_reasons': underwriting_result.get('reasons', []),
+            'submission_data': data,
+            'cached_address': cached_address
+        }
+        
+        deal_id = jv_db.create_jv_deal(deal_data)
+        
+        # Send Zapier webhook notification
+        try:
+            from zapier_webhook_service import zapier_webhook_service
+            webhook_data = {
+                'deal_id': deal_id,
+                'partner_email': data['email'],
+                'partner_phone': data['phone'],
+                'address': data['address'],
+                'deal_type': data['deal_type'],
+                'asking_price': data['asking_price'],
+                'arv': data['arv'],
+                'rehab_cost': data.get('rehab_cost', 0),
+                'status': deal_data['status'],
+                'auto_evaluation': deal_data['auto_evaluation'],
+                'submitted_at': datetime.now().isoformat()
+            }
+            
+            zapier_webhook_service.trigger_new_jv_submission(webhook_data)
+            logging.info(f"Zapier webhook sent for deal {deal_id}")
+        except Exception as e:
+            logging.error(f"Failed to send Zapier webhook: {e}")
+        
+        # Return success response
+        return jsonify({
+            'success': True,
+            'deal_id': deal_id,
+            'status': deal_data['status'],
+            'message': 'Deal submitted successfully! We\'ll review it and get back to you soon.'
+        })
+        
+    except Exception as e:
+        logging.error(f"Error submitting JV deal: {e}")
+        return jsonify({'error': 'Failed to submit deal. Please try again.'}), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
