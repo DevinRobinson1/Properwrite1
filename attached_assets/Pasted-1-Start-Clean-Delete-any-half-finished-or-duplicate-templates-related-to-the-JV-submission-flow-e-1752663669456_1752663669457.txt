@@ -1,0 +1,164 @@
+1 ▪ Start Clean
+Delete any half-finished or duplicate templates related to the JV submission flow (e.g. templates/jv_submit.html, templates/jv_submit_step*.html, stale CSS/JS fragments).
+
+Keep every other working area of the app (Acquisitions, Dispositions, Comps, Admin, Subscription logic, credit tracking, etc.) exactly as-is.
+
+Confirm templates/ is the canonical location for new HTML files, static/js/ for page-specific JS, and static/css/ (or Tailwind) for styles.
+
+2 ▪ Create the new JV Submission Module
+Important: When you call the file creation tool, always include the parameter file_text populated with the entire file contents to avoid the “Parameter file_text is required” error.
+
+2.1 File #1 → templates/jv_submit.html
+Supply the complete HTML (below) in the file_text parameter:
+
+html
+Copy
+Edit
+{% extends "base.html" %}
+{% block title %}Submit a JV Deal{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/jv_submit.css') }}">
+<section id="jv-wizard" class="mx-auto max-w-3xl p-4">
+  <!-- Step progress bar -->
+  <ol id="wizard-steps" class="flex justify-between text-sm mb-6">
+    <li data-step="1" class="step active">Partner Info</li>
+    <li data-step="2" class="step">Property Details</li>
+    <li data-step="3" class="step">Deal Numbers</li>
+    <li data-step="4" class="step">Review & Submit</li>
+  </ol>
+
+  <!-- STEP 1 – Partner Info -->
+  <form id="jv-form" autocomplete="off">
+    <fieldset data-step="1">
+      <h2 class="text-lg font-semibold mb-4">Partner Information</h2>
+      <label>Email*
+        <input type="email" name="email" required>
+      </label>
+      <label>Phone*
+        <input type="tel" name="phone" required>
+      </label>
+      <button type="button" class="btn next">Continue</button>
+    </fieldset>
+
+    <!-- STEP 2 – Property -->
+    <fieldset data-step="2" hidden>
+      <h2 class="text-lg font-semibold mb-4">Property Address</h2>
+      <label>Address* 
+        <input id="autocomplete" type="text" name="address" placeholder="Start typing…" required>
+      </label>
+      <label>Deal Type*
+        <select name="deal_type" required>
+          <option value="Cash">Cash / Dispo Help</option>
+          <option value="Creative">Creative Finance</option>
+        </select>
+      </label>
+      <button type="button" class="btn prev">Back</button>
+      <button type="button" class="btn next">Continue</button>
+    </fieldset>
+
+    <!-- STEP 3 – Deal Numbers -->
+    <fieldset data-step="3" hidden>
+      <h2 class="text-lg font-semibold mb-4">Deal Numbers</h2>
+      <label>Asking Price*
+        <input type="number" name="asking_price" required>
+      </label>
+      <label>ARV*
+        <input type="number" name="arv" required>
+      </label>
+      <label>Estimated Rehab $
+        <input type="number" name="rehab_cost">
+      </label>
+      <label>Photo Link
+        <input type="url" name="photo_link">
+      </label>
+      <button type="button" class="btn prev">Back</button>
+      <button type="button" class="btn next">Continue</button>
+    </fieldset>
+
+    <!-- STEP 4 – Review -->
+    <fieldset data-step="4" hidden>
+      <h2 class="text-lg font-semibold mb-4">Review Deal</h2>
+      <div id="review-container" class="mb-4"></div>
+      <button type="button" class="btn prev">Back</button>
+      <button type="submit" class="btn primary w-full">Submit JV Deal</button>
+    </fieldset>
+  </form>
+</section>
+
+<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_KEY }}&libraries=places"></script>
+<script src="{{ url_for('static', filename='js/jv_submit.js') }}"></script>
+{% endblock %}
+2.2 File #2 → static/js/jv_submit.js
+Provide full JS logic to:
+
+Handle step navigation (next / prev).
+
+Init Google Places Autocomplete on #autocomplete.
+
+Perform client-side validation and highlight missing fields.
+
+POST JSON to /api/jv-deals
+
+On success: redirect to a “Success” page or show modal.
+
+On error: toast/alert with error from backend.
+
+(Optional) Use OpenAI analysis endpoint (already in repo) to pre-score the deal and inject recap into Step 4 Review.
+
+Make sure to implement caching (localStorage) so if the user refreshes mid-flow, their progress repopulates.
+
+2.3 File #3 → static/css/jv_submit.css
+Lightweight custom styles:
+
+.step.active { @apply text-primary font-bold border-b-2; }
+
+.btn shared button classes.
+
+Responsive tweaks for max-w-3xl layout.
+
+3 ▪ Backend Endpoints
+POST /api/jv-deals
+
+Validate payload server-side.
+
+If address already exists in cache (Redis), reuse geocode to cut API cost.
+
+Store deal in jv_deals table with status pending.
+
+Signal (app/events.py): after insert emit jv_deal_submitted event.
+
+Zapier Webhook: send event payload to ZAPIER_JV_HOOK_URL.
+
+Include partner email, phone, address, deal type, pricing.
+
+Admin: extend existing /admin/jv-deals list to add filters (city, state, partner, status). Leverage DataTables server-side pagination.
+
+4 ▪ QA & Testing
+Unit-test new API route (tests/test_jv_deal_submit.py).
+
+Cypress or Playwright E2E for full 4-step wizard on mobile & desktop.
+
+Verify credit decrement only after final submission, not on each step.
+
+5 ▪ Dependencies
+Already using Flask, Tailwind, HTMX? Keep consistent.
+
+If not present, add flask-wtforms for CSRF.
+
+Use existing redis_cache.py util for address caching.
+
+No breaking changes to Acquisitions / Dispositions / Comps.
+
+6 ▪ Commit & Deploy
+git checkout -b feature/jv-wizard
+
+Add files with correct file_text.
+
+Push → run CI.
+
+Staging URL: /jv-submit
+
+Team review; once approved, merge to main.
+
+💡 Remember: The new page must be fully functional, mobile-first, and isolated—no regressions elsewhere.
