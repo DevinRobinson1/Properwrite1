@@ -770,32 +770,44 @@ def get_user_status():
 def api_logout():
     """API logout endpoint for compatibility"""
     try:
-        # Clear session
+        # Clear session completely
         session.clear()
+        
+        # Make session non-permanent to ensure it's cleared
+        session.permanent = False
         
         return jsonify({
             'success': True,
-            'message': 'Logged out successfully'
+            'message': 'Logged out successfully',
+            'redirect': '/'
         })
     except Exception as e:
         logging.error(f"Error logging out: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'Error logging out'
-        }), 500
+            'error': 'Logout failed',
+            'redirect': '/'
+        }), 200  # Return 200 to prevent additional errors
 
 @app.route('/logout', methods=['GET', 'POST'])
 @csrf.exempt
 def logout():
     """Standard logout route for compatibility"""
     try:
-        # Clear session
+        # Clear session completely
         session.clear()
+        
+        # Make session non-permanent to ensure it's cleared
+        session.permanent = False
+        
+        # Add success message
+        flash('You have been logged out successfully.', 'success')
         
         # Redirect to homepage
         return redirect('/')
     except Exception as e:
         logging.error(f"Error logging out: {str(e)}")
+        flash('Logout completed.', 'info')
         return redirect('/')
 
 @app.route('/api/login', methods=['POST'])

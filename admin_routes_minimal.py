@@ -330,6 +330,138 @@ def get_promo_codes():
         logger.error(f"Error getting promo codes: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@admin_bp.route('/api/promo-codes/<promo_id>', methods=['GET'])
+@require_admin
+def get_promo_code(promo_id):
+    """Get single promo code by ID"""
+    try:
+        with Session(engine) as session:
+            promo_code = session.execute(text("""
+                SELECT 
+                    pc.id,
+                    pc.code,
+                    pc.type,
+                    pc.discount_percentage,
+                    pc.credit_amount,
+                    pc.max_uses,
+                    pc.uses_count,
+                    pc.is_active,
+                    pc.valid_until,
+                    pc.created_at,
+                    a.name as affiliate_name
+                FROM promo_codes pc
+                LEFT JOIN affiliates a ON pc.affiliate_id::text = a.id::text
+                WHERE pc.id = :promo_id
+            """), {'promo_id': promo_id}).fetchone()
+            
+            if not promo_code:
+                return jsonify({'success': False, 'error': 'Promo code not found'}), 404
+            
+            promo_code_data = {
+                'id': str(promo_code.id),
+                'code': promo_code.code,
+                'type': promo_code.type,
+                'discount_percentage': float(promo_code.discount_percentage) if promo_code.discount_percentage else 0,
+                'credit_amount': promo_code.credit_amount or 0,
+                'max_uses': promo_code.max_uses,
+                'uses_count': promo_code.uses_count,
+                'is_active': promo_code.is_active,
+                'affiliate_name': promo_code.affiliate_name or 'Direct',
+                'valid_until': promo_code.valid_until.isoformat() if promo_code.valid_until else None,
+                'created_at': promo_code.created_at.isoformat() if promo_code.created_at else None
+            }
+            
+            return jsonify({
+                'success': True,
+                'promo_code': promo_code_data
+            })
+            
+    except Exception as e:
+        logger.error(f"Error getting promo code: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@admin_bp.route('/api/promo-codes/<promo_id>', methods=['PUT'])
+@require_admin
+def update_promo_code(promo_id):
+    """Update promo code"""
+    try:
+        data = request.get_json()
+        code = data.get('code')
+        promo_type = data.get('type')
+        value = data.get('value')
+        max_uses = data.get('max_uses')
+        is_active = data.get('is_active')
+        
+        with Session(engine) as session:
+            # Check if promo code exists
+            existing = session.execute(text("""
+                SELECT id FROM promo_codes WHERE id = :promo_id
+            """), {'promo_id': promo_id}).fetchone()
+            
+            if not existing:
+                return jsonify({'success': False, 'error': 'Promo code not found'}), 404
+            
+            # Update promo code
+            session.execute(text("""
+                UPDATE promo_codes 
+                SET 
+                    code = :code,
+                    type = :type,
+                    discount_percentage = :discount_percentage,
+                    credit_amount = :credit_amount,
+                    max_uses = :max_uses,
+                    is_active = :is_active,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = :promo_id
+            """), {
+                'promo_id': promo_id,
+                'code': code,
+                'type': promo_type,
+                'discount_percentage': value if promo_type == 'PERCENTAGE_DISCOUNT' else None,
+                'credit_amount': int(value) if promo_type == 'CREDIT_PACK' else None,
+                'max_uses': max_uses,
+                'is_active': is_active
+            })
+            session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Promo code updated successfully'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error updating promo code: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@admin_bp.route('/api/promo-codes/<promo_id>', methods=['DELETE'])
+@require_admin
+def delete_promo_code(promo_id):
+    """Delete promo code"""
+    try:
+        with Session(engine) as session:
+            # Check if promo code exists
+            existing = session.execute(text("""
+                SELECT id FROM promo_codes WHERE id = :promo_id
+            """), {'promo_id': promo_id}).fetchone()
+            
+            if not existing:
+                return jsonify({'success': False, 'error': 'Promo code not found'}), 404
+            
+            # Delete promo code
+            session.execute(text("""
+                DELETE FROM promo_codes WHERE id = :promo_id
+            """), {'promo_id': promo_id})
+            session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Promo code deleted successfully'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error deleting promo code: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @admin_bp.route('/api/create-affiliate', methods=['POST'])
 @require_admin
 def create_affiliate():
