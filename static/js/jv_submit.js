@@ -451,8 +451,12 @@ class JVWizard {
       const result = await response.json();
 
       if (response.ok) {
-        // Show analysis results
-        this.showAnalysisResults(result.analysis);
+        console.log('✅ Deal submitted successfully!', result);
+        
+        // Show analysis results if available
+        if (result.underwrite_result) {
+          this.showAnalysisResults(result.underwrite_result);
+        }
         
         // Trigger confetti celebration
         this.triggerConfetti();
@@ -460,10 +464,10 @@ class JVWizard {
         this.showMessage('Deal submitted successfully! We\'ll review it and get back to you soon.', 'success');
         this.clearStorage();
         
-        // Redirect after 3 seconds to show analysis
+        // Redirect after 5 seconds to show success
         setTimeout(() => {
           window.location.href = '/';
-        }, 3000);
+        }, 5000);
       } else {
         this.showMessage(result.error || 'Failed to submit deal. Please try again.', 'error');
       }
@@ -549,7 +553,18 @@ class JVWizard {
   }
 
   showAnalysisResults(analysis) {
+    console.log('📊 Showing analysis results:', analysis);
+    
     const reviewContainer = document.getElementById('review-container');
+    if (!reviewContainer) {
+      console.warn('Review container not found');
+      return;
+    }
+    
+    // Handle different response formats
+    const status = analysis.status || 'unknown';
+    const reasons = analysis.reasons || [];
+    const mao = analysis.mao || 0;
     
     let analysisHTML = `
       <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
@@ -558,37 +573,22 @@ class JVWizard {
         </h3>
     `;
     
-    if (analysis.recommendations && analysis.recommendations.length > 0) {
-      analysisHTML += '<div class="space-y-3">';
-      analysis.recommendations.forEach(rec => {
-        const profitColor = rec.confidence === 'High' ? 'text-green-600' : 'text-yellow-600';
-        analysisHTML += `
-          <div class="flex justify-between items-center p-3 bg-white rounded border">
-            <div>
-              <span class="font-medium">${rec.strategy} Strategy</span>
-              <span class="ml-2 text-sm text-gray-600">(${rec.confidence} Confidence)</span>
-            </div>
-            <div class="text-right">
-              <div class="font-semibold ${profitColor}">$${rec.profit.toLocaleString()} profit</div>
-              <div class="text-sm text-gray-600">MAO: $${rec.mao.toLocaleString()}</div>
-            </div>
-          </div>
-        `;
-      });
-      analysisHTML += '</div>';
-    }
-    
-    // Approval status
-    const statusColor = analysis.approvalStatus === 'auto_approved' ? 'text-green-600' : 
-                       analysis.approvalStatus === 'likely_approved' ? 'text-yellow-600' : 'text-red-600';
+    // Status display
+    const statusColor = status === 'auto-approved' ? 'text-green-600' : 
+                       status === 'likely-approved' ? 'text-yellow-600' : 'text-red-600';
     
     analysisHTML += `
-      <div class="mt-4 p-3 bg-gray-50 rounded border">
+      <div class="p-3 bg-gray-50 rounded border">
         <div class="flex items-center justify-between">
           <span class="font-medium">Status:</span>
-          <span class="font-semibold ${statusColor}">${analysis.approvalStatus.replace('_', ' ').toUpperCase()}</span>
+          <span class="font-semibold ${statusColor}">${status.replace('_', ' ').replace('-', ' ').toUpperCase()}</span>
         </div>
-        <p class="text-sm text-gray-600 mt-1">${analysis.approvalReason}</p>
+        ${mao > 0 ? `<p class="text-sm text-gray-600 mt-1">Maximum Allowable Offer: $${mao.toLocaleString()}</p>` : ''}
+        ${reasons.length > 0 ? `<div class="mt-2 text-sm text-gray-600">
+          <ul class="list-disc pl-4">
+            ${reasons.map(reason => `<li>${reason}</li>`).join('')}
+          </ul>
+        </div>` : ''}
       </div>
     `;
     
