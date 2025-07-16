@@ -255,35 +255,46 @@ def create_bitcoin_checkout():
 def api_signup():
     """API endpoint for user signup"""
     try:
+        logging.info("Signup request received")
+        
         # Handle both JSON and form data
         if request.content_type == 'application/json':
             data = request.get_json()
         else:
             data = request.form.to_dict()
             
+        logging.info(f"Signup data received: {data.keys()}")
+        
         name = data.get('name')
         email = data.get('email')
         password = data.get('password')
         
         if not name or not email or not password:
+            logging.error(f"Missing required fields: name={bool(name)}, email={bool(email)}, password={bool(password)}")
             return jsonify({"error": "Missing required fields"}), 400
+        
+        logging.info(f"Creating account for: {email}")
         
         # Check if user already exists
         with Session(engine) as db_session:
             existing_user = db_session.query(User).filter_by(email=email).first()
             if existing_user:
+                logging.warning(f"User already exists: {email}")
                 return jsonify({"error": "Email already registered"}), 400
         
         # Get invite token from session if present
         invite_token = session.get('team_invite_token')
         
         # Create new user with billing service
+        logging.info(f"Creating user with billing service: {email}")
         result = billing_service.create_user({
             'name': name,
             'email': email,
             'password': password,
             'invite_token': invite_token
         })
+        
+        logging.info(f"Billing service result: {result}")
         
         if result.get('success'):
             # Set consolidated session with permanent flag
@@ -296,6 +307,8 @@ def api_signup():
             session['team_role'] = result.get('role', 'owner')
             session['new_user_welcome'] = True
             
+            logging.info(f"Session created for user: {email}")
+            
             # Clear invite token if used
             if invite_token:
                 session.pop('team_invite_token', None)
@@ -303,6 +316,7 @@ def api_signup():
             # Send welcome email
             try:
                 email_service.send_welcome_email(email, name)
+                logging.info(f"Welcome email sent to: {email}")
             except Exception as e:
                 logging.error(f"Failed to send welcome email: {e}")
             
@@ -311,10 +325,13 @@ def api_signup():
                 "message": "Account created successfully"
             })
         else:
+            logging.error(f"Failed to create user: {result.get('error')}")
             return jsonify({"error": result.get('error', 'Failed to create account')}), 400
             
     except Exception as e:
         logging.error(f"Signup error: {str(e)}")
+        import traceback
+        logging.error(f"Signup traceback: {traceback.format_exc()}")
         return jsonify({"error": "Internal server error"}), 500
 
 app.register_blueprint(admin_api_bp)
