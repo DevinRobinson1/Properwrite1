@@ -262,69 +262,133 @@ class JVWizard {
     }
   }
 
+  // HTML escape function to prevent XSS
+  escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
   generateReview() {
     const formData = this.getFormData();
     const reviewContainer = document.getElementById('review-container');
     
-    let reviewHTML = '<div class="space-y-2">';
+    // Clear existing content
+    reviewContainer.innerHTML = '';
     
+    // Create container div
+    const container = document.createElement('div');
+    container.className = 'space-y-2';
+    
+    // Helper function to create review item
+    const createReviewItem = (label, value) => {
+      const item = document.createElement('div');
+      item.className = 'review-item';
+      
+      const labelSpan = document.createElement('span');
+      labelSpan.className = 'review-label';
+      labelSpan.textContent = label + ':';
+      
+      const valueSpan = document.createElement('span');
+      valueSpan.className = 'review-value';
+      valueSpan.textContent = value;
+      
+      item.appendChild(labelSpan);
+      item.appendChild(valueSpan);
+      return item;
+    };
+    
+    // Helper function to create review item with link
+    const createReviewItemWithLink = (label, url, linkText) => {
+      const item = document.createElement('div');
+      item.className = 'review-item';
+      
+      const labelSpan = document.createElement('span');
+      labelSpan.className = 'review-label';
+      labelSpan.textContent = label + ':';
+      
+      const valueSpan = document.createElement('span');
+      valueSpan.className = 'review-value';
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.className = 'text-blue-600 hover:underline';
+      link.textContent = linkText;
+      
+      valueSpan.appendChild(link);
+      item.appendChild(labelSpan);
+      item.appendChild(valueSpan);
+      return item;
+    };
+    
+    // Add form data to review
     if (formData.email) {
-      reviewHTML += `<div class="review-item"><span class="review-label">Email:</span><span class="review-value">${formData.email}</span></div>`;
+      container.appendChild(createReviewItem('Email', formData.email));
     }
     
     if (formData.phone) {
-      reviewHTML += `<div class="review-item"><span class="review-label">Phone:</span><span class="review-value">${formData.phone}</span></div>`;
+      container.appendChild(createReviewItem('Phone', formData.phone));
     }
     
     if (formData.address) {
-      reviewHTML += `<div class="review-item"><span class="review-label">Address:</span><span class="review-value">${formData.address}</span></div>`;
+      container.appendChild(createReviewItem('Address', formData.address));
     }
     
     if (formData.deal_type) {
-      reviewHTML += `<div class="review-item"><span class="review-label">Deal Type:</span><span class="review-value">${formData.deal_type}</span></div>`;
+      container.appendChild(createReviewItem('Deal Type', formData.deal_type));
     }
     
     if (formData.asking_price) {
-      reviewHTML += `<div class="review-item"><span class="review-label">Asking Price:</span><span class="review-value">$${parseInt(formData.asking_price).toLocaleString()}</span></div>`;
+      const price = '$' + parseInt(formData.asking_price).toLocaleString();
+      container.appendChild(createReviewItem('Asking Price', price));
     }
     
     if (formData.arv) {
-      reviewHTML += `<div class="review-item"><span class="review-label">ARV:</span><span class="review-value">$${parseInt(formData.arv).toLocaleString()}</span></div>`;
+      const arv = '$' + parseInt(formData.arv).toLocaleString();
+      container.appendChild(createReviewItem('ARV', arv));
     }
     
     if (formData.rehab_cost) {
-      reviewHTML += `<div class="review-item"><span class="review-label">Rehab Cost:</span><span class="review-value">$${parseInt(formData.rehab_cost).toLocaleString()}</span></div>`;
+      const rehab = '$' + parseInt(formData.rehab_cost).toLocaleString();
+      container.appendChild(createReviewItem('Rehab Cost', rehab));
     }
     
     if (formData.property_status) {
-      reviewHTML += `<div class="review-item"><span class="review-label">Property Status:</span><span class="review-value">${formData.property_status}</span></div>`;
+      container.appendChild(createReviewItem('Property Status', formData.property_status));
     }
     
     if (formData.closing_date) {
       const date = new Date(formData.closing_date);
-      reviewHTML += `<div class="review-item"><span class="review-label">Expected Closing:</span><span class="review-value">${date.toLocaleDateString()}</span></div>`;
+      container.appendChild(createReviewItem('Expected Closing', date.toLocaleDateString()));
     }
     
     if (formData.property_description) {
-      reviewHTML += `<div class="review-item"><span class="review-label">Description:</span><span class="review-value">${formData.property_description}</span></div>`;
+      container.appendChild(createReviewItem('Description', formData.property_description));
     }
     
     if (formData.photo_link) {
-      reviewHTML += `<div class="review-item"><span class="review-label">Photo Link:</span><span class="review-value"><a href="${formData.photo_link}" target="_blank" class="text-blue-600 hover:underline">View Photos</a></span></div>`;
+      // Validate URL format before creating link
+      try {
+        new URL(formData.photo_link);
+        container.appendChild(createReviewItemWithLink('Photo Link', formData.photo_link, 'View Photos'));
+      } catch (e) {
+        container.appendChild(createReviewItem('Photo Link', formData.photo_link));
+      }
     }
     
     if (formData.additional_notes) {
-      reviewHTML += `<div class="review-item"><span class="review-label">Additional Notes:</span><span class="review-value">${formData.additional_notes}</span></div>`;
+      container.appendChild(createReviewItem('Additional Notes', formData.additional_notes));
     }
     
-    reviewHTML += '</div>';
+    // Add container to DOM
+    reviewContainer.appendChild(container);
     
     // Add AI analysis if available
     if (formData.arv && formData.asking_price) {
       this.generateAIAnalysis(formData);
     }
-    
-    reviewContainer.innerHTML = reviewHTML;
   }
 
   async generateAIAnalysis(formData) {
