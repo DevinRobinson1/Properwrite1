@@ -4017,15 +4017,58 @@ def affiliate_links():
 # JV Deals Admin Panel Routes
 # ===============================
 
-@app.route('/admin/jv-deals-enhanced')
-def admin_jv_deals_enhanced():
-    """Enhanced JV Deals Admin Panel with DataGrid functionality"""
-    # Check if user has admin permissions (use same auth as main admin dashboard)
-    if not session.get('is_admin'):
-        flash('Access denied. Admin permissions required.', 'error')
-        return redirect('/admin/login')
+@app.route('/jv-admin/login', methods=['GET', 'POST'])
+def jv_admin_login():
+    """JV Admin Login - Separate from main admin"""
+    if request.method == 'POST':
+        password = request.form.get('password')
+        
+        # Get JV admin password hash from environment variable
+        jv_admin_password_hash = os.environ.get('JV_ADMIN_PASSWORD_HASH')
+        
+        if not jv_admin_password_hash:
+            # Fallback to main admin password if JV-specific not set
+            jv_admin_password_hash = os.environ.get('ADMIN_PASSWORD_HASH')
+            
+        if not jv_admin_password_hash:
+            return render_template('jv_admin_login.html', error='JV admin access is disabled. Please configure password.')
+        
+        # Check password against hash
+        if password and check_password_hash(jv_admin_password_hash, password):
+            session['is_jv_admin'] = True
+            session['jv_admin_user_id'] = 'jv_admin_1'
+            logging.info(f"JV admin login successful from IP: {request.remote_addr}")
+            return redirect('/jv-admin/dashboard')
+        
+        logging.warning(f"Failed JV admin login attempt from IP: {request.remote_addr}")
+        return render_template('jv_admin_login.html', error='Invalid password')
+    
+    return render_template('jv_admin_login.html')
+
+@app.route('/jv-admin/logout')
+def jv_admin_logout():
+    """JV Admin Logout"""
+    session.pop('is_jv_admin', None)
+    session.pop('jv_admin_user_id', None)
+    flash('You have been logged out of the JV admin panel.', 'info')
+    return redirect('/jv-admin/login')
+
+@app.route('/jv-admin/dashboard')
+def jv_admin_dashboard():
+    """JV Admin Dashboard - Direct access to enhanced JV panel"""
+    # Check if user has JV admin permissions
+    if not session.get('is_jv_admin'):
+        flash('Access denied. JV admin permissions required.', 'error')
+        return redirect('/jv-admin/login')
     
     return render_template('admin_jv_deals_enhanced.html')
+
+# Update the existing enhanced JV deals route to use JV admin auth
+@app.route('/admin/jv-deals-enhanced')
+def admin_jv_deals_enhanced():
+    """Enhanced JV Deals Admin Panel - Redirect to dedicated JV admin"""
+    # Redirect to dedicated JV admin system
+    return redirect('/jv-admin/login')
 
 # ===============================
 # Team JV Queue Routes
