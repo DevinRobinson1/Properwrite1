@@ -39,7 +39,7 @@ def require_jv_admin_api(f):
     """JV Admin API authentication decorator"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not session.get('jv_admin_authenticated'):
+        if not session.get('is_jv_admin'):
             return jsonify({'error': 'Unauthorized'}), 401
         return f(*args, **kwargs)
     return decorated_function
