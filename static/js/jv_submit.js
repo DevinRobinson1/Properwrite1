@@ -113,13 +113,21 @@ class JVWizard {
 
   validateCurrentStep() {
     const currentFieldset = document.querySelector(`fieldset[data-step="${this.currentStep}"]`);
+    if (!currentFieldset) {
+      console.log('No fieldset found for current step:', this.currentStep);
+      return false;
+    }
+
     const requiredFields = currentFieldset.querySelectorAll('input[required], select[required]');
+    console.log('Required fields found:', requiredFields.length);
     
     let isValid = true;
     requiredFields.forEach(field => {
+      console.log('Checking field:', field.name, 'value:', field.value);
       if (!field.value.trim()) {
         field.classList.add('border-red-300');
         isValid = false;
+        console.log('Field is empty:', field.name);
       } else {
         field.classList.remove('border-red-300');
       }
@@ -132,6 +140,9 @@ class JVWizard {
       if (!emailRegex.test(emailField.value)) {
         emailField.classList.add('border-red-300');
         isValid = false;
+        console.log('Email validation failed:', emailField.value);
+      } else {
+        console.log('Email validation passed:', emailField.value);
       }
     }
 
@@ -142,9 +153,14 @@ class JVWizard {
       if (!phoneRegex.test(phoneField.value)) {
         phoneField.classList.add('border-red-300');
         isValid = false;
+        console.log('Phone validation failed:', phoneField.value);
+      } else {
+        console.log('Phone validation passed:', phoneField.value);
       }
     }
 
+    console.log('Validation result:', isValid);
+    
     if (!isValid) {
       this.showMessage('Please fill in all required fields correctly.', 'error');
     }
