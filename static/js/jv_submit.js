@@ -16,25 +16,38 @@ class JVWizard {
   }
 
   bindEvents() {
+    console.log('Binding events...');
+    
     // Next/Previous buttons
     document.addEventListener('click', (e) => {
+      console.log('Click detected on:', e.target);
+      
       if (e.target.classList.contains('next') || e.target.closest('.next')) {
+        console.log('Next button clicked');
+        e.preventDefault();
         this.nextStep();
       } else if (e.target.classList.contains('prev') || e.target.closest('.prev')) {
+        console.log('Previous button clicked');
+        e.preventDefault();
         this.prevStep();
       }
     });
 
     // Form submission
-    document.getElementById('jv-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      this.submitForm();
-    });
+    const form = document.getElementById('jv-form');
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.submitForm();
+      });
+    }
 
     // Form input changes - save to localStorage
-    document.getElementById('jv-form').addEventListener('input', (e) => {
-      this.saveToStorage();
-    });
+    if (form) {
+      form.addEventListener('input', (e) => {
+        this.saveToStorage();
+      });
+    }
 
     // Step clicks
     document.querySelectorAll('.step-indicator').forEach(indicator => {
@@ -68,15 +81,21 @@ class JVWizard {
   }
 
   nextStep() {
+    console.log('nextStep called, current step:', this.currentStep);
+    
     if (this.validateCurrentStep()) {
+      console.log('Validation passed, moving to next step');
       this.saveToStorage();
       if (this.currentStep < this.maxSteps) {
         this.currentStep++;
+        console.log('New step:', this.currentStep);
         if (this.currentStep === 4) {
           this.generateReview();
         }
         this.updateUI();
       }
+    } else {
+      console.log('Validation failed');
     }
   }
 
@@ -428,5 +447,7 @@ class JVWizard {
 
 // Initialize wizard when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  new JVWizard();
+  console.log('DOM loaded, initializing JVWizard...');
+  window.jvWizard = new JVWizard();
+  console.log('JVWizard initialized:', window.jvWizard);
 });
