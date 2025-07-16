@@ -41,6 +41,7 @@ from affiliate_api import affiliate_api
 from construction_service import ConstructionService
 from renovation_estimator_backend import RenovationEstimatorService
 from services.unified_property_data_service import get_unified_property_service
+from werkzeug.security import check_password_hash
 
 # Load environment variables from .env file
 if os.path.exists('.env'):
@@ -3139,74 +3140,9 @@ def jv_submit_deal():
             'error': 'Internal server error'
         }), 500
 
-@app.route('/jv-admin')
-def jv_admin_page():
-    """
-    Admin dashboard for JV deals and partners
-    """
-    try:
-        # Check admin authentication (simple token check)
-        admin_token = os.environ.get('ADMIN_TOKEN', 'admin123')  # Default for demo
-        provided_token = request.args.get('token')
-        
-        if provided_token != admin_token:
-            return render_template('jv_admin_login.html')
-        
-        from jv_database import jv_db
-        
-        # Get dashboard stats
-        stats = jv_db.get_dashboard_stats()
-        
-        # Get recent partners
-        partners = jv_db.get_all_partners(limit=20)
-        
-        return render_template('jv_admin.html', 
-                             stats=stats, 
-                             partners=partners, 
-                             admin_token=admin_token)
-        
-    except Exception as e:
-        logging.error(f"Error loading admin page: {e}")
-        return render_template('jv_admin.html', 
-                             stats={'total_partners': 0, 'deals_last_30_days': 0, 'auto_approved': 0, 'auto_denied': 0, 'approval_rate': 0}, 
-                             partners=[], 
-                             error=str(e))
+# Old JV admin route removed - replaced by dedicated JV admin system at /jv-admin/login
 
-@app.route('/jv-admin/partner/<partner_id>')
-def jv_admin_partner_detail(partner_id):
-    """
-    Partner detail view
-    """
-    try:
-        # Check admin authentication
-        admin_token = os.environ.get('ADMIN_TOKEN', 'admin123')
-        provided_token = request.args.get('token')
-        
-        if provided_token != admin_token:
-            return redirect(f'/jv-admin?token={admin_token}')
-        
-        from jv_database import jv_db
-        
-        # Get partner details
-        partner = jv_db.get_partner_by_id(partner_id)
-        if not partner:
-            return "Partner not found", 404
-        
-        # Get partner deals
-        deals = jv_db.get_partner_deals(partner_id, limit=50)
-        
-        # Get partner stats
-        stats = jv_db.get_partner_stats(partner_id)
-        
-        return render_template('jv_admin_partner.html', 
-                             partner=partner, 
-                             deals=deals, 
-                             stats=stats,
-                             admin_token=admin_token)
-        
-    except Exception as e:
-        logging.error(f"Error loading partner detail: {e}")
-        return f"Error: {e}", 500
+# Old JV admin partner route removed - replaced by dedicated JV admin system
 
 @app.route('/jv-admin/deal/<deal_id>')
 def jv_admin_deal_detail(deal_id):
