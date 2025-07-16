@@ -437,6 +437,7 @@ class JVWizard {
       console.log('Form data being submitted:', Array.from(formData.entries()));
       console.log('MAO analysis:', maoAnalysis);
       
+      console.log('🚀 Submitting to /api/jv-submit endpoint');
       const response = await fetch('/api/jv-submit', {
         method: 'POST',
         body: formData  // Don't set Content-Type header with FormData
