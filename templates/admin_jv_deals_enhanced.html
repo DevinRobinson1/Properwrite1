@@ -233,12 +233,18 @@
 
         function loadMetrics() {
             fetch('/admin/api/jv-deals/metrics')
-                .then(response => response.json())
+                .then(response => {
+                    console.log('JV Metrics API Response Status:', response.status);
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('JV Metrics API Response Data:', data);
                     if (data.success) {
                         $('#total-deals').text(data.metrics.total_deals);
                         $('#pending-deals').text(data.metrics.pending_review);
                         $('#approval-rate').text(data.metrics.approval_rate + '%');
+                    } else {
+                        console.error('Metrics API returned error:', data);
                     }
                 })
                 .catch(error => console.error('Error loading metrics:', error));
@@ -253,11 +259,17 @@
             params.append('limit', '100');
 
             fetch(`/admin/api/jv-deals?${params}`)
-                .then(response => response.json())
+                .then(response => {
+                    console.log('JV Deals API Response Status:', response.status);
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('JV Deals API Response Data:', data);
                     if (data.success) {
                         currentDeals = data.deals;
                         populateDealsTable(data.deals);
+                    } else {
+                        console.error('API returned error:', data);
                     }
                 })
                 .catch(error => console.error('Error loading deals:', error));
