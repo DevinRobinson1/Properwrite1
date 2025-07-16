@@ -266,8 +266,8 @@
                 .then(data => {
                     console.log('JV Deals API Response Data:', data);
                     if (data.success) {
-                        currentDeals = data.jv_deals || [];
-                        populateDealsTable(data.jv_deals || []);
+                        currentDeals = data.deals || [];
+                        populateDealsTable(data.deals || []);
                     } else {
                         console.error('API returned error:', data);
                     }
