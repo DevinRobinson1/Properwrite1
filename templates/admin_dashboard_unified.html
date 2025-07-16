@@ -1903,6 +1903,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-Admin-Token': 'admin123'
                     },
                     body: JSON.stringify({ user_ids: selectedUsers })
                 })
@@ -1935,6 +1936,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-Admin-Token': 'admin123'
                     },
                     body: JSON.stringify({ user_ids: selectedUsers })
                 })
@@ -1967,7 +1969,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token() }}'
+                        'X-Admin-Token': 'admin123'
                     },
                     body: JSON.stringify({ user_ids: selectedUsers })
                 })
@@ -2317,6 +2319,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-Admin-Token': 'admin123'
                     }
                 })
                 .then(response => response.json())
@@ -2369,6 +2372,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-Admin-Token': 'admin123'
                     },
                     body: JSON.stringify({ credits: parseInt(credits) })
                 })
@@ -2397,6 +2401,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-Admin-Token': 'admin123'
                     }
                 })
                 .then(response => response.json())
@@ -2425,6 +2430,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-Admin-Token': 'admin123'
                     },
                     body: JSON.stringify({ plan: planName })
                 })
@@ -2452,6 +2458,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-Admin-Token': 'admin123'
                 }
             })
             .then(response => response.json())
