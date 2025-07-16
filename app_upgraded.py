@@ -4018,6 +4018,7 @@ def affiliate_links():
 # ===============================
 
 @app.route('/jv-admin/login', methods=['GET', 'POST'])
+@csrf.exempt
 def jv_admin_login():
     """JV Admin Login - Separate from main admin"""
     if request.method == 'POST':
