@@ -35,6 +35,15 @@ def require_admin_api(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def require_jv_admin_api(f):
+    """JV Admin API authentication decorator"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('jv_admin_authenticated'):
+            return jsonify({'error': 'Unauthorized'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
 @admin_api_bp.route('/dashboard/stats', methods=['GET'])
 @csrf.exempt
 @require_admin_api
@@ -774,7 +783,7 @@ def get_revenue_metrics():
         return jsonify({'error': str(e)}), 500
 
 @admin_api_bp.route('/jv-deals', methods=['GET'])
-@require_admin_api
+@require_jv_admin_api
 def get_jv_deals():
     """Get JV deal submissions with advanced filtering and sorting"""
     try:
@@ -919,7 +928,7 @@ def get_jv_deals():
         return jsonify({'error': str(e)}), 500
 
 @admin_api_bp.route('/users/<user_id>/jv-deals', methods=['GET'])
-@require_admin_api  
+@require_jv_admin_api  
 def get_user_jv_deals(user_id):
     """Get JV deals for a specific user (for portfolio drawer)"""
     try:
@@ -1015,7 +1024,7 @@ def get_user_jv_deals(user_id):
         return jsonify({'error': str(e)}), 500
 
 @admin_api_bp.route('/jv-deals/<deal_id>', methods=['PATCH'])
-@require_admin_api
+@require_jv_admin_api
 def update_jv_deal(deal_id):
     """Update JV deal status and notes"""
     try:
@@ -1102,7 +1111,7 @@ def update_jv_deal(deal_id):
         return jsonify({'error': str(e)}), 500
 
 @admin_api_bp.route('/jv-deals/metrics', methods=['GET'])
-@require_admin_api
+@require_jv_admin_api
 def get_jv_deal_metrics():
     """Get JV deal metrics for header chips"""
     try:
