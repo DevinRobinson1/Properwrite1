@@ -2952,7 +2952,12 @@ def jv_deals_submit():
         }
         
         # Submit deal to database
-        deal_id = jv_db.submit_deal(partner_id, deal_data)
+        deal_id = jv_db.create_deal_submission(
+            partner_id=partner_id,
+            deal_data=deal_data,
+            auto_status=underwrite_result.get('recommendation', 'needs_review'),
+            reasons=underwrite_result.get('reasons', [])
+        )
         
         # Trigger Zapier webhook for new JV submission
         from zapier_webhook_service import trigger_jv_submission
