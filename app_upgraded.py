@@ -3981,8 +3981,8 @@ def jv_submit():
     """Serve the JV submission page"""
     try:
         # Get Google Maps API key for the template
-        google_maps_key = os.environ.get('GOOGLE_PLACES_API_KEY', '')
-        return render_template('jv_submit.html', GOOGLE_MAPS_KEY=google_maps_key)
+        google_maps_key = os.environ.get('GOOGLE_MAPS_API_KEY', '')
+        return render_template('jv_submit.html', GOOGLE_MAPS_API_KEY=google_maps_key)
     except Exception as e:
         logging.error(f"Error serving JV submit page: {e}")
         flash('Error loading JV submission page', 'error')
