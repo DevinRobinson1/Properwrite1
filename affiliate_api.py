@@ -249,6 +249,63 @@ def create_promo_code():
     finally:
         db.close()
 
+@affiliate_api.route('/api/admin/promo-codes/<code_id>', methods=['PUT'])
+@require_admin
+def update_promo_code(code_id):
+    """Update an existing promo code"""
+    db = get_db_session()
+    try:
+        from affiliate_models import PromoCode, PromoCodeType
+        
+        promo_code = db.query(PromoCode).filter_by(id=code_id).first()
+        if not promo_code:
+            return jsonify({'error': 'Promo code not found'}), 404
+        
+        data = request.json
+        
+        # Update fields if provided
+        if 'code' in data:
+            promo_code.code = data['code']
+        if 'type' in data:
+            promo_code.type = PromoCodeType(data['type'])
+        if 'discount_percentage' in data:
+            promo_code.discount_percentage = data['discount_percentage']
+        if 'credit_amount' in data:
+            promo_code.credit_amount = data['credit_amount']
+        if 'bonus_seats' in data:
+            promo_code.bonus_seats = data['bonus_seats']
+        if 'max_uses' in data:
+            promo_code.max_uses = data['max_uses']
+        if 'valid_until' in data:
+            from datetime import datetime
+            promo_code.valid_until = datetime.fromisoformat(data['valid_until']) if data['valid_until'] else None
+        if 'is_active' in data:
+            promo_code.is_active = data['is_active']
+        if 'first_month_only' in data:
+            promo_code.first_month_only = data['first_month_only']
+        if 'description' in data:
+            promo_code.description = data['description']
+        
+        db.commit()
+        
+        return jsonify({
+            'id': str(promo_code.id),
+            'code': promo_code.code,
+            'type': promo_code.type.value,
+            'discount_percentage': promo_code.discount_percentage,
+            'credit_amount': promo_code.credit_amount,
+            'bonus_seats': promo_code.bonus_seats,
+            'max_uses': promo_code.max_uses,
+            'valid_until': promo_code.valid_until.isoformat() if promo_code.valid_until else None,
+            'is_active': promo_code.is_active,
+            'first_month_only': promo_code.first_month_only,
+            'description': promo_code.description,
+            'updated': True
+        })
+        
+    finally:
+        db.close()
+
 @affiliate_api.route('/api/admin/promo-codes/<code_id>/deactivate', methods=['POST'])
 @require_admin
 def deactivate_promo_code(code_id):
