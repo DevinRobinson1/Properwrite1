@@ -156,13 +156,13 @@ def auto_underwrite_deal_with_mao(deal_data, mao_analysis):
                 approval_status = 'needs_review'
                 approval_reason = 'No profitable strategies found - requires manual review'
         
-        # Determine final recommendation
+        # Determine final recommendation for database storage
         if approval_status == 'auto_approved':
             recommendation = 'approved'
         elif approval_status == 'likely_approved':
             recommendation = 'approved'
         else:
-            recommendation = 'pending'
+            recommendation = 'denied'  # Changed from 'pending' to 'denied' for database constraint
         
         # Calculate suggested offer
         if recommendations:
