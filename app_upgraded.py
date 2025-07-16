@@ -2875,6 +2875,114 @@ def jv_submit_page():
     return render_template('jv_submit.html', 
                          google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY') or os.environ.get('GOOGLE_API_KEY'))
 
+@app.route('/api/jv-deals', methods=['POST'])
+@limiter.limit("5 per hour")  # Limit JV submissions to prevent spam
+def jv_deals_submit():
+    """
+    Submit JV deal with MAO analysis and approval logic
+    """
+    try:
+        # Handle FormData submission
+        data = {}
+        
+        # Extract form data
+        for key, value in request.form.items():
+            if key != 'csrf_token':
+                data[key] = value
+        
+        # Parse MAO analysis if provided
+        mao_analysis_json = request.form.get('mao_analysis')
+        mao_analysis = json.loads(mao_analysis_json) if mao_analysis_json else None
+        
+        # Map form fields to expected format
+        mapped_data = {
+            'partner_name': data.get('name'),
+            'partner_email': data.get('email'),
+            'partner_phone': data.get('phone'),
+            'partner_company': data.get('company', ''),
+            'partner_markets': data.get('markets', '').split(',') if data.get('markets') else [],
+            'property_address': data.get('address'),
+            'property_city': data.get('city'),
+            'property_state': data.get('state'),
+            'property_zip': data.get('zip'),
+            'deal_type': 'wholesale',  # Default for JV deals
+            'seller_asking_price': data.get('asking_price'),
+            'arv': data.get('arv'),
+            'rehab_needed': 'yes' if data.get('rehab_cost') else 'no',
+            'rehab_cost': data.get('rehab_cost', '0'),
+            'property_status': data.get('property_status'),
+            'closing_date': data.get('closing_date'),
+            'property_description': data.get('property_description', ''),
+            'photo_link': data.get('photo_link', ''),
+            'additional_notes': data.get('additional_notes', ''),
+            'mao_analysis': mao_analysis
+        }
+        
+        # Create or get partner record
+        from jv_database import jv_db
+        
+        partner_id = jv_db.create_or_get_partner(
+            name=mapped_data.get('partner_name'),
+            email=mapped_data.get('partner_email'),
+            phone=mapped_data.get('partner_phone'),
+            company=mapped_data.get('partner_company'),
+            markets=mapped_data.get('partner_markets', [])
+        )
+        
+        # Enhanced auto-underwrite with MAO analysis
+        underwrite_result = auto_underwrite_deal_with_mao(mapped_data, mao_analysis)
+        
+        # Prepare deal data for database storage
+        deal_data = {
+            'property_address': mapped_data.get('property_address'),
+            'street': mapped_data.get('street', ''),
+            'city': mapped_data.get('property_city'),
+            'state': mapped_data.get('property_state'),
+            'zip_code': mapped_data.get('property_zip'),
+            'asking_price': float(mapped_data.get('seller_asking_price', 0)),
+            'arv': float(mapped_data.get('arv', 0)),
+            'repair_estimate': float(mapped_data.get('rehab_cost', 0)),
+            'suggested_offer': underwrite_result.get('suggested_offer', 0),
+            'status': 'pending',
+            'auto_evaluation': underwrite_result.get('recommendation', 'needs_review'),
+            'evaluation_reasons': underwrite_result.get('reasons', []),
+            'admin_notes': '',
+            'submission_data': mapped_data,
+            'mao_analysis': mao_analysis
+        }
+        
+        # Submit deal to database
+        deal_id = jv_db.submit_deal(partner_id, deal_data)
+        
+        # Trigger Zapier webhook for new JV submission
+        from zapier_webhook_service import trigger_jv_submission
+        trigger_jv_submission({
+            'id': deal_id,
+            'address': deal_data['property_address'],
+            'user_id': partner_id,
+            'partner_name': mapped_data.get('partner_name'),
+            'partner_email': mapped_data.get('partner_email'),
+            'asking_price': deal_data['asking_price'],
+            'arv': deal_data['arv'],
+            'auto_evaluation': deal_data['auto_evaluation'],
+            'submitted_at': datetime.utcnow().isoformat()
+        })
+        
+        return jsonify({
+            'success': True,
+            'deal_id': deal_id,
+            'analysis': mao_analysis,
+            'underwrite_result': underwrite_result,
+            'message': 'Deal submitted successfully!'
+        })
+        
+    except Exception as e:
+        logging.error(f"Error submitting JV deal: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 @app.route('/api/jv-submit', methods=['POST'])
 @limiter.limit("5 per hour")  # Limit JV submissions to prevent spam
 def jv_submit_deal():

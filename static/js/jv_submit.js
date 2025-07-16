@@ -417,34 +417,43 @@ class JVWizard {
       return;
     }
 
-    const formData = this.getFormData();
     const submitButton = document.querySelector('button[type="submit"]');
     
     submitButton.disabled = true;
     submitButton.textContent = 'Submitting...';
     
     try {
+      // Use FormData to include CSRF token
+      const formData = new FormData(document.getElementById('jv-form'));
+      
+      // Add MAO analysis before submission
+      const dealData = this.getFormData();
+      const maoAnalysis = this.calculateMAO(dealData);
+      
+      // Add analysis to form data
+      formData.append('mao_analysis', JSON.stringify(maoAnalysis));
+      
       const response = await fetch('/api/jv-deals', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
+        body: formData  // Don't set Content-Type header with FormData
       });
 
       const result = await response.json();
 
       if (response.ok) {
+        // Show analysis results
+        this.showAnalysisResults(result.analysis);
+        
         // Trigger confetti celebration
         this.triggerConfetti();
         
         this.showMessage('Deal submitted successfully! We\'ll review it and get back to you soon.', 'success');
         this.clearStorage();
         
-        // Redirect after 2 seconds
+        // Redirect after 3 seconds to show analysis
         setTimeout(() => {
           window.location.href = '/';
-        }, 2000);
+        }, 3000);
       } else {
         this.showMessage(result.error || 'Failed to submit deal. Please try again.', 'error');
       }
@@ -455,6 +464,125 @@ class JVWizard {
       submitButton.disabled = false;
       submitButton.textContent = 'Submit JV Deal';
     }
+  }
+
+  calculateMAO(dealData) {
+    const askingPrice = parseFloat(dealData.asking_price?.replace(/,/g, '') || 0);
+    const arv = parseFloat(dealData.arv?.replace(/,/g, '') || 0);
+    const rehabCost = parseFloat(dealData.rehab_cost?.replace(/,/g, '') || 0);
+    
+    // Standard wholesale MAO calculation
+    const wholesaleMAO = arv * 0.70 - rehabCost;
+    const assignmentFee = 15000; // Standard assignment fee
+    const finalMAO = wholesaleMAO - assignmentFee;
+    
+    // Novation calculation (higher profit potential)
+    const novationMAO = arv * 0.85 - rehabCost - 25000; // Higher ARV%, account for closing costs
+    
+    // Profit calculations
+    const wholesaleProfit = finalMAO - askingPrice;
+    const novationProfit = novationMAO - askingPrice;
+    
+    // Deal recommendations
+    const recommendations = [];
+    
+    if (wholesaleProfit > 0) {
+      recommendations.push({
+        strategy: 'Wholesale',
+        mao: finalMAO,
+        profit: wholesaleProfit,
+        confidence: wholesaleProfit > 10000 ? 'High' : 'Medium'
+      });
+    }
+    
+    if (novationProfit > 0 && novationProfit > wholesaleProfit) {
+      recommendations.push({
+        strategy: 'Novation',
+        mao: novationMAO,
+        profit: novationProfit,
+        confidence: novationProfit > 15000 ? 'High' : 'Medium'
+      });
+    }
+    
+    // Approval logic
+    let approvalStatus = 'pending';
+    let approvalReason = '';
+    
+    if (recommendations.length === 0) {
+      approvalStatus = 'needs_review';
+      approvalReason = 'No profitable strategies found - requires manual review';
+    } else if (Math.max(wholesaleProfit, novationProfit) > 20000) {
+      approvalStatus = 'auto_approved';
+      approvalReason = 'High profit potential - automatically approved';
+    } else if (Math.max(wholesaleProfit, novationProfit) > 10000) {
+      approvalStatus = 'likely_approved';
+      approvalReason = 'Good profit potential - likely to be approved';
+    } else {
+      approvalStatus = 'needs_review';
+      approvalReason = 'Lower profit margins - requires careful review';
+    }
+    
+    return {
+      askingPrice,
+      arv,
+      rehabCost,
+      wholesaleMAO: finalMAO,
+      novationMAO,
+      wholesaleProfit,
+      novationProfit,
+      recommendations,
+      approvalStatus,
+      approvalReason
+    };
+  }
+
+  showAnalysisResults(analysis) {
+    const reviewContainer = document.getElementById('review-container');
+    
+    let analysisHTML = `
+      <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <h3 class="text-lg font-semibold text-blue-900 mb-3">
+          <i class="fas fa-chart-line mr-2"></i>Deal Analysis Results
+        </h3>
+    `;
+    
+    if (analysis.recommendations && analysis.recommendations.length > 0) {
+      analysisHTML += '<div class="space-y-3">';
+      analysis.recommendations.forEach(rec => {
+        const profitColor = rec.confidence === 'High' ? 'text-green-600' : 'text-yellow-600';
+        analysisHTML += `
+          <div class="flex justify-between items-center p-3 bg-white rounded border">
+            <div>
+              <span class="font-medium">${rec.strategy} Strategy</span>
+              <span class="ml-2 text-sm text-gray-600">(${rec.confidence} Confidence)</span>
+            </div>
+            <div class="text-right">
+              <div class="font-semibold ${profitColor}">$${rec.profit.toLocaleString()} profit</div>
+              <div class="text-sm text-gray-600">MAO: $${rec.mao.toLocaleString()}</div>
+            </div>
+          </div>
+        `;
+      });
+      analysisHTML += '</div>';
+    }
+    
+    // Approval status
+    const statusColor = analysis.approvalStatus === 'auto_approved' ? 'text-green-600' : 
+                       analysis.approvalStatus === 'likely_approved' ? 'text-yellow-600' : 'text-red-600';
+    
+    analysisHTML += `
+      <div class="mt-4 p-3 bg-gray-50 rounded border">
+        <div class="flex items-center justify-between">
+          <span class="font-medium">Status:</span>
+          <span class="font-semibold ${statusColor}">${analysis.approvalStatus.replace('_', ' ').toUpperCase()}</span>
+        </div>
+        <p class="text-sm text-gray-600 mt-1">${analysis.approvalReason}</p>
+      </div>
+    `;
+    
+    analysisHTML += '</div>';
+    
+    reviewContainer.innerHTML += analysisHTML;
   }
 
   triggerConfetti() {
