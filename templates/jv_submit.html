@@ -3,71 +3,269 @@
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/jv_submit.css') }}">
-<section id="jv-wizard" class="mx-auto max-w-3xl p-4">
-  <!-- Step progress bar -->
-  <ol id="wizard-steps" class="flex justify-between text-sm mb-6">
-    <li data-step="1" class="step active">Partner Info</li>
-    <li data-step="2" class="step">Property Details</li>
-    <li data-step="3" class="step">Deal Numbers</li>
-    <li data-step="4" class="step">Review & Submit</li>
-  </ol>
 
-  <!-- STEP 1 – Partner Info -->
-  <form id="jv-form" autocomplete="off">
-    <fieldset data-step="1">
-      <h2 class="text-lg font-semibold mb-4">Partner Information</h2>
-      <label>Email*
-        <input type="email" name="email" required>
-      </label>
-      <label>Phone*
-        <input type="tel" name="phone" required>
-      </label>
-      <button type="button" class="btn next">Continue</button>
-    </fieldset>
+<!-- Modern Hero Section -->
+<div class="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12">
+  <div class="max-w-4xl mx-auto px-4">
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">
+        <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Submit a JV Deal
+        </span>
+      </h1>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        Partner with us on your next real estate investment opportunity. Our streamlined process makes it easy to submit and track your deals.
+      </p>
+    </div>
+  </div>
+</div>
 
-    <!-- STEP 2 – Property -->
-    <fieldset data-step="2" hidden>
-      <h2 class="text-lg font-semibold mb-4">Property Address</h2>
-      <label>Address* 
-        <input id="autocomplete" type="text" name="address" placeholder="Start typing…" required>
-      </label>
-      <label>Deal Type*
-        <select name="deal_type" required>
-          <option value="Cash">Cash / Dispo Help</option>
-          <option value="Creative">Creative Finance</option>
-        </select>
-      </label>
-      <button type="button" class="btn prev">Back</button>
-      <button type="button" class="btn next">Continue</button>
-    </fieldset>
+<!-- Main Wizard Container -->
+<section id="jv-wizard" class="max-w-4xl mx-auto px-4 py-8">
+  <!-- Modern Progress Bar -->
+  <div class="mb-12">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-8">
+        <div class="step-indicator active" data-step="1">
+          <div class="step-circle">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="step-label">Partner Info</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-indicator" data-step="2">
+          <div class="step-circle">
+            <i class="fas fa-home"></i>
+          </div>
+          <div class="step-label">Property Details</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-indicator" data-step="3">
+          <div class="step-circle">
+            <i class="fas fa-calculator"></i>
+          </div>
+          <div class="step-label">Deal Numbers</div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-indicator" data-step="4">
+          <div class="step-circle">
+            <i class="fas fa-check"></i>
+          </div>
+          <div class="step-label">Review & Submit</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <!-- STEP 3 – Deal Numbers -->
-    <fieldset data-step="3" hidden>
-      <h2 class="text-lg font-semibold mb-4">Deal Numbers</h2>
-      <label>Asking Price*
-        <input type="number" name="asking_price" required>
-      </label>
-      <label>ARV*
-        <input type="number" name="arv" required>
-      </label>
-      <label>Estimated Rehab $
-        <input type="number" name="rehab_cost">
-      </label>
-      <label>Photo Link
-        <input type="url" name="photo_link">
-      </label>
-      <button type="button" class="btn prev">Back</button>
-      <button type="button" class="btn next">Continue</button>
-    </fieldset>
+  <!-- Form Card -->
+  <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+    <form id="jv-form" autocomplete="off">
+      <!-- STEP 1 – Partner Info -->
+      <fieldset data-step="1" class="step-content">
+        <div class="p-8">
+          <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-user text-blue-600 text-xl"></i>
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold text-gray-900">Partner Information</h2>
+              <p class="text-gray-600">Tell us about yourself so we can get in touch</p>
+            </div>
+          </div>
+          
+          <div class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="form-group">
+                <label class="form-label">Email Address *</label>
+                <div class="input-wrapper">
+                  <i class="fas fa-envelope input-icon"></i>
+                  <input type="email" name="email" class="form-input" placeholder="your@email.com" required>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Phone Number *</label>
+                <div class="input-wrapper">
+                  <i class="fas fa-phone input-icon"></i>
+                  <input type="tel" name="phone" class="form-input" placeholder="(555) 123-4567" required>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Full Name (Optional)</label>
+              <div class="input-wrapper">
+                <i class="fas fa-id-card input-icon"></i>
+                <input type="text" name="name" class="form-input" placeholder="John Smith">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-50 px-8 py-6 flex justify-end">
+          <button type="button" class="btn-primary next">
+            Continue to Property Details
+            <i class="fas fa-arrow-right ml-2"></i>
+          </button>
+        </div>
+      </fieldset>
 
-    <!-- STEP 4 – Review -->
-    <fieldset data-step="4" hidden>
-      <h2 class="text-lg font-semibold mb-4">Review Deal</h2>
-      <div id="review-container" class="mb-4"></div>
-      <button type="button" class="btn prev">Back</button>
-      <button type="submit" class="btn primary w-full">Submit JV Deal</button>
-    </fieldset>
-  </form>
+      <!-- STEP 2 – Property -->
+      <fieldset data-step="2" class="step-content" hidden>
+        <div class="p-8">
+          <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-home text-green-600 text-xl"></i>
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold text-gray-900">Property Details</h2>
+              <p class="text-gray-600">Where is the property located and what type of deal is it?</p>
+            </div>
+          </div>
+          
+          <div class="space-y-6">
+            <div class="form-group">
+              <label class="form-label">Property Address *</label>
+              <div class="input-wrapper">
+                <i class="fas fa-map-marker-alt input-icon"></i>
+                <input id="autocomplete" type="text" name="address" class="form-input" placeholder="Start typing the property address..." required>
+              </div>
+              <p class="text-sm text-gray-500 mt-2">
+                <i class="fas fa-info-circle mr-1"></i>
+                Uses Google Places autocomplete for accuracy
+              </p>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Deal Type *</label>
+              <div class="select-wrapper">
+                <select name="deal_type" class="form-select" required>
+                  <option value="">Select deal type...</option>
+                  <option value="Cash">Cash / Disposition Help</option>
+                  <option value="Creative">Creative Finance</option>
+                </select>
+                <i class="fas fa-chevron-down select-icon"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-50 px-8 py-6 flex justify-between">
+          <button type="button" class="btn-secondary prev">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back
+          </button>
+          <button type="button" class="btn-primary next">
+            Continue to Deal Numbers
+            <i class="fas fa-arrow-right ml-2"></i>
+          </button>
+        </div>
+      </fieldset>
+
+      <!-- STEP 3 – Deal Numbers -->
+      <fieldset data-step="3" class="step-content" hidden>
+        <div class="p-8">
+          <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-calculator text-purple-600 text-xl"></i>
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold text-gray-900">Deal Numbers</h2>
+              <p class="text-gray-600">Let's talk numbers - what are the key financial details?</p>
+            </div>
+          </div>
+          
+          <div class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="form-group">
+                <label class="form-label">Seller Asking Price *</label>
+                <div class="input-wrapper">
+                  <i class="fas fa-dollar-sign input-icon"></i>
+                  <input type="number" name="asking_price" class="form-input" placeholder="250000" required>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">ARV (After Repair Value) *</label>
+                <div class="input-wrapper">
+                  <i class="fas fa-chart-line input-icon"></i>
+                  <input type="number" name="arv" class="form-input" placeholder="320000" required>
+                </div>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="form-group">
+                <label class="form-label">Estimated Rehab Cost</label>
+                <div class="input-wrapper">
+                  <i class="fas fa-tools input-icon"></i>
+                  <input type="number" name="rehab_cost" class="form-input" placeholder="25000">
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Photo Link (Optional)</label>
+                <div class="input-wrapper">
+                  <i class="fas fa-camera input-icon"></i>
+                  <input type="url" name="photo_link" class="form-input" placeholder="https://drive.google.com/...">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-50 px-8 py-6 flex justify-between">
+          <button type="button" class="btn-secondary prev">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back
+          </button>
+          <button type="button" class="btn-primary next">
+            Review Deal
+            <i class="fas fa-arrow-right ml-2"></i>
+          </button>
+        </div>
+      </fieldset>
+
+      <!-- STEP 4 – Review -->
+      <fieldset data-step="4" class="step-content" hidden>
+        <div class="p-8">
+          <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-check text-orange-600 text-xl"></i>
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold text-gray-900">Review Your Deal</h2>
+              <p class="text-gray-600">Please review all details before submitting</p>
+            </div>
+          </div>
+          
+          <div id="review-container" class="bg-gray-50 rounded-xl p-6 mb-6">
+            <!-- Review content will be populated by JavaScript -->
+          </div>
+          
+          <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <div class="flex items-center">
+              <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+              <p class="text-blue-800 text-sm">
+                <strong>Next Steps:</strong> After submission, our team will review your deal within 24-48 hours and contact you with our decision.
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-50 px-8 py-6 flex justify-between">
+          <button type="button" class="btn-secondary prev">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back
+          </button>
+          <button type="submit" class="btn-success">
+            <i class="fas fa-paper-plane mr-2"></i>
+            Submit JV Deal
+          </button>
+        </div>
+      </fieldset>
+    </form>
+  </div>
 </section>
 
 <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_KEY }}&libraries=places"></script>

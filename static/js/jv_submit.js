@@ -18,9 +18,9 @@ class JVWizard {
   bindEvents() {
     // Next/Previous buttons
     document.addEventListener('click', (e) => {
-      if (e.target.classList.contains('next')) {
+      if (e.target.classList.contains('next') || e.target.closest('.next')) {
         this.nextStep();
-      } else if (e.target.classList.contains('prev')) {
+      } else if (e.target.classList.contains('prev') || e.target.closest('.prev')) {
         this.prevStep();
       }
     });
@@ -37,9 +37,9 @@ class JVWizard {
     });
 
     // Step clicks
-    document.querySelectorAll('.step').forEach(step => {
-      step.addEventListener('click', (e) => {
-        const stepNum = parseInt(e.target.dataset.step);
+    document.querySelectorAll('.step-indicator').forEach(indicator => {
+      indicator.addEventListener('click', (e) => {
+        const stepNum = parseInt(indicator.dataset.step);
         if (stepNum <= this.currentStep) {
           this.goToStep(stepNum);
         }
@@ -135,12 +135,14 @@ class JVWizard {
 
   updateUI() {
     // Update step indicators
-    document.querySelectorAll('.step').forEach(step => {
-      const stepNum = parseInt(step.dataset.step);
+    document.querySelectorAll('.step-indicator').forEach(indicator => {
+      const stepNum = parseInt(indicator.dataset.step);
+      indicator.classList.remove('active', 'completed');
+      
       if (stepNum === this.currentStep) {
-        step.classList.add('active');
-      } else {
-        step.classList.remove('active');
+        indicator.classList.add('active');
+      } else if (stepNum < this.currentStep) {
+        indicator.classList.add('completed');
       }
     });
 
