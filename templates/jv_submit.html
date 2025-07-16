@@ -75,6 +75,7 @@
 
   <!-- Form Steps -->
   <form id="jv-form" autocomplete="off" class="space-y-8">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
     <!-- STEP 1 – Partner Info -->
     <fieldset data-step="1" class="step-content">
       <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl shadow-lg overflow-hidden border-2 border-blue-200">
@@ -206,7 +207,7 @@
                   <label class="form-label">Seller Asking Price *</label>
                   <div class="input-wrapper">
                     <i class="fas fa-dollar-sign input-icon"></i>
-                    <input type="number" name="asking_price" class="form-input" placeholder="250000" required>
+                    <input type="text" name="asking_price" class="form-input" placeholder="250,000" required>
                   </div>
                 </div>
                 
@@ -214,7 +215,7 @@
                   <label class="form-label">ARV (After Repair Value) *</label>
                   <div class="input-wrapper">
                     <i class="fas fa-chart-line input-icon"></i>
-                    <input type="number" name="arv" class="form-input" placeholder="320000" required>
+                    <input type="text" name="arv" class="form-input" placeholder="320,000" required>
                   </div>
                 </div>
               </div>
@@ -224,17 +225,54 @@
                   <label class="form-label">Estimated Rehab Cost</label>
                   <div class="input-wrapper">
                     <i class="fas fa-tools input-icon"></i>
-                    <input type="number" name="rehab_cost" class="form-input" placeholder="25000">
+                    <input type="text" name="rehab_cost" class="form-input" placeholder="25,000">
                   </div>
                 </div>
                 
                 <div class="form-group">
-                  <label class="form-label">Photo Link (Optional)</label>
-                  <div class="input-wrapper">
-                    <i class="fas fa-camera input-icon"></i>
-                    <input type="url" name="photo_link" class="form-input" placeholder="https://drive.google.com/...">
+                  <label class="form-label">Current Property Status *</label>
+                  <div class="select-wrapper">
+                    <select name="property_status" class="form-select" required>
+                      <option value="">Select status...</option>
+                      <option value="Under Contract">Under Contract</option>
+                      <option value="Listed">Listed</option>
+                      <option value="Not Listed">Not Listed</option>
+                      <option value="Distressed">Distressed</option>
+                      <option value="Foreclosure">Foreclosure</option>
+                      <option value="Estate Sale">Estate Sale</option>
+                      <option value="Vacant">Vacant</option>
+                      <option value="Occupied">Occupied</option>
+                    </select>
+                    <i class="fas fa-chevron-down select-icon"></i>
                   </div>
                 </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Expected Closing Date *</label>
+                <div class="input-wrapper">
+                  <i class="fas fa-calendar input-icon"></i>
+                  <input type="date" name="closing_date" class="form-input" required>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Property Description</label>
+                <textarea name="property_description" class="form-input" rows="3" placeholder="Brief description of the property..." maxlength="300"></textarea>
+                <p class="text-sm text-gray-500 mt-1">Maximum 300 characters</p>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Link to Photos / Drive Folder</label>
+                <div class="input-wrapper">
+                  <i class="fas fa-camera input-icon"></i>
+                  <input type="url" name="photo_link" class="form-input" placeholder="https://drive.google.com/...">
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Additional Notes / Questions</label>
+                <textarea name="additional_notes" class="form-input" rows="3" placeholder="Any additional details or questions..."></textarea>
               </div>
             </div>
           </div>

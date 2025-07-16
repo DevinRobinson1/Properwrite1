@@ -115,6 +115,19 @@ fieldset[data-step="4"] .bg-gray-50 {
   @apply w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white;
 }
 
+textarea.form-input {
+  @apply pl-4 resize-none;
+}
+
+/* Better styling for form input backgrounds */
+.form-input, .form-select {
+  @apply bg-white shadow-sm;
+}
+
+.form-input:focus, .form-select:focus {
+  @apply shadow-lg border-blue-400 bg-white;
+}
+
 .form-input:focus {
   @apply shadow-lg border-blue-400;
 }

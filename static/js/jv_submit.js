@@ -19,6 +19,7 @@ class JVWizard {
   init() {
     this.bindEvents();
     this.initGooglePlaces();
+    this.initNumberFormatting();
     this.loadFromStorage();
     this.updateUI();
   }
@@ -86,6 +87,41 @@ class JVWizard {
         });
       }
     }
+  }
+
+  initNumberFormatting() {
+    // Format number fields with commas
+    const numberFields = ['asking_price', 'arv', 'rehab_cost'];
+    
+    numberFields.forEach(fieldName => {
+      const input = document.querySelector(`[name="${fieldName}"]`);
+      if (input) {
+        input.addEventListener('input', (e) => {
+          this.formatNumberInput(e.target);
+        });
+        
+        input.addEventListener('blur', (e) => {
+          this.formatNumberInput(e.target);
+        });
+      }
+    });
+  }
+
+  formatNumberInput(input) {
+    // Get raw value without commas
+    let value = input.value.replace(/,/g, '');
+    
+    // Only format if it's a valid number
+    if (value && !isNaN(value)) {
+      // Format with commas
+      const formatted = parseInt(value).toLocaleString('en-US');
+      input.value = formatted;
+    }
+  }
+
+  getUnformattedValue(input) {
+    // Return raw numeric value without commas
+    return input.value.replace(/,/g, '');
   }
 
   nextStep() {
@@ -260,8 +296,25 @@ class JVWizard {
       reviewHTML += `<div class="review-item"><span class="review-label">Rehab Cost:</span><span class="review-value">$${parseInt(formData.rehab_cost).toLocaleString()}</span></div>`;
     }
     
+    if (formData.property_status) {
+      reviewHTML += `<div class="review-item"><span class="review-label">Property Status:</span><span class="review-value">${formData.property_status}</span></div>`;
+    }
+    
+    if (formData.closing_date) {
+      const date = new Date(formData.closing_date);
+      reviewHTML += `<div class="review-item"><span class="review-label">Expected Closing:</span><span class="review-value">${date.toLocaleDateString()}</span></div>`;
+    }
+    
+    if (formData.property_description) {
+      reviewHTML += `<div class="review-item"><span class="review-label">Description:</span><span class="review-value">${formData.property_description}</span></div>`;
+    }
+    
     if (formData.photo_link) {
       reviewHTML += `<div class="review-item"><span class="review-label">Photo Link:</span><span class="review-value"><a href="${formData.photo_link}" target="_blank" class="text-blue-600 hover:underline">View Photos</a></span></div>`;
+    }
+    
+    if (formData.additional_notes) {
+      reviewHTML += `<div class="review-item"><span class="review-label">Additional Notes:</span><span class="review-value">${formData.additional_notes}</span></div>`;
     }
     
     reviewHTML += '</div>';
@@ -309,10 +362,16 @@ class JVWizard {
     const formData = {};
     const form = document.getElementById('jv-form');
     const inputs = form.querySelectorAll('input, select, textarea');
+    const numberFields = ['asking_price', 'arv', 'rehab_cost'];
     
     inputs.forEach(input => {
       if (input.name && input.value) {
-        formData[input.name] = input.value;
+        // Remove commas from number fields before sending to backend
+        if (numberFields.includes(input.name)) {
+          formData[input.name] = input.value.replace(/,/g, '');
+        } else {
+          formData[input.name] = input.value;
+        }
       }
     });
     
