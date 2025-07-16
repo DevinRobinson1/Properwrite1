@@ -16,7 +16,9 @@ logger = logging.getLogger(__name__)
 
 affiliate_api = Blueprint('affiliate_api', __name__)
 
-# CSRF protection will be handled by the main app
+# Import CSRF for exemption
+from flask_wtf.csrf import CSRFProtect
+csrf = CSRFProtect()
 
 def get_db_session():
     """Get database session from billing service"""
@@ -44,22 +46,22 @@ def require_admin(f):
     """Admin authentication decorator - uses same auth as main admin API"""
     @functools.wraps(f)
     def decorated_function(*args, **kwargs):
-        # Import the main admin authentication decorator
-        from admin_api import require_admin_api
-        
         # Check if user is authenticated as admin
         admin_token = request.headers.get('X-Admin-Token')
-        if admin_token != 'admin123':  # Keep for backward compatibility
-            # Try session-based authentication
-            from flask import session
-            if not session.get('admin_authenticated'):
-                return jsonify({'error': 'Unauthorized'}), 401
+        if admin_token == 'admin123':  # Keep for backward compatibility
+            return f(*args, **kwargs)
+        
+        # Try session-based authentication (matches admin_routes_minimal.py)
+        from flask import session
+        if not session.get('is_admin'):
+            return jsonify({'error': 'Unauthorized'}), 401
         
         return f(*args, **kwargs)
     return decorated_function
 
 # Affiliate Management Endpoints
 @affiliate_api.route('/api/admin/affiliates', methods=['GET'])
+@csrf.exempt
 @require_admin
 def get_affiliates():
     """Get all affiliates with filtering and pagination"""
@@ -178,6 +180,7 @@ def get_affiliate_metrics(affiliate_id):
 
 # Promo Code Management Endpoints
 @affiliate_api.route('/api/admin/promo-codes', methods=['GET'])
+@csrf.exempt
 @require_admin
 def get_promo_codes():
     """Get all promo codes with filtering"""
@@ -225,6 +228,7 @@ def get_promo_codes():
         db.close()
 
 @affiliate_api.route('/api/admin/promo-codes', methods=['POST'])
+@csrf.exempt
 @require_admin
 def create_promo_code():
     """Create a new promo code"""
@@ -250,6 +254,7 @@ def create_promo_code():
         db.close()
 
 @affiliate_api.route('/api/admin/promo-codes/<code_id>', methods=['PUT'])
+@csrf.exempt
 @require_admin
 def update_promo_code(code_id):
     """Update an existing promo code"""
@@ -307,6 +312,7 @@ def update_promo_code(code_id):
         db.close()
 
 @affiliate_api.route('/api/admin/promo-codes/<code_id>/deactivate', methods=['POST'])
+@csrf.exempt
 @require_admin
 def deactivate_promo_code(code_id):
     """Deactivate a promo code"""
@@ -328,6 +334,7 @@ def deactivate_promo_code(code_id):
 
 # Payout Management Endpoints
 @affiliate_api.route('/api/admin/payouts/pending', methods=['GET'])
+@csrf.exempt
 @require_admin
 def get_pending_payouts():
     """Get affiliates with pending payouts"""
