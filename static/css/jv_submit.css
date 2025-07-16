@@ -5,12 +5,24 @@
   @apply flex flex-col items-center space-y-2 relative;
 }
 
-.step-indicator.active .step-circle {
+.step-indicator[data-step="1"].active .step-circle {
   @apply bg-blue-600 text-white shadow-lg transform scale-110;
 }
 
+.step-indicator[data-step="2"].active .step-circle {
+  @apply bg-green-600 text-white shadow-lg transform scale-110;
+}
+
+.step-indicator[data-step="3"].active .step-circle {
+  @apply bg-purple-600 text-white shadow-lg transform scale-110;
+}
+
+.step-indicator[data-step="4"].active .step-circle {
+  @apply bg-orange-600 text-white shadow-lg transform scale-110;
+}
+
 .step-indicator.completed .step-circle {
-  @apply bg-green-600 text-white;
+  @apply bg-gray-600 text-white;
 }
 
 .step-circle {
@@ -21,12 +33,24 @@
   @apply text-sm font-medium text-gray-600;
 }
 
-.step-indicator.active .step-label {
+.step-indicator[data-step="1"].active .step-label {
   @apply text-blue-600 font-semibold;
 }
 
+.step-indicator[data-step="2"].active .step-label {
+  @apply text-green-600 font-semibold;
+}
+
+.step-indicator[data-step="3"].active .step-label {
+  @apply text-purple-600 font-semibold;
+}
+
+.step-indicator[data-step="4"].active .step-label {
+  @apply text-orange-600 font-semibold;
+}
+
 .step-indicator.completed .step-label {
-  @apply text-green-600;
+  @apply text-gray-600;
 }
 
 .step-connector {
@@ -36,6 +60,39 @@
 /* Form Styles */
 .step-content {
   @apply transition-all duration-300 ease-in-out;
+}
+
+/* Step-specific styling */
+fieldset[data-step="1"] {
+  @apply border-l-4 border-blue-500;
+}
+
+fieldset[data-step="2"] {
+  @apply border-l-4 border-green-500;
+}
+
+fieldset[data-step="3"] {
+  @apply border-l-4 border-purple-500;
+}
+
+fieldset[data-step="4"] {
+  @apply border-l-4 border-orange-500;
+}
+
+fieldset[data-step="1"] .bg-gray-50 {
+  @apply bg-blue-50;
+}
+
+fieldset[data-step="2"] .bg-gray-50 {
+  @apply bg-green-50;
+}
+
+fieldset[data-step="3"] .bg-gray-50 {
+  @apply bg-purple-50;
+}
+
+fieldset[data-step="4"] .bg-gray-50 {
+  @apply bg-orange-50;
 }
 
 .form-group {
@@ -55,11 +112,11 @@
 }
 
 .form-input {
-  @apply w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+  @apply w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white;
 }
 
 .form-input:focus {
-  @apply shadow-lg;
+  @apply shadow-lg border-blue-400;
 }
 
 .form-input:invalid {
@@ -71,7 +128,7 @@
 }
 
 .form-select {
-  @apply w-full pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white;
+  @apply w-full pl-4 pr-10 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white;
 }
 
 .select-icon {
@@ -84,11 +141,28 @@
 }
 
 .btn-secondary {
-  @apply bg-white text-gray-700 px-6 py-3 rounded-lg font-medium border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200;
+  @apply bg-white text-gray-700 px-6 py-3 rounded-lg font-medium border-2 border-gray-300 hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 shadow-md;
 }
 
 .btn-success {
   @apply bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 shadow-lg;
+}
+
+/* Step-specific button colors */
+fieldset[data-step="1"] .btn-primary {
+  @apply from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800;
+}
+
+fieldset[data-step="2"] .btn-primary {
+  @apply from-green-600 to-green-700 hover:from-green-700 hover:to-green-800;
+}
+
+fieldset[data-step="3"] .btn-primary {
+  @apply from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800;
+}
+
+fieldset[data-step="4"] .btn-primary {
+  @apply from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800;
 }
 
 /* Review Container */
@@ -97,7 +171,7 @@
 }
 
 .review-item {
-  @apply flex justify-between items-center py-3 px-4 bg-white rounded-lg border border-gray-200;
+  @apply flex justify-between items-center py-4 px-6 bg-white rounded-lg border-2 border-gray-200 shadow-sm;
 }
 
 .review-label {
@@ -106,6 +180,27 @@
 
 .review-value {
   @apply text-gray-900 font-semibold;
+}
+
+/* Step Headers */
+.step-header {
+  @apply border-b-2 border-gray-100 pb-6 mb-8;
+}
+
+fieldset[data-step="1"] .step-header {
+  @apply border-blue-100;
+}
+
+fieldset[data-step="2"] .step-header {
+  @apply border-green-100;
+}
+
+fieldset[data-step="3"] .step-header {
+  @apply border-purple-100;
+}
+
+fieldset[data-step="4"] .step-header {
+  @apply border-orange-100;
 }
 
 /* Success/Error Messages */
