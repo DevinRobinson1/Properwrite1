@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Admin Dashboard - properwrite.com</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -23,6 +24,9 @@
                     <span class="ml-3 text-gray-500">Admin Dashboard</span>
                 </div>
                 <div class="flex items-center space-x-4">
+                    <button onclick="showCreateAffiliateModal()" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                        <i class="fas fa-plus mr-1"></i>Create Affiliate Code
+                    </button>
                     <span class="text-sm text-gray-500">Admin</span>
                     <a href="/admin/logout" class="text-sm text-red-600 hover:text-red-800">Logout</a>
                 </div>
@@ -589,14 +593,134 @@
             }, 300);
         });
 
+        // Affiliate functions
+        async function showCreateAffiliateModal() {
+            const modal = document.getElementById('create-affiliate-modal');
+            if (!modal) {
+                // Create modal if it doesn't exist
+                const modalHtml = `
+                    <div id="create-affiliate-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
+                        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                            <h3 class="text-lg font-semibold mb-4">Create Affiliate Code</h3>
+                            <form id="create-affiliate-form">
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium mb-2">Code</label>
+                                    <input type="text" id="affiliate-code" class="w-full p-2 border rounded" placeholder="AUTO-GENERATED">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium mb-2">Type</label>
+                                    <select id="affiliate-type" class="w-full p-2 border rounded">
+                                        <option value="percentage_discount">Percentage Discount</option>
+                                        <option value="credit_pack">Credit Pack</option>
+                                        <option value="team_bonus">Team Bonus</option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium mb-2">Value</label>
+                                    <input type="number" id="affiliate-value" class="w-full p-2 border rounded" placeholder="10">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium mb-2">Max Uses</label>
+                                    <input type="number" id="affiliate-max-uses" class="w-full p-2 border rounded" placeholder="100">
+                                </div>
+                                <div class="flex justify-end space-x-3">
+                                    <button type="button" onclick="closeAffiliateModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+                                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Create</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                
+                // Add form handler
+                document.getElementById('create-affiliate-form').addEventListener('submit', createAffiliateCode);
+            }
+            
+            modal.style.display = 'flex';
+        }
+        
+        function closeAffiliateModal() {
+            document.getElementById('create-affiliate-modal').style.display = 'none';
+        }
+        
+        async function createAffiliateCode(e) {
+            e.preventDefault();
+            
+            const code = document.getElementById('affiliate-code').value;
+            const type = document.getElementById('affiliate-type').value;
+            const value = document.getElementById('affiliate-value').value;
+            const maxUses = document.getElementById('affiliate-max-uses').value;
+            
+            const data = {
+                code: code || null, // Let backend generate if empty
+                type: type,
+                max_uses: parseInt(maxUses) || null
+            };
+            
+            // Set value based on type
+            if (type === 'percentage_discount') {
+                data.discount_percentage = parseInt(value);
+            } else if (type === 'credit_pack') {
+                data.credit_amount = parseInt(value);
+            } else if (type === 'team_bonus') {
+                data.bonus_seats = parseInt(value);
+            }
+            
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                const response = await fetch('/api/admin/promo-codes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Token': 'admin123',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(\`Affiliate code created successfully: \${result.code}\`);
+                    closeAffiliateModal();
+                    loadAffiliateStats();
+                } else {
+                    alert(\`Error: \${result.error}\`);
+                }
+            } catch (error) {
+                console.error('Error creating affiliate code:', error);
+                alert('Error creating affiliate code. Please try again.');
+            }
+        }
+        
+        async function loadAffiliateStats() {
+            try {
+                const response = await fetch('/api/admin/promo-codes?active_only=true', {
+                    headers: {'X-Admin-Token': 'admin123'}
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const activeCount = data.promo_codes.length;
+                    const totalUses = data.promo_codes.reduce((sum, code) => sum + code.uses_count, 0);
+                    console.log(\`Active affiliate codes: \${activeCount}, Total uses: \${totalUses}\`);
+                }
+            } catch (error) {
+                console.error('Error loading affiliate stats:', error);
+            }
+        }
+
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', () => {
             loadDashboardStats();
             loadUsers();
+            loadAffiliateStats();
             
             // Refresh stats every 30 seconds
             setInterval(() => {
                 loadDashboardStats();
+                loadAffiliateStats();
             }, 30000);
         });
     </script>

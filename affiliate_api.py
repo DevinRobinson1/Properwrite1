@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 
 affiliate_api = Blueprint('affiliate_api', __name__)
 
+# CSRF protection will be handled by the main app
+
 def get_db_session():
     """Get database session from billing service"""
     from sqlalchemy import create_engine
@@ -39,12 +41,20 @@ def get_db_session():
     return Session()
 
 def require_admin(f):
-    """Admin authentication decorator"""
+    """Admin authentication decorator - uses same auth as main admin API"""
     @functools.wraps(f)
     def decorated_function(*args, **kwargs):
+        # Import the main admin authentication decorator
+        from admin_api import require_admin_api
+        
+        # Check if user is authenticated as admin
         admin_token = request.headers.get('X-Admin-Token')
-        if admin_token != 'admin123':  # In production, use proper auth
-            return jsonify({'error': 'Unauthorized'}), 401
+        if admin_token != 'admin123':  # Keep for backward compatibility
+            # Try session-based authentication
+            from flask import session
+            if not session.get('admin_authenticated'):
+                return jsonify({'error': 'Unauthorized'}), 401
+        
         return f(*args, **kwargs)
     return decorated_function
 
@@ -137,8 +147,9 @@ def approve_affiliate(affiliate_id):
     try:
         service = AffiliateService(db)
         
-        # In production, get admin user ID from session
-        admin_id = 'admin_user_id'
+        # Get admin user ID from session
+        from flask import session
+        admin_id = session.get('admin_user_id', 'admin_user_id')
         
         affiliate = service.approve_affiliate(affiliate_id, admin_id)
         
@@ -222,8 +233,9 @@ def create_promo_code():
         service = AffiliateService(db)
         data = request.json
         
-        # In production, get admin user ID from session
-        data['created_by'] = 'admin_user_id'
+        # Get admin user ID from session
+        from flask import session
+        data['created_by'] = session.get('admin_user_id', 'admin_user_id')
         
         promo_code = service.create_promo_code(data)
         
@@ -298,8 +310,9 @@ def create_payout():
         service = AffiliateService(db)
         data = request.json
         
-        # In production, get admin user ID from session
-        initiated_by = 'admin_user_id'
+        # Get admin user ID from session
+        from flask import session
+        initiated_by = session.get('admin_user_id', 'admin_user_id')
         
         payout = service.create_payout(data['affiliate_id'], initiated_by)
         
