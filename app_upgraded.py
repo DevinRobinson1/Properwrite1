@@ -2552,54 +2552,58 @@ def analyze_comps():
             zip_code=zip_code
         )
         
-        # UNIFIED COMPS SERVICE INTEGRATION
-        # This service uses cache-aware property data service with:
-        # - Intelligent caching with TTL (24-72 hours)
-        # - Stale-while-revalidate pattern for fresh data
-        # - Distributed locking for API calls
-        # - Automatic fallback to enhanced/simple services
-        unified_service = get_unified_property_service()
+        # PREMIUM COMPS SERVICE INTEGRATION
+        # Enhanced comparable properties with strict underwriting logic
+        from premium_comps_service import premium_comps_service
         
-        # Get comparable properties with caching
-        result = unified_service.get_comparable_properties(
-            address=address,
-            beds=int(beds),
-            baths=float(baths),
-            sqft=int(sqft),
-            lat=lat or 0.0,
-            lng=lng or 0.0
+        # Get subject property features for filtering
+        subject_has_pool = data.get('has_pool', False)
+        subject_has_hoa = data.get('has_hoa', False)
+        subject_is_waterfront = data.get('is_waterfront', False)
+        
+        # Search for comparable properties using premium service
+        result = premium_comps_service.search_comparable_properties(
+            subject_address=address,
+            subject_beds=int(beds),
+            subject_baths=float(baths),
+            subject_sqft=int(sqft),
+            subject_lat=lat or 0.0,
+            subject_lng=lng or 0.0,
+            subject_has_pool=subject_has_pool,
+            subject_has_hoa=subject_has_hoa,
+            subject_is_waterfront=subject_is_waterfront
         )
         
-        # If unified service fails, fallback to enhanced service
+        # If premium service fails, fallback to unified service
         if not result.get('success') or not result.get('comps'):
-            logging.warning("Unified service failed, falling back to enhanced service")
+            logging.warning("Premium service failed, falling back to unified service")
             
-            # Use enhanced service as fallback
             try:
-                enhanced_result = enhanced_comps_service.search_comparable_sales(search_params)
-                if enhanced_result.get('success') and enhanced_result.get('comps'):
-                    result = enhanced_result
+                unified_service = get_unified_property_service()
+                unified_result = unified_service.get_comparable_properties(
+                    address=address,
+                    beds=int(beds),
+                    baths=float(baths),
+                    sqft=int(sqft),
+                    lat=lat or 0.0,
+                    lng=lng or 0.0
+                )
+                if unified_result.get('success') and unified_result.get('comps'):
+                    result = unified_result
                     result['fallback_used'] = True
-                    result['message'] = "Using enhanced service due to cache miss"
+                    result['message'] = "Using unified service due to premium service unavailability"
             except Exception as e:
-                logging.error(f"Enhanced service fallback failed: {e}")
+                logging.error(f"Unified service fallback failed: {e}")
                 
-                # Final fallback to simple service
+                # Final fallback to enhanced service
                 try:
-                    simple_result = comps_service.search_comparable_sales(
-                        address=address,
-                        beds=int(beds),
-                        baths=float(baths),
-                        sqft=int(sqft),
-                        lat=lat or 0.0,
-                        lng=lng or 0.0
-                    )
-                    if simple_result.get('success') and simple_result.get('comps'):
-                        result = simple_result
+                    enhanced_result = enhanced_comps_service.search_comparable_sales(search_params)
+                    if enhanced_result.get('success') and enhanced_result.get('comps'):
+                        result = enhanced_result
                         result['fallback_used'] = True
-                        result['message'] = "Using simplified analysis due to performance optimization"
+                        result['message'] = "Using enhanced service due to performance optimization"
                 except Exception as e:
-                    logging.error(f"Simple service fallback failed: {e}")
+                    logging.error(f"Enhanced service fallback failed: {e}")
         
         # Add analysis summary if successful
         if result.get('success') and result.get('comps'):
