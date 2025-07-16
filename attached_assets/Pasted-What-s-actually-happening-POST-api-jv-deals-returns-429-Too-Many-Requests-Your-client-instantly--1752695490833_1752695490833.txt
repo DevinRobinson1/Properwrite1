@@ -1,0 +1,84 @@
+What’s actually happening?
+POST /api/jv-deals returns 429 (Too Many Requests)
+Your client instantly tries to parse the body with response.json(), but the server is replying with an HTML rate-limit page (<!doctype html> …).
+Result: SyntaxError: Unexpected token '<' because the response is not JSON.
+
+Why the 429? — one (or a mix) of these is almost always to blame:
+
+Likely Cause	How to confirm	Quick Fix
+🔒 Auth/CSRF redirect — the request is being bounced to an HTML login page or Cloudflare “verify you’re human” page, which Cloudflare sends as 429.	Network tab → Preview panel. If you see a full HTML doc or cf-ray headers, it’s Cloudflare.	Send the valid JWT cookie / Supabase auth header with the request or add the /api/jv-deals route to Cloudflare’s Security → WAF → Skip list during dev.
+🚦 Server-side rate-limiter (e.g. express-rate-limit, Supabase Edge Function quotas).	Check server logs: does every call log as “Too many requests”?	Raise the limit for /api/jv-deals or scope it per-IP instead of global.
+🔁 Infinite-retry loop in your front-end — each “429” triggers a re-submit, hammering the endpoint.	Count calls in Network tab: >1 POST per click = loop.	Ensure you disableSubmitBtn() and do not re-fire the same fetch inside catch.
+
+🛠 Fix it in three steps
+1. Harden the fetch → JSON parse
+js
+Copy
+Edit
+async function submitJV(dealData) {
+  try {
+    const res = await fetch('/api/jv-deals', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',          // ← send cookie / JWT
+      body: JSON.stringify(dealData)
+    });
+
+    if (!res.ok) {
+      // Read text so we can surface the real error in UI/logs
+      const errText = await res.text();
+      throw new Error(`HTTP ${res.status}: ${errText.slice(0,200)}`);
+    }
+
+    const json = await res.json();     // safe now
+    return json;
+
+  } catch (err) {
+    console.error('JV submit failed:', err);
+    alert(err.message);                // or toast
+    throw err;
+  }
+}
+Why: you avoid the JSON parse crash and log the body so you can see if it’s Cloudflare, Supabase, or your Express handler sending the 429.
+
+2. Check auth headers / cookies
+If you’re on Supabase RPC or PostgREST:
+
+js
+Copy
+Edit
+headers: {
+  'Content-Type': 'application/json',
+  'apikey': process.env.PUBLIC_SUPABASE_ANON_KEY,
+  'Authorization': `Bearer ${supabase.auth.getSession().data.session?.access_token}`
+}
+If you’re on Express with your own JWT cookie, make sure credentials:'include' is present in the fetch call and the domain in Set-Cookie matches the page domain (.properwrite.com not the Replit preview).
+
+3. Relax rate-limit during testing
+Express example:
+
+js
+Copy
+Edit
+// src/middleware/rateLimit.js
+import rateLimit from 'express-rate-limit';
+
+export const jvLimiter = rateLimit({
+  windowMs: 60 * 1000,      // 1 min
+  max: 30,                   // dev-friendly
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use('/api/jv-deals', jvLimiter);
+Cloudflare example: Security ➜ WAF ➜ Custom Rules ➜ Skip rule for URI /api/jv-deals.
+
+🔑 Quick verification checklist
+curl -v -X POST https://properwrite.com/api/jv-deals with sample JSON → make sure you get 201 Created JSON, not HTML.
+
+Browser DevTools → Preview tab for the failing 429 response → If you still see HTML, it’s a redirect or Cloudflare, not your JSON handler.
+
+Server logs (Replit / Supabase) — confirm only one request per click.
+
+Retry after fixes → Button should re-enable, server returns JSON, you land on “✅ Deal submitted” screen.
+
+Apply the three-step patch and that submission should push straight through without the rate-limit / JSON parse error. Let me know if you still see the 429 after you confirm the response body and we can dial into the exact source (Cloudflare vs. Express vs. Supabase quota).

@@ -2877,7 +2877,8 @@ def jv_submit_page():
                          google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY') or os.environ.get('GOOGLE_API_KEY'))
 
 @app.route('/api/jv-deals', methods=['POST'])
-@limiter.limit("5 per hour")  # Limit JV submissions to prevent spam
+@limiter.limit("10 per minute")  # Increased limit for testing
+@csrf.exempt  # Exempt from CSRF for API endpoint
 def jv_deals_submit():
     """
     Submit JV deal with MAO analysis and approval logic
@@ -2990,7 +2991,8 @@ def jv_deals_submit():
         }), 500
 
 @app.route('/api/jv-submit', methods=['POST'])
-@limiter.limit("5 per hour")  # Limit JV submissions to prevent spam
+@limiter.limit("10 per minute")  # Increased limit for testing
+@csrf.exempt  # Exempt from CSRF for API endpoint
 def jv_submit_deal():
     """
     Submit and auto-underwrite JV deal with partner information

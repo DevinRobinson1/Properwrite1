@@ -442,6 +442,11 @@ class JVWizard {
         body: formData  // Don't set Content-Type header with FormData
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText.slice(0, 200)}`);
+      }
+
       const result = await response.json();
 
       if (response.ok) {
