@@ -912,6 +912,76 @@
         .modal-body {
             padding: 24px;
         }
+        
+        /* Tooltip Styles for Renovation Estimator */
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip-icon {
+            cursor: help;
+            margin-left: 6px;
+            color: #6b7280;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        
+        .tooltip-icon:hover {
+            color: #3b82f6;
+        }
+        
+        .tooltip-text {
+            visibility: hidden;
+            width: 280px;
+            background-color: #1f2937;
+            color: white;
+            text-align: left;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -140px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+            line-height: 1.4;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1f2937 transparent transparent transparent;
+        }
+        
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Tooltip positioning adjustments for side positioning */
+        .tooltip-text.tooltip-right {
+            top: 50%;
+            left: 115%;
+            margin-top: -25px;
+            margin-left: 0;
+        }
+        
+        .tooltip-text.tooltip-right::after {
+            top: 50%;
+            left: 0;
+            margin-top: -5px;
+            margin-left: -5px;
+            border-color: transparent #1f2937 transparent transparent;
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -3006,7 +3076,13 @@
                                                 <label for="ren-roof-resheet" class="text-sm font-medium text-gray-700">Resheet</label>
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Replacement Squares</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Replacement Squares
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Number of 100 sq ft roofing sections to tear off and replace.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-roof-squares" value="15" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                         </div>
@@ -3020,10 +3096,22 @@
                                         <div class="space-y-4">
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-siding-replace" class="mr-3 text-blue-600">
-                                                <label for="ren-siding-replace" class="text-sm font-medium text-gray-700">Replace Siding</label>
+                                                <label for="ren-siding-replace" class="text-sm font-medium text-gray-700">
+                                                    Replace Siding
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to replace all exterior siding on house & garage.</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Replacement Sq Ft</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Replacement Sq Ft
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Total square footage of siding to be replaced.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-siding-squares" value="1000" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                         </div>
@@ -3037,7 +3125,13 @@
                                         <div class="space-y-4">
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-paint-ext-siding" class="mr-3 text-blue-600">
-                                                <label for="ren-paint-ext-siding" class="text-sm font-medium text-gray-700">Paint Exterior Siding</label>
+                                                <label for="ren-paint-ext-siding" class="text-sm font-medium text-gray-700">
+                                                    Paint Exterior Siding
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to paint all existing siding instead of full replacement.</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-paint-ext-trim" class="mr-3 text-blue-600">
@@ -3048,7 +3142,13 @@
                                                 <label for="ren-paint-foundation" class="text-sm font-medium text-gray-700">Paint Foundation</label>
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Siding Sq Ft</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Siding Sq Ft
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Total square footage of siding to be painted.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-paint-siding-sq" value="15" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                         </div>
@@ -3062,14 +3162,32 @@
                                         <div class="space-y-4">
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-foundation-straighten" class="mr-3 text-blue-600">
-                                                <label for="ren-foundation-straighten" class="text-sm font-medium text-gray-700">Straighten Foundation</label>
+                                                <label for="ren-foundation-straighten" class="text-sm font-medium text-gray-700">
+                                                    Straighten Foundation
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to level and realign foundation walls.</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-foundation-rebuild" class="mr-3 text-blue-600">
-                                                <label for="ren-foundation-rebuild" class="text-sm font-medium text-gray-700">Rebuild Foundation</label>
+                                                <label for="ren-foundation-rebuild" class="text-sm font-medium text-gray-700">
+                                                    Rebuild Foundation
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to fully rebuild damaged foundation sections.</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Repair Distance (ft)</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Repair Distance (ft)
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Linear feet of foundation wall needing repair or rebuild.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-foundation-repair-ft" value="15" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                         </div>
@@ -3082,15 +3200,33 @@
                                         </h4>
                                         <div class="space-y-4">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Window Replacements</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Window Replacements
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Total number of windows (all sizes) to remove and replace.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-window-replacements" value="8" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Historic Window Replacements</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Historic Window Replacements
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Number of custom or historic windows requiring special work.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-historic-windows" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Glass Replacements</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Glass Replacements
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Number of individual glass panes to replace (in multi-pane units).</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-glass-replacements" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                         </div>
@@ -3110,24 +3246,54 @@
                                         </h4>
                                         <div class="space-y-4">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Gas Meter Installs</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    New Gas Meter Installs
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Count of new gas meter hookups required.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-hvac-gas-meter" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Furnace Installs</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    New Furnace Installs
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Number of new furnace units to install.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-hvac-furnace" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">New AC Installs</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    New AC Installs
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Number of new air-conditioning units to install.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-hvac-ac" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Bath Fans</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    New Bath Fans
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Number of new bathroom exhaust fans to install.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-hvac-bath-fans" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-hvac-reduct" class="mr-3 text-blue-600">
-                                                <label for="ren-hvac-reduct" class="text-sm font-medium text-gray-700">Reduct Entire House</label>
+                                                <label for="ren-hvac-reduct" class="text-sm font-medium text-gray-700">
+                                                    Reduct Entire House
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to replace all HVAC ductwork throughout the home.</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                         </div>
                                     </div>
@@ -3139,24 +3305,54 @@
                                         </h4>
                                         <div class="space-y-4">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Electric Panels</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    New Electric Panels
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Number of new electrical panels to install.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-elec-panels" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Vanity Light Replacements</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Vanity Light Replacements
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Number of bathroom vanity lights to replace.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-elec-vanity-lights" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Ceiling Fan Replacements</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Ceiling Fan Replacements
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Number of ceiling fans to replace or install.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-elec-ceiling-fans" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Smoke Detectors</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Smoke Detectors
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Number of smoke detectors to install or replace.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-elec-smoke-detectors" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-elec-rewire" class="mr-3 text-blue-600">
-                                                <label for="ren-elec-rewire" class="text-sm font-medium text-gray-700">Rewire Entire House</label>
+                                                <label for="ren-elec-rewire" class="text-sm font-medium text-gray-700">
+                                                    Rewire Entire House
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to replace all electrical wiring in the home.</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                         </div>
                                     </div>
@@ -3168,24 +3364,54 @@
                                         </h4>
                                         <div class="space-y-4">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Water Heater</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    New Water Heater
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Number of new water heater units to install.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-plumb-water-heater" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Sink Locations</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    New Sink Locations
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Number of new sink locations needing plumbing.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-plumb-sink-locations" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Toilet Locations</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    New Toilet Locations
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Number of new toilet locations needing plumbing.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-plumb-toilet-locations" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Tub/Shower Locations</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    New Tub/Shower Locations
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Number of new tub/shower locations needing plumbing.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-plumb-tub-locations" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-plumb-repipe" class="mr-3 text-blue-600">
-                                                <label for="ren-plumb-repipe" class="text-sm font-medium text-gray-700">Repipe Entire House</label>
+                                                <label for="ren-plumb-repipe" class="text-sm font-medium text-gray-700">
+                                                    Repipe Entire House
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to replace all plumbing pipes in the home.</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                         </div>
                                     </div>
@@ -3202,28 +3428,64 @@
                                         </h4>
                                         <div class="space-y-4">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Kitchen Sq Ft</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Kitchen Sq Ft
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Total square footage of kitchen area to be renovated.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-kitchen-sqft" value="230" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">New Countertop Linear Ft</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    New Countertop Linear Ft
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Linear footage of countertop to install (including backsplash).</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-kitchen-countertop" value="30" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-kitchen-cabinets" class="mr-3 text-blue-600">
-                                                <label for="ren-kitchen-cabinets" class="text-sm font-medium text-gray-700">Install New Cabinets</label>
+                                                <label for="ren-kitchen-cabinets" class="text-sm font-medium text-gray-700">
+                                                    Install New Cabinets
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to install new kitchen cabinets throughout.</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-kitchen-appliances" class="mr-3 text-blue-600">
-                                                <label for="ren-kitchen-appliances" class="text-sm font-medium text-gray-700">New Appliances</label>
+                                                <label for="ren-kitchen-appliances" class="text-sm font-medium text-gray-700">
+                                                    New Appliances
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to install new kitchen appliances package.</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-kitchen-flooring" class="mr-3 text-blue-600">
-                                                <label for="ren-kitchen-flooring" class="text-sm font-medium text-gray-700">New Flooring</label>
+                                                <label for="ren-kitchen-flooring" class="text-sm font-medium text-gray-700">
+                                                    New Flooring
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to install new kitchen flooring (tile, vinyl, etc.).</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-kitchen-paint" class="mr-3 text-blue-600">
-                                                <label for="ren-kitchen-paint" class="text-sm font-medium text-gray-700">Paint Walls</label>
+                                                <label for="ren-kitchen-paint" class="text-sm font-medium text-gray-700">
+                                                    Paint Walls
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to paint all kitchen walls with primer and paint.</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                         </div>
                                     </div>
@@ -3235,24 +3497,54 @@
                                         </h4>
                                         <div class="space-y-4">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Number of Bathrooms</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Number of Bathrooms
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Total count of bathrooms to be renovated.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-num-bathrooms" value="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Bathroom Sq Ft Each</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Bathroom Sq Ft Each
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Average square footage per bathroom.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-bathroom-sqft" value="100" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-bathroom-fixtures" class="mr-3 text-blue-600">
-                                                <label for="ren-bathroom-fixtures" class="text-sm font-medium text-gray-700">Replace Fixtures</label>
+                                                <label for="ren-bathroom-fixtures" class="text-sm font-medium text-gray-700">
+                                                    Replace Fixtures
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to replace all bathroom fixtures (faucets, toilets, etc.).</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-bathroom-tile" class="mr-3 text-blue-600">
-                                                <label for="ren-bathroom-tile" class="text-sm font-medium text-gray-700">Install New Tile</label>
+                                                <label for="ren-bathroom-tile" class="text-sm font-medium text-gray-700">
+                                                    Install New Tile
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to install new bathroom tile (floors and walls).</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-bathroom-vanity" class="mr-3 text-blue-600">
-                                                <label for="ren-bathroom-vanity" class="text-sm font-medium text-gray-700">Replace Vanity</label>
+                                                <label for="ren-bathroom-vanity" class="text-sm font-medium text-gray-700">
+                                                    Replace Vanity
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to replace bathroom vanity and mirror.</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                         </div>
                                     </div>
@@ -3264,16 +3556,34 @@
                                         </h4>
                                         <div class="space-y-4">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Living Areas Sq Ft</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Living Areas Sq Ft
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Total square footage of living areas (living room, dining room, etc.).</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-living-sqft" value="500" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-living-flooring" class="mr-3 text-blue-600">
-                                                <label for="ren-living-flooring" class="text-sm font-medium text-gray-700">New Flooring</label>
+                                                <label for="ren-living-flooring" class="text-sm font-medium text-gray-700">
+                                                    New Flooring
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to install new flooring in living areas.</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-living-paint" class="mr-3 text-blue-600">
-                                                <label for="ren-living-paint" class="text-sm font-medium text-gray-700">Paint Walls</label>
+                                                <label for="ren-living-paint" class="text-sm font-medium text-gray-700">
+                                                    Paint Walls
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to paint all living area walls.</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                         </div>
                                     </div>
@@ -3285,20 +3595,44 @@
                                         </h4>
                                         <div class="space-y-4">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Number of Bedrooms</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Number of Bedrooms
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Total count of bedrooms to be renovated.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-num-bedrooms" value="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 mb-1">Bedroom Sq Ft Each</label>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    Bedroom Sq Ft Each
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Average square footage per bedroom.</span>
+                                                    </span>
+                                                </label>
                                                 <input type="number" id="ren-bedroom-sqft" value="200" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" onchange="updateRenovationEstimate()">
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-bedroom-flooring" class="mr-3 text-blue-600">
-                                                <label for="ren-bedroom-flooring" class="text-sm font-medium text-gray-700">New Flooring</label>
+                                                <label for="ren-bedroom-flooring" class="text-sm font-medium text-gray-700">
+                                                    New Flooring
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to install new flooring in all bedrooms.</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                             <div class="flex items-center">
                                                 <input type="checkbox" id="ren-bedroom-paint" class="mr-3 text-blue-600">
-                                                <label for="ren-bedroom-paint" class="text-sm font-medium text-gray-700">Paint Walls</label>
+                                                <label for="ren-bedroom-paint" class="text-sm font-medium text-gray-700">
+                                                    Paint Walls
+                                                    <span class="tooltip-container">
+                                                        <span class="tooltip-icon">🛈</span>
+                                                        <span class="tooltip-text">Check to paint all bedroom walls.</span>
+                                                    </span>
+                                                </label>
                                             </div>
                                         </div>
                                     </div>

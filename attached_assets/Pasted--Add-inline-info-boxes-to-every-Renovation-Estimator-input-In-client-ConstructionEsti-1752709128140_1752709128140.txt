@@ -1,0 +1,186 @@
+/**
+ * 🚀 Add inline info‐boxes to every Renovation Estimator input
+ *
+ * In client/ConstructionEstimator.jsx (or wherever you define these fields),
+ * for each label insert a small “🛈” icon with a hover tooltip.
+ *
+ * 1. Bedrooms  
+ *    Tooltip: "Total number of bedrooms, including any finished basement or attic rooms."
+ *
+ * 2. Bathrooms  
+ *    Tooltip: "Total number of full and half bathrooms in the property."
+ *
+ * 3. Square Feet  
+ *    Tooltip: "Total finished living area in square feet (include basement if finished)."
+ *
+ * 4. ARV ($)  
+ *    Tooltip: "After‐Repair Value estimate based on comparable sales and planned upgrades."
+ *
+ * 5. Repairs ($)  
+ *    Tooltip: "Your total budget for all renovation and repair work."
+ *
+ * 6. Monthly Rent ($)  
+ *    Tooltip: "Projected monthly rental income once the property is leased."
+ *
+ * 7. Acquisition Price ($)  
+ *    Tooltip: "Purchase price plus all closing costs and fees."
+ *
+ * 8. House Length (ft)  
+ *    Tooltip: "Exterior length of the home, including any attached garage."
+ *
+ * 9. House Width (ft)  
+ *    Tooltip: "Exterior width of the home, including any attached garage."
+ *
+ * 10. House Height (ft)  
+ *    Tooltip: "Height from ground to peak of roof (include 2nd‐story or attic)."
+ *
+ * 11. Garage Length (ft)  
+ *    Tooltip: "Exterior length of the garage only."
+ *
+ * 12. Garage Width (ft)  
+ *    Tooltip: "Exterior width of the garage only."
+ *
+ * 13. Garage Height (ft)  
+ *    Tooltip: "Height of garage from ground to peak."
+ *
+ * 14. Replacement Squares (Roof)  
+ *    Tooltip: "Number of 100 sq ft roofing sections to tear off and replace."
+ *
+ * 15. Replace Siding (checkbox)  
+ *    Tooltip: "Check to replace all exterior siding on house & garage."
+ *
+ * 16. Replacement Sq Ft (Siding)  
+ *    Tooltip: "Total square footage of siding to be replaced."
+ *
+ * 17. Paint Exterior Siding (checkbox)  
+ *    Tooltip: "Check to paint all existing siding instead of full replacement."
+ *
+ * 18. Siding Sq Ft (Paint)  
+ *    Tooltip: "Total square footage of siding to be painted."
+ *
+ * 19. Straighten Foundation (checkbox)  
+ *    Tooltip: "Check to level and realign foundation walls."
+ *
+ * 20. Rebuild Foundation (checkbox)  
+ *    Tooltip: "Check to fully rebuild damaged foundation sections."
+ *
+ * 21. Repair Distance (ft)  
+ *    Tooltip: "Linear feet of foundation wall needing repair or rebuild."
+ *
+ * 22. Window Replacements  
+ *    Tooltip: "Total number of windows (all sizes) to remove and replace."
+ *
+ * 23. Historic Window Replacements  
+ *    Tooltip: "Number of custom or historic windows requiring special work."
+ *
+ * 24. Glass Replacements  
+ *    Tooltip: "Number of individual glass panes to replace (in multi‐pane units)."
+ *
+ * 25. New Gas Meter Installs  
+ *    Tooltip: "Count of new gas meter hookups required."
+ *
+ * 26. New Furnace Installs  
+ *    Tooltip: "Number of new furnace units to install."
+ *
+ * 27. New AC Installs  
+ *    Tooltip: "Number of new air‐conditioning units to install."
+ *
+ * 28. New Bath Fans  
+ *    Tooltip: "Number of new bathroom exhaust fans to install."
+ *
+ * 29. Re‐duct Entire House (checkbox)  
+ *    Tooltip: "Check to replace all HVAC ductwork throughout the home."
+ *
+ * 30. New Electric Panels  
+ *    Tooltip: "Count of new main or sub‐electric panels to install."
+ *
+ * 31. Vanity Light Replacements  
+ *    Tooltip: "Number of vanity lights in bathrooms to replace."
+ *
+ * 32. Ceiling Fan Replacements  
+ *    Tooltip: "Number of ceiling fans to install or replace."
+ *
+ * 33. Smoke Detectors  
+ *    Tooltip: "Number of smoke detector units to install."
+ *
+ * 34. Rewire Entire House (checkbox)  
+ *    Tooltip: "Check to replace all electrical wiring throughout the home."
+ *
+ * 35. New Water Heater  
+ *    Tooltip: "Count of new water heater units to install."
+ *
+ * 36. New Sink Locations  
+ *    Tooltip: "Number of new plumbing sink hookups required."
+ *
+ * 37. New Toilet Locations  
+ *    Tooltip: "Number of new toilet hookups required."
+ *
+ * 38. New Tub/Shower Locations  
+ *    Tooltip: "Number of new bathtub or shower connections required."
+ *
+ * 39. Repipe Entire House (checkbox)  
+ *    Tooltip: "Check to replace all plumbing pipes throughout the home."
+ *
+ * 40. Kitchen Sq Ft  
+ *    Tooltip: "Total square footage of the kitchen area."
+ *
+ * 41. New Countertop Linear Ft  
+ *    Tooltip: "Linear feet of new countertops to be installed."
+ *
+ * 42. Install New Cabinets (checkbox)  
+ *    Tooltip: "Check to install new kitchen cabinetry."
+ *
+ * 43. New Appliances (checkbox)  
+ *    Tooltip: "Check to include new appliances (stove, fridge, etc.)."
+ *
+ * 44. New Flooring (Kitchen) (checkbox)  
+ *    Tooltip: "Check to replace all kitchen floor coverings."
+ *
+ * 45. Paint Walls (Kitchen) (checkbox)  
+ *    Tooltip: "Check to paint kitchen walls and ceiling."
+ *
+ * 46. Number of Bathrooms (Interior)  
+ *    Tooltip: "Total number of bathrooms for interior finishes."
+ *
+ * 47. Bathroom Sq Ft Each  
+ *    Tooltip: "Average square footage per bathroom for tile and flooring."
+ *
+ * 48. Replace Fixtures (checkbox)  
+ *    Tooltip: "Check to replace sinks, toilets, faucets, and fixtures."
+ *
+ * 49. Install New Tile (checkbox)  
+ *    Tooltip: "Check to install new tile in bathrooms."
+ *
+ * 50. Replace Vanity (checkbox)  
+ *    Tooltip: "Check to install new bathroom vanity and countertop."
+ *
+ * 51. Living Areas Sq Ft  
+ *    Tooltip: "Total square footage of living and common areas."
+ *
+ * 52. New Flooring (Living Areas) (checkbox)  
+ *    Tooltip: "Check to replace all flooring in living spaces."
+ *
+ * 53. Paint Walls (Living Areas) (checkbox)  
+ *    Tooltip: "Check to paint walls and ceilings in living areas."
+ *
+ * 54. Number of Bedrooms (Interior)  
+ *    Tooltip: "Total number of bedrooms for interior finishes."
+ *
+ * 55. Bedroom Sq Ft Each  
+ *    Tooltip: "Average square footage per bedroom for flooring and paint."
+ *
+ * 56. New Flooring (Bedrooms) (checkbox)  
+ *    Tooltip: "Check to replace all bedroom floor coverings."
+ *
+ * 57. Paint Walls (Bedrooms) (checkbox)  
+ *    Tooltip: "Check to paint bedroom walls and ceilings."
+ *
+ * Implementation:
+ * - Use your existing <Tooltip> or wrap label text in 
+ *     <Tooltip text="…" placement="right"><label>…</label></Tooltip>
+ * - Place it immediately after each <label> or input header.
+ * - Keep styling consistent with your Tailwind theme.
+ *
+ * Paste all of the above into Replit’s AI prompt to generate the code 
+ * in one pass. Then test by hovering each “🛈” icon in your live app.
+ */
