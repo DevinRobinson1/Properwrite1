@@ -1,0 +1,66 @@
+/**
+ * 🛠 PROJECT GOAL
+ * Build an *admin-only* JV Dashboard module inside my existing Node + React (Vite)
+ * monorepo on Replit.  This module must let authorised team members see metrics,
+ * filter submissions, update deal status, add notes, export CSV, and view partner
+ * contact info.  Use ReplitDB for data.  Keep all code inside /src and /client.
+ *
+ * 🔐 1. AUTH + MIDDLEWARE
+ *    - Re-use existing JWT cookie.  If user.role ∉ ['admin','team'] return 403.
+ *    - Place middleware in src/middleware/requireRole.js
+ *
+ * 📊 2. API ENDPOINTS (Express)
+ *    /admin/jv-stats            GET   → aggregate counts + top partner
+ *    /admin/jv-submissions      GET   → paginated, filters   (query: page, status, partner, from, to)
+ *    /admin/jv/:dealId/status   PUT   → body {status:'approved'|'denied'|'pending'}
+ *    /admin/jv/:dealId/note     POST  → body {note:'...'}
+ *    /admin/jv-partner/:id      GET   → partner info + all their deals
+ *
+ *    Store deals in ReplitDB keys jvDeals:{uuid}.  Store users in users:{uuid}.
+ *
+ * ⚛️ 3. FRONTEND (React + Tailwind, client/admin/)
+ *    - Route: /admin/jv-dashboard (React Router)
+ *    - Components:
+ *        AdminDashboard.jsx
+ *            ↳ MetricTile.jsx (Total, Approved, Denied, Top Partner)
+ *            ↳ JVTable.jsx   (DataGrid w/ filtering, infinite scroll)
+ *               ↳ StatusBadge.jsx
+ *               ↳ PartnerDrawer.jsx (slide-over w/ contact + history)
+ *    - Use fetch to the API above, SWR or simple useEffect.
+ *    - Tiny line-charts for 7-day / 30-day trends → Chart.js.
+ *    - “Export CSV” button – client-side converts current table rows to CSV.
+ *
+ * 🗃 4. DATA MODEL (ReplitDB JSON shape)
+ *    jvDeals:{dealId}: {
+ *      userId, propertyAddress, askingPrice, arv, suggestedOffer,
+ *      status: 'pending'|'approved'|'denied',
+ *      adminNote, createdAt, updatedAt
+ *    }
+ *    users:{userId}: { name, email, phone, role }
+ *
+ * 📦 5. FILE / FOLDER TREE
+ *    src/
+ *      routes/
+ *        admin/
+ *          jvStats.js
+ *          jvSubmissions.js
+ *          jvActions.js
+ *          jvPartner.js
+ *      middleware/requireRole.js
+ *    client/
+ *      admin/
+ *        AdminDashboard.jsx
+ *        MetricTile.jsx
+ *        JVTable.jsx
+ *        PartnerDrawer.jsx
+ *        StatusBadge.jsx
+ *    tailwind.config.cjs already exists – keep it.
+ *
+ * ✅ 6. QUALITY
+ *    - Type-annotate with JSDoc.
+ *    - Use async/await plus try/catch → res.status(500).json({error}).
+ *    - All text labels in one i18n object for future translations.
+ *
+ * Once finished, run `npm run dev` to confirm dashboard at
+ * https://<your-repl>.repl.co/admin/jv-dashboard shows sample data.
+ */

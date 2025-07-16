@@ -890,7 +890,7 @@ def get_jv_deals():
                         'financials': {
                             'asking_price': deal_json.get('asking_price'),
                             'arv': deal_json.get('arv'),
-                            'repairs': deal_json.get('repairs'),
+                            'repairs': deal_json.get('repair_estimate'),  # Fixed: was 'repairs', should be 'repair_estimate'
                             'suggested_offer': deal_json.get('suggested_offer')
                         },
                         'status': deal['final_status'] or deal['auto_status'],
@@ -975,7 +975,7 @@ def get_user_jv_deals(user_id):
                         'financials': {
                             'asking_price': deal_json.get('asking_price'),
                             'arv': deal_json.get('arv'),
-                            'repairs': deal_json.get('repairs'),
+                            'repairs': deal_json.get('repair_estimate'),  # Fixed: was 'repairs', should be 'repair_estimate'
                             'suggested_offer': deal_json.get('suggested_offer')
                         },
                         'status': deal['final_status'] or deal['auto_status'],
