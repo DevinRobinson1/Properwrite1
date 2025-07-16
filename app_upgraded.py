@@ -4018,14 +4018,12 @@ def affiliate_links():
 # ===============================
 
 @app.route('/admin/jv-deals-enhanced')
-@require_auth
 def admin_jv_deals_enhanced():
     """Enhanced JV Deals Admin Panel with DataGrid functionality"""
-    # Check if user has admin permissions
-    user_email = session.get('user_email')
-    if user_email not in ['devin@pfpsolutions.us', 'admin@properwrite.com']:
+    # Check if user has admin permissions (use same auth as main admin dashboard)
+    if not session.get('is_admin'):
         flash('Access denied. Admin permissions required.', 'error')
-        return redirect(url_for('index'))
+        return redirect('/admin/login')
     
     return render_template('admin_jv_deals_enhanced.html')
 
