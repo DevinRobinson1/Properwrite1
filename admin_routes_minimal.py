@@ -211,6 +211,12 @@ def dashboard():
         }
         return render_template('admin_dashboard_unified.html', data=dashboard_data, error=str(e))
 
+@admin_bp.route('/jv-deals-enhanced')
+@require_admin
+def jv_deals_enhanced():
+    """Enhanced JV deals admin panel with advanced features"""
+    return render_template('admin_jv_deals_enhanced.html')
+
 @admin_bp.route('/api/affiliates', methods=['GET'])
 @require_admin
 def get_affiliates():
