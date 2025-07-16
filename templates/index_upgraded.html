@@ -7387,8 +7387,50 @@
                 // Hide no results message
                 document.getElementById('comps-no-results').classList.add('hidden');
             } else {
-                // Show no results message
-                document.getElementById('comps-no-results').classList.remove('hidden');
+                // Show no results message with context
+                const noResultsElement = document.getElementById('comps-no-results');
+                if (noResultsElement) {
+                    noResultsElement.classList.remove('hidden');
+                    
+                    // Update message based on error type
+                    if (data.error_type === 'rate_limit') {
+                        noResultsElement.innerHTML = `
+                            <div class="bg-orange-50 border border-orange-200 rounded-lg p-6 text-center">
+                                <div class="text-orange-600 mb-2">
+                                    <i class="fas fa-clock text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-orange-800 mb-2">API Rate Limit Reached</h3>
+                                <p class="text-orange-700 mb-2">
+                                    Our property data sources are temporarily limiting requests.
+                                </p>
+                                <p class="text-orange-600 text-sm">
+                                    Please try again in a few minutes. Your property analysis will remain available.
+                                </p>
+                            </div>
+                        `;
+                    } else {
+                        noResultsElement.innerHTML = `
+                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-6 text-center">
+                                <div class="text-amber-600 mb-2">
+                                    <i class="fas fa-exclamation-triangle text-2xl"></i>
+                                </div>
+                                <h3 class="font-semibold text-amber-800 mb-2">No Comparable Properties Found</h3>
+                                <p class="text-amber-700 mb-2">
+                                    We couldn't find properties that match your exact criteria.
+                                </p>
+                                <div class="text-amber-600 text-sm space-y-1">
+                                    <p>• No recent sales with matching beds/baths</p>
+                                    <p>• Property type is unique in the area</p>
+                                    <p>• Location has limited sales data</p>
+                                    <p>• New construction or private sale</p>
+                                </div>
+                                <p class="text-amber-600 text-sm mt-3">
+                                    Consider expanding your search criteria or consulting a local realtor for manual comps.
+                                </p>
+                            </div>
+                        `;
+                    }
+                }
                 document.getElementById('comps-cards').innerHTML = '';
             }
             
@@ -10894,6 +10936,17 @@
             // ABSOLUTELY NO SCROLL GATE FOR LOGGED IN USERS
             if (isAuthenticated) {
                 console.log('🔐 User is authenticated - DISABLING scroll gate completely');
+                // Ensure no modal is shown
+                const modal = document.getElementById('scroll-gate-modal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
+                // Remove any existing blur
+                const blurOverlay = document.getElementById('scroll-gate-blur');
+                if (blurOverlay) {
+                    blurOverlay.remove();
+                }
                 return; // Exit early - no scroll gate for logged-in users
             }
             
@@ -10955,6 +11008,12 @@
         }
         
         function showScrollGateModal() {
+            // Final authentication check before showing modal
+            if (isAuthenticated) {
+                console.log('🔐 User is authenticated - NOT showing scroll gate modal');
+                return;
+            }
+            
             const modal = document.getElementById('scroll-gate-modal');
             if (modal) {
                 modal.classList.remove('hidden');

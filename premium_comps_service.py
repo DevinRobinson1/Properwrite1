@@ -169,15 +169,24 @@ class PremiumCompsService:
                 timeout=30
             )
             
+            if response.status_code == 429:
+                logger.error(f"❌ API rate limit exceeded (429) - falling back to cached data")
+                return []
+            
             if response.status_code != 200:
-                logger.error(f"❌ API error: {response.status_code}")
+                logger.error(f"❌ API error: {response.status_code} - {response.text[:200]}")
                 return []
             
             data = response.json()
             
             # Process results
             comps = []
-            properties = data.get('props', [])
+            
+            # Handle different response formats
+            if isinstance(data, list):
+                properties = data
+            else:
+                properties = data.get('props', [])
             
             cutoff_date = datetime.now() - timedelta(days=time_window)
             
@@ -213,6 +222,9 @@ class PremiumCompsService:
             
         except Exception as e:
             logger.error(f"❌ Error searching properties: {e}")
+            logger.error(f"❌ Response status: {response.status_code if 'response' in locals() else 'No response'}")
+            if 'response' in locals():
+                logger.error(f"❌ Response content: {response.text[:500]}")
             return []
     
     def _extract_property_data(self, prop: Dict) -> Optional[CompProperty]:

@@ -2591,7 +2591,7 @@ def analyze_comps():
                 if unified_result.get('success') and unified_result.get('comps'):
                     result = unified_result
                     result['fallback_used'] = True
-                    result['message'] = "Using unified service due to premium service unavailability"
+                    result['message'] = "Found comparable properties using cached data"
             except Exception as e:
                 logging.error(f"Unified service fallback failed: {e}")
                 
@@ -2601,9 +2601,18 @@ def analyze_comps():
                     if enhanced_result.get('success') and enhanced_result.get('comps'):
                         result = enhanced_result
                         result['fallback_used'] = True
-                        result['message'] = "Using enhanced service due to performance optimization"
+                        result['message'] = "Found comparable properties using enhanced search"
                 except Exception as e:
                     logging.error(f"Enhanced service fallback failed: {e}")
+                    
+                    # Return a helpful error message with context
+                    result = {
+                        'success': False,
+                        'comps': [],
+                        'message': "Comparable properties temporarily unavailable due to API rate limits. Please try again in a few minutes.",
+                        'error_type': 'rate_limit',
+                        'fallback_used': True
+                    }
         
         # Add analysis summary if successful
         if result.get('success') and result.get('comps'):
