@@ -1,0 +1,57 @@
+/**
+ * 🔒  PAYMENT & CREDIT SYSTEM – FULL AUDIT TASK
+ *
+ * GOAL: Prove that (1) credits auto-trigger payment when exhausted, 
+ *       (2) card collection works with Stripe in live + test mode, 
+ *       (3) crypto checkout grants credits after on-chain confirmation.
+ *       Document every finding, patch any obvious bugs, and push tests.
+ *
+ * -------------------------------------------------------------------
+ * 1️⃣  CREDIT-EXHAUSTION → BILLING
+ * -------------------------------------------------------------------
+ * • Trace every `spendCredits()` / `credits--` call.  
+ * • Confirm code branches to `createCheckoutSession()` (Stripe)
+ *   or `showPaywallModal()` on zero/negative balance.  
+ * • Unit-test: simulate 1 credit left ➜ call gated endpoint twice ➜
+ *   expect HTTP 403 and Stripe session object.  
+ *
+ * -------------------------------------------------------------------
+ * 2️⃣  STRIPE CARD FLOW
+ * -------------------------------------------------------------------
+ * • Verify Stripe.js v3 loaded with publishable key.  
+ * • Check Elements: number, expiry, cvc, postal; Luhn validation.  
+ * • Test-mode purchase with card **4242-4242-4242-4242** succeeds
+ *   and Stripe webhook (`payment_intent.succeeded`) bumps credits.  
+ * • Handle errors: 4000-0000-0000-9995 (insufficient funds) shows UI.  
+ *
+ * -------------------------------------------------------------------
+ * 3️⃣  CRYPTO CHECKOUT
+ * -------------------------------------------------------------------
+ * • Locate Web3 / Coinbase Commerce / Lightning code path.  
+ * • Confirm wallet-connect, signature flow, and tx hash listener.  
+ * • Use testnet (ETH Goerli, tx value 0.001) ➜ wait for 1 conf ➜
+ *   server marks invoice `paid`, adds credits.  
+ * • Double-spend prevention: ensure idempotent handler or
+ *   `unique:true` DB constraint on txHash.  
+ *
+ * -------------------------------------------------------------------
+ * 4️⃣  SECURITY & COMPLIANCE
+ * -------------------------------------------------------------------
+ * • All payment routes behind `requireAuth`.  
+ * • Verify HTTPS enforced and CSP blocks `mixed-content`.  
+ * • Secrets in Replit “Secrets” tab, not committed to git.  
+ *
+ * -------------------------------------------------------------------
+ * 5️⃣  TEST HARNESS & REPORT
+ * -------------------------------------------------------------------
+ * • Create `/tests/payments.spec.js` (Jest + Supertest):
+ *     - credit drain ➜ Stripe mock ➜ expect 200 + new credits
+ *     - declined card ➜ expect 402 + error JSON
+ *     - crypto webhook mock ➜ expect credits += X
+ * • Output `docs/payment-audit.md` with:
+ *     - Pass/Fail matrix
+ *     - File + line numbers for fixes
+ *     - Screenshots / curl examples
+ *
+ * Push any small patches directly; flag bigger issues with TODO tags.
+ */

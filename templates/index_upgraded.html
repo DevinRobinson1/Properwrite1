@@ -5441,6 +5441,23 @@
                 
                 const data = await response.json();
                 
+                // Check for credit exhaustion (402 status)
+                if (response.status === 402) {
+                    if (loadingState) loadingState.classList.add('hidden');
+                    
+                    // Show billing modal for credit exhaustion
+                    showBillingModal('You need more credits to analyze properties. Please purchase additional credits to continue.');
+                    return;
+                }
+                
+                // Check for freemium gate (403 status)
+                if (response.status === 403 && data.error === 'auth_required') {
+                    console.log('Freemium gate triggered by backend');
+                    if (loadingState) loadingState.classList.add('hidden');
+                    showFreemiumGate('propertyAnalysis', data.message);
+                    return;
+                }
+                
                 if (data.success) {
                     populatePropertyData(data);
                     await calculateStrategies();
@@ -9199,6 +9216,32 @@
             if (resultsElement && !resultsElement.classList.contains('hidden')) {
                 resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
+        }
+
+        // Show billing modal for credit exhaustion
+        function showBillingModal(message) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white p-8 rounded-lg max-w-md w-full mx-4">
+                    <div class="text-center mb-6">
+                        <i class="fas fa-credit-card text-red-500 text-4xl mb-4"></i>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Credits Exhausted</h2>
+                        <p class="text-gray-600">${message}</p>
+                    </div>
+                    <div class="space-y-4">
+                        <button onclick="window.location.href='/dashboard'" 
+                                class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 font-medium">
+                            Purchase Credits
+                        </button>
+                        <button onclick="this.closest('.fixed').remove()" 
+                                class="w-full bg-gray-100 text-gray-800 py-3 px-4 rounded-lg hover:bg-gray-200 font-medium">
+                            Maybe Later
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
         }
 
         // Close dropdowns when clicking outside

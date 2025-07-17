@@ -3333,7 +3333,6 @@ def jv_admin_update_deal_status(deal_id):
 # ==================== BILLING & SUBSCRIPTION ENDPOINTS ====================
 
 @app.route('/api/billing/create-checkout', methods=['POST'])
-@csrf.exempt
 @require_auth
 def create_checkout():
     """Create Stripe checkout session for subscription or credit purchase"""
