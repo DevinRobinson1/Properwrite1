@@ -10056,15 +10056,29 @@
                     })
                     .then(async response => {
                         const result = await response.json();
+                        console.log('Property analysis response:', {
+                            status: response.status,
+                            result: result,
+                            headers: response.headers
+                        });
                         
-                        // Check for freemium gate response
+                        // Check for freemium gate response only if backend actually blocked it
                         if (response.status === 403 && result.error === 'auth_required') {
+                            console.log('Freemium gate triggered by backend');
                             hideLoadingState();
                             showFreemiumGate('propertyAnalysis', result.message);
                             return;
                         }
                         
                         if (result.success) {
+                            // Check if this was a free use (show toast)
+                            if (result.access_info && result.access_info.reason === 'free_use_available') {
+                                showFreeUseToast();
+                            }
+                            // Also check for X-Free-Use header
+                            if (response.headers.get('X-Free-Use') === 'true') {
+                                showFreeUseToast();
+                            }
                             // Display analysis results
                             displayPropertyAnalysis(result);
                             hideLoadingState();
@@ -12551,7 +12565,8 @@
         // Wrap existing property analysis function
         const originalAnalyzeProperty = window.analyzeProperty;
         window.analyzeProperty = function() {
-            return gateFeatureAccess('propertyAnalysis', originalAnalyzeProperty);
+            // Don't gate property analysis - let backend handle it
+            return originalAnalyzeProperty();
         };
         
         // Wrap existing comps analysis function  
@@ -12604,6 +12619,7 @@
         
         // Debug function to clear free use cookie
         window.clearFreemiumCookie = function() {
+            console.log('Clearing freemium cookie...');
             fetch('/api/freemium/clear-cookie', {
                 method: 'POST',
                 headers: {
@@ -12620,6 +12636,11 @@
             .catch(error => {
                 console.error('Error clearing cookie:', error);
             });
+        };
+        
+        // Debug function to check current cookie state
+        window.checkFreemiumCookie = function() {
+            console.log('Current free_use cookie:', document.cookie.split('; ').find(row => row.startsWith('free_use=')));
         };
     </script>
 </body>

@@ -65,6 +65,19 @@ def gate_feature(feature_name):
                 # Add header to indicate this was a free use
                 response.headers['X-Free-Use'] = 'true'
                 
+                # Add access info to JSON response if possible
+                try:
+                    if response.is_json:
+                        response_data = response.get_json()
+                        if response_data and isinstance(response_data, dict):
+                            response_data['access_info'] = {
+                                'reason': 'free_use_available',
+                                'message': 'You used your free property analysis!'
+                            }
+                            response.data = jsonify(response_data).data
+                except:
+                    pass
+                
                 return response
             
             # User has already used their free action
