@@ -2235,22 +2235,34 @@
                                     </div>
                                     
                                     <div class="flex justify-between items-center">
-                                        <span class="text-gray-800 font-medium">Construction Price:</span>
+                                        <span class="text-gray-800 font-medium">Acquisition Price:</span>
                                         <div class="flex items-center">
                                             <span class="text-xs text-gray-500 mr-2">$</span>
                                             <input type="text" id="mls-construction-price-input" value="250,000" 
                                                    class="w-32 px-3 py-2 border border-purple-300 rounded text-right font-bold text-purple-600 editable-input"
                                                    onchange="formatNumber(this); calculateMLSNovation();"
                                                    oninput="formatNumber(this); calculateMLSNovation();"
-                                                   placeholder="Enter construction price">
+                                                   placeholder="Enter acquisition price">
                                         </div>
                                     </div>
                                     
                                     <hr class="my-4">
                                     
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-gray-800 font-medium">Listing Price:</span>
+                                        <div class="flex items-center">
+                                            <span class="text-xs text-gray-500 mr-2">$</span>
+                                            <input type="text" id="mls-listing-price-input" value="375,000" 
+                                                   class="w-32 px-3 py-2 border border-green-300 rounded text-right font-bold text-green-600 editable-input"
+                                                   onchange="formatNumber(this); calculateMLSNovation();"
+                                                   oninput="formatNumber(this); calculateMLSNovation();"
+                                                   placeholder="Enter listing price">
+                                        </div>
+                                    </div>
+                                    
                                     <div class="bg-blue-50 p-3 rounded">
-                                        <h5 class="font-medium text-blue-800 mb-2">Calculated Listing Price:</h5>
-                                        <div class="text-2xl font-bold text-blue-600" id="mls-calculated-listing-price">$0</div>
+                                        <h5 class="font-medium text-blue-800 mb-2">Auto-Calculated Listing Price:</h5>
+                                        <div class="text-lg font-bold text-blue-600" id="mls-calculated-listing-price">$0</div>
                                         <div class="text-xs text-gray-600 mt-1">ARV - Renovation Costs - Sell Now Discount</div>
                                     </div>
                                     
@@ -2333,7 +2345,7 @@
                                                 <span id="mls-gross-sales-price">$0</span>
                                             </div>
                                             <div class="flex justify-between">
-                                                <span>Less: Construction Price:</span>
+                                                <span>Less: Acquisition Price:</span>
                                                 <span id="mls-acquisition-cost">$0</span>
                                             </div>
                                             <div class="flex justify-between">
@@ -7125,11 +7137,20 @@
             const sellNowDiscount = parseFloat(document.getElementById('mls-sell-discount-input')?.value?.replace(/,/g, '')) || 10000;
             const constructionPrice = parseFloat(document.getElementById('mls-construction-price-input')?.value?.replace(/,/g, '')) || 250000;
             
-            // Calculate listing price: ARV - Renovation Costs - Sell Now Discount
-            const listPrice = arv - renovationCosts - sellNowDiscount;
+            // Calculate auto-calculated listing price: ARV - Renovation Costs - Sell Now Discount
+            const autoCalculatedListPrice = arv - renovationCosts - sellNowDiscount;
             
-            // Update the calculated listing price display
-            updateElementIfExists('mls-calculated-listing-price', '$' + listPrice.toLocaleString());
+            // Update the auto-calculated listing price display
+            updateElementIfExists('mls-calculated-listing-price', '$' + autoCalculatedListPrice.toLocaleString());
+            
+            // Use the editable listing price input for actual calculations
+            const listPrice = parseFloat(document.getElementById('mls-listing-price-input')?.value?.replace(/,/g, '')) || autoCalculatedListPrice;
+            
+            // Auto-populate listing price if it's empty or default
+            const listPriceElement = document.getElementById('mls-listing-price-input');
+            if (listPriceElement && (!listPriceElement.value || listPriceElement.value === '375,000')) {
+                listPriceElement.value = autoCalculatedListPrice.toLocaleString();
+            }
             
             // Get commission rates from the MLS/Novation section
             const listingCommission = parseFloat(document.getElementById('mls-listing-commission-input')?.value) || 2;
