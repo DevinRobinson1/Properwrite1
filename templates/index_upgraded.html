@@ -2196,25 +2196,67 @@
                             <h3 class="text-lg font-semibold text-blue-800 mb-4">🏠 Novation/Installment (MLS Listing)</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="space-y-4">
+                                    <h4 class="font-semibold text-blue-800 mb-3">Input Fields</h4>
+                                    
                                     <div class="flex justify-between items-center">
-                                        <span class="text-gray-700 font-medium">Sell Now Price: 
-                                            <span class="info-tooltip" title="Enter the price you want to sell for - commissions and fees will calculate automatically">
-                                                <span class="tooltiptext">Enter the price you want to sell for - commissions and fees will calculate automatically</span>
-                                                i
-                                            </span>
-                                        </span>
+                                        <span class="text-gray-800 font-medium">ARV:</span>
                                         <div class="flex items-center">
                                             <span class="text-xs text-gray-500 mr-2">$</span>
-                                            <input type="text" id="mls-novation-list-price" value="346,500" 
+                                            <input type="text" id="mls-arv-input" value="415,000" 
                                                    class="w-32 px-3 py-2 border border-blue-300 rounded text-right font-bold text-blue-600 editable-input"
-                                                   onchange="formatAndRecalculateDispositions(this); calculateMLSNovation();"
+                                                   onchange="formatNumber(this); calculateMLSNovation();"
                                                    oninput="formatNumber(this); calculateMLSNovation();"
-                                                   placeholder="Enter sell price">
+                                                   placeholder="Enter ARV">
                                         </div>
                                     </div>
+                                    
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-gray-800 font-medium">Renovation Costs:</span>
+                                        <div class="flex items-center">
+                                            <span class="text-xs text-gray-500 mr-2">$</span>
+                                            <input type="text" id="mls-renovation-costs-input" value="30,000" 
+                                                   class="w-32 px-3 py-2 border border-red-300 rounded text-right font-bold text-red-600 editable-input"
+                                                   onchange="formatNumber(this); calculateMLSNovation();"
+                                                   oninput="formatNumber(this); calculateMLSNovation();"
+                                                   placeholder="Enter renovation costs">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-gray-800 font-medium">Sell Now Discount:</span>
+                                        <div class="flex items-center">
+                                            <span class="text-xs text-gray-500 mr-2">$</span>
+                                            <input type="text" id="mls-sell-discount-input" value="10,000" 
+                                                   class="w-32 px-3 py-2 border border-orange-300 rounded text-right font-bold text-orange-600 editable-input"
+                                                   onchange="formatNumber(this); calculateMLSNovation();"
+                                                   oninput="formatNumber(this); calculateMLSNovation();"
+                                                   placeholder="Enter discount">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-gray-800 font-medium">Construction Price:</span>
+                                        <div class="flex items-center">
+                                            <span class="text-xs text-gray-500 mr-2">$</span>
+                                            <input type="text" id="mls-construction-price-input" value="250,000" 
+                                                   class="w-32 px-3 py-2 border border-purple-300 rounded text-right font-bold text-purple-600 editable-input"
+                                                   onchange="formatNumber(this); calculateMLSNovation();"
+                                                   oninput="formatNumber(this); calculateMLSNovation();"
+                                                   placeholder="Enter construction price">
+                                        </div>
+                                    </div>
+                                    
+                                    <hr class="my-4">
+                                    
+                                    <div class="bg-blue-50 p-3 rounded">
+                                        <h5 class="font-medium text-blue-800 mb-2">Calculated Listing Price:</h5>
+                                        <div class="text-2xl font-bold text-blue-600" id="mls-calculated-listing-price">$0</div>
+                                        <div class="text-xs text-gray-600 mt-1">ARV - Renovation Costs - Sell Now Discount</div>
+                                    </div>
+                                    
                                     <div class="space-y-2">
                                         <div class="flex justify-between">
-                                            <span>Listing Commission:</span>
+                                            <span class="text-gray-700">Listing Commission:</span>
                                             <div class="flex items-center">
                                                 <input type="text" id="mls-listing-commission-input" value="2.0" 
                                                        class="w-16 px-2 py-1 border border-blue-300 rounded text-right mr-1"
@@ -2224,7 +2266,7 @@
                                             </div>
                                         </div>
                                         <div class="flex justify-between">
-                                            <span>Buyer Agent Commission:</span>
+                                            <span class="text-gray-700">Buyer Agent Commission:</span>
                                             <div class="flex items-center">
                                                 <input type="text" id="mls-buyer-commission-input" value="2.0" 
                                                        class="w-16 px-2 py-1 border border-blue-300 rounded text-right mr-1"
@@ -2233,77 +2275,74 @@
                                                 <span>%</span>
                                             </div>
                                         </div>
-                                        <div class="text-xs text-gray-500 mt-2">
-                                            <i class="fas fa-info-circle mr-1"></i>
-                                            Commissions calculated from sell now price above. Detailed closing costs from Installment section also included.
-                                        </div>
                                     </div>
                                 </div>
                                 <div class="bg-white p-4 rounded border">
-                                    <h4 class="font-semibold text-blue-800 mb-2">Net Proceeds</h4>
-                                    <div class="space-y-1 text-sm">
-                                        <div class="flex justify-between">
-                                            <span>Sell Now Price:</span>
-                                            <span id="mls-novation-list-price-display">$0</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span>Sale Fast Price:</span>
-                                            <span id="mls-novation-sale-fast-price">$0</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span>Under Contract Price:</span>
-                                            <span id="mls-novation-under-contract-price">$0</span>
-                                        </div>
-                                        
-                                        <!-- Detailed Breakdown Section -->
-                                        <div class="bg-gray-50 p-2 rounded mt-2">
-                                            <h5 class="font-medium text-gray-700 mb-1">Cost Breakdown:</h5>
-                                            <div class="space-y-1 text-xs">
-                                                <div class="flex justify-between">
-                                                    <span>Listing Commission:</span>
-                                                    <span id="mls-listing-commission-amount">$0</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span>Buyer Commission:</span>
-                                                    <span id="mls-buyer-commission-amount">$0</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span>Title/Escrow Fees:</span>
-                                                    <span id="mls-title-fees-amount">$0</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span>Staging & Photography:</span>
-                                                    <span id="mls-staging-photo-amount">$0</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span>Other Closing Costs:</span>
-                                                    <span id="mls-other-closing-amount">$0</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span>Inspection & Repairs:</span>
-                                                    <span id="mls-inspection-repairs-amount">$0</span>
-                                                </div>
+                                    <h4 class="font-semibold text-blue-800 mb-3">Calculated Boxes</h4>
+                                    
+                                    <!-- Fees and Commission Section -->
+                                    <div class="bg-gray-50 p-3 rounded mb-4">
+                                        <h5 class="font-medium text-gray-700 mb-2">Fees and Commission:</h5>
+                                        <div class="space-y-1 text-sm">
+                                            <div class="flex justify-between">
+                                                <span>Listing Commission:</span>
+                                                <span id="mls-listing-commission-amount">$0</span>
                                             </div>
-                                        </div>
-                                        
-                                        <div class="flex justify-between font-medium">
-                                            <span>Total Commissions and Fees:</span>
-                                            <span id="mls-novation-total-commissions-fees">$0</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span>Gross Sales Price After Closing Fees:</span>
-                                            <span id="mls-gross-sales-price">$0</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span>Less: Acquisition Cost:</span>
-                                            <span id="mls-acquisition-cost">$0</span>
-                                        </div>
-                                        <div class="flex justify-between">
-                                            <span>Less: Repair Costs:</span>
-                                            <span id="mls-repair-costs">$0</span>
+                                            <div class="flex justify-between">
+                                                <span>Buyer Commission:</span>
+                                                <span id="mls-buyer-commission-amount">$0</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Title/Escrow Fees:</span>
+                                                <span id="mls-title-fees-amount">$0</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Staging & Photography:</span>
+                                                <span id="mls-staging-photo-amount">$0</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Other Closing Costs:</span>
+                                                <span id="mls-other-closing-amount">$0</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Inspection & Repairs:</span>
+                                                <span id="mls-inspection-repairs-amount">$0</span>
+                                            </div>
                                         </div>
                                         <hr class="my-2">
                                         <div class="flex justify-between font-bold">
+                                            <span>Total Fees and Commission:</span>
+                                            <span id="mls-novation-total-commissions-fees">$0</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Net to Us Section -->
+                                    <div class="bg-green-50 p-3 rounded">
+                                        <h5 class="font-medium text-green-800 mb-2">Net to Us (Profit):</h5>
+                                        <div class="space-y-1 text-sm">
+                                            <div class="flex justify-between">
+                                                <span>Listing Price:</span>
+                                                <span id="mls-novation-list-price-display">$0</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Less: Total Fees & Commission:</span>
+                                                <span id="mls-display-fees-deduction">$0</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Gross Sales Price After Fees:</span>
+                                                <span id="mls-gross-sales-price">$0</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Less: Construction Price:</span>
+                                                <span id="mls-acquisition-cost">$0</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Less: Renovation Costs:</span>
+                                                <span id="mls-repair-costs">$0</span>
+                                            </div>
+                                        </div>
+                                        <hr class="my-2">
+                                        <div class="flex justify-between font-bold text-lg">
                                             <span>Net to Us (Profit):</span>
                                             <span class="text-green-600 font-bold" id="mls-novation-net-to-us">$0</span>
                                         </div>
@@ -7054,23 +7093,43 @@
         function calculateMLSNovation() {
             console.log('calculateMLSNovation called');
             
-            // Get list price from editable input (this is the "sell now price" the user fills in)
-            const listPriceInput = document.getElementById('mls-novation-list-price');
-            let listPrice = parseFloat(listPriceInput?.value?.replace(/,/g, '')) || 346500;
+            // Auto-populate from property header if not already filled
+            const arvElement = document.getElementById('mls-arv-input');
+            const renovationCostsElement = document.getElementById('mls-renovation-costs-input');
+            const constructionPriceElement = document.getElementById('mls-construction-price-input');
             
-            // If list price is the default/empty, calculate it automatically
-            if (!listPriceInput?.value || listPriceInput.value === '0' || listPriceInput.value === '') {
-                const arv = parseFloat(document.getElementById('arv')?.value?.replace(/,/g, '')) || 415000;
-                const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/,/g, '')) || 30000;
-                
-                // Calculate list price: (ARV - Repairs) - discount
-                const afterRepairs = arv - repairs;
-                const discount = Math.max(afterRepairs * 0.10, 20000); // 10% discount or minimum $20,000
-                listPrice = afterRepairs - discount;
-                
-                // Update the input field with calculated value
-                listPriceInput.value = listPrice.toLocaleString();
+            if (arvElement && (!arvElement.value || arvElement.value === '415,000')) {
+                const headerArv = document.getElementById('arv')?.value?.replace(/,/g, '');
+                if (headerArv) {
+                    arvElement.value = parseFloat(headerArv).toLocaleString();
+                }
             }
+            
+            if (renovationCostsElement && (!renovationCostsElement.value || renovationCostsElement.value === '30,000')) {
+                const headerRepairs = document.getElementById('repairs')?.value?.replace(/,/g, '');
+                if (headerRepairs) {
+                    renovationCostsElement.value = parseFloat(headerRepairs).toLocaleString();
+                }
+            }
+            
+            if (constructionPriceElement && (!constructionPriceElement.value || constructionPriceElement.value === '250,000')) {
+                const headerAcquisition = document.getElementById('global-acquisitions-price-header')?.value?.replace(/,/g, '');
+                if (headerAcquisition) {
+                    constructionPriceElement.value = parseFloat(headerAcquisition).toLocaleString();
+                }
+            }
+            
+            // Get input values from the new structure
+            const arv = parseFloat(document.getElementById('mls-arv-input')?.value?.replace(/,/g, '')) || 415000;
+            const renovationCosts = parseFloat(document.getElementById('mls-renovation-costs-input')?.value?.replace(/,/g, '')) || 30000;
+            const sellNowDiscount = parseFloat(document.getElementById('mls-sell-discount-input')?.value?.replace(/,/g, '')) || 10000;
+            const constructionPrice = parseFloat(document.getElementById('mls-construction-price-input')?.value?.replace(/,/g, '')) || 250000;
+            
+            // Calculate listing price: ARV - Renovation Costs - Sell Now Discount
+            const listPrice = arv - renovationCosts - sellNowDiscount;
+            
+            // Update the calculated listing price display
+            updateElementIfExists('mls-calculated-listing-price', '$' + listPrice.toLocaleString());
             
             // Get commission rates from the MLS/Novation section
             const listingCommission = parseFloat(document.getElementById('mls-listing-commission-input')?.value) || 2;
@@ -7109,19 +7168,17 @@
             const saleFastPrice = listPrice;
             const underContractPrice = listPrice;
             
-            // Get acquisition cost (what we paid for the property)
-            const acquisitionCost = parseFloat(document.getElementById('global-acquisitions-price-header')?.value?.replace(/,/g, '')) || 140000;
-            
-            // Get repairs cost
-            const repairsCost = parseFloat(document.getElementById('repairs')?.value?.replace(/,/g, '')) || 30000;
-            
             // Calculate gross sales price after closing fees
             const grossSalesPrice = listPrice - totalCombinedFees;
             
-            // Calculate net to us (actual profit): Gross Sales Price - Acquisition Cost - Repairs
-            const netToUs = grossSalesPrice - acquisitionCost - repairsCost;
+            // Calculate net to us (actual profit): Gross Sales Price - Construction Price - Renovation Costs
+            const netToUs = grossSalesPrice - constructionPrice - renovationCosts;
             
             console.log('MLS/Novation calculation:', {
+                arv,
+                renovationCosts,
+                sellNowDiscount,
+                constructionPrice,
                 listPrice,
                 listingCommissionAmount,
                 buyerCommissionAmount,
@@ -7130,8 +7187,6 @@
                 totalOutOfPocket,
                 totalCombinedFees,
                 grossSalesPrice,
-                acquisitionCost,
-                repairsCost,
                 netToUs
             });
             
@@ -7140,9 +7195,10 @@
             updateElementIfExists('mls-novation-sale-fast-price', '$' + saleFastPrice.toLocaleString());
             updateElementIfExists('mls-novation-under-contract-price', '$' + underContractPrice.toLocaleString());
             updateElementIfExists('mls-novation-total-commissions-fees', '$' + totalCombinedFees.toLocaleString());
+            updateElementIfExists('mls-display-fees-deduction', '$' + totalCombinedFees.toLocaleString());
             updateElementIfExists('mls-gross-sales-price', '$' + grossSalesPrice.toLocaleString());
-            updateElementIfExists('mls-acquisition-cost', '$' + acquisitionCost.toLocaleString());
-            updateElementIfExists('mls-repair-costs', '$' + repairsCost.toLocaleString());
+            updateElementIfExists('mls-acquisition-cost', '$' + constructionPrice.toLocaleString());
+            updateElementIfExists('mls-repair-costs', '$' + renovationCosts.toLocaleString());
             updateElementIfExists('mls-novation-net-to-us', '$' + netToUs.toLocaleString());
             
             // Update detailed breakdown elements
