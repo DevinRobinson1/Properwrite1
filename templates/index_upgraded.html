@@ -12351,70 +12351,81 @@
         // Comprehensive New Construction Calculator based on Excel template
         function calculateNewConstruction() {
             try {
+                console.log('🏗️ Starting New Construction calculation...');
+                
                 // Get input values using parseCurrency for formatted inputs
-                const sellPrice = parseCurrency(document.getElementById('nc-sell-price').value);
-                const projectDuration = parseFloat(document.getElementById('nc-project-duration').value) || 0;
-                const units = parseFloat(document.getElementById('nc-units').value) || 0;
-                const landPrice = parseCurrency(document.getElementById('nc-land-price').value);
-                const costPerSqft = parseCurrency(document.getElementById('nc-cost-per-sqft').value);
-                const sqftPerUnit = parseFloat(document.getElementById('nc-sqft-per-unit').value) || 0;
-                const constructionTime = parseFloat(document.getElementById('nc-construction-time').value) || 0;
-                const rate = parseFloat(document.getElementById('nc-rate').value) || 0;
-                const realtorPercent = parseFloat(document.getElementById('nc-realtor-percent').value) || 0;
+                const sellPrice = parseCurrency(document.getElementById('nc-sell-price').value) || 1500000;
+                const projectDuration = parseFloat(document.getElementById('nc-project-duration').value) || 365;
+                const units = parseFloat(document.getElementById('nc-units').value) || 5;
+                const landPrice = parseCurrency(document.getElementById('nc-land-price').value) || 350000;
+                const costPerSqft = parseCurrency(document.getElementById('nc-cost-per-sqft').value) || 300;
+                const sqftPerUnit = parseFloat(document.getElementById('nc-sqft-per-unit').value) || 1900;
+                const constructionTime = parseFloat(document.getElementById('nc-construction-time').value) || 150;
+                const rate = parseFloat(document.getElementById('nc-rate').value) || 12;
+                const realtorPercent = parseFloat(document.getElementById('nc-realtor-percent').value) || 4.5;
                 
                 // Development costs using parseCurrency
-                const sewerWater = parseCurrency(document.getElementById('nc-sewer-water').value);
-                const surveys = parseCurrency(document.getElementById('nc-surveys').value);
-                const soilTest = parseCurrency(document.getElementById('nc-soil-test').value);
-                const clearing = parseCurrency(document.getElementById('nc-clearing').value);
-                const civilPlans = parseCurrency(document.getElementById('nc-civil-plans').value);
-                const entitlement = parseCurrency(document.getElementById('nc-entitlement').value);
-                const architectural = parseCurrency(document.getElementById('nc-architectural').value);
-                const grading = parseCurrency(document.getElementById('nc-grading').value);
-                const otherAbCost = parseCurrency(document.getElementById('nc-other-ab-cost').value);
+                const sewerWater = parseCurrency(document.getElementById('nc-sewer-water').value) || 15000;
+                const surveys = parseCurrency(document.getElementById('nc-surveys').value) || 7000;
+                const soilTest = parseCurrency(document.getElementById('nc-soil-test').value) || 4000;
+                const clearing = parseCurrency(document.getElementById('nc-clearing').value) || 10000;
+                const civilPlans = parseCurrency(document.getElementById('nc-civil-plans').value) || 25000;
+                const entitlement = parseCurrency(document.getElementById('nc-entitlement').value) || 3000;
+                const architectural = parseCurrency(document.getElementById('nc-architectural').value) || 25000;
+                const grading = parseCurrency(document.getElementById('nc-grading').value) || 1500;
+                const otherAbCost = parseCurrency(document.getElementById('nc-other-ab-cost').value) || 3000;
                 
                 // Alternative holding costs
-                const insurance = parseFloat(document.getElementById('nc-insurance').value) || 0;
-                const taxes = parseFloat(document.getElementById('nc-taxes').value) || 0;
-                const utilities = parseFloat(document.getElementById('nc-utilities').value) || 0;
+                const insurance = parseFloat(document.getElementById('nc-insurance').value) || 3000;
+                const taxes = parseFloat(document.getElementById('nc-taxes').value) || 1000;
+                const utilities = parseFloat(document.getElementById('nc-utilities').value) || 1000;
                 const maintenance = parseFloat(document.getElementById('nc-maintenance').value) || 0;
                 const otherExpenses = parseFloat(document.getElementById('nc-other-expenses').value) || 0;
                 
-                // Basic calculations
+                // Template-based calculations (matching exact formulas from PDF)
                 const grossIncome = sellPrice * units;
                 const targetRoi = grossIncome * 0.20; // 20% ROI
-                const landPadReady = landPrice + (sewerWater + surveys + soilTest + clearing + civilPlans + entitlement + architectural + grading);
+                const landPadReady = grossIncome * 0.20; // 20% of Gross Income per template
                 const padPrice = landPrice / units;
                 const buildCostAvailable = targetRoi - landPadReady;
                 
                 // Development costs
                 const developmentCost = sewerWater + surveys + soilTest + clearing + civilPlans + entitlement + architectural + grading;
-                const padReadyCost = landPrice + developmentCost;
+                const padReadyCost = developmentCost * 0.20; // 20% of development cost per template
                 
                 // Vertical construction
                 const totalSqft = units * sqftPerUnit;
                 const buildCost = totalSqft * costPerSqft;
-                const estimatedProfitBasic = grossIncome - landPadReady - buildCost;
-                const developmentFee = developmentCost * 0.10; // 10% development fee
+                const estimatedProfitBasic = grossIncome - landPadReady - buildCost - developmentCost;
+                const developmentFee = (landPrice + developmentCost + buildCost) * 0.05; // 5% development fee
                 
-                // Loan calculations
+                // Loan calculations (matching template)
                 const abClosingPercent = 6; // Fixed at 6%
                 const abClosingCost = landPrice * (abClosingPercent / 100);
                 const bcClosingPercent = 1; // Fixed at 1%
-                const bcClosingCost = sellPrice * (bcClosingPercent / 100);
+                const bcClosingCost = grossIncome * (bcClosingPercent / 100);
                 const totalCC = abClosingCost + bcClosingCost + otherAbCost;
+                
+                // Total loan amount
                 const totalLoan = landPrice + developmentCost + buildCost + totalCC;
-                const holdTime = constructionTime; // Same as construction time
+                
+                // Holding cost calculations (matching template with daily/monthly/yearly breakdown)
+                const annualRate = totalLoan * (rate / 100);
+                const monthlyRate = annualRate / 12;
+                const dailyRate = annualRate / 365;
+                const holdTime = constructionTime; // Hold time in days
                 const points = 2; // Fixed at 2%
-                const totalHoldCost = (totalLoan * (rate / 100) * (holdTime / 365)) + (totalLoan * (points / 100));
+                const pointsCost = totalLoan * (points / 100);
+                const totalHoldCost = (dailyRate * holdTime) + pointsCost;
                 
-                // Alternative holding costs
-                const totalAltHolding = insurance + taxes + utilities + maintenance + otherExpenses;
-                const totalHoldingDays = totalAltHolding * (holdTime / 365);
+                // Alternative holding costs (daily calculation)
+                const totalAltHoldingAnnual = insurance + taxes + utilities + maintenance + otherExpenses;
+                const totalAltHoldingDaily = totalAltHoldingAnnual / 365;
+                const totalAltHoldingForPeriod = totalAltHoldingDaily * holdTime;
                 
-                // Realtor fees
-                const realtorAmount = sellPrice * (realtorPercent / 100);
-                const totalRealtorFees = realtorAmount * units;
+                // Realtor fees (on gross income, not per unit)
+                const realtorAmount = grossIncome * (realtorPercent / 100);
+                const totalRealtorFees = realtorAmount;
                 
                 // Final calculations
                 const finalSellPrice = grossIncome;
@@ -12422,66 +12433,112 @@
                 const finalDevelopment = developmentCost;
                 const finalVertical = buildCost;
                 const finalHolding = totalHoldCost;
-                const finalAltHolding = totalHoldingDays;
+                const finalAltHolding = totalAltHoldingForPeriod;
                 const finalClosing = totalCC;
                 const finalRealtor = totalRealtorFees;
                 const totalExpenses = finalPurchase + finalDevelopment + finalVertical + finalHolding + finalAltHolding + finalClosing + finalRealtor;
                 const finalProfit = finalSellPrice - totalExpenses;
                 
-                // Update all fields with formatUSD for consistent currency formatting
-                document.getElementById('nc-gross-income').value = formatUSD(grossIncome);
-                document.getElementById('nc-target-roi').value = formatUSD(targetRoi);
-                document.getElementById('nc-land-pad-ready').value = formatUSD(landPadReady);
-                document.getElementById('nc-pad-price').value = formatUSD(padPrice);
-                document.getElementById('nc-build-cost-available').value = formatUSD(buildCostAvailable);
+                console.log('📊 New Construction Results:', {
+                    grossIncome,
+                    targetRoi,
+                    landPadReady,
+                    developmentCost,
+                    buildCost,
+                    totalHoldCost,
+                    totalRealtorFees,
+                    totalExpenses,
+                    finalProfit
+                });
                 
-                document.getElementById('nc-development-cost').value = formatUSD(developmentCost);
-                document.getElementById('nc-pad-ready-cost').value = formatUSD(padReadyCost);
+                // Update all readonly fields (grey boxes in template)
+                const updateElement = (id, value) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.value = formatUSD(value);
+                        console.log(`📝 Updated ${id}: ${formatUSD(value)}`);
+                    } else {
+                        console.warn(`⚠️ Element not found: ${id}`);
+                    }
+                };
                 
-                document.getElementById('nc-build-cost').value = formatUSD(buildCost);
-                document.getElementById('nc-total-sqft').value = Math.round(totalSqft).toLocaleString();
-                document.getElementById('nc-estimated-profit-basic').value = formatUSD(estimatedProfitBasic);
-                document.getElementById('nc-development-fee').value = formatUSD(developmentFee);
+                updateElement('nc-gross-income', grossIncome);
+                updateElement('nc-target-roi', targetRoi);
+                updateElement('nc-land-pad-ready', landPadReady);
+                updateElement('nc-pad-price', padPrice);
+                updateElement('nc-build-cost-available', buildCostAvailable);
                 
-                document.getElementById('nc-ab-closing-percent').value = abClosingPercent + '%';
-                document.getElementById('nc-ab-closing-cost').value = formatUSD(abClosingCost);
-                document.getElementById('nc-bc-closing-percent').value = bcClosingPercent + '%';
-                document.getElementById('nc-bc-closing-cost').value = formatUSD(bcClosingCost);
-                document.getElementById('nc-total-cc').value = formatUSD(totalCC);
-                document.getElementById('nc-total-loan').value = formatUSD(totalLoan);
-                document.getElementById('nc-hold-time').value = Math.round(holdTime).toLocaleString();
-                document.getElementById('nc-points').value = points + '%';
-                document.getElementById('nc-total-hold-cost').value = formatUSD(totalHoldCost);
+                updateElement('nc-development-cost', developmentCost);
+                updateElement('nc-pad-ready-cost', padReadyCost);
                 
-                document.getElementById('nc-total-alt-holding').value = formatUSD(totalAltHolding);
-                document.getElementById('nc-total-holding-days').value = Math.round(totalHoldingDays).toLocaleString();
+                updateElement('nc-build-cost', buildCost);
+                updateElement('nc-estimated-profit-basic', estimatedProfitBasic);
+                updateElement('nc-development-fee', developmentFee);
                 
-                document.getElementById('nc-realtor-amount').value = formatUSD(realtorAmount);
-                document.getElementById('nc-total-realtor-fees').value = formatUSD(totalRealtorFees);
+                // Update loan calculation fields
+                const abClosingElement = document.getElementById('nc-ab-closing-percent');
+                if (abClosingElement) abClosingElement.value = abClosingPercent + '%';
                 
-                document.getElementById('nc-final-sell-price').value = formatUSD(finalSellPrice);
-                document.getElementById('nc-final-purchase').value = formatUSD(finalPurchase);
-                document.getElementById('nc-final-development').value = formatUSD(finalDevelopment);
-                document.getElementById('nc-final-vertical').value = formatUSD(finalVertical);
-                document.getElementById('nc-final-holding').value = formatUSD(finalHolding);
-                document.getElementById('nc-final-alt-holding').value = formatUSD(finalAltHolding);
-                document.getElementById('nc-final-closing').value = formatUSD(finalClosing);
-                document.getElementById('nc-final-realtor').value = formatUSD(finalRealtor);
-                document.getElementById('nc-total-expenses').value = formatUSD(totalExpenses);
-                document.getElementById('nc-final-profit').value = formatUSD(finalProfit);
+                updateElement('nc-ab-closing-cost', abClosingCost);
+                
+                const bcClosingElement = document.getElementById('nc-bc-closing-percent');
+                if (bcClosingElement) bcClosingElement.value = bcClosingPercent + '%';
+                
+                updateElement('nc-bc-closing-cost', bcClosingCost);
+                updateElement('nc-total-cc', totalCC);
+                updateElement('nc-total-loan', totalLoan);
+                
+                const holdTimeElement = document.getElementById('nc-hold-time');
+                if (holdTimeElement) holdTimeElement.value = Math.round(holdTime).toLocaleString();
+                
+                const pointsElement = document.getElementById('nc-points');
+                if (pointsElement) pointsElement.value = points + '%';
+                
+                updateElement('nc-total-hold-cost', totalHoldCost);
+                
+                // Update holding cost fields
+                updateElement('nc-total-alt-holding', totalAltHoldingAnnual);
+                updateElement('nc-total-holding-days', totalAltHoldingForPeriod);
+                
+                // Update realtor fields
+                updateElement('nc-realtor-amount', realtorAmount);
+                updateElement('nc-total-realtor-fees', totalRealtorFees);
+                
+                // Update final summary
+                updateElement('nc-final-sell-price', finalSellPrice);
+                updateElement('nc-final-purchase', finalPurchase);
+                updateElement('nc-final-development', finalDevelopment);
+                updateElement('nc-final-vertical', finalVertical);
+                updateElement('nc-final-holding', finalHolding);
+                updateElement('nc-final-alt-holding', finalAltHolding);
+                updateElement('nc-final-closing', finalClosing);
+                updateElement('nc-final-realtor', finalRealtor);
+                updateElement('nc-total-expenses', totalExpenses);
+                updateElement('nc-final-profit', finalProfit);
+                
+                // Update square footage (non-currency field)
+                const sqftElement = document.getElementById('nc-total-sqft');
+                if (sqftElement) {
+                    sqftElement.value = Math.round(totalSqft).toLocaleString();
+                    console.log(`📏 Updated total sqft: ${Math.round(totalSqft).toLocaleString()}`);
+                }
                 
                 // Add visual feedback for profit
                 const profitElement = document.getElementById('nc-final-profit');
-                if (finalProfit > 0) {
-                    profitElement.classList.remove('bg-red-100');
-                    profitElement.classList.add('bg-green-200');
-                } else {
-                    profitElement.classList.remove('bg-green-200');
-                    profitElement.classList.add('bg-red-100');
+                if (profitElement) {
+                    if (finalProfit > 0) {
+                        profitElement.classList.remove('bg-red-100');
+                        profitElement.classList.add('bg-green-200');
+                    } else {
+                        profitElement.classList.remove('bg-green-200');
+                        profitElement.classList.add('bg-red-100');
+                    }
                 }
                 
+                console.log('✅ New Construction calculation completed successfully');
+                
             } catch (error) {
-                console.error('Error calculating new construction:', error);
+                console.error('❌ Error calculating new construction:', error);
                 showToast('Error calculating values. Please check your inputs.', 'error');
             }
         }
@@ -12843,6 +12900,11 @@
             loadConstructionCatalog();
             // Run initial calculation to format numbers with commas
             calculateNewConstruction();
+            
+            // Initialize the New Construction calculator on page load
+            setTimeout(() => {
+                calculateNewConstruction();
+            }, 100);
         });
     </script>
     
