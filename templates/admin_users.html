@@ -140,7 +140,7 @@
             if (credits) {
                 const reason = prompt('Enter reason (optional):') || 'Admin grant';
                 
-                fetch(`/admin/api/users/${userId}/grant-credits`, {
+                fetch(`/admin/api/users/${userId}/add-credits`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ credits: parseInt(credits), reason: reason })
