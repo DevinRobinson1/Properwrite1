@@ -1515,10 +1515,10 @@
                     </div>
                 </div>
 
-                <!-- Scroll Gate Detection Point -->
-                {% if not session.get('user_id') %}
+                <!-- Scroll Gate Detection Point - DISABLED for freemium gate testing -->
+                <!-- {% if not session.get('user_id') %}
                 <div id="offers-gate-trigger" class="scroll-gate-trigger"></div>
-                {% endif %}
+                {% endif %} -->
                 
                 <!-- Acquisitions Section -->
                 <div id="acquisitions-section" class="section-content hidden">
@@ -10071,14 +10071,6 @@
                         }
                         
                         if (result.success) {
-                            // Check if this was a free use (show toast)
-                            if (result.access_info && result.access_info.reason === 'free_use_available') {
-                                showFreeUseToast();
-                            }
-                            // Also check for X-Free-Use header
-                            if (response.headers.get('X-Free-Use') === 'true') {
-                                showFreeUseToast();
-                            }
                             // Display analysis results
                             displayPropertyAnalysis(result);
                             hideLoadingState();
@@ -11403,7 +11395,8 @@
                 return; // Exit early - no scroll gate for logged-in users
             }
             
-            console.log('🔐 User is NOT authenticated - initializing scroll gate');
+            console.log('🔐 User is NOT authenticated - SCROLL GATE DISABLED for freemium gate testing');
+            return; // Disable scroll gate
             initializeScrollGate();
         });
         
@@ -12475,7 +12468,8 @@
         
         // Initialize freemium gate on page load
         document.addEventListener('DOMContentLoaded', function() {
-            checkFreemiumStatus();
+            // Disabled for property analysis - backend handles freemium gate
+            // checkFreemiumStatus();
         });
         
         // Check freemium status from backend
@@ -12562,12 +12556,8 @@
             }, 5000);
         }
         
-        // Wrap existing property analysis function
-        const originalAnalyzeProperty = window.analyzeProperty;
-        window.analyzeProperty = function() {
-            // Don't gate property analysis - let backend handle it
-            return originalAnalyzeProperty();
-        };
+        // Disable frontend freemium gate for property analysis - let backend handle it
+        // (Property analysis freemium logic is handled by backend decorator)
         
         // Wrap existing comps analysis function  
         const originalRunCompsAnalysis = window.runCompsAnalysis;
