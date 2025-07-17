@@ -1,0 +1,74 @@
+/**
+ * 🧾  AFFILIATE & CREDIT‐CODE SYSTEM – FULL AUDIT TASK
+ *
+ * OBJECTIVE
+ * ---------
+ * 1. Diagnose why **credit codes** (promo codes, affiliate coupons) are not
+ *    adding credits to user wallets.
+ * 2. Verify affiliate attribution → payout pipeline.
+ * 3. Produce automated tests proving that:
+ *      • valid code → credits++ and affiliate stats update
+ *      • invalid / expired / max‐use code → proper error
+ *
+ * SCOPE
+ * -----
+ *  • /src/services/credits.js          (spendCredits, addCredits, applyCode)
+ *  • /src/services/affiliate.js        (trackReferral, payoutEligible)
+ *  • /src/routes/coupons.js            (POST /api/coupons/apply)
+ *  • /src/models/   (ReplitDB schemas users:, coupons:, affiliates:)
+ *
+ * AUDIT STEPS
+ * -----------
+ * 1️⃣  **Code Path Trace**
+ *     ▸ Start at `/api/coupons/apply` → ensure it:
+ *         - validates code
+ *         - calls `addCredits(userId, amount)`
+ *         - marks coupon as `redeemedBy.push(userId)`
+ *         - triggers `trackReferral(affiliateId, userId, amount)`
+ *
+ * 2️⃣  **Database Consistency**
+ *     ▸ coupons:{code} must contain:
+ *         { amount, maxUses, expiresAt, redeemedBy:[…], affiliateId }
+ *     ▸ subscriptions:{userId}.credits increases by `amount`.
+ *     ▸ affiliates:{affiliateId}.creditsEarned increases by `amount`.
+ *
+ * 3️⃣  **Edge-Case Tests**
+ *     ▸ Expired code (Date.now() > expiresAt) → HTTP 410.
+ *     ▸ Max-use exceeded (redeemedBy.length >= maxUses) → HTTP 409.
+ *     ▸ Same user redeems twice → HTTP 409.
+ *
+ * 4️⃣  **Stripe / Checkout Integration**
+ *     ▸ If code originates from Stripe Coupon:
+ *         - Verify webhook `checkout.session.completed` includes `discount`.
+ *         - ensure `handleStripeWebhook()` credits wallet & logs affiliate.
+ *
+ * 5️⃣  **Affiliate Payout Workflow**
+ *     ▸ Confirm `payoutEligible()` aggregates `creditsEarned` minus `payoutsSent`.
+ *     ▸ Test payout mock: mark as “paid”, create Stripe Transfer or PayPal batch.
+ *
+ * 6️⃣  **Automated Tests**
+ *     • Create `/tests/coupons.spec.js`
+ *         - happy path: apply valid code → expect credits + coupon.redeemedBy
+ *         - expired code → expect 410
+ *         - over-use code → expect 409
+ *     • Create `/tests/affiliate.spec.js`
+ *         - redeem via affiliate code → expect affiliates:{id}.creditsEarned++
+ *         - call payoutEligible() → expect correct payable amount
+ *
+ * 7️⃣  **Reporting**
+ *     ▸ Output `docs/credit-affiliate-audit.md` with:
+ *         - Pass / Fail checklist
+ *         - File + line numbers for any fixes applied
+ *         - Instructions to replicate tests (`npm run test`)
+ *
+ * 8️⃣  **Deliver Fixes**
+ *     ▸ Patch obvious bugs (null checks, wrong key names) in place.
+ *     ▸ Add TODO comments for deeper refactors if needed.
+ *
+ * When complete, commit:
+ *   • updated source files
+ *   • the new Jest tests
+ *   • the audit report
+ *
+ * Label commit:  "chore: credit & affiliate system audit + fixes"
+ */

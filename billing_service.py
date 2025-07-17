@@ -790,7 +790,9 @@ class BillingService:
             'WELCOME50': 50,
             'STARTER100': 100,
             'subto25': 25,
-            'CG40': 40
+            'CG40': 40,
+            'cg30': 30,
+            'F&F25': 25
         }
         
         return PROMO_BONUSES.get(promo_code, 0)

@@ -393,6 +393,170 @@ def create_payout():
     finally:
         db.close()
 
+# Public Promo Code Endpoints
+@affiliate_api.route('/api/apply-promo-code', methods=['POST'])
+@csrf.exempt
+def apply_promo_code():
+    """Apply a promo code and add credits to user account"""
+    try:
+        data = request.json
+        if not data or 'code' not in data:
+            return jsonify({'error': 'Promo code required'}), 400
+        
+        code = data.get('code', '').strip().upper()
+        if not code:
+            return jsonify({'error': 'Promo code required'}), 400
+        
+        # Get user info from session
+        from flask import session
+        user_id = session.get('user_id')
+        user_email = session.get('user_email')
+        
+        if not user_id:
+            return jsonify({'error': 'User must be logged in'}), 401
+        
+        # Get user and team info
+        from billing_models import User, Team
+        db = get_db_session()
+        
+        user = db.query(User).filter_by(id=user_id).first()
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        team = db.query(Team).filter_by(id=user.team_id).first()
+        if not team:
+            return jsonify({'error': 'Team not found'}), 404
+        
+        # Validate promo code using affiliate service
+        affiliate_service = AffiliateService(db)
+        is_valid, message, promo_code = affiliate_service.validate_promo_code(
+            code, user_id, team.tier or 'free'
+        )
+        
+        if not is_valid:
+            return jsonify({'error': message}), 400
+        
+        # Apply the promo code
+        credits_added = 0
+        
+        if promo_code.type == PromoCodeType.CREDIT_PACK:
+            credits_added = promo_code.credit_amount or 0
+            
+            # Add credits to team
+            team.credit_balance += credits_added
+            
+            # Log the credit addition
+            from billing_models import CreditLog
+            credit_log = CreditLog(
+                team_id=team.id,
+                delta=credits_added,
+                reason=f'promo-{code}'
+            )
+            db.add(credit_log)
+            
+            # Create redemption record
+            redemption = affiliate_service.redeem_promo_code(
+                code, user_id, team.id, {
+                    'amount': 0,  # No payment amount for direct credit application
+                    'stripe_payment_id': None
+                }
+            )
+            
+            db.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Successfully applied promo code {code}',
+                'credits_added': credits_added,
+                'new_balance': team.credit_balance,
+                'promo_type': 'credit_pack'
+            })
+            
+        else:
+            # For other types (percentage discount, team bonus), they apply at checkout
+            # Just mark as used for tracking
+            redemption = affiliate_service.redeem_promo_code(
+                code, user_id, team.id, {
+                    'amount': 0,
+                    'stripe_payment_id': None
+                }
+            )
+            
+            db.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Promo code {code} will be applied at checkout',
+                'credits_added': 0,
+                'new_balance': team.credit_balance,
+                'promo_type': promo_code.type.value
+            })
+            
+    except Exception as e:
+        logging.error(f"Error applying promo code: {str(e)}")
+        return jsonify({'error': 'Failed to apply promo code'}), 500
+    finally:
+        if 'db' in locals():
+            db.close()
+
+@affiliate_api.route('/api/validate-promo-code', methods=['POST'])
+@csrf.exempt
+def validate_promo_code_endpoint():
+    """Validate a promo code without applying it"""
+    try:
+        data = request.json
+        if not data or 'code' not in data:
+            return jsonify({'error': 'Promo code required'}), 400
+        
+        code = data.get('code', '').strip().upper()
+        if not code:
+            return jsonify({'error': 'Promo code required'}), 400
+        
+        # Get user info from session
+        from flask import session
+        user_id = session.get('user_id')
+        
+        if not user_id:
+            return jsonify({'error': 'User must be logged in'}), 401
+        
+        # Get user and team info
+        from billing_models import User, Team
+        db = get_db_session()
+        
+        user = db.query(User).filter_by(id=user_id).first()
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        team = db.query(Team).filter_by(id=user.team_id).first()
+        if not team:
+            return jsonify({'error': 'Team not found'}), 404
+        
+        # Validate promo code using affiliate service
+        affiliate_service = AffiliateService(db)
+        is_valid, message, promo_code = affiliate_service.validate_promo_code(
+            code, user_id, team.tier or 'free'
+        )
+        
+        if not is_valid:
+            return jsonify({'valid': False, 'message': message}), 200
+        
+        return jsonify({
+            'valid': True,
+            'message': 'Valid promo code',
+            'code': promo_code.code,
+            'type': promo_code.type.value,
+            'credit_amount': promo_code.credit_amount,
+            'discount_percentage': promo_code.discount_percentage,
+            'description': promo_code.campaign_name or f'{promo_code.code} promo code'
+        })
+        
+    except Exception as e:
+        logging.error(f"Error validating promo code: {str(e)}")
+        return jsonify({'error': 'Failed to validate promo code'}), 500
+    finally:
+        if 'db' in locals():
+            db.close()
+
 # Analytics Endpoints
 @affiliate_api.route('/api/admin/affiliates/top-performers', methods=['GET'])
 @require_admin
