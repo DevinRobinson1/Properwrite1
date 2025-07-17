@@ -100,7 +100,7 @@ fieldset[data-step="4"] .bg-gray-50 {
 }
 
 .form-label {
-  @apply block text-sm font-semibold text-gray-700;
+  @apply block text-sm font-semibold text-gray-700 mb-2;
 }
 
 .input-wrapper {
@@ -108,28 +108,49 @@ fieldset[data-step="4"] .bg-gray-50 {
 }
 
 .input-icon {
-  @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm;
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-base;
 }
 
 .form-input {
-  @apply w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white;
+  @apply w-full pl-10 pr-4 py-4 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm text-base font-medium;
+  min-height: 52px;
+  line-height: 1.5;
 }
 
 textarea.form-input {
   @apply pl-4 resize-none;
 }
 
-/* Better styling for form input backgrounds */
+/* Enhanced input styling with better quality appearance */
 .form-input, .form-select {
   @apply bg-white shadow-sm;
+  border-color: #d1d5db;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+/* Fix text cutoff issues */
+.form-input {
+  overflow: visible;
+  text-overflow: ellipsis;
+}
+
+.form-select {
+  overflow: visible;
+}
+
+/* Improved focus and active states */
+.form-input:focus, .form-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .form-input:focus, .form-select:focus {
-  @apply shadow-lg border-blue-400 bg-white;
+  @apply shadow-lg border-blue-400 bg-white transform scale-[1.02];
 }
 
 .form-input:focus {
-  @apply shadow-lg border-blue-400;
+  @apply shadow-lg border-blue-400 ring-4 ring-blue-100;
 }
 
 .form-input:invalid {
@@ -141,11 +162,13 @@ textarea.form-input {
 }
 
 .form-select {
-  @apply w-full pl-4 pr-10 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white;
+  @apply w-full pl-4 pr-10 py-4 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white shadow-sm text-base font-medium;
+  min-height: 52px;
+  line-height: 1.5;
 }
 
 .select-icon {
-  @apply absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm pointer-events-none;
+  @apply absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-base pointer-events-none;
 }
 
 /* Button Styles */
@@ -271,7 +294,8 @@ fieldset[data-step="4"] .step-header {
   }
   
   .form-input, .form-select {
-    @apply py-2.5;
+    @apply py-3;
+    min-height: 48px;
   }
   
   .btn-primary, .btn-secondary, .btn-success {
@@ -297,11 +321,11 @@ fieldset[data-step="4"] .step-header {
 
 /* Hover Effects */
 .form-input:hover {
-  @apply border-gray-400;
+  @apply border-gray-400 shadow-md;
 }
 
 .form-select:hover {
-  @apply border-gray-400;
+  @apply border-gray-400 shadow-md;
 }
 
 /* Focus States */
