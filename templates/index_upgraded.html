@@ -1005,12 +1005,6 @@
                 
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center space-x-8">
-                    <!-- Walkthrough Video Button -->
-                    <button onclick="openWalkthroughVideo()" class="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-md">
-                        <i class="fas fa-play"></i>
-                        <span class="font-medium">Watch Demo</span>
-                    </button>
-                    
                     <!-- Features Button -->
                     <button onclick="showFeaturesModal()" class="text-gray-600 hover:text-blue-600 transition-colors font-medium">
                         Features
@@ -1096,12 +1090,6 @@
                 <div>
                     <div class="text-sm font-semibold text-gray-900 mb-3">Navigation</div>
                     <div class="space-y-2 pl-2">
-                        <!-- Mobile Walkthrough Video Button -->
-                        <button onclick="openWalkthroughVideo()" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-3 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 flex items-center space-x-3 shadow-md">
-                            <i class="fas fa-play text-white"></i>
-                            <span class="text-sm font-medium">Watch Demo</span>
-                        </button>
-                        
                         <button onclick="showFeaturesModal()" class="w-full text-left text-sm text-gray-600 hover:text-blue-600 transition-colors py-2">
                             <i class="fas fa-cog mr-3 text-blue-500"></i>Features
                         </button>
@@ -12812,9 +12800,9 @@
             <!-- Video Content -->
             <div style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%; /* 16:9 aspect ratio */">
                 <iframe id="walkthrough-video-iframe" 
-                        src="https://www.youtube.com/embed/S2zT2dGt-jM?autoplay=1&rel=0&showinfo=0" 
+                        src="https://www.youtube.com/embed/S2zT2dGt-jM?rel=0&showinfo=0" 
                         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 0 0 12px 12px;"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                         allowfullscreen>
                 </iframe>
             </div>
