@@ -3,25 +3,46 @@
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/jv_submit.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/jv_enhanced.css') }}">
 
 <!-- Modern Hero Section -->
 <div class="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12">
   <div class="max-w-4xl mx-auto px-4">
     <div class="text-center mb-8">
+      <!-- PFPS Logo -->
+      <div class="flex justify-center mb-6">
+        <img src="{{ url_for('static', filename='PFPS_Horizontal_Logo_Dark.png') }}" alt="People First Property Solutions" class="h-16 md:h-20">
+      </div>
       <h1 class="text-4xl font-bold text-gray-900 mb-4">
         <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Submit a JV Deal
         </span>
       </h1>
       <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-        Partner with us on your next real estate investment opportunity. Our streamlined process makes it easy to submit and track your deals.
+        Partner with <strong>People First Property Solutions</strong> on your next real estate investment opportunity in North Carolina and South Carolina.
       </p>
+      <div class="mt-6 flex justify-center items-center space-x-6 text-sm text-gray-600">
+        <div class="flex items-center">
+          <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>
+          <span>NC & SC Markets</span>
+        </div>
+        <div class="flex items-center">
+          <i class="fas fa-clock text-green-600 mr-2"></i>
+          <span>4.2 Hour Response</span>
+        </div>
+        <div class="flex items-center">
+          <i class="fas fa-handshake text-purple-600 mr-2"></i>
+          <span>200+ Partners</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- Main Wizard Container -->
-<section id="jv-wizard" class="max-w-4xl mx-auto px-4 py-8">
+<section id="jv-wizard" class="max-w-7xl mx-auto px-4 py-8 flex gap-8">
+  <!-- Left Side - Main Form -->
+  <div class="flex-1 max-w-4xl">
   <!-- Animated Progress Bar -->
   <div class="mb-8">
     <div class="max-w-2xl mx-auto mb-6">
@@ -44,7 +65,7 @@
       <div class="flex items-center space-x-8">
         <div class="step-indicator active" data-step="1">
           <div class="step-circle">
-            <i class="fas fa-user"></i>
+            <img src="{{ url_for('static', filename='PFPS_Icon_Mark_Dark.png') }}" alt="PFPS" class="w-6 h-6">
           </div>
           <div class="step-label">Partner Info</div>
         </div>
@@ -82,11 +103,14 @@
         <div class="p-8">
           <div class="flex items-center mb-6 step-header">
             <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mr-4">
-              <i class="fas fa-user text-white text-xl"></i>
+              <img src="{{ url_for('static', filename='PFPS_Icon_Mark_Dark.png') }}" alt="PFPS" class="w-6 h-6 filter brightness-0 invert">
             </div>
-            <div>
+            <div class="flex-1">
               <h2 class="text-2xl font-bold text-blue-900">Partner Information</h2>
-              <p class="text-blue-700">Tell us about yourself so we can get in touch</p>
+              <p class="text-blue-700">Join the People First Property Solutions network</p>
+            </div>
+            <div class="hidden md:block">
+              <img src="{{ url_for('static', filename='PFPS_Horizontal_Logo_Dark.png') }}" alt="People First Property Solutions" class="h-8 opacity-60">
             </div>
           </div>
           
@@ -138,9 +162,12 @@
             <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mr-4">
               <i class="fas fa-home text-white text-xl"></i>
             </div>
-            <div>
+            <div class="flex-1">
               <h2 class="text-2xl font-bold text-green-900">Property Details</h2>
-              <p class="text-green-700">Where is the property located and what type of deal is it?</p>
+              <p class="text-green-700">NC & SC properties - where PFPS specializes</p>
+            </div>
+            <div class="hidden md:block">
+              <img src="{{ url_for('static', filename='PFPS_Horizontal_Logo_Dark.png') }}" alt="People First Property Solutions" class="h-8 opacity-60">
             </div>
           </div>
           
@@ -160,14 +187,66 @@
               
               <div class="form-group">
                 <label class="form-label">Deal Type *</label>
-                <div class="select-wrapper">
-                  <select name="deal_type" class="form-select" required>
-                    <option value="">Select deal type...</option>
-                    <option value="Cash/Dispo Help">Cash/Dispo Help</option>
-                    <option value="Novation/Installment Deal">Novation/Installment Deal</option>
-                    <option value="Creative Finance Deal">Creative Finance Deal</option>
-                  </select>
-                  <i class="fas fa-chevron-down select-icon"></i>
+                <div class="space-y-3">
+                  <div class="deal-type-option" data-value="Cash/Dispo Help">
+                    <input type="radio" name="deal_type" value="Cash/Dispo Help" id="cash-dispo" class="sr-only" required>
+                    <label for="cash-dispo" class="deal-type-card">
+                      <div class="flex items-center">
+                        <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mr-4">
+                          <i class="fas fa-dollar-sign text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                          <h4 class="font-semibold text-gray-900">Cash/Dispo Help</h4>
+                          <p class="text-sm text-gray-600">Need cash buyer from our network or help selling quickly</p>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  
+                  <div class="deal-type-option" data-value="Novation/Installment Deal">
+                    <input type="radio" name="deal_type" value="Novation/Installment Deal" id="novation-installment" class="sr-only">
+                    <label for="novation-installment" class="deal-type-card">
+                      <div class="flex items-center">
+                        <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mr-4">
+                          <i class="fas fa-handshake text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                          <h4 class="font-semibold text-gray-900">Novation/Installment Deal</h4>
+                          <p class="text-sm text-gray-600">Seller-friendly installment payment structure</p>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  
+                  <div class="deal-type-option" data-value="Creative Finance Deal">
+                    <input type="radio" name="deal_type" value="Creative Finance Deal" id="creative-finance" class="sr-only">
+                    <label for="creative-finance" class="deal-type-card">
+                      <div class="flex items-center">
+                        <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center mr-4">
+                          <i class="fas fa-lightbulb text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                          <h4 class="font-semibold text-gray-900">Creative Finance Deal</h4>
+                          <p class="text-sm text-gray-600">Subject-to, seller finance, or lease-option strategies</p>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  
+                  <div class="deal-type-option" data-value="not-sure">
+                    <input type="radio" name="deal_type_helper" value="not-sure" id="not-sure" class="sr-only">
+                    <label for="not-sure" class="deal-type-card border-dashed border-gray-300">
+                      <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center mr-4">
+                          <i class="fas fa-question text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                          <h4 class="font-semibold text-gray-900">Not Sure?</h4>
+                          <p class="text-sm text-gray-600">We'll help you choose the best strategy</p>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -195,9 +274,12 @@
             <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mr-4">
               <i class="fas fa-calculator text-white text-xl"></i>
             </div>
-            <div>
+            <div class="flex-1">
               <h2 class="text-2xl font-bold text-purple-900">Deal Numbers</h2>
-              <p class="text-purple-700">Let's talk numbers - what are the key financial details?</p>
+              <p class="text-purple-700">PFPS analyzes every deal using our proven MAO system</p>
+            </div>
+            <div class="hidden md:block">
+              <img src="{{ url_for('static', filename='PFPS_Horizontal_Logo_Dark.png') }}" alt="People First Property Solutions" class="h-8 opacity-60">
             </div>
           </div>
           
@@ -264,16 +346,56 @@
               </div>
               
               <div class="form-group">
-                <label class="form-label">Link to Photos / Drive Folder</label>
-                <div class="input-wrapper">
-                  <i class="fas fa-camera input-icon"></i>
-                  <input type="url" name="photo_link" class="form-input" placeholder="https://drive.google.com/...">
+                <label class="form-label">Property Photos</label>
+                <div class="photo-upload-area">
+                  <div id="photo-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition-colors">
+                    <div class="space-y-4">
+                      <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                        <i class="fas fa-camera text-blue-600 text-2xl"></i>
+                      </div>
+                      <div>
+                        <p class="text-lg font-medium text-gray-900">Add Property Photos</p>
+                        <p class="text-sm text-gray-600">Drag & drop photos here or click to browse</p>
+                      </div>
+                      <div class="flex justify-center space-x-4">
+                        <button type="button" id="photo-browse" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                          <i class="fas fa-folder-open mr-2"></i>Browse Files
+                        </button>
+                        <button type="button" id="camera-capture" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                          <i class="fas fa-camera mr-2"></i>Take Photo
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <input type="file" id="photo-input" name="photos" multiple accept="image/*" class="hidden">
+                  <input type="file" id="camera-input" accept="image/*" capture="environment" class="hidden">
+                  
+                  <div id="photo-preview" class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 hidden">
+                    <!-- Photo previews will be inserted here -->
+                  </div>
+                  
+                  <div class="mt-4">
+                    <label class="form-label">Or paste a link to Google Drive / Dropbox</label>
+                    <div class="input-wrapper">
+                      <i class="fas fa-link input-icon"></i>
+                      <input type="url" name="photo_link" class="form-input" placeholder="https://drive.google.com/...">
+                    </div>
+                  </div>
                 </div>
               </div>
               
               <div class="form-group">
                 <label class="form-label">Additional Notes / Questions</label>
-                <textarea name="additional_notes" class="form-input" rows="3" placeholder="Any additional details or questions..."></textarea>
+                <div class="relative">
+                  <textarea name="additional_notes" class="form-input" rows="3" placeholder="Any additional details or questions..."></textarea>
+                  <button type="button" id="voice-memo" class="absolute bottom-3 right-3 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-microphone"></i>
+                  </button>
+                </div>
+                <div class="mt-2 flex items-center text-sm text-gray-600">
+                  <i class="fas fa-info-circle mr-1"></i>
+                  <span>Tip: Include any unique selling points or urgent timeline needs</span>
+                </div>
               </div>
             </div>
           </div>
@@ -300,9 +422,12 @@
             <div class="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center mr-4">
               <i class="fas fa-check text-white text-xl"></i>
             </div>
-            <div>
+            <div class="flex-1">
               <h2 class="text-2xl font-bold text-orange-900">Review Your Deal</h2>
-              <p class="text-orange-700">Please review all details before submitting</p>
+              <p class="text-orange-700">Ready to partner with People First Property Solutions?</p>
+            </div>
+            <div class="hidden md:block">
+              <img src="{{ url_for('static', filename='PFPS_Horizontal_Logo_Dark.png') }}" alt="People First Property Solutions" class="h-8 opacity-60">
             </div>
           </div>
           
@@ -312,12 +437,15 @@
             </div>
           </div>
           
-          <div class="bg-orange-200 border border-orange-300 rounded-xl p-4">
+          <div class="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-xl p-4">
             <div class="flex items-center">
-              <i class="fas fa-info-circle text-orange-800 mr-2"></i>
-              <p class="text-orange-800 text-sm">
-                <strong>Next Steps:</strong> After submission, our team will review your deal within 24-48 hours and contact you with our decision.
-              </p>
+              <img src="{{ url_for('static', filename='PFPS_Icon_Mark_Dark.png') }}" alt="PFPS" class="w-8 h-8 mr-3">
+              <div>
+                <p class="text-blue-900 font-semibold">People First Property Solutions</p>
+                <p class="text-blue-700 text-sm">
+                  <strong>Next Steps:</strong> Our NC/SC specialists will review your deal within 4.2 hours and contact you with our decision.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -327,14 +455,63 @@
             <i class="fas fa-arrow-left mr-2"></i>
             Back
           </button>
-          <button type="submit" class="btn-success">
-            <i class="fas fa-paper-plane mr-2"></i>
-            Submit JV Deal
-          </button>
+          <div class="flex items-center space-x-3">
+            <img src="{{ url_for('static', filename='PFPS_Icon_Mark_Dark.png') }}" alt="PFPS" class="w-8 h-8">
+            <button type="submit" class="btn-success">
+              <i class="fas fa-paper-plane mr-2"></i>
+              Submit to People First Property Solutions
+            </button>
+          </div>
         </div>
       </div>
     </fieldset>
   </form>
+  </div>
+  
+  <!-- Right Side - Real-Time Deal Calculator -->
+  <div class="hidden lg:block w-80 sticky top-8 h-fit">
+    <div id="deal-calculator" class="bg-gradient-to-br from-green-50 to-blue-50 border-2 border-green-200 rounded-2xl p-6 shadow-xl">
+      <div class="flex items-center mb-4">
+        <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mr-3">
+          <i class="fas fa-calculator text-white"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-green-900">Live Deal Analysis</h3>
+          <p class="text-sm text-green-700">Updates as you type</p>
+        </div>
+      </div>
+      
+      <div id="calculator-content" class="space-y-4">
+        <div class="bg-white rounded-lg p-4 border border-green-200">
+          <div class="text-center text-gray-500 py-8">
+            <img src="{{ url_for('static', filename='PFPS_Icon_Mark_Dark.png') }}" alt="PFPS" class="w-12 h-12 mx-auto mb-3 opacity-40">
+            <p>Enter deal details to see live analysis</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Trust Building Elements -->
+    <div class="mt-6 bg-white border border-gray-200 rounded-xl p-4 shadow-lg">
+      <div class="text-center">
+        <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+          <i class="fas fa-shield-alt text-white"></i>
+        </div>
+        <div class="mb-3">
+          <img src="{{ url_for('static', filename='PFPS_Icon_Mark_Dark.png') }}" alt="PFPS" class="w-8 h-8 mx-auto mb-2">
+        </div>
+        <h4 class="font-semibold text-gray-900 mb-2">PFPS Advantage</h4>
+        <div class="space-y-2 text-sm text-gray-600">
+          <p><i class="fas fa-check-circle text-green-500 mr-2"></i>NC/SC Market Experts</p>
+          <p><i class="fas fa-check-circle text-green-500 mr-2"></i>4.2 Hour Response Time</p>
+          <p><i class="fas fa-check-circle text-green-500 mr-2"></i>$50M+ Deals Closed</p>
+          <p><i class="fas fa-check-circle text-green-500 mr-2"></i>200+ Active Partners</p>
+          <p><i class="fas fa-check-circle text-green-500 mr-2"></i>JV Novation Specialists</p>
+          <p><i class="fas fa-check-circle text-green-500 mr-2"></i>Creative Finance Experts</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 
 {% endblock %}

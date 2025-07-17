@@ -22,6 +22,7 @@ class JVWizard {
     this.initNumberFormatting();
     this.loadFromStorage();
     this.updateUI();
+    this.initEnhancedFeatures();
   }
 
   bindEvents() {
@@ -883,5 +884,279 @@ class JVWizard {
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOM loaded, initializing JVWizard...');
   window.jvWizard = new JVWizard();
+window.jvWizard.initEnhancedFeatures = function() {
+  this.initPhotoUpload();
+  this.initVoiceMemo();
+  this.initRealTimeCalculator();
+  this.initDealTypeCards();
+  this.initMarketIntelligence();
+}
+
+window.jvWizard.initPhotoUpload = function() {
+  const dropZone = document.getElementById('photo-drop-zone');
+  const fileInput = document.getElementById('photo-input');
+  const cameraInput = document.getElementById('camera-input');
+  const browseBtn = document.getElementById('photo-browse');
+  const cameraBtn = document.getElementById('camera-capture');
+  const previewContainer = document.getElementById('photo-preview');
+
+  if (!dropZone || !fileInput) return;
+
+  // Drag and drop functionality
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+  });
+
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('drag-over');
+  });
+
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    this.handleFiles(e.dataTransfer.files);
+  });
+
+  // Browse files
+  browseBtn.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    this.handleFiles(e.target.files);
+  });
+
+  // Camera capture
+  cameraBtn.addEventListener('click', () => {
+    cameraInput.click();
+  });
+
+  cameraInput.addEventListener('change', (e) => {
+    this.handleFiles(e.target.files);
+  });
+}
+
+window.jvWizard.handleFiles = function(files) {
+  const previewContainer = document.getElementById('photo-preview');
+  if (!previewContainer) return;
+
+  previewContainer.classList.remove('hidden');
+  
+  Array.from(files).forEach(file => {
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const previewItem = document.createElement('div');
+        previewItem.className = 'photo-preview-item';
+        previewItem.innerHTML = `
+          <img src="${e.target.result}" alt="Property photo">
+          <button type="button" class="remove-photo" onclick="this.parentElement.remove()">×</button>
+        `;
+        previewContainer.appendChild(previewItem);
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
+
+window.jvWizard.initVoiceMemo = function() {
+  const voiceBtn = document.getElementById('voice-memo');
+  const textarea = document.querySelector('textarea[name="additional_notes"]');
+  
+  if (!voiceBtn || !textarea) return;
+
+  let recognition;
+  let isRecording = false;
+
+  if ('webkitSpeechRecognition' in window) {
+    recognition = new webkitSpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event) => {
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        }
+      }
+      if (finalTranscript) {
+        textarea.value += (textarea.value ? ' ' : '') + finalTranscript;
+      }
+    };
+
+    recognition.onend = () => {
+      isRecording = false;
+      voiceBtn.classList.remove('recording');
+      voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+    };
+
+    voiceBtn.addEventListener('click', () => {
+      if (!isRecording) {
+        recognition.start();
+        isRecording = true;
+        voiceBtn.classList.add('recording');
+        voiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
+      } else {
+        recognition.stop();
+      }
+    });
+  } else {
+    voiceBtn.style.display = 'none';
+  }
+}
+
+window.jvWizard.initRealTimeCalculator = function() {
+  const form = document.getElementById('jv-form');
+  if (!form) return;
+
+  form.addEventListener('input', (e) => {
+    this.updateRealTimeCalculator();
+  });
+}
+
+window.jvWizard.updateRealTimeCalculator = function() {
+  const calculatorContent = document.getElementById('calculator-content');
+  if (!calculatorContent) return;
+
+  const formData = new FormData(document.getElementById('jv-form'));
+  const data = Object.fromEntries(formData);
+
+  const arv = parseFloat(data.arv) || 0;
+  const repairs = parseFloat(data.repairs) || 0;
+  const dealType = data.deal_type;
+
+  if (arv > 0 && repairs > 0) {
+    let maoCalc = 0;
+    let dealScore = 'low';
+    let scoreColor = 'text-red-600';
+
+    if (dealType === 'Cash/Dispo Help') {
+      maoCalc = arv * 0.70 - repairs - 5000;
+    } else if (dealType === 'Novation/Installment Deal') {
+      maoCalc = arv * 0.85 - repairs - 10000;
+    } else if (dealType === 'Creative Finance Deal') {
+      maoCalc = arv * 0.90 - repairs - 15000;
+    }
+
+    const profit = maoCalc - (parseFloat(data.asking_price) || 0);
+    
+    if (profit > 30000) {
+      dealScore = 'high';
+      scoreColor = 'text-green-600';
+    } else if (profit > 15000) {
+      dealScore = 'medium';
+      scoreColor = 'text-yellow-600';
+    }
+
+    calculatorContent.innerHTML = `
+      <div class="bg-white rounded-lg p-4 border border-green-200">
+        <div class="deal-score ${scoreColor}">
+          <div class="profit-indicator">${this.formatCurrency(maoCalc)}</div>
+          <p class="text-sm font-medium">Maximum Allowable Offer</p>
+        </div>
+        <div class="profit-breakdown">
+          <div class="profit-breakdown-item">
+            <span>ARV</span>
+            <span>${this.formatCurrency(arv)}</span>
+          </div>
+          <div class="profit-breakdown-item">
+            <span>Repairs</span>
+            <span>-${this.formatCurrency(repairs)}</span>
+          </div>
+          <div class="profit-breakdown-item">
+            <span>Profit Buffer</span>
+            <span>-${this.formatCurrency(dealType === 'Cash/Dispo Help' ? 5000 : dealType === 'Novation/Installment Deal' ? 10000 : 15000)}</span>
+          </div>
+          <div class="profit-breakdown-item font-bold border-t pt-2">
+            <span>Potential Profit</span>
+            <span class="${profit > 0 ? 'text-green-600' : 'text-red-600'}">${this.formatCurrency(profit)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+window.jvWizard.initDealTypeCards = function() {
+  const dealTypeCards = document.querySelectorAll('.deal-type-card');
+  dealTypeCards.forEach(card => {
+    card.addEventListener('click', (e) => {
+      e.preventDefault();
+      const radio = card.previousElementSibling;
+      if (radio && radio.type === 'radio') {
+        radio.checked = true;
+        this.updateRealTimeCalculator();
+      }
+    });
+  });
+}
+
+window.jvWizard.initMarketIntelligence = function() {
+  const addressInput = document.getElementById('autocomplete');
+  if (!addressInput) return;
+
+  addressInput.addEventListener('input', (e) => {
+    const address = e.target.value;
+    if (address.length > 10) {
+      this.showMarketInsights(address);
+    }
+  });
+}
+
+window.jvWizard.showMarketInsights = function(address) {
+  const isNC = address.toLowerCase().includes('nc') || address.toLowerCase().includes('north carolina');
+  const isSC = address.toLowerCase().includes('sc') || address.toLowerCase().includes('south carolina');
+  
+  if (isNC || isSC) {
+    const state = isNC ? 'NC' : 'SC';
+    const insights = this.getMarketInsights(state);
+    
+    const insightDiv = document.createElement('div');
+    insightDiv.className = 'market-insight mt-3';
+    insightDiv.innerHTML = `
+      <div class="flex items-center">
+        <div class="market-insight-icon">
+          <i class="fas fa-info-circle text-xs"></i>
+        </div>
+        <div>
+          <strong>PFPS ${state} Market Intel:</strong> ${insights}
+        </div>
+      </div>
+    `;
+    
+    const existingInsight = document.querySelector('.market-insight');
+    if (existingInsight) {
+      existingInsight.remove();
+    }
+    
+    const addressGroup = addressInput.closest('.form-group');
+    if (addressGroup) {
+      addressGroup.appendChild(insightDiv);
+    }
+  }
+}
+
+window.jvWizard.getMarketInsights = function(state) {
+  const insights = {
+    'NC': 'Charlotte & Raleigh markets showing strong investor activity. Average flip profit: $45K. Best neighborhoods: Myers Park, Dilworth, NoDa.',
+    'SC': 'Charleston & Columbia markets heating up. Average flip profit: $38K. Best neighborhoods: Summerville, Mount Pleasant, Forest Acres.'
+  };
+  return insights[state] || 'Strong market fundamentals in this area.';
+}
+
+window.jvWizard.formatCurrency = function(amount) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount);
+}
+
+// Initialize enhanced features after wizard is created
+window.jvWizard.initEnhancedFeatures();
   console.log('JVWizard initialized:', window.jvWizard);
 });

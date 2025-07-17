@@ -366,6 +366,144 @@ fieldset[data-step="4"] .step-header {
   @apply text-blue-600;
 }
 
+/* Deal Type Cards */
+.deal-type-card {
+  @apply w-full p-4 border-2 border-gray-200 rounded-xl cursor-pointer transition-all duration-200 hover:border-blue-400 hover:shadow-md;
+}
+
+.deal-type-option input[type="radio"]:checked + .deal-type-card {
+  @apply border-blue-600 bg-blue-50 shadow-lg;
+}
+
+.deal-type-option input[type="radio"]:checked + .deal-type-card h4 {
+  @apply text-blue-900;
+}
+
+/* Photo Upload Styling */
+.photo-upload-area {
+  @apply space-y-4;
+}
+
+#photo-drop-zone.drag-over {
+  @apply border-blue-500 bg-blue-50;
+}
+
+.photo-preview-item {
+  @apply relative bg-gray-100 rounded-lg overflow-hidden;
+  aspect-ratio: 1;
+}
+
+.photo-preview-item img {
+  @apply w-full h-full object-cover;
+}
+
+.photo-preview-item .remove-photo {
+  @apply absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs cursor-pointer hover:bg-red-600 transition-colors;
+}
+
+/* Real-time Calculator Styling */
+#deal-calculator {
+  animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.deal-score {
+  @apply text-center py-6;
+}
+
+.deal-score-high {
+  @apply text-green-600;
+}
+
+.deal-score-medium {
+  @apply text-yellow-600;
+}
+
+.deal-score-low {
+  @apply text-red-600;
+}
+
+.profit-indicator {
+  @apply text-2xl font-bold mb-2;
+}
+
+.profit-breakdown {
+  @apply space-y-2 text-sm;
+}
+
+.profit-breakdown-item {
+  @apply flex justify-between items-center;
+}
+
+/* Market Intelligence Cards */
+.market-insight {
+  @apply bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-3 text-sm;
+}
+
+.market-insight-icon {
+  @apply w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center mr-2;
+}
+
+/* Mobile Enhancements */
+@media (max-width: 768px) {
+  .deal-type-card {
+    @apply p-3;
+  }
+  
+  .deal-type-card h4 {
+    @apply text-base;
+  }
+  
+  .deal-type-card p {
+    @apply text-xs;
+  }
+  
+  #photo-drop-zone {
+    @apply p-4;
+  }
+  
+  .photo-preview-item {
+    @apply h-24;
+  }
+}
+
+/* Voice Memo Animation */
+#voice-memo.recording {
+  @apply bg-red-600 animate-pulse;
+}
+
+/* Auto-save indicator */
+.auto-save-indicator {
+  @apply fixed bottom-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg transition-all duration-300;
+}
+
+.auto-save-indicator.saving {
+  @apply bg-yellow-600;
+}
+
+.auto-save-indicator.saved {
+  @apply bg-green-600;
+}
+
+/* Contextual Tips */
+.contextual-tip {
+  @apply bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800 mt-2;
+}
+
+.contextual-tip-icon {
+  @apply inline-block w-4 h-4 mr-2;
+}
+
 /* Deal Analysis Results */
 .deal-analysis-result {
   @apply bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 mb-6;
