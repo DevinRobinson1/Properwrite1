@@ -2254,7 +2254,39 @@
                                             <span>Under Contract Price:</span>
                                             <span id="mls-novation-under-contract-price">$0</span>
                                         </div>
-                                        <div class="flex justify-between">
+                                        
+                                        <!-- Detailed Breakdown Section -->
+                                        <div class="bg-gray-50 p-2 rounded mt-2">
+                                            <h5 class="font-medium text-gray-700 mb-1">Cost Breakdown:</h5>
+                                            <div class="space-y-1 text-xs">
+                                                <div class="flex justify-between">
+                                                    <span>Listing Commission:</span>
+                                                    <span id="mls-listing-commission-amount">$0</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span>Buyer Commission:</span>
+                                                    <span id="mls-buyer-commission-amount">$0</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span>Title/Escrow Fees:</span>
+                                                    <span id="mls-title-fees-amount">$0</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span>Staging & Photography:</span>
+                                                    <span id="mls-staging-photo-amount">$0</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span>Other Closing Costs:</span>
+                                                    <span id="mls-other-closing-amount">$0</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span>Inspection & Repairs:</span>
+                                                    <span id="mls-inspection-repairs-amount">$0</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between font-medium">
                                             <span>Total Commissions and Fees:</span>
                                             <span id="mls-novation-total-commissions-fees">$0</span>
                                         </div>
@@ -7085,6 +7117,14 @@
             updateElementIfExists('mls-novation-under-contract-price', '$' + underContractPrice.toLocaleString());
             updateElementIfExists('mls-novation-total-commissions-fees', '$' + totalCombinedFees.toLocaleString());
             updateElementIfExists('mls-novation-net-to-us', '$' + netToUs.toLocaleString());
+            
+            // Update detailed breakdown elements
+            updateElementIfExists('mls-listing-commission-amount', '$' + listingCommissionAmount.toLocaleString());
+            updateElementIfExists('mls-buyer-commission-amount', '$' + buyerCommissionAmount.toLocaleString());
+            updateElementIfExists('mls-title-fees-amount', '$' + (titleEscrowFees + flatFeeListingService).toLocaleString());
+            updateElementIfExists('mls-staging-photo-amount', '$' + (professionalStaging + photography + matterport).toLocaleString());
+            updateElementIfExists('mls-other-closing-amount', '$' + (loanConcessions + homeWarranty).toLocaleString());
+            updateElementIfExists('mls-inspection-repairs-amount', '$' + (inspectionFee + maxRepairs + makeReadyCleaning).toLocaleString());
         }
         
         function updateNovationCalculation() {
