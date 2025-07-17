@@ -36,9 +36,9 @@ def gate_feature(feature_name):
             if feature_name in PUBLIC_FEATURES:
                 return f(*args, **kwargs)
             
-            # Check if user is authenticated
-            auth_data = auth_service.get_current_user()
-            if auth_data['success']:
+            # Check if user is authenticated (simple session check)
+            user_id = session.get('user_id')
+            if user_id:
                 # User is authenticated, allow access
                 return f(*args, **kwargs)
             
@@ -47,6 +47,8 @@ def gate_feature(feature_name):
             
             # If user hasn't used their free action yet
             if not free_use_cookie:
+                logging.info(f"Allowing free use for feature: {feature_name}")
+                
                 # Allow this action and set the cookie
                 response = make_response(f(*args, **kwargs))
                 
@@ -65,6 +67,7 @@ def gate_feature(feature_name):
                 return response
             
             # User has already used their free action
+            logging.info(f"Free use already consumed, blocking feature: {feature_name}")
             return jsonify({
                 'error': 'auth_required',
                 'message': 'Create an account to unlock this feature. Get 5 free credits + full access.',
@@ -81,8 +84,8 @@ def check_free_use_status():
     Returns:
         Dict with free use status
     """
-    auth_data = auth_service.get_current_user()
-    if auth_data['success']:
+    user_id = session.get('user_id')
+    if user_id:
         return {
             'authenticated': True,
             'free_use_available': False,
@@ -156,9 +159,9 @@ def get_feature_access_info(feature_name: str) -> dict:
             'action_required': None
         }
     
-    # Check authentication
-    auth_data = auth_service.get_current_user()
-    if auth_data['success']:
+    # Check authentication (simple session check)
+    user_id = session.get('user_id')
+    if user_id:
         return {
             'accessible': True,
             'reason': 'authenticated',
