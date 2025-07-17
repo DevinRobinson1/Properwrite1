@@ -3,7 +3,7 @@ Affiliate Management Service
 Handles affiliate operations, promo codes, and commission tracking
 """
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Tuple
 import uuid
 import random
@@ -141,7 +141,7 @@ class AffiliateService:
             return False, "Invalid promo code", None
         
         # Check validity period
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         if promo_code.valid_until and now > promo_code.valid_until:
             return False, "Promo code has expired", None
         
