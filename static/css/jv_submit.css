@@ -145,8 +145,54 @@ textarea.form-input {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
+/* Better field alignment and spacing */
+.form-group {
+  @apply mb-6;
+}
+
+.form-group .form-label {
+  @apply text-base font-semibold text-gray-800 mb-3;
+}
+
+.input-wrapper {
+  @apply relative mb-1;
+}
+
+.input-icon {
+  @apply absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg;
+  z-index: 1;
+}
+
+.form-input {
+  @apply w-full pl-12 pr-4 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm text-base font-medium;
+  min-height: 56px;
+  line-height: 1.5;
+}
+
+.form-select {
+  @apply w-full pl-4 pr-12 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white shadow-sm text-base font-medium;
+  min-height: 56px;
+  line-height: 1.5;
+}
+
+.select-icon {
+  @apply absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg pointer-events-none;
+  z-index: 1;
+}
+
+/* Date input specific styling */
+input[type="date"].form-input {
+  @apply pl-12;
+}
+
+/* Textarea specific styling */
+textarea.form-input {
+  @apply pl-4 pr-4 py-4 resize-none;
+  min-height: 120px;
+}
+
 .form-input:focus, .form-select:focus {
-  @apply shadow-lg border-blue-400 bg-white transform scale-[1.02];
+  @apply shadow-lg border-blue-400 bg-white;
 }
 
 .form-input:focus {
@@ -301,6 +347,88 @@ fieldset[data-step="4"] .step-header {
   .btn-primary, .btn-secondary, .btn-success {
     @apply px-4 py-2.5 text-sm;
   }
+}
+
+/* Validation Messages */
+.validation-message {
+  @apply mt-2 text-sm font-medium;
+}
+
+.validation-message.error {
+  @apply text-red-600;
+}
+
+.validation-message.warning {
+  @apply text-yellow-600;
+}
+
+.validation-message.info {
+  @apply text-blue-600;
+}
+
+/* Deal Analysis Results */
+.deal-analysis-result {
+  @apply bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 mb-6;
+}
+
+.deal-analysis-result.approved {
+  @apply from-green-50 to-emerald-50 border-green-200;
+}
+
+.deal-analysis-result.denied {
+  @apply from-red-50 to-pink-50 border-red-200;
+}
+
+.deal-analysis-result.needs-review {
+  @apply from-yellow-50 to-amber-50 border-yellow-200;
+}
+
+.deal-analysis-result h3 {
+  @apply text-xl font-bold mb-3 flex items-center;
+}
+
+.deal-analysis-result.approved h3 {
+  @apply text-green-800;
+}
+
+.deal-analysis-result.denied h3 {
+  @apply text-red-800;
+}
+
+.deal-analysis-result.needs-review h3 {
+  @apply text-yellow-800;
+}
+
+.deal-analysis-result p {
+  @apply text-gray-700 leading-relaxed mb-3;
+}
+
+.mao-calculation {
+  @apply bg-white rounded-lg p-4 border border-gray-200 mb-4;
+}
+
+.mao-calculation h4 {
+  @apply font-semibold text-gray-800 mb-2;
+}
+
+.mao-calculation .calculation-line {
+  @apply flex justify-between items-center py-1;
+}
+
+.mao-calculation .calculation-line.total {
+  @apply border-t border-gray-300 pt-2 mt-2 font-semibold;
+}
+
+.negotiation-tips {
+  @apply bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4;
+}
+
+.negotiation-tips h4 {
+  @apply font-semibold text-blue-800 mb-2;
+}
+
+.negotiation-tips ul {
+  @apply list-disc list-inside space-y-1 text-blue-700;
 }
 
 /* Animations */

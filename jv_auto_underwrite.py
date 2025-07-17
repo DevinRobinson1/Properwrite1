@@ -173,6 +173,12 @@ def auto_underwrite_deal_with_mao(deal_data, mao_analysis):
         
         reasons = [approval_reason]
         
+        # Add detailed denial reasons if deal is denied
+        if approval_status in ['needs_review', 'likely_denied']:
+            mao_calc = calculate_mao(arv, rehab_cost)
+            denial_reasons = generate_denial_reasons(asking_price, mao_calc, deal_data)
+            reasons.extend([reason['message'] for reason in denial_reasons])
+        
         # Add strategy recommendations to reasons
         for rec in recommendations:
             reasons.append(f"{rec['strategy']}: ${rec['profit']:,.0f} profit ({rec['confidence']} confidence)")
@@ -202,3 +208,80 @@ def auto_underwrite_deal_with_mao(deal_data, mao_analysis):
             'approval_status': 'needs_review',
             'strategies': []
         }
+
+
+def calculate_mao(arv, rehab_cost):
+    """
+    Calculate Maximum Allowable Offer (MAO) for wholesaling
+    Standard formula: ARV * 0.70 - Rehab - Wholesale Profit - Assignment Fee - Closing Costs - Buffer
+    """
+    wholesale_profit = 15000  # Minimum profit for wholesaler
+    assignment_fee = 5000     # Assignment fee
+    closing_costs = 3000      # Estimated closing costs
+    buffer_amount = 5000      # Safety buffer
+    
+    max_allowable_offer = (arv * 0.70) - rehab_cost - wholesale_profit - assignment_fee - closing_costs - buffer_amount
+    
+    return {
+        'arv': arv,
+        'rehab_cost': rehab_cost,
+        'arv_percentage': arv * 0.70,
+        'wholesale_profit': wholesale_profit,
+        'assignment_fee': assignment_fee,
+        'closing_costs': closing_costs,
+        'buffer_amount': buffer_amount,
+        'max_allowable_offer': max(0, max_allowable_offer)
+    }
+
+
+def generate_denial_reasons(asking_price, mao_calculation, deal_data):
+    """
+    Generate detailed denial reasons with specific feedback and tips
+    """
+    reasons = []
+    difference = asking_price - mao_calculation['max_allowable_offer']
+    percentage = (difference / asking_price) * 100 if asking_price > 0 else 0
+    
+    if difference > 0:
+        reasons.append({
+            'category': 'Price Above MAO',
+            'severity': 'high' if percentage > 20 else 'medium',
+            'message': f"Asking price of ${asking_price:,.0f} is ${difference:,.0f} ({percentage:.1f}%) above our Maximum Allowable Offer of ${mao_calculation['max_allowable_offer']:,.0f}",
+            'tips': [
+                "Highlight any additional repair costs or issues you've identified",
+                "Present comparable sales data showing lower values",
+                "Offer a quick close (14-21 days) in exchange for price reduction",
+                "Mention cash offer with no financing contingencies",
+                "Point out market conditions or seasonality affecting buyer demand",
+                f"Suggest splitting the difference or offer at ${asking_price - (difference / 2):,.0f}"
+            ],
+            'mao_breakdown': mao_calculation
+        })
+    
+    # Check for unrealistic ARV
+    if deal_data.get('arv', 0) < asking_price * 1.2:
+        reasons.append({
+            'category': 'ARV Too Low',
+            'severity': 'medium',
+            'message': f"ARV of ${deal_data.get('arv', 0):,.0f} provides insufficient margin above asking price of ${asking_price:,.0f}",
+            'tips': [
+                "Verify ARV with recent comparable sales",
+                "Consider if additional improvements could increase ARV",
+                "Ensure ARV reflects current market conditions"
+            ]
+        })
+    
+    # Check for excessive rehab costs
+    if deal_data.get('rehab_cost', 0) > mao_calculation['arv'] * 0.30:
+        reasons.append({
+            'category': 'High Rehab Costs',
+            'severity': 'medium',
+            'message': f"Rehab cost of ${deal_data.get('rehab_cost', 0):,.0f} exceeds 30% of ARV",
+            'tips': [
+                "Get multiple contractor quotes to verify costs",
+                "Consider if some repairs can be deferred",
+                "Negotiate with seller to address major issues"
+            ]
+        })
+    
+    return reasons

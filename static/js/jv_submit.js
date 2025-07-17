@@ -162,52 +162,199 @@ class JVWizard {
       return false;
     }
 
+    // Clear previous validation messages
+    currentFieldset.querySelectorAll('.validation-message').forEach(msg => msg.remove());
+    
     const requiredFields = currentFieldset.querySelectorAll('input[required], select[required]');
     console.log('Required fields found:', requiredFields.length);
     
     let isValid = true;
     requiredFields.forEach(field => {
       console.log('Checking field:', field.name, 'value:', field.value);
+      
+      // Remove previous error styling
+      field.classList.remove('border-red-300');
+      
       if (!field.value.trim()) {
         field.classList.add('border-red-300');
+        this.showValidationMessage(field, 'This field is required', 'error');
         isValid = false;
         console.log('Field is empty:', field.name);
       } else {
+        // Additional validation for specific fields
+        if (field.name === 'email') {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(field.value)) {
+            field.classList.add('border-red-300');
+            this.showValidationMessage(field, 'Please enter a valid email address', 'error');
+            isValid = false;
+            console.log('Invalid email format');
+          } else {
+            console.log('Email validation passed:', field.value);
+          }
+        } else if (field.name === 'phone') {
+          const phoneRegex = /^\d{10}$/;
+          const cleanPhone = field.value.replace(/\D/g, '');
+          if (!phoneRegex.test(cleanPhone)) {
+            field.classList.add('border-red-300');
+            this.showValidationMessage(field, 'Please enter a valid 10-digit phone number', 'error');
+            isValid = false;
+            console.log('Invalid phone format');
+          } else {
+            console.log('Phone validation passed:', field.value);
+          }
+        } else if (field.name === 'asking_price' || field.name === 'arv') {
+          const numValue = parseFloat(this.getUnformattedValue(field));
+          if (isNaN(numValue) || numValue <= 0) {
+            field.classList.add('border-red-300');
+            this.showValidationMessage(field, 'Please enter a valid dollar amount', 'error');
+            isValid = false;
+          } else if (numValue < 10000) {
+            field.classList.add('border-red-300');
+            this.showValidationMessage(field, 'Amount seems too low for a real estate deal', 'error');
+            isValid = false;
+          }
+        } else if (field.name === 'closing_date') {
+          const selectedDate = new Date(field.value);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          if (selectedDate < today) {
+            field.classList.add('border-red-300');
+            this.showValidationMessage(field, 'Closing date cannot be in the past', 'error');
+            isValid = false;
+          }
+        }
+        
         field.classList.remove('border-red-300');
       }
     });
 
-    // Email validation
-    const emailField = currentFieldset.querySelector('input[type="email"]');
-    if (emailField && emailField.value) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(emailField.value)) {
-        emailField.classList.add('border-red-300');
-        isValid = false;
-        console.log('Email validation failed:', emailField.value);
-      } else {
-        console.log('Email validation passed:', emailField.value);
-      }
-    }
-
-    // Phone validation
-    const phoneField = currentFieldset.querySelector('input[type="tel"]');
-    if (phoneField && phoneField.value) {
-      const phoneRegex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-      if (!phoneRegex.test(phoneField.value)) {
-        phoneField.classList.add('border-red-300');
-        isValid = false;
-        console.log('Phone validation failed:', phoneField.value);
-      } else {
-        console.log('Phone validation passed:', phoneField.value);
+    // Step 3 specific validation - MAO calculation
+    if (this.currentStep === 3 && isValid) {
+      const askingPrice = parseFloat(this.getUnformattedValue(document.querySelector('[name="asking_price"]')));
+      const arv = parseFloat(this.getUnformattedValue(document.querySelector('[name="arv"]')));
+      const rehabCost = parseFloat(this.getUnformattedValue(document.querySelector('[name="rehab_cost"]')) || 0);
+      
+      if (askingPrice && arv) {
+        const maoCalculation = this.calculateMAO(arv, rehabCost);
+        const difference = askingPrice - maoCalculation.maxAllowableOffer;
+        
+        if (difference > 0) {
+          this.showDealAnalysis(askingPrice, maoCalculation, difference);
+        }
       }
     }
 
     console.log('Validation result:', isValid);
-    
-    if (!isValid) {
-      this.showMessage('Please fill in all required fields correctly.', 'error');
+    return isValid;
+  }
+
+  showValidationMessage(field, message, type = 'error') {
+    const existingMessage = field.parentNode.querySelector('.validation-message');
+    if (existingMessage) {
+      existingMessage.remove();
     }
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `validation-message ${type}`;
+    messageDiv.textContent = message;
+    
+    field.parentNode.appendChild(messageDiv);
+  }
+
+  calculateMAO(arv, rehabCost) {
+    // Standard MAO calculation for wholesaling
+    const wholesaleProfit = 15000; // Minimum profit for wholesaler
+    const assignmentFee = 5000; // Assignment fee
+    const closingCosts = 3000; // Estimated closing costs
+    const bufferAmount = 5000; // Safety buffer
+    
+    const maxAllowableOffer = (arv * 0.70) - rehabCost - wholesaleProfit - assignmentFee - closingCosts - bufferAmount;
+    
+    return {
+      arv: arv,
+      rehabCost: rehabCost,
+      arvPercentage: arv * 0.70,
+      wholesaleProfit: wholesaleProfit,
+      assignmentFee: assignmentFee,
+      closingCosts: closingCosts,
+      bufferAmount: bufferAmount,
+      maxAllowableOffer: Math.max(0, maxAllowableOffer)
+    };
+  }
+
+  showDealAnalysis(askingPrice, maoCalculation, difference) {
+    const dealAnalysisDiv = document.createElement('div');
+    dealAnalysisDiv.className = 'deal-analysis-result needs-review';
+    
+    const percentage = ((difference / askingPrice) * 100).toFixed(1);
+    
+    dealAnalysisDiv.innerHTML = `
+      <h3>
+        <i class="fas fa-exclamation-triangle mr-2"></i>
+        Deal Analysis: Price Above MAO
+      </h3>
+      <p>The asking price of <strong>$${askingPrice.toLocaleString()}</strong> is <strong>$${difference.toLocaleString()}</strong> (${percentage}%) above our Maximum Allowable Offer (MAO).</p>
+      
+      <div class="mao-calculation">
+        <h4>MAO Calculation Breakdown:</h4>
+        <div class="calculation-line">
+          <span>ARV (After Repair Value)</span>
+          <span>$${maoCalculation.arv.toLocaleString()}</span>
+        </div>
+        <div class="calculation-line">
+          <span>70% of ARV</span>
+          <span>$${maoCalculation.arvPercentage.toLocaleString()}</span>
+        </div>
+        <div class="calculation-line">
+          <span>Less: Rehab Cost</span>
+          <span>($${maoCalculation.rehabCost.toLocaleString()})</span>
+        </div>
+        <div class="calculation-line">
+          <span>Less: Wholesale Profit</span>
+          <span>($${maoCalculation.wholesaleProfit.toLocaleString()})</span>
+        </div>
+        <div class="calculation-line">
+          <span>Less: Assignment Fee</span>
+          <span>($${maoCalculation.assignmentFee.toLocaleString()})</span>
+        </div>
+        <div class="calculation-line">
+          <span>Less: Closing Costs</span>
+          <span>($${maoCalculation.closingCosts.toLocaleString()})</span>
+        </div>
+        <div class="calculation-line">
+          <span>Less: Safety Buffer</span>
+          <span>($${maoCalculation.bufferAmount.toLocaleString()})</span>
+        </div>
+        <div class="calculation-line total">
+          <span><strong>Maximum Allowable Offer</strong></span>
+          <span><strong>$${maoCalculation.maxAllowableOffer.toLocaleString()}</strong></span>
+        </div>
+      </div>
+      
+      <div class="negotiation-tips">
+        <h4>Negotiation Tips to Get Better Price:</h4>
+        <ul>
+          <li>Highlight any additional repair costs or issues you've identified</li>
+          <li>Present comparable sales data showing lower values</li>
+          <li>Offer a quick close (14-21 days) in exchange for price reduction</li>
+          <li>Mention cash offer with no financing contingencies</li>
+          <li>Point out market conditions or seasonality affecting buyer demand</li>
+          <li>Suggest splitting the difference or offer at $${(askingPrice - (difference / 2)).toLocaleString()}</li>
+        </ul>
+      </div>
+      
+      <p><strong>Note:</strong> We can still move forward with this deal if you believe you can negotiate the price down or if there are other compelling factors. Our team will review all submissions individually.</p>
+    `;
+    
+    const currentFieldset = document.querySelector(`fieldset[data-step="${this.currentStep}"]`);
+    const contentDiv = currentFieldset.querySelector('.bg-white.rounded-xl');
+    contentDiv.appendChild(dealAnalysisDiv);
+  }
+        field.classList.remove('border-red-300');
+      }
+    });
 
     return isValid;
   }
