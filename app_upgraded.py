@@ -162,6 +162,12 @@ def admin_affiliate_login():
     """Admin affiliate login page"""
     return render_template('admin_affiliate_login.html')
 
+# JV Expectations Route
+@app.route('/jv-expectations')
+def jv_expectations():
+    """Joint Venture partnership expectations page"""
+    return render_template('jv_expectations.html')
+
 # Bitcoin Payment Routes
 @app.route('/bitcoin/subscription/<plan_key>')
 def bitcoin_subscription(plan_key):
