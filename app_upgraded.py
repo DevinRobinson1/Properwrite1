@@ -4023,7 +4023,8 @@ def affiliate_redirect(affiliate_code):
             'AFF002': 'AFF002', 
             'AFF003': 'AFF003',
             'WELCOME': 'WELCOME50',
-            'STARTER': 'STARTER100'
+            'STARTER': 'STARTER100',
+            'CG40': 'CG40'
         }
         
         promo_code = affiliate_promo_map.get(affiliate_code)

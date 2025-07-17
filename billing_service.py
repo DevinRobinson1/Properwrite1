@@ -789,7 +789,8 @@ class BillingService:
             'AFF003': 200,
             'WELCOME50': 50,
             'STARTER100': 100,
-            'subto25': 25
+            'subto25': 25,
+            'CG40': 40
         }
         
         return PROMO_BONUSES.get(promo_code, 0)
