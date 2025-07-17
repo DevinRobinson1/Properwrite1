@@ -1,0 +1,91 @@
+dd exact route & validation
+(src/routes/admin/userCredits.js)
+
+js
+Copy
+Edit
+import express from 'express';
+import { db } from '../../services/replitDb.js';   // ← adjust path
+import { requireRole } from '../../middleware/requireRole.js';
+
+const router = express.Router();
+
+/**
+ * POST /admin/api/users/:userId/credits
+ * Body: { delta: number }
+ */
+router.post(
+  '/admin/api/users/:userId/credits',
+  requireRole(['admin', 'team']),
+  express.json(),                       // <-- ensure JSON body is parsed
+  async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { delta } = req.body;
+
+      if (!userId)          return res.status(400).json({ error: 'Missing userId' });
+      if (typeof delta !== 'number' || isNaN(delta))
+                           return res.status(400).json({ error: 'delta must be a number' });
+
+      const subKey = `subscriptions:${userId}`;
+      const sub    = (await db.get(subKey)) || { credits: 0 };
+
+      const newCredits = Math.max(0, (sub.credits || 0) + delta);
+      await db.set(subKey, { ...sub, credits: newCredits, updatedAt: Date.now() });
+
+      res.json({ ok: true, credits: newCredits });
+    } catch (err) {
+      console.error('Credit adjust error', err);
+      res.status(500).json({ error: 'Server error' });
+    }
+});
+
+export default router;
+Wire it in app.js:
+
+js
+Copy
+Edit
+import userCredits from './routes/admin/userCredits.js';
+app.use(userCredits);
+2️⃣ Frontend – send JSON with proper header
+(snippet for your Add Credits modal/button)
+
+js
+Copy
+Edit
+async function addUserCredits(userId, delta) {
+  try {
+    const res = await fetch(`/admin/api/users/${userId}/credits`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ delta: Number(delta) })
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+    const { credits } = await res.json();
+    alert(`Credits updated ✔︎  New balance: ${credits}`);
+    refreshUserPanel(userId);                          // re-pull user data
+  } catch (err) {
+    console.error('Error adding credits:', err);
+    alert('Error adding credits');
+  }
+}
+Common gotcha: if you use FormData() the browser defaults to multipart/form-data, which fails the server’s JSON check. Always send raw JSON with the header above.
+
+3️⃣ Quick sanity test
+bash
+Copy
+Edit
+curl -X POST https://properwrite.com/admin/api/users/<USER_ID>/credits \
+     -H "Content-Type: application/json" \
+     --cookie "properwrite_token=<JWT>" \
+     -d '{"delta": 25}'
+# 👉 Should return 200 { "ok":true, "credits": NEW_TOTAL }
+4️⃣ Why you saw the 400
+Network tab shows body as delta= (empty) or missing header → server’s delta validator fails → 400 Bad Request
+
+DevTools alert pops “Error adding credits”.
+
+After dropping in both snippets, delta is delivered correctly, the route updates subscriptions:{userId}.credits, and the alert confirms the new balance. No more 400s. 🚀
