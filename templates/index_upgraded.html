@@ -12584,13 +12584,243 @@
             }
         }
         
-        // Export functions (placeholder)
+        // Export functions
         function exportFixFlipSOW() {
-            showToast('Excel export feature coming soon!', 'info');
+            // Generate and download Fix & Flip SOW report
+            const projectData = {
+                project_name: document.getElementById('ff-project-name').value || 'Fix & Flip Project',
+                property_address: document.getElementById('ff-property-address').value || '',
+                square_footage: document.getElementById('ff-square-footage').value || '',
+                hard_costs: document.getElementById('ff-hard-costs').textContent || '$0',
+                overhead_cost: document.getElementById('ff-overhead-cost').textContent || '$0',
+                contingency_cost: document.getElementById('ff-contingency-cost').textContent || '$0',
+                gc_fee_cost: document.getElementById('ff-gc-fee-cost').textContent || '$0',
+                total_cost: document.getElementById('ff-total-cost').textContent || '$0'
+            };
+
+            // Create CSV content for SOW
+            const csvContent = [
+                ['Fix & Flip - Statement of Work (SOW)'],
+                [''],
+                ['Project Information'],
+                ['Project Name', projectData.project_name],
+                ['Property Address', projectData.property_address],
+                ['Square Footage', projectData.square_footage],
+                [''],
+                ['Cost Breakdown'],
+                ['Hard Costs', projectData.hard_costs],
+                ['Overhead', projectData.overhead_cost],
+                ['Contingency', projectData.contingency_cost],
+                ['GC Fee', projectData.gc_fee_cost],
+                [''],
+                ['Total Project Cost', projectData.total_cost],
+                [''],
+                ['Selected Items'],
+                ['Trade', 'Item', 'Quantity', 'Unit Price', 'Total']
+            ];
+
+            // Add selected items to CSV
+            fixFlipItems.forEach(item => {
+                csvContent.push([
+                    item.trade || '',
+                    item.sub_item || '',
+                    item.quantity || '',
+                    item.unit_price || '',
+                    item.total_price || ''
+                ]);
+            });
+
+            const csvString = csvContent.map(row => row.join(',')).join('\n');
+
+            // Download the file
+            const blob = new Blob([csvString], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'fix-flip-sow.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            showToast('SOW exported successfully!', 'success');
         }
         
         function exportNewConstructionProForma() {
-            showToast('Excel export feature coming soon!', 'info');
+            // Generate and download New Construction Pro Forma
+            const projectData = {
+                sell_price: document.getElementById('nc-sell-price').value || '0',
+                project_duration: document.getElementById('nc-project-duration').value || '0',
+                land_price: document.getElementById('nc-land-price').value || '0',
+                units: document.getElementById('nc-units').value || '0',
+                total_development: document.getElementById('nc-total-development').textContent || '$0',
+                total_vertical: document.getElementById('nc-total-vertical').textContent || '$0',
+                final_profit: document.getElementById('nc-final-profit').textContent || '$0'
+            };
+
+            // Create CSV content for Pro Forma
+            const csvContent = [
+                ['New Construction - Pro Forma'],
+                [''],
+                ['Project Overview'],
+                ['Sell Home Price', projectData.sell_price],
+                ['Project Duration (Days)', projectData.project_duration],
+                ['Land Purchase Price', projectData.land_price],
+                ['Number of Units', projectData.units],
+                [''],
+                ['Cost Summary'],
+                ['Total Development Cost', projectData.total_development],
+                ['Total Vertical Construction', projectData.total_vertical],
+                [''],
+                ['Profit Analysis'],
+                ['Final Profit', projectData.final_profit],
+                [''],
+                ['Generated on', new Date().toLocaleDateString()]
+            ];
+
+            const csvString = csvContent.map(row => row.join(',')).join('\n');
+
+            // Download the file
+            const blob = new Blob([csvString], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'new-construction-proforma.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            showToast('Pro Forma exported successfully!', 'success');
+        }
+        
+        // Export breakdown function for renovation estimator
+        function exportRenovationBreakdown() {
+            // Generate detailed renovation breakdown export
+            const breakdownData = {
+                property_address: document.getElementById('ren-property-address').value || '',
+                exterior_total: document.getElementById('ren-exterior-total').textContent || '$0',
+                mechanical_total: document.getElementById('ren-mechanical-total').textContent || '$0',
+                interior_total: document.getElementById('ren-interior-total').textContent || '$0',
+                total_cost: document.getElementById('ren-total-cost').textContent || '$0',
+                profit: document.getElementById('ren-profit-dollars').textContent || '$0',
+                deal_rating: document.getElementById('ren-deal-rating').textContent || ''
+            };
+
+            // Create detailed CSV content
+            const csvContent = [
+                ['Renovation Cost Breakdown - Detailed Report'],
+                [''],
+                ['Property Information'],
+                ['Property Address', breakdownData.property_address],
+                [''],
+                ['Cost Categories'],
+                ['Exterior Costs', breakdownData.exterior_total],
+                ['Mechanical Costs', breakdownData.mechanical_total],
+                ['Interior Costs', breakdownData.interior_total],
+                [''],
+                ['Summary'],
+                ['Total Renovation Cost', breakdownData.total_cost],
+                ['Expected Profit', breakdownData.profit],
+                ['Deal Rating', breakdownData.deal_rating],
+                [''],
+                ['Report Generated', new Date().toLocaleDateString() + ' at ' + new Date().toLocaleTimeString()]
+            ];
+
+            const csvString = csvContent.map(row => row.join(',')).join('\n');
+
+            // Download the file
+            const blob = new Blob([csvString], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'renovation-breakdown.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            showToast('Breakdown exported successfully!', 'success');
+        }
+        
+        // Export breakdown function for new construction
+        function exportNewConstructionBreakdown() {
+            // Generate comprehensive new construction breakdown export
+            const breakdownData = {
+                // Basic project info
+                sell_price: document.getElementById('nc-sell-price').value || '0',
+                project_duration: document.getElementById('nc-project-duration').value || '0',
+                land_price: document.getElementById('nc-land-price').value || '0',
+                units: document.getElementById('nc-units').value || '0',
+                
+                // Development costs
+                sewer_water: document.getElementById('nc-sewer-water').value || '0',
+                surveys: document.getElementById('nc-surveys').value || '0',
+                soil_test: document.getElementById('nc-soil-test').value || '0',
+                clearing: document.getElementById('nc-clearing').value || '0',
+                civil_plans: document.getElementById('nc-civil-plans').value || '0',
+                entitlement: document.getElementById('nc-entitlement').value || '0',
+                architectural: document.getElementById('nc-architectural').value || '0',
+                
+                // Loan & holding costs
+                insurance: document.getElementById('nc-insurance').value || '0',
+                taxes: document.getElementById('nc-taxes').value || '0',
+                utilities: document.getElementById('nc-utilities').value || '0',
+                maintenance: document.getElementById('nc-maintenance').value || '0',
+                other_expenses: document.getElementById('nc-other-expenses').value || '0',
+                
+                // Realtor fees
+                realtor_percent: document.getElementById('nc-realtor-percent').value || '0',
+                realtor_amount: document.getElementById('nc-realtor-amount').value || '0',
+                
+                // Final numbers
+                final_profit: document.getElementById('nc-final-profit').value || '0',
+                total_expenses: document.getElementById('nc-total-expenses').value || '0'
+            };
+
+            // Create comprehensive CSV content
+            const csvContent = [
+                ['New Construction - Detailed Breakdown'],
+                [''],
+                ['Project Overview'],
+                ['Sell Home Price', '$' + breakdownData.sell_price],
+                ['Project Duration (Days)', breakdownData.project_duration],
+                ['Land Purchase Price', '$' + breakdownData.land_price],
+                ['Number of Units', breakdownData.units],
+                [''],
+                ['Development Costs'],
+                ['Sewer & Water Taps', '$' + breakdownData.sewer_water],
+                ['Surveys', '$' + breakdownData.surveys],
+                ['Soil Test and Environmentals', '$' + breakdownData.soil_test],
+                ['Clearing Lot', '$' + breakdownData.clearing],
+                ['Civil Plans and Engineering', '$' + breakdownData.civil_plans],
+                ['Entitlement Fees', '$' + breakdownData.entitlement],
+                ['Architectural Plans', '$' + breakdownData.architectural],
+                [''],
+                ['Holding Costs'],
+                ['Insurance', '$' + breakdownData.insurance],
+                ['Taxes', '$' + breakdownData.taxes],
+                ['Utilities', '$' + breakdownData.utilities],
+                ['Maintenance', '$' + breakdownData.maintenance],
+                ['Other Expenses (HOA)', '$' + breakdownData.other_expenses],
+                [''],
+                ['Sales Costs'],
+                ['Realtor Fee Percentage', breakdownData.realtor_percent + '%'],
+                ['Realtor Amount', '$' + breakdownData.realtor_amount],
+                [''],
+                ['Financial Summary'],
+                ['Total Project Expenses', '$' + breakdownData.total_expenses],
+                ['Final Profit', '$' + breakdownData.final_profit],
+                [''],
+                ['Report Generated', new Date().toLocaleDateString() + ' at ' + new Date().toLocaleTimeString()]
+            ];
+
+            const csvString = csvContent.map(row => row.join(',')).join('\n');
+
+            // Download the file
+            const blob = new Blob([csvString], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'new-construction-breakdown.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            showToast('Construction breakdown exported successfully!', 'success');
         }
         
         // Show tooltip
