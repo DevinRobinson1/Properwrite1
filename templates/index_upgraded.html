@@ -12435,18 +12435,26 @@
                     </ul>
                 </div>
                 
-                <div class="flex space-x-3">
+                <div class="flex flex-col space-y-3">
+                    <div class="flex space-x-3">
+                        <button 
+                            onclick="showRegistrationModal()"
+                            class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            Create Free Account
+                        </button>
+                        <button 
+                            onclick="showLoginModal()"
+                            class="flex-1 px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                        >
+                            Sign In
+                        </button>
+                    </div>
                     <button 
-                        onclick="closeFreemiumGate()"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                        onclick="dismissFreemiumGate()"
+                        class="w-full px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors text-sm"
                     >
-                        Cancel
-                    </button>
-                    <button 
-                        onclick="showRegistrationModal()"
-                        class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                        Sign Up Free
+                        Not Right Now
                     </button>
                 </div>
             </div>
@@ -12503,6 +12511,13 @@
                 return action(); // User is authenticated, allow access
             }
             
+            // Check if user dismissed freemium gate and this is a wholesale feature
+            const dismissed = localStorage.getItem('freemium-dismissed');
+            if (dismissed === 'true' && (featureName === 'wholesale' || featureName === 'acquisitions')) {
+                // Allow access to wholesale features even after dismissal
+                return action();
+            }
+            
             // Check feature access
             const accessInfo = await canAccessFeature(featureName);
             
@@ -12545,6 +12560,19 @@
             freemiumGateActive = false;
         }
         
+        // Dismiss freemium gate modal - allows continued use of wholesale module
+        function dismissFreemiumGate() {
+            const modal = document.getElementById('freemium-gate-modal');
+            modal.classList.add('hidden');
+            freemiumGateActive = false;
+            
+            // Set a flag to allow continued use of wholesale module
+            localStorage.setItem('freemium-dismissed', 'true');
+            
+            // Show a brief toast notification
+            showToast('You can continue using the wholesale calculator. Sign up anytime for full access!', 'info');
+        }
+        
         // Show free use toast
         function showFreeUseToast() {
             const toast = document.getElementById('free-use-toast');
@@ -12553,6 +12581,44 @@
             // Hide after 5 seconds
             setTimeout(() => {
                 toast.classList.add('hidden');
+            }, 5000);
+        }
+        
+        // Show a general toast notification
+        function showToast(message, type = 'info') {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full`;
+            
+            // Set toast style based on type
+            if (type === 'info') {
+                toast.className += ' bg-blue-500 text-white';
+            } else if (type === 'success') {
+                toast.className += ' bg-green-500 text-white';
+            } else if (type === 'warning') {
+                toast.className += ' bg-orange-500 text-white';
+            }
+            
+            toast.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
             }, 5000);
         }
         
@@ -12577,10 +12643,13 @@
         const originalShowAcquisitionsTab = window.showAcquisitionsTab;
         if (originalShowAcquisitionsTab) {
             window.showAcquisitionsTab = function(tabName) {
-                if (tabName !== 'wholesale') { // Wholesale is always accessible
+                if (tabName === 'wholesale') {
+                    // Wholesale is always accessible
+                    return originalShowAcquisitionsTab(tabName);
+                } else {
+                    // Other tabs require access check
                     return gateFeatureAccess('acquisitions', () => originalShowAcquisitionsTab(tabName));
                 }
-                return originalShowAcquisitionsTab(tabName);
             };
         }
         
