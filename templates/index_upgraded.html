@@ -6018,11 +6018,18 @@
             const arv = parseFloat(document.getElementById('arv')?.value?.replace(/[^\d]/g, '')) || 415000;
             const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/[^\d]/g, '')) || 30000;
             
-            // Read assignment fee from user input, fallback to global value if not set
+            // Read assignment fee from user input - preserve user's value without defaulting back to 15000
             const wholesaleAssignmentInput = document.getElementById('wholesale-assignment-fee');
-            const assignmentFee = wholesaleAssignmentInput ? 
-                parseFloat(wholesaleAssignmentInput.value.replace(/[^\d]/g, '')) || 15000 : 
-                window.globalMinAcceptableProfit || 15000;
+            let assignmentFee = 15000; // Default value
+            
+            if (wholesaleAssignmentInput && wholesaleAssignmentInput.value) {
+                const userValue = parseFloat(wholesaleAssignmentInput.value.replace(/[^\d]/g, ''));
+                if (userValue && !isNaN(userValue)) {
+                    assignmentFee = userValue;
+                }
+            } else if (window.globalMinAcceptableProfit) {
+                assignmentFee = window.globalMinAcceptableProfit;
+            }
             
             // Calculate MAO: ARV * 70% - Repairs - Assignment Fee
             const percent = parseFloat(document.getElementById('wholesale-arv-percent')?.value) / 100 || 0.70;
