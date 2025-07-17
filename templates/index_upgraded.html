@@ -2290,10 +2290,22 @@
                                             <span>Total Commissions and Fees:</span>
                                             <span id="mls-novation-total-commissions-fees">$0</span>
                                         </div>
+                                        <div class="flex justify-between">
+                                            <span>Gross Sales Price After Closing Fees:</span>
+                                            <span id="mls-gross-sales-price">$0</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Less: Acquisition Cost:</span>
+                                            <span id="mls-acquisition-cost">$0</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Less: Repair Costs:</span>
+                                            <span id="mls-repair-costs">$0</span>
+                                        </div>
                                         <hr class="my-2">
                                         <div class="flex justify-between font-bold">
-                                            <span>Net to Us:</span>
-                                            <span class="text-blue-600 font-bold" id="mls-novation-net-to-us">$0</span>
+                                            <span>Net to Us (Profit):</span>
+                                            <span class="text-green-600 font-bold" id="mls-novation-net-to-us">$0</span>
                                         </div>
                                     </div>
                                 </div>
@@ -7097,8 +7109,17 @@
             const saleFastPrice = listPrice;
             const underContractPrice = listPrice;
             
-            // Calculate net to us: List Price - Total Combined Fees
-            const netToUs = listPrice - totalCombinedFees;
+            // Get acquisition cost (what we paid for the property)
+            const acquisitionCost = parseFloat(document.getElementById('global-acquisitions-price-header')?.value?.replace(/,/g, '')) || 140000;
+            
+            // Get repairs cost
+            const repairsCost = parseFloat(document.getElementById('repairs')?.value?.replace(/,/g, '')) || 30000;
+            
+            // Calculate gross sales price after closing fees
+            const grossSalesPrice = listPrice - totalCombinedFees;
+            
+            // Calculate net to us (actual profit): Gross Sales Price - Acquisition Cost - Repairs
+            const netToUs = grossSalesPrice - acquisitionCost - repairsCost;
             
             console.log('MLS/Novation calculation:', {
                 listPrice,
@@ -7108,6 +7129,9 @@
                 totalClosingCosts,
                 totalOutOfPocket,
                 totalCombinedFees,
+                grossSalesPrice,
+                acquisitionCost,
+                repairsCost,
                 netToUs
             });
             
@@ -7116,6 +7140,9 @@
             updateElementIfExists('mls-novation-sale-fast-price', '$' + saleFastPrice.toLocaleString());
             updateElementIfExists('mls-novation-under-contract-price', '$' + underContractPrice.toLocaleString());
             updateElementIfExists('mls-novation-total-commissions-fees', '$' + totalCombinedFees.toLocaleString());
+            updateElementIfExists('mls-gross-sales-price', '$' + grossSalesPrice.toLocaleString());
+            updateElementIfExists('mls-acquisition-cost', '$' + acquisitionCost.toLocaleString());
+            updateElementIfExists('mls-repair-costs', '$' + repairsCost.toLocaleString());
             updateElementIfExists('mls-novation-net-to-us', '$' + netToUs.toLocaleString());
             
             // Update detailed breakdown elements
