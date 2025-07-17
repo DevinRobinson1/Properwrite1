@@ -3,11 +3,14 @@
   <div class="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[95vh] overflow-y-auto">
     <!-- Modal Header -->
     <div class="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
-      <h2 class="text-2xl font-bold text-gray-900">
-        <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          JV Partnership Expectations
-        </span>
-      </h2>
+      <div class="flex items-center space-x-4">
+        <img src="/static/PFPS_Icon_Mark_Dark.png" alt="People First Property Solutions" class="w-8 h-8 object-contain">
+        <h2 class="text-2xl font-bold text-gray-900">
+          <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            JV Partnership Expectations
+          </span>
+        </h2>
+      </div>
       <button onclick="closeJVExpectationsModal()" class="text-gray-500 hover:text-gray-700">
         <i class="fas fa-times text-xl"></i>
       </button>
@@ -16,8 +19,11 @@
     <!-- Modal Content -->
     <div class="p-6">
       <div class="text-center mb-8">
+        <div class="flex justify-center mb-4">
+          <img src="/static/PFPS_Horizontal_Logo_Dark.png" alt="People First Property Solutions" class="h-10 object-contain">
+        </div>
         <p class="text-lg text-gray-600">
-          Welcome to the People First Property Solutions JV Network! We believe in people over profit—this isn't just a deal, it's the beginning of a long-term partnership.
+          Welcome to the People First Property Solutions JV Network! We believe in people over profit—this isn't just a deal, it's the beginning of a long-term partnership. We exclusively work deals in North Carolina and South Carolina markets.
         </p>
       </div>
       
@@ -270,16 +276,62 @@
             </h4>
             <p class="text-gray-700 text-sm">No. Once we're locked in on a deal, exclusivity is expected.</p>
           </div>
+          
+          <div class="bg-white rounded-lg p-4 border border-gray-200">
+            <h4 class="font-semibold text-gray-900 mb-2 flex items-center">
+              <i class="fas fa-map-marker-alt text-orange-600 mr-2"></i>
+              Do you work deals outside NC/SC?
+            </h4>
+            <p class="text-gray-700 text-sm">No. We exclusively focus on North Carolina and South Carolina markets where we have established buyer networks and local expertise.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Geographic Focus -->
+      <div class="mb-8">
+        <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+          <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>
+          Our Market Focus
+        </h3>
+        
+        <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+          <div class="text-center mb-4">
+            <div class="flex justify-center mb-2">
+              <img src="/static/PFPS_Horizontal_Logo_Dark.png" alt="People First Property Solutions" class="h-8 object-contain">
+            </div>
+            <p class="text-lg text-blue-800 font-semibold">We exclusively work deals in North Carolina and South Carolina</p>
+          </div>
+          
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="bg-white rounded-lg p-4 shadow-sm">
+              <h4 class="text-lg font-bold text-blue-800 mb-2 flex items-center">
+                <i class="fas fa-home text-blue-600 mr-2"></i>
+                North Carolina Markets
+              </h4>
+              <p class="text-gray-700 text-sm">Active in Charlotte, Raleigh, Greensboro, Winston-Salem, and surrounding areas.</p>
+            </div>
+            
+            <div class="bg-white rounded-lg p-4 shadow-sm">
+              <h4 class="text-lg font-bold text-blue-800 mb-2 flex items-center">
+                <i class="fas fa-home text-blue-600 mr-2"></i>
+                South Carolina Markets
+              </h4>
+              <p class="text-gray-700 text-sm">Active in Charleston, Columbia, Greenville, Rock Hill, and surrounding areas.</p>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- Call to Action -->
       <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white text-center">
+        <div class="flex justify-center mb-4">
+          <img src="/static/PFPS_Horizontal_Logo_Dark.png" alt="People First Property Solutions" class="h-8 object-contain filter brightness-0 invert">
+        </div>
         <h3 class="text-xl font-bold mb-4">
           <i class="fas fa-rocket mr-2"></i>
           Ready to Start?
         </h3>
-        <p class="mb-4">Let's make some deals together!</p>
+        <p class="mb-4">Let's make some deals together in North Carolina and South Carolina!</p>
         
         <div class="space-y-3">
           <a href="/jv-submit" class="inline-block bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200 mr-4">
