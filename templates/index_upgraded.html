@@ -10054,8 +10054,16 @@
                         },
                         body: JSON.stringify(data)
                     })
-                    .then(response => response.json())
-                    .then(result => {
+                    .then(async response => {
+                        const result = await response.json();
+                        
+                        // Check for freemium gate response
+                        if (response.status === 403 && result.error === 'auth_required') {
+                            hideLoadingState();
+                            showFreemiumGate('propertyAnalysis', result.message);
+                            return;
+                        }
+                        
                         if (result.success) {
                             // Display analysis results
                             displayPropertyAnalysis(result);
@@ -12391,5 +12399,208 @@
     
     <!-- Include Billing Modal -->
     {% include 'billing_modal.html' %}
+    
+    <!-- Freemium Access Gate Modal -->
+    <div id="freemium-gate-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div class="text-center">
+                <div class="mb-4">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-key text-blue-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Unlock This Feature</h3>
+                    <p class="text-gray-600 mb-4" id="freemium-gate-message">
+                        Create an account to unlock this feature.<br>
+                        Get 5 free credits + full access.
+                    </p>
+                </div>
+                
+                <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                    <div class="flex items-center justify-center mb-2">
+                        <i class="fas fa-gift text-blue-600 mr-2"></i>
+                        <span class="font-semibold text-blue-800">Free Signup Bonus</span>
+                    </div>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li>✓ 5 free property analysis credits</li>
+                        <li>✓ Full access to all calculators</li>
+                        <li>✓ Save and export your reports</li>
+                        <li>✓ Team collaboration features</li>
+                    </ul>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button 
+                        onclick="closeFreemiumGate()"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        onclick="showRegistrationModal()"
+                        class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        Sign Up Free
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Free Use Toast -->
+    <div id="free-use-toast" class="fixed top-4 right-4 bg-orange-500 text-white px-4 py-3 rounded-lg shadow-lg hidden z-50">
+        <div class="flex items-center">
+            <i class="fas fa-info-circle mr-2"></i>
+            <span>That was your free use—register now for more access!</span>
+        </div>
+    </div>
+    
+    <script>
+        // Freemium Gate JavaScript
+        let freemiumGateActive = false;
+        let userFreeUseStatus = null;
+        
+        // Initialize freemium gate on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkFreemiumStatus();
+        });
+        
+        // Check freemium status from backend
+        async function checkFreemiumStatus() {
+            try {
+                const response = await fetch('/api/freemium/status');
+                const data = await response.json();
+                userFreeUseStatus = data;
+                console.log('Freemium status:', data);
+            } catch (error) {
+                console.error('Error checking freemium status:', error);
+            }
+        }
+        
+        // Check if user can access a feature
+        async function canAccessFeature(featureName) {
+            try {
+                const response = await fetch(`/api/freemium/feature-access/${featureName}`);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error checking feature access:', error);
+                return { accessible: false, reason: 'error' };
+            }
+        }
+        
+        // Gate feature access
+        async function gateFeatureAccess(featureName, action) {
+            // Check if user is authenticated
+            if (window.userStatus && window.userStatus.authenticated) {
+                return action(); // User is authenticated, allow access
+            }
+            
+            // Check feature access
+            const accessInfo = await canAccessFeature(featureName);
+            
+            if (accessInfo.accessible) {
+                // User can access the feature
+                const result = await action();
+                
+                // Check if this was a free use (from response headers)
+                if (accessInfo.reason === 'free_use_available') {
+                    showFreeUseToast();
+                    // Refresh status after free use
+                    setTimeout(checkFreemiumStatus, 1000);
+                }
+                
+                return result;
+            } else {
+                // Show the freemium gate modal
+                showFreemiumGate(featureName, accessInfo.message);
+                return false;
+            }
+        }
+        
+        // Show freemium gate modal
+        function showFreemiumGate(featureName, message) {
+            const modal = document.getElementById('freemium-gate-modal');
+            const messageEl = document.getElementById('freemium-gate-message');
+            
+            if (message) {
+                messageEl.innerHTML = message;
+            }
+            
+            modal.classList.remove('hidden');
+            freemiumGateActive = true;
+        }
+        
+        // Close freemium gate modal
+        function closeFreemiumGate() {
+            const modal = document.getElementById('freemium-gate-modal');
+            modal.classList.add('hidden');
+            freemiumGateActive = false;
+        }
+        
+        // Show free use toast
+        function showFreeUseToast() {
+            const toast = document.getElementById('free-use-toast');
+            toast.classList.remove('hidden');
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 5000);
+        }
+        
+        // Wrap existing property analysis function
+        const originalAnalyzeProperty = window.analyzeProperty;
+        window.analyzeProperty = function() {
+            return gateFeatureAccess('propertyAnalysis', originalAnalyzeProperty);
+        };
+        
+        // Wrap existing comps analysis function  
+        const originalRunCompsAnalysis = window.runCompsAnalysis;
+        window.runCompsAnalysis = function() {
+            return gateFeatureAccess('comps', originalRunCompsAnalysis);
+        };
+        
+        // Wrap AI functions
+        const originalGenerateObjectionResponse = window.generateObjectionResponse;
+        if (originalGenerateObjectionResponse) {
+            window.generateObjectionResponse = function() {
+                return gateFeatureAccess('aiAnalysis', originalGenerateObjectionResponse);
+            };
+        }
+        
+        // Wrap acquisitions functions
+        const originalShowAcquisitionsTab = window.showAcquisitionsTab;
+        if (originalShowAcquisitionsTab) {
+            window.showAcquisitionsTab = function(tabName) {
+                if (tabName !== 'wholesale') { // Wholesale is always accessible
+                    return gateFeatureAccess('acquisitions', () => originalShowAcquisitionsTab(tabName));
+                }
+                return originalShowAcquisitionsTab(tabName);
+            };
+        }
+        
+        // Wrap renovation calculator
+        const originalCalculateRenovationEstimate = window.calculateRenovationEstimate;
+        if (originalCalculateRenovationEstimate) {
+            window.calculateRenovationEstimate = function() {
+                return gateFeatureAccess('renovationCalculator', originalCalculateRenovationEstimate);
+            };
+        }
+        
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('freemium-gate-modal');
+            if (event.target === modal) {
+                closeFreemiumGate();
+            }
+        });
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && freemiumGateActive) {
+                closeFreemiumGate();
+            }
+        });
+    </script>
 </body>
 </html>

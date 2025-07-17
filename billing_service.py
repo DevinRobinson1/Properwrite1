@@ -613,6 +613,14 @@ class BillingService:
                         seats_max=1
                     )
                     db.add(team)
+                    
+                    # Log the initial free credits
+                    free_credits_log = CreditLog(
+                        team_id=team.id,
+                        delta=5,
+                        reason='signup-bonus'
+                    )
+                    db.add(free_credits_log)
                 
                 # Create new user
                 user = User(
@@ -659,6 +667,49 @@ class BillingService:
         except Exception as e:
             logging.error(f"Error creating user: {e}")
             return {'success': False, 'error': str(e)}
+    
+    def seed_free_credits(self, user_id: str) -> bool:
+        """
+        Seed new user with 5 free credits
+        """
+        try:
+            with self.db_session() as db:
+                user = db.query(User).filter(User.id == user_id).first()
+                
+                if not user:
+                    return False
+                
+                # Find user's team
+                team = db.query(Team).filter(Team.id == user.team_id).first()
+                
+                if not team:
+                    return False
+                
+                # Check if user already has signup bonus
+                existing_bonus = db.query(CreditLog).filter(
+                    and_(CreditLog.team_id == team.id, CreditLog.reason == 'signup-bonus')
+                ).first()
+                
+                if existing_bonus:
+                    return True  # Already has bonus
+                
+                # Add 5 free credits
+                team.credit_balance += 5
+                
+                # Log the credit addition
+                credit_log = CreditLog(
+                    team_id=team.id,
+                    delta=5,
+                    reason='signup-bonus'
+                )
+                db.add(credit_log)
+                db.commit()
+                
+                return True
+                
+        except Exception as e:
+            logging.error(f"Error seeding free credits: {e}")
+            return False
     
     def accept_team_invite(self, token: str, user_id: str) -> Dict:
         """

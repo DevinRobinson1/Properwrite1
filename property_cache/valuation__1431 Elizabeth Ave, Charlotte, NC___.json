@@ -1,0 +1,66 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 159900,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 49866413,
+      "matched_address": "1431 Elizabeth Ave, Charlotte, NC, ,  ",
+      "images": [
+        "https://photos.zillowstatic.com/fp/d7abf2097e0390105007f4878bfca92a-p_d.jpg"
+      ],
+      "bedrooms": 3.0,
+      "bathrooms": 2.0,
+      "square_feet": null,
+      "year_built": 1959
+    },
+    "rentcast": {
+      "estimate": 757000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    },
+    "rentometer": {
+      "rent_estimate": 3015,
+      "rent_median": 2948,
+      "rent_range": {
+        "min": 1800,
+        "max": 4995
+      },
+      "source": "Rentometer",
+      "confidence": "High",
+      "samples": 32,
+      "radius_miles": 1.5,
+      "credits_remaining": 940,
+      "updated": "2025-07-17"
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin",
+    "Rentometer"
+  ],
+  "sources_used": [
+    "Zillow",
+    "RentCast",
+    "Rentometer"
+  ],
+  "address_info": {
+    "address": "1431 Elizabeth Ave, Charlotte, NC",
+    "city": "",
+    "state": "",
+    "zip_code": "",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-17T01:09:51.979926",
+  "rent_estimate": 3015,
+  "rent_data_source": "Rentometer"
+}

@@ -46,6 +46,7 @@ from construction_service import ConstructionService
 from renovation_estimator_backend import RenovationEstimatorService
 from services.unified_property_data_service import get_unified_property_service
 from werkzeug.security import check_password_hash
+from freemium_gate import gate_feature, check_free_use_status, get_feature_access_info, seed_free_credits
 
 # Load environment variables from .env file
 if os.path.exists('.env'):
@@ -123,6 +124,29 @@ app.register_blueprint(admin_bp)
 def inject_csrf_token():
     """Make CSRF token available to all templates"""
     return dict(csrf_token=generate_csrf)
+
+# Freemium Gate API Endpoints
+@app.route('/api/freemium/status', methods=['GET'])
+@csrf.exempt
+def get_freemium_status():
+    """Get current freemium access status"""
+    try:
+        status = check_free_use_status()
+        return jsonify(status)
+    except Exception as e:
+        logging.error(f"Error getting freemium status: {e}")
+        return jsonify({'error': 'Failed to get status'}), 500
+
+@app.route('/api/freemium/feature-access/<feature_name>', methods=['GET'])
+@csrf.exempt
+def get_feature_access(feature_name):
+    """Get access information for a specific feature"""
+    try:
+        access_info = get_feature_access_info(feature_name)
+        return jsonify(access_info)
+    except Exception as e:
+        logging.error(f"Error getting feature access for {feature_name}: {e}")
+        return jsonify({'error': 'Failed to get access info'}), 500
 
 # Register affiliate API blueprint
 app.register_blueprint(affiliate_api)
@@ -873,6 +897,7 @@ def api_login():
         }), 500
 
 @app.route('/api/analyze-property', methods=['POST'])
+@gate_feature('propertyAnalysis')
 @limiter.limit("10 per minute, 100 per hour")
 @csrf.exempt
 def analyze_property():
@@ -1513,6 +1538,7 @@ def ai_strategy_insight():
         }), 500
 
 @app.route('/ai_deal_analysis', methods=['POST'])
+@gate_feature('aiAnalysis')
 def ai_deal_analysis():
     """
     AI-powered comparison of all four investment strategies
@@ -1549,6 +1575,7 @@ def ai_deal_analysis():
         }), 500
 
 @app.route('/acquisitions_analysis', methods=['POST'])
+@gate_feature('acquisitions')
 def acquisitions_analysis():
     """
     Comprehensive acquisitions analysis using the new Acquisitions Module
@@ -1577,6 +1604,7 @@ def acquisitions_analysis():
         }), 500
 
 @app.route('/optimal_acquisition_strategy', methods=['POST'])
+@gate_feature('acquisitions')
 def optimal_acquisition_strategy():
     """
     Get optimal acquisition strategy recommendation
@@ -2549,6 +2577,7 @@ def save_renovation_estimate():
         }), 500
 
 @app.route('/api/comps/analyze', methods=['POST'])
+@gate_feature('comps')
 @csrf.exempt
 def analyze_comps():
     """
@@ -4269,6 +4298,59 @@ def submit_jv_deal():
     except Exception as e:
         logging.error(f"Error submitting JV deal: {e}")
         return jsonify({'error': 'Failed to submit deal. Please try again.'}), 500
+
+# Freemium Access Gate API Endpoints
+@app.route('/api/freemium/status', methods=['GET'])
+def api_freemium_status():
+    """Get freemium access status"""
+    try:
+        # Check if user is authenticated
+        user_id = session.get('user_id')
+        if user_id:
+            return jsonify({
+                'authenticated': True,
+                'free_use_available': False,
+                'free_use_used': False
+            })
+        
+        # Get free use status from cookies
+        free_use_status = check_free_use_status()
+        
+        return jsonify({
+            'authenticated': False,
+            'free_use_available': free_use_status.get('free_use_available', True),
+            'free_use_used': free_use_status.get('free_use_used', False)
+        })
+        
+    except Exception as e:
+        logging.error(f"Error getting freemium status: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/freemium/feature-access/<feature_name>', methods=['GET'])
+def api_feature_access(feature_name):
+    """Get access information for a specific feature"""
+    try:
+        # Check if user is authenticated
+        user_id = session.get('user_id')
+        if user_id:
+            return jsonify({
+                'accessible': True,
+                'reason': 'authenticated',
+                'message': 'Access granted for authenticated user'
+            })
+        
+        # Get feature access info
+        access_info = get_feature_access_info(feature_name)
+        
+        return jsonify(access_info)
+        
+    except Exception as e:
+        logging.error(f"Error getting feature access: {e}")
+        return jsonify({
+            'accessible': False,
+            'reason': 'error',
+            'message': 'Error checking feature access'
+        }), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)

@@ -1,0 +1,167 @@
+🛠 Feature: Freemium Access Gate
+
+⸻
+
+🔧 Frontend + UX Summary
+	1.	Wholesale Price Module
+	•	Always visible to everyone (no gate).
+	•	“Wholesale Price” card shows real-time value without login.
+	2.	Feature Gate Overlay
+	•	Any other action/tab click (“Acquisitions”, “Comps”, “Export Report”, “Calculate Estimate” etc.) triggers a lightweight modal:
+“Create an account to unlock this feature.
+Get 5 free credits + full access.”
+	•	If user has never registered and has not used their free view yet, clicking any gated feature will:
+	•	First click: allow it once, quietly set a cookie free_use=true and show a toast: “That was your free use—register now for more.”
+	•	Subsequent clicks: show the signup modal.
+	3.	Post-Signup Flow
+	•	On successful registration:
+	•	Seed user’s credit wallet with 5 free credits.
+	•	Automatically close the modal and let them continue.
+
+⸻
+
+🧩 Backend Logic
+	1.	Middleware: gateFeature(featureName)
+
+import { getSession } from './auth.js';
+
+export function gateFeature(featureName) {
+  return async (req, res, next) => {
+    const session = await getSession(req);
+    if (session?.user) return next();           // Authenticated → OK
+
+    // Publicly allow “wholesalePrice” feature
+    if (featureName === 'wholesalePrice') return next();
+
+    // Check free-use cookie
+    const usedFree = req.cookies.free_use === 'true';
+    if (!usedFree) {
+      // First free use
+      res.cookie('free_use', 'true', { maxAge: 365*24*3600*1000, httpOnly: false });
+      return next();
+    }
+
+    // Otherwise block
+    return res.status(403).json({ error: 'auth_required' });
+  };
+}
+
+
+	2.	Apply to your routes
+
+// Wholesale price endpoint (public)
+app.get('/api/wholesale-price', gateFeature('wholesalePrice'), wholesaleHandler);
+
+// All other API routes
+app.use('/api/acquisitions', gateFeature('acquisitions'), acquisitionsRouter);
+app.use('/api/comps',        gateFeature('comps'),        compsRouter);
+// …etc.
+
+
+	3.	Registration Handler
+After you create the new user, seed 5 credits:
+
+// In your signup controller
+const newUser = await db.createUser({ email, pwHash, /*…*/ });
+await db.set(`subscriptions:${newUser.id}`, { plan:'free', credits:5, status:'active', createdAt:Date.now() });
+
+
+
+⸻
+
+💾 Data Model / ReplitDB Design
+
+// users:{userId}
+{
+  "email": "alice@example.com",
+  "passwordHash": "…",
+  // other profile fields
+}
+
+// subscriptions:{userId}
+{
+  "plan": "free",          // free | starter | pro …
+  "credits": 5,            // seeded to 5 on signup
+  "status": "active",
+  "createdAt": "2025-07-16T20:00:00Z"
+}
+
+
+⸻
+
+💻 Front-end Snippet (React)
+
+// components/AuthGate.js
+import { useState } from 'react';
+import { useCookies } from 'react-cookie';
+import SignupModal from './SignupModal';
+
+export default function AuthGate({ feature, children }) {
+  const [cookies, setCookie] = useCookies(['free_use']);
+  const [showModal, setShowModal] = useState(false);
+
+  const handleClick = async (e) => {
+    // If logged-in, proceed
+    if (window.__USER__) return children.props.onClick(e);
+
+    // If this is the first free use
+    if (!cookies.free_use) {
+      setCookie('free_use','true',{ path:'/', maxAge:31536000 });
+      // allow single use
+      return children.props.onClick(e);
+    }
+
+    // otherwise show signup
+    e.preventDefault();
+    setShowModal(true);
+  };
+
+  // Clone the child (a button or link) and override onClick
+  return (
+    <>
+      {React.cloneElement(children, { onClick: handleClick })}
+      {showModal && <SignupModal onClose={()=>setShowModal(false)} />}
+    </>
+  );
+}
+
+Usage Example:
+
+<AuthGate feature="calculateEstimate">
+  <button className="btn-primary">Calculate Estimate</button>
+</AuthGate>
+
+
+⸻
+
+📦 File Structure / Project Org Tips
+
+src/
+ ├─ middleware/
+ │   └─ gateFeature.js     ← the Express middleware
+ ├─ routes/
+ │   ├─ wholesale.js      ← public wholesale-price route
+ │   ├─ acquisitions.js    ← gated acquisitions routes
+ │   └─ ...  
+ ├─ services/
+ │   └─ auth.js           ← getSession, signup, etc.
+ └─ client/
+     ├─ components/
+     │   ├─ AuthGate.jsx
+     │   └─ SignupModal.jsx
+     └─ pages/            ← your React views
+
+
+⸻
+
+✅ Next Steps
+	1.	Install cookie-parser (Express) and react-cookie (React).
+	2.	Wire up gateFeature in your app.js before each route.
+	3.	Wrap every gated button/link in <AuthGate>…</AuthGate>.
+	4.	Test in incognito:
+	•	View wholesale price → ✅ allowed
+	•	Click “Calculate” first time → ✅ allowed (toast: “Your free use!”)
+	•	Click again → 📢 signup modal
+	•	Complete signup → ✅ redirected, 5 credits in DB
+
+That will give you exactly one free action, unlimited wholesale‐price visibility, and a smooth pay‐or‐register flow with cookie persistence. Let me know if you need adjustments!

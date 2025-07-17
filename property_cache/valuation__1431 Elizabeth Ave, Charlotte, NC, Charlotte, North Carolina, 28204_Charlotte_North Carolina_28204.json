@@ -1,0 +1,51 @@
+{
+  "valuations": {
+    "rentcast": {
+      "estimate": 757000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    },
+    "rentometer": {
+      "rent_estimate": 3015,
+      "rent_median": 2948,
+      "rent_range": {
+        "min": 1800,
+        "max": 4995
+      },
+      "source": "Rentometer",
+      "confidence": "High",
+      "samples": 32,
+      "radius_miles": 1.5,
+      "credits_remaining": 939,
+      "updated": "2025-07-17"
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin",
+    "Rentometer"
+  ],
+  "sources_used": [
+    "RentCast",
+    "Rentometer"
+  ],
+  "address_info": {
+    "address": "1431 Elizabeth Ave, Charlotte, NC, Charlotte, North Carolina, 28204",
+    "city": "Charlotte",
+    "state": "North Carolina",
+    "zip_code": "28204",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-17T01:09:57.701688",
+  "rent_estimate": 3015,
+  "rent_data_source": "Rentometer"
+}
