@@ -126,21 +126,25 @@ class JVWizard {
   }
 
   nextStep() {
-    console.log('nextStep called, current step:', this.currentStep);
+    console.log('🔄 nextStep called, current step:', this.currentStep);
     
-    if (this.validateCurrentStep()) {
-      console.log('Validation passed, moving to next step');
-      this.saveToStorage();
-      if (this.currentStep < this.maxSteps) {
-        this.currentStep++;
-        console.log('New step:', this.currentStep);
-        if (this.currentStep === 4) {
-          this.generateReview();
+    try {
+      if (this.validateCurrentStep()) {
+        console.log('✅ Validation passed, moving to next step');
+        this.saveToStorage();
+        if (this.currentStep < this.maxSteps) {
+          this.currentStep++;
+          console.log('➡️ New step:', this.currentStep);
+          if (this.currentStep === 4) {
+            this.generateReview();
+          }
+          this.updateUI();
         }
-        this.updateUI();
+      } else {
+        console.log('❌ Validation failed');
       }
-    } else {
-      console.log('Validation failed');
+    } catch (error) {
+      console.error('🚨 Error in nextStep:', error);
     }
   }
 
@@ -157,9 +161,11 @@ class JVWizard {
   }
 
   validateCurrentStep() {
+    console.log('🔍 Starting validation for step:', this.currentStep);
+    
     const currentFieldset = document.querySelector(`fieldset[data-step="${this.currentStep}"]`);
     if (!currentFieldset) {
-      console.log('No fieldset found for current step:', this.currentStep);
+      console.log('❌ No fieldset found for current step:', this.currentStep);
       return false;
     }
 
@@ -167,11 +173,11 @@ class JVWizard {
     currentFieldset.querySelectorAll('.validation-message').forEach(msg => msg.remove());
     
     const requiredFields = currentFieldset.querySelectorAll('input[required], select[required]');
-    console.log('Required fields found:', requiredFields.length);
+    console.log('📋 Required fields found:', requiredFields.length);
     
     let isValid = true;
     requiredFields.forEach(field => {
-      console.log('Checking field:', field.name, 'value:', field.value);
+      console.log('🔍 Checking field:', field.name, 'value:', field.value, 'type:', field.type);
       
       // Remove previous error styling
       field.classList.remove('border-red-300');
@@ -180,7 +186,7 @@ class JVWizard {
         field.classList.add('border-red-300');
         this.showValidationMessage(field, 'This field is required', 'error');
         isValid = false;
-        console.log('Field is empty:', field.name);
+        console.log('❌ Field is empty:', field.name);
       } else {
         // Additional validation for specific fields
         if (field.name === 'email') {
@@ -352,12 +358,6 @@ class JVWizard {
     const currentFieldset = document.querySelector(`fieldset[data-step="${this.currentStep}"]`);
     const contentDiv = currentFieldset.querySelector('.bg-white.rounded-xl');
     contentDiv.appendChild(dealAnalysisDiv);
-  }
-        field.classList.remove('border-red-300');
-      }
-    });
-
-    return isValid;
   }
 
   updateUI() {
