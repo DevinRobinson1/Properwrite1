@@ -4304,7 +4304,10 @@ def submit_jv_deal():
 def clear_freemium_cookie():
     """Clear the free use cookie for testing"""
     response = make_response(jsonify({'success': True, 'message': 'Free use cookie cleared'}))
-    response.set_cookie('free_use', '', expires=0)
+    # Clear the cookie by setting it to empty with past expiration
+    response.set_cookie('free_use', '', expires=0, path='/', samesite='Lax')
+    # Also try alternative clearing method
+    response.set_cookie('free_use', '', max_age=0, path='/', samesite='Lax')
     return response
 
 @app.route('/api/freemium/status', methods=['GET'])

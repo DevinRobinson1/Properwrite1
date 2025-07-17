@@ -12620,6 +12620,8 @@
         // Debug function to clear free use cookie
         window.clearFreemiumCookie = function() {
             console.log('Clearing freemium cookie...');
+            
+            // Method 1: Use API endpoint
             fetch('/api/freemium/clear-cookie', {
                 method: 'POST',
                 headers: {
@@ -12628,13 +12630,24 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Cookie cleared:', data);
+                console.log('Cookie cleared via API:', data);
+                
+                // Method 2: Also clear via JavaScript (double clear)
+                document.cookie = 'free_use=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; samesite=Lax';
+                console.log('Cookie also cleared via JavaScript');
+                
                 showToast('Free use cookie cleared! You can now test first-time use.', 'success');
                 // Refresh page to reset state
                 setTimeout(() => location.reload(), 1000);
             })
             .catch(error => {
-                console.error('Error clearing cookie:', error);
+                console.error('Error clearing cookie via API:', error);
+                
+                // Fallback: clear via JavaScript only
+                document.cookie = 'free_use=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; samesite=Lax';
+                console.log('Cookie cleared via JavaScript fallback');
+                showToast('Free use cookie cleared! You can now test first-time use.', 'success');
+                setTimeout(() => location.reload(), 1000);
             });
         };
         
