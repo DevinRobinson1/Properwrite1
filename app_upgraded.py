@@ -4300,6 +4300,13 @@ def submit_jv_deal():
         return jsonify({'error': 'Failed to submit deal. Please try again.'}), 500
 
 # Freemium Access Gate API Endpoints
+@app.route('/api/freemium/clear-cookie', methods=['POST'])
+def clear_freemium_cookie():
+    """Clear the free use cookie for testing"""
+    response = make_response(jsonify({'success': True, 'message': 'Free use cookie cleared'}))
+    response.set_cookie('free_use', '', expires=0)
+    return response
+
 @app.route('/api/freemium/status', methods=['GET'])
 def api_freemium_status():
     """Get freemium access status"""

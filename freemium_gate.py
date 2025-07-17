@@ -44,6 +44,7 @@ def gate_feature(feature_name):
             
             # User is not authenticated, check free use
             free_use_cookie = request.cookies.get('free_use')
+            logging.info(f"Freemium gate check - feature: {feature_name}, cookie: {free_use_cookie}")
             
             # If user hasn't used their free action yet
             if not free_use_cookie:
