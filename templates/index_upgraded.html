@@ -1005,6 +1005,12 @@
                 
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center space-x-8">
+                    <!-- Walkthrough Video Button -->
+                    <button onclick="openWalkthroughVideo()" class="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-md">
+                        <i class="fas fa-play"></i>
+                        <span class="font-medium">Watch Demo</span>
+                    </button>
+                    
                     <!-- Features Button -->
                     <button onclick="showFeaturesModal()" class="text-gray-600 hover:text-blue-600 transition-colors font-medium">
                         Features
@@ -1090,6 +1096,12 @@
                 <div>
                     <div class="text-sm font-semibold text-gray-900 mb-3">Navigation</div>
                     <div class="space-y-2 pl-2">
+                        <!-- Mobile Walkthrough Video Button -->
+                        <button onclick="openWalkthroughVideo()" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-3 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 flex items-center space-x-3 shadow-md">
+                            <i class="fas fa-play text-white"></i>
+                            <span class="text-sm font-medium">Watch Demo</span>
+                        </button>
+                        
                         <button onclick="showFeaturesModal()" class="w-full text-left text-sm text-gray-600 hover:text-blue-600 transition-colors py-2">
                             <i class="fas fa-cog mr-3 text-blue-500"></i>Features
                         </button>
@@ -12756,6 +12768,12 @@
         // Debug function to check current cookie state
         window.checkFreemiumCookie = function() {
             console.log('Current free_use cookie:', document.cookie.split('; ').find(row => row.startsWith('free_use=')));
+        };
+        
+        // Function to open walkthrough video
+        window.openWalkthroughVideo = function() {
+            // Open the Loom video in a new tab
+            window.open('https://www.loom.com/share/0eb2659450164d7fa828c5cdcfbe1a13?sid=a5f9e615-f912-4616-8455-a14cd333d06d', '_blank');
         };
     </script>
 </body>
