@@ -665,6 +665,377 @@ def add_user_credits(user_id):
         logging.error(f"Error adding credits to user {user_id}: {e}")
         return jsonify({'error': str(e)}), 500
 
+@admin_api_bp.route('/users/<user_id>/reset-password', methods=['POST'])
+@csrf.exempt
+@require_admin_api
+def reset_user_password(user_id):
+    """Reset a user's password"""
+    try:
+        data = request.get_json()
+        new_password = data.get('new_password')
+        
+        # Generate random password if not provided
+        if not new_password:
+            import secrets
+            import string
+            new_password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
+        
+        # Hash the password
+        from werkzeug.security import generate_password_hash
+        password_hash = generate_password_hash(new_password)
+        
+        with get_db_session() as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+            
+            # Update password
+            user.password_hash = password_hash
+            db.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Password reset successfully',
+                'new_password': new_password
+            })
+            
+    except Exception as e:
+        logging.error(f"Error resetting password for user {user_id}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@admin_api_bp.route('/users/<user_id>/upgrade-plan', methods=['POST'])
+@csrf.exempt
+@require_admin_api
+def upgrade_user_plan(user_id):
+    """Upgrade a user's plan"""
+    try:
+        data = request.get_json()
+        new_plan = data.get('plan')
+        
+        if not new_plan:
+            return jsonify({'error': 'Plan is required'}), 400
+        
+        valid_plans = ['starter', 'pro', 'team5', 'growth10']
+        if new_plan not in valid_plans:
+            return jsonify({'error': 'Invalid plan'}), 400
+        
+        with get_db_session() as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+            
+            # Get user's team
+            team = db.query(Team).filter(Team.id == user.team_id).first()
+            if not team:
+                return jsonify({'error': 'User team not found'}), 404
+            
+            # Update team plan
+            team.tier = new_plan
+            
+            # Set appropriate credit balance based on plan
+            credit_mapping = {
+                'starter': 50,
+                'pro': 300,
+                'team5': 1000,
+                'growth10': 999999  # unlimited
+            }
+            
+            team.credit_balance = credit_mapping.get(new_plan, 300)
+            
+            # Create log entry
+            credit_log = CreditLog(
+                team_id=team.id,
+                user_id=user.id,
+                delta=0,
+                reason=f"Plan upgraded to {new_plan}"
+            )
+            db.add(credit_log)
+            db.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Plan upgraded to {new_plan}',
+                'new_plan': new_plan,
+                'new_credits': team.credit_balance
+            })
+            
+    except Exception as e:
+        logging.error(f"Error upgrading plan for user {user_id}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@admin_api_bp.route('/users/<user_id>/send-welcome-email', methods=['POST'])
+@csrf.exempt
+@require_admin_api
+def send_welcome_email(user_id):
+    """Send welcome email to user"""
+    try:
+        with get_db_session() as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+            
+            # Import email service
+            try:
+                from email_service import EmailService
+                email_service = EmailService()
+                
+                # Send welcome email
+                success = email_service.send_welcome_email(user.email, user.name or 'User')
+                
+                if success:
+                    return jsonify({
+                        'success': True,
+                        'message': 'Welcome email sent successfully'
+                    })
+                else:
+                    return jsonify({
+                        'success': False,
+                        'error': 'Failed to send email'
+                    }), 500
+                    
+            except ImportError:
+                return jsonify({
+                    'success': False,
+                    'error': 'Email service not configured'
+                }), 500
+            
+    except Exception as e:
+        logging.error(f"Error sending welcome email to user {user_id}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@admin_api_bp.route('/users/<user_id>/grant-trial-extension', methods=['POST'])
+@csrf.exempt
+@require_admin_api
+def grant_trial_extension(user_id):
+    """Grant trial extension to user"""
+    try:
+        data = request.get_json()
+        days = data.get('days', 30)
+        
+        try:
+            days = int(days)
+        except (ValueError, TypeError):
+            return jsonify({'error': 'Days must be a valid number'}), 400
+        
+        if days <= 0:
+            return jsonify({'error': 'Days must be greater than 0'}), 400
+        
+        with get_db_session() as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+            
+            # Get user's team
+            team = db.query(Team).filter(Team.id == user.team_id).first()
+            if not team:
+                return jsonify({'error': 'User team not found'}), 404
+            
+            # Add trial extension - for now just add credits
+            bonus_credits = days * 10  # 10 credits per day
+            team.credit_balance += bonus_credits
+            
+            # Create log entry
+            credit_log = CreditLog(
+                team_id=team.id,
+                user_id=user.id,
+                delta=bonus_credits,
+                reason=f"Trial extension: {days} days ({bonus_credits} credits)"
+            )
+            db.add(credit_log)
+            db.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Trial extended by {days} days',
+                'bonus_credits': bonus_credits,
+                'new_balance': team.credit_balance
+            })
+            
+    except Exception as e:
+        logging.error(f"Error granting trial extension to user {user_id}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@admin_api_bp.route('/users/<user_id>/flag-for-review', methods=['POST'])
+@csrf.exempt
+@require_admin_api
+def flag_for_review(user_id):
+    """Flag user for review"""
+    try:
+        data = request.get_json()
+        reason = data.get('reason', 'Admin flagged for review')
+        
+        with get_db_session() as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+            
+            # Create log entry
+            credit_log = CreditLog(
+                team_id=user.team_id,
+                user_id=user.id,
+                delta=0,
+                reason=f"FLAGGED FOR REVIEW: {reason}"
+            )
+            db.add(credit_log)
+            db.commit()
+            
+            # Log the flag
+            logging.warning(f"User {user_id} ({user.email}) flagged for review: {reason}")
+            
+            return jsonify({
+                'success': True,
+                'message': 'User flagged for review successfully'
+            })
+            
+    except Exception as e:
+        logging.error(f"Error flagging user {user_id} for review: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@admin_api_bp.route('/users/<user_id>/export-data', methods=['GET'])
+@csrf.exempt
+@require_admin_api
+def export_user_data(user_id):
+    """Export user data"""
+    try:
+        with get_db_session() as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+            
+            # Get user's team
+            team = db.query(Team).filter(Team.id == user.team_id).first()
+            
+            # Get credit logs
+            credit_logs = db.query(CreditLog).filter(
+                CreditLog.user_id == user_id
+            ).order_by(CreditLog.created_at.desc()).all()
+            
+            # Prepare export data
+            export_data = {
+                'user_info': {
+                    'id': str(user.id),
+                    'email': user.email,
+                    'name': user.name,
+                    'created_at': user.created_at.isoformat() if user.created_at else None,
+                    'last_login': user.last_login.isoformat() if user.last_login else None,
+                    'is_active': user.is_active,
+                    'team_role': user.team_role
+                },
+                'team_info': {
+                    'id': str(team.id) if team else None,
+                    'name': team.name if team else None,
+                    'tier': team.tier if team else None,
+                    'credit_balance': team.credit_balance if team else None,
+                    'created_at': team.created_at.isoformat() if team and team.created_at else None
+                },
+                'credit_history': [
+                    {
+                        'id': str(log.id),
+                        'delta': log.delta,
+                        'reason': log.reason,
+                        'created_at': log.created_at.isoformat() if log.created_at else None
+                    }
+                    for log in credit_logs
+                ],
+                'export_timestamp': datetime.utcnow().isoformat()
+            }
+            
+            import json
+            response = current_app.response_class(
+                response=json.dumps(export_data, indent=2),
+                status=200,
+                mimetype='application/json'
+            )
+            response.headers['Content-Disposition'] = f'attachment; filename=user_data_{user_id}.json'
+            return response
+            
+    except Exception as e:
+        logging.error(f"Error exporting user data for {user_id}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@admin_api_bp.route('/users/<user_id>/billing-history', methods=['GET'])
+@csrf.exempt
+@require_admin_api
+def get_billing_history(user_id):
+    """Get user billing history"""
+    try:
+        with get_db_session() as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+            
+            # Get credit logs as billing history
+            credit_logs = db.query(CreditLog).filter(
+                CreditLog.user_id == user_id
+            ).order_by(CreditLog.created_at.desc()).limit(50).all()
+            
+            billing_data = []
+            for log in credit_logs:
+                billing_data.append({
+                    'date': log.created_at.strftime('%Y-%m-%d') if log.created_at else 'Unknown',
+                    'amount': abs(log.delta),
+                    'description': log.reason or 'Credit transaction',
+                    'type': 'Credit' if log.delta > 0 else 'Usage'
+                })
+            
+            return jsonify({
+                'success': True,
+                'billing': billing_data
+            })
+            
+    except Exception as e:
+        logging.error(f"Error getting billing history for user {user_id}: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@admin_api_bp.route('/users/<user_id>/activity-log', methods=['GET'])
+@csrf.exempt
+@require_admin_api
+def get_activity_log(user_id):
+    """Get user activity log"""
+    try:
+        with get_db_session() as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user:
+                return jsonify({'error': 'User not found'}), 404
+            
+            # Get credit logs as activity log
+            credit_logs = db.query(CreditLog).filter(
+                CreditLog.user_id == user_id
+            ).order_by(CreditLog.created_at.desc()).limit(100).all()
+            
+            activity_data = []
+            for log in credit_logs:
+                activity_type = 'Credit Used' if log.delta < 0 else 'Credit Added'
+                activity_data.append({
+                    'timestamp': log.created_at.strftime('%Y-%m-%d %H:%M:%S') if log.created_at else 'Unknown',
+                    'action': activity_type,
+                    'description': log.reason or 'No description'
+                })
+            
+            # Add some sample activity types
+            if user.last_login:
+                activity_data.insert(0, {
+                    'timestamp': user.last_login.strftime('%Y-%m-%d %H:%M:%S'),
+                    'action': 'Login',
+                    'description': 'User logged in'
+                })
+            
+            if user.created_at:
+                activity_data.append({
+                    'timestamp': user.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                    'action': 'Account Created',
+                    'description': 'User account created'
+                })
+            
+            return jsonify({
+                'success': True,
+                'activity': activity_data[:50]  # Limit to 50 entries
+            })
+            
+    except Exception as e:
+        logging.error(f"Error getting activity log for user {user_id}: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @admin_api_bp.route('/users/<user_id>/activity-log', methods=['GET'])
 @csrf.exempt
 @require_admin_api

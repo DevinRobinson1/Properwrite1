@@ -2368,13 +2368,17 @@
             
             const credits = prompt('Enter the number of credits to add:');
             if (credits && !isNaN(credits) && credits > 0) {
+                const reason = prompt('Enter reason for credit addition (optional):') || 'Admin credit addition';
+                
                 fetch(`/admin/api/users/${currentUserData.id}/add-credits`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-Admin-Token': 'admin123'
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ credits: parseInt(credits) })
+                    body: JSON.stringify({ 
+                        credits: parseInt(credits),
+                        reason: reason
+                    })
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -2396,25 +2400,29 @@
         function resetUserPassword() {
             if (!currentUserData) return;
             
-            if (confirm('Are you sure you want to reset this user\'s password? They will receive an email with reset instructions.')) {
+            if (confirm('Are you sure you want to reset this user\'s password?')) {
+                const newPassword = prompt('Enter new password (leave blank for auto-generated):');
+                
                 fetch(`/admin/api/users/${currentUserData.id}/reset-password`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-Admin-Token': 'admin123'
-                    }
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        new_password: newPassword || null
+                    })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Password reset email sent successfully');
+                        alert(`Password reset successfully! New password: ${data.new_password}`);
                     } else {
-                        alert('Error sending password reset: ' + data.error);
+                        alert('Error resetting password: ' + data.error);
                     }
                 })
                 .catch(error => {
                     console.error('Error resetting password:', error);
-                    alert('Error sending password reset');
+                    alert('Error resetting password');
                 });
             }
         }
@@ -2422,15 +2430,14 @@
         function upgradeUserPlan() {
             if (!currentUserData) return;
             
-            const plans = ['free', 'pro', 'team5', 'growth10'];
-            const planName = prompt('Enter the plan to upgrade to (free, pro, team5, growth10):');
+            const plans = ['starter', 'pro', 'team5', 'growth10'];
+            const planName = prompt('Enter the plan to upgrade to (starter, pro, team5, growth10):');
             
             if (planName && plans.includes(planName)) {
                 fetch(`/admin/api/users/${currentUserData.id}/upgrade-plan`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-Admin-Token': 'admin123'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ plan: planName })
                 })
@@ -2457,8 +2464,7 @@
             fetch(`/admin/api/users/${currentUserData.id}/send-welcome-email`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-Admin-Token': 'admin123'
+                    'Content-Type': 'application/json'
                 }
             })
             .then(response => response.json())
@@ -2473,6 +2479,184 @@
                 console.error('Error sending welcome email:', error);
                 alert('Error sending welcome email');
             });
+        }
+
+        function grantTrialExtension() {
+            if (!currentUserData) return;
+            
+            const days = prompt('Enter number of days to extend trial:');
+            if (days && !isNaN(days) && parseInt(days) > 0) {
+                fetch(`/admin/api/users/${currentUserData.id}/grant-trial-extension`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        days: parseInt(days)
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Trial extended by ${days} days! Added ${data.bonus_credits} bonus credits.`);
+                        // Refresh the user data
+                        viewUser(currentUserData.id, currentUserData.email, currentUserData.name, currentUserData.team, currentUserData.plan, currentUserData.credits, currentUserData.lastActive);
+                    } else {
+                        alert('Error granting trial extension: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error granting trial extension:', error);
+                    alert('Error granting trial extension');
+                });
+            }
+        }
+
+        function flagForReview() {
+            if (!currentUserData) return;
+            
+            const reason = prompt('Enter reason for flagging user for review:');
+            if (reason) {
+                fetch(`/admin/api/users/${currentUserData.id}/flag-for-review`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        reason: reason
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('User flagged for review successfully');
+                    } else {
+                        alert('Error flagging user: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error flagging user:', error);
+                    alert('Error flagging user');
+                });
+            }
+        }
+
+        function exportUserData() {
+            if (!currentUserData) return;
+            
+            fetch(`/admin/api/users/${currentUserData.id}/export-data`, {
+                method: 'GET'
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `user_data_${currentUserData.id}.json`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                alert('User data exported successfully');
+            })
+            .catch(error => {
+                console.error('Error exporting user data:', error);
+                alert('Error exporting user data');
+            });
+        }
+
+        function viewUserActivity() {
+            if (!currentUserData) return;
+            
+            fetch(`/admin/api/users/${currentUserData.id}/activity-log`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Create a simple activity log display
+                    let activityHTML = '<h3>User Activity Log</h3><ul>';
+                    data.activity.forEach(activity => {
+                        activityHTML += `<li>${activity.timestamp}: ${activity.action} - ${activity.description}</li>`;
+                    });
+                    activityHTML += '</ul>';
+                    
+                    // Show in a new window
+                    const newWindow = window.open('', '_blank', 'width=800,height=600');
+                    newWindow.document.write(`
+                        <html>
+                            <head><title>User Activity Log</title></head>
+                            <body>${activityHTML}</body>
+                        </html>
+                    `);
+                } else {
+                    alert('Error viewing activity: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error viewing activity:', error);
+                alert('Error viewing activity');
+            });
+        }
+
+        function viewUserBilling() {
+            if (!currentUserData) return;
+            
+            fetch(`/admin/api/users/${currentUserData.id}/billing-history`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Create a simple billing history display
+                    let billingHTML = '<h3>User Billing History</h3><ul>';
+                    data.billing.forEach(bill => {
+                        billingHTML += `<li>${bill.date}: $${bill.amount} - ${bill.description}</li>`;
+                    });
+                    billingHTML += '</ul>';
+                    
+                    // Show in a new window
+                    const newWindow = window.open('', '_blank', 'width=800,height=600');
+                    newWindow.document.write(`
+                        <html>
+                            <head><title>User Billing History</title></head>
+                            <body>${billingHTML}</body>
+                        </html>
+                    `);
+                } else {
+                    alert('Error viewing billing history: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error viewing billing history:', error);
+                alert('Error viewing billing history');
+            });
+        }
+
+        function reactivateUser() {
+            if (!currentUserData) return;
+            
+            if (confirm('Are you sure you want to reactivate this user?')) {
+                fetch(`/admin/api/users/${currentUserData.id}/suspend`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        suspend: false
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('User reactivated successfully');
+                        // Refresh the user data
+                        viewUser(currentUserData.id, currentUserData.email, currentUserData.name, currentUserData.team, currentUserData.plan, currentUserData.credits, currentUserData.lastActive);
+                    } else {
+                        alert('Error reactivating user: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error reactivating user:', error);
+                    alert('Error reactivating user');
+                });
+            }
         }
 
         function grantTrialExtension() {
@@ -2669,6 +2853,8 @@
         }
 
     </script>
+
+    <!-- Update existing functions to use proper admin endpoints -->
 
     <!-- Comprehensive User View Panel -->
     <div id="user-details-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
