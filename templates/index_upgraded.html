@@ -12779,11 +12779,64 @@
             console.log('Current free_use cookie:', document.cookie.split('; ').find(row => row.startsWith('free_use=')));
         };
         
-        // Function to open walkthrough video
+        // Function to open walkthrough video in modal
         window.openWalkthroughVideo = function() {
-            // Open the Loom video in a new tab
-            window.open('https://www.loom.com/share/0eb2659450164d7fa828c5cdcfbe1a13?sid=a5f9e615-f912-4616-8455-a14cd333d06d', '_blank');
+            document.getElementById('video-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
         };
+        
+        // Function to close walkthrough video modal
+        window.closeWalkthroughVideo = function() {
+            document.getElementById('video-modal').style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restore scrolling
+            // Stop the video by reloading the iframe
+            const iframe = document.getElementById('walkthrough-video-iframe');
+            iframe.src = iframe.src;
+        };
+    </script>
+    
+    <!-- Video Modal -->
+    <div id="video-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="position: relative; width: 90%; max-width: 800px; background: white; border-radius: 12px; padding: 0; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);">
+            <!-- Modal Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #e5e7eb;">
+                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: #1f2937;">
+                    <i class="fas fa-play-circle" style="color: #3b82f6; margin-right: 8px;"></i>
+                    Platform Walkthrough
+                </h3>
+                <button onclick="closeWalkthroughVideo()" style="background: none; border: none; font-size: 1.5rem; color: #6b7280; cursor: pointer; padding: 8px; border-radius: 4px; transition: all 0.2s;" onmouseover="this.style.background='#f3f4f6'; this.style.color='#374151';" onmouseout="this.style.background='none'; this.style.color='#6b7280';">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Video Content -->
+            <div style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%; /* 16:9 aspect ratio */">
+                <iframe id="walkthrough-video-iframe" 
+                        src="https://www.youtube.com/embed/S2zT2dGt-jM?autoplay=1&rel=0&showinfo=0" 
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 0 0 12px 12px;"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Close modal when clicking outside -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('video-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeWalkthroughVideo();
+                }
+            });
+            
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.getElementById('video-modal').style.display === 'flex') {
+                    closeWalkthroughVideo();
+                }
+            });
+        });
     </script>
 </body>
 </html>
