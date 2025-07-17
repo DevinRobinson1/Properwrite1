@@ -2197,19 +2197,19 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="space-y-4">
                                     <div class="flex justify-between items-center">
-                                        <span class="text-gray-700">List Price: 
-                                            <span class="info-tooltip" title="Editable - adjust if needed">
-                                                <span class="tooltiptext">Editable - adjust if needed</span>
+                                        <span class="text-gray-700 font-medium">Sell Now Price: 
+                                            <span class="info-tooltip" title="Enter the price you want to sell for - commissions and fees will calculate automatically">
+                                                <span class="tooltiptext">Enter the price you want to sell for - commissions and fees will calculate automatically</span>
                                                 i
                                             </span>
                                         </span>
                                         <div class="flex items-center">
                                             <span class="text-xs text-gray-500 mr-2">$</span>
                                             <input type="text" id="mls-novation-list-price" value="346,500" 
-                                                   class="w-24 px-2 py-1 border border-blue-300 rounded text-right font-bold text-blue-600 editable-input"
+                                                   class="w-32 px-3 py-2 border border-blue-300 rounded text-right font-bold text-blue-600 editable-input"
                                                    onchange="formatAndRecalculateDispositions(this); calculateMLSNovation();"
-                                                   oninput="formatNumber(this)"
-                                                   placeholder="Enter list price">
+                                                   oninput="formatNumber(this); calculateMLSNovation();"
+                                                   placeholder="Enter sell price">
                                         </div>
                                     </div>
                                     <div class="space-y-2">
@@ -2218,7 +2218,8 @@
                                             <div class="flex items-center">
                                                 <input type="text" id="mls-listing-commission-input" value="2.0" 
                                                        class="w-16 px-2 py-1 border border-blue-300 rounded text-right mr-1"
-                                                       onchange="calculateMLSNovation()">
+                                                       onchange="calculateMLSNovation()"
+                                                       oninput="calculateMLSNovation()">
                                                 <span>%</span>
                                             </div>
                                         </div>
@@ -2227,9 +2228,14 @@
                                             <div class="flex items-center">
                                                 <input type="text" id="mls-buyer-commission-input" value="2.0" 
                                                        class="w-16 px-2 py-1 border border-blue-300 rounded text-right mr-1"
-                                                       onchange="calculateMLSNovation()">
+                                                       onchange="calculateMLSNovation()"
+                                                       oninput="calculateMLSNovation()">
                                                 <span>%</span>
                                             </div>
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-2">
+                                            <i class="fas fa-info-circle mr-1"></i>
+                                            Commissions calculated from sell now price above. Detailed closing costs from Installment section also included.
                                         </div>
                                     </div>
                                 </div>
@@ -2237,7 +2243,7 @@
                                     <h4 class="font-semibold text-blue-800 mb-2">Net Proceeds</h4>
                                     <div class="space-y-1 text-sm">
                                         <div class="flex justify-between">
-                                            <span>List Price Sales Price:</span>
+                                            <span>Sell Now Price:</span>
                                             <span id="mls-novation-list-price-display">$0</span>
                                         </div>
                                         <div class="flex justify-between">
@@ -2255,7 +2261,7 @@
                                         <hr class="my-2">
                                         <div class="flex justify-between font-bold">
                                             <span>Net to Us:</span>
-                                            <span class="text-blue-600" id="mls-novation-net-to-us">$0</span>
+                                            <span class="text-blue-600 font-bold" id="mls-novation-net-to-us">$0</span>
                                         </div>
                                     </div>
                                 </div>
@@ -6140,6 +6146,9 @@
                 grossProfit = finalSalesPrice - maxAllowableOffer - repairs - totalCombinedFees;
             }
             const netProfit = Math.max(ourMinimumProfit, grossProfit);
+            
+            // Update MLS/Novation calculation since it depends on installment closing costs
+            calculateMLSNovation();
         }
 
 
@@ -7001,7 +7010,7 @@
         function calculateMLSNovation() {
             console.log('calculateMLSNovation called');
             
-            // Get list price from editable input (if user has manually adjusted it)
+            // Get list price from editable input (this is the "sell now price" the user fills in)
             const listPriceInput = document.getElementById('mls-novation-list-price');
             let listPrice = parseFloat(listPriceInput?.value?.replace(/,/g, '')) || 346500;
             
@@ -7019,38 +7028,62 @@
                 listPriceInput.value = listPrice.toLocaleString();
             }
             
-            // Get commission rates
+            // Get commission rates from the MLS/Novation section
             const listingCommission = parseFloat(document.getElementById('mls-listing-commission-input')?.value) || 2;
             const buyerCommission = parseFloat(document.getElementById('mls-buyer-commission-input')?.value) || 2;
-            const totalCommissionRate = (listingCommission + buyerCommission) / 100;
-            const totalCommissions = Math.round(listPrice * totalCommissionRate);
             
-            // Fixed our fee
-            const ourFee = 20475;
+            // Calculate commissions based on list price
+            const listingCommissionAmount = Math.round(listPrice * (listingCommission / 100));
+            const buyerCommissionAmount = Math.round(listPrice * (buyerCommission / 100));
+            const totalCommissions = listingCommissionAmount + buyerCommissionAmount;
             
-            // Calculate pricing tiers
-            const saleFastPrice = listPrice; // Same as list price for most cases
-            const underContractPrice = listPrice; // Final agreed price (same as list price)
-            const totalCommissionsAndFees = totalCommissions + ourFee;
+            // Get detailed closing costs from Installment section
+            const flatFeeListingService = parseFloat(document.getElementById('flat-fee-listing-service')?.value?.replace(/,/g, '')) || 500;
+            const titleEscrowPercent = parseFloat(document.getElementById('title-escrow-fees')?.value) || 1;
+            const titleEscrowFees = Math.round(listPrice * (titleEscrowPercent / 100));
+            const loanConcessions = parseFloat(document.getElementById('loan-concessions-buyer')?.value?.replace(/,/g, '')) || 400;
+            const homeWarranty = parseFloat(document.getElementById('home-warranty')?.value?.replace(/,/g, '')) || 650;
             
-            // Calculate net to us: List Price - Total Commissions and Fees
-            const netToUs = listPrice - totalCommissionsAndFees;
+            // Get out-of-pocket costs
+            const professionalStaging = parseFloat(document.getElementById('professional-staging')?.value?.replace(/,/g, '')) || 2500;
+            const makeReadyCleaning = parseFloat(document.getElementById('make-ready-cleaning')?.value?.replace(/,/g, '')) || 750;
+            const photography = parseFloat(document.getElementById('photography')?.value?.replace(/,/g, '')) || 350;
+            const matterport = parseFloat(document.getElementById('matterport')?.value?.replace(/,/g, '')) || 250;
+            const inspectionFee = parseFloat(document.getElementById('inspection-fee')?.value?.replace(/,/g, '')) || 1000;
+            const maxRepairs = parseFloat(document.getElementById('max-repairs-prior-closing')?.value?.replace(/,/g, '')) || 3000;
+            
+            // Calculate total closing costs
+            const totalClosingCosts = flatFeeListingService + titleEscrowFees + loanConcessions + homeWarranty;
+            
+            // Calculate total out-of-pocket costs
+            const totalOutOfPocket = professionalStaging + makeReadyCleaning + photography + matterport + inspectionFee + maxRepairs;
+            
+            // Calculate total combined fees (commissions + closing costs + out-of-pocket)
+            const totalCombinedFees = totalCommissions + totalClosingCosts + totalOutOfPocket;
+            
+            // Calculate pricing tiers (all based on list price)
+            const saleFastPrice = listPrice;
+            const underContractPrice = listPrice;
+            
+            // Calculate net to us: List Price - Total Combined Fees
+            const netToUs = listPrice - totalCombinedFees;
             
             console.log('MLS/Novation calculation:', {
                 listPrice,
-                saleFastPrice,
-                underContractPrice,
+                listingCommissionAmount,
+                buyerCommissionAmount,
                 totalCommissions,
-                ourFee,
-                totalCommissionsAndFees,
+                totalClosingCosts,
+                totalOutOfPocket,
+                totalCombinedFees,
                 netToUs
             });
             
-            // Update the display elements with new structure
+            // Update the display elements
             updateElementIfExists('mls-novation-list-price-display', '$' + listPrice.toLocaleString());
             updateElementIfExists('mls-novation-sale-fast-price', '$' + saleFastPrice.toLocaleString());
             updateElementIfExists('mls-novation-under-contract-price', '$' + underContractPrice.toLocaleString());
-            updateElementIfExists('mls-novation-total-commissions-fees', '$' + totalCommissionsAndFees.toLocaleString());
+            updateElementIfExists('mls-novation-total-commissions-fees', '$' + totalCombinedFees.toLocaleString());
             updateElementIfExists('mls-novation-net-to-us', '$' + netToUs.toLocaleString());
         }
         
@@ -8185,6 +8218,9 @@
 
             // Store total fees for MAO recalculation
             window.currentInstallmentFees = totalCombinedFees;
+
+            // Update MLS/Novation calculation since it depends on installment closing costs
+            calculateMLSNovation();
 
             return totalCombinedFees;
         }
