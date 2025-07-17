@@ -1,0 +1,98 @@
+The browser is still telling us two things:
+
+1. **`400 (Bad Request)`** from `…/add-credits` → the server never reached our credit-adjust logic; it rejected the request up front.
+2. **`SyntaxError: Unexpected token '<'`** → the body is HTML (probably a fallback page or error template), not JSON.
+
+That can only happen when the **URL, method, or body shape** does not match what the Express route expects. Let’s zero in.
+
+---
+
+## 1 min trace-check
+
+| What to look at      | Where                                  | What you should see                          |
+| -------------------- | -------------------------------------- | -------------------------------------------- |
+| **Request URL**      | DevTools → Network → `add-credits` row | `…/admin/api/users/<uuid>/credits` (exactly) |
+| **Request Method**   | same                                   | **POST**                                     |
+| **Request Headers**  | same → Headers → `Content-Type`        | `application/json`                           |
+| **Request Payload**  | same → Request Payload                 | `{"delta": <number>}`                        |
+| **Response Status**  | same                                   | 200                                          |
+| **Response Preview** | same                                   | `{ ok:true, credits:<newTotal> }`            |
+
+One mismatch = 400 → HTML → JSON parse crash.
+
+---
+
+## Two quick fixes (pick the one that matches what you see)
+
+### 🔧 Fix A – Front-end URL / body mismatch
+
+What I see in your logs:
+
+```
+…/8fc8d36d-…-add-credits
+```
+
+The route we built is `/admin/api/users/:userId/**credits**` (no “add-”).
+**Change the fetch:**
+
+```diff
+- fetch(`/admin/api/users/${userId}/add-credits`, …)
++ fetch(`/admin/api/users/${userId}/credits`, …)
+```
+
+…and be sure the body is:
+
+```js
+body: JSON.stringify({ delta: Number(delta) })
+```
+
+### 🔧 Fix B – Accept both URLs (server side safety net)
+
+If you like the `add-credits` path, expose an alias:
+
+```js
+// src/routes/admin/userCredits.js
+router.post(
+  ['/admin/api/users/:userId/credits',      // canonical
+   '/admin/api/users/:userId/add-credits'], // alias
+  requireRole(['admin', 'team']),
+  express.json(),
+  async (req,res)=>{ … }                   // same handler
+);
+```
+
+Now either URL will work.
+
+---
+
+## Bonus hardening
+
+```js
+// Front-end
+if (!delta || isNaN(delta)) {
+  alert('Enter a numeric credit amount'); return;
+}
+```
+
+```js
+// Back-end top of handler
+if (!Number.isInteger(delta))             // reject floats / strings
+  return res.status(400).json({ error:'delta must be integer' });
+```
+
+---
+
+## Smoke-test with curl
+
+```bash
+curl -X POST \
+  https://properwrite.com/admin/api/users/<USER_ID>/credits \
+  -H "Content-Type: application/json" \
+  --cookie "properwrite_token=<ADMIN_JWT_COOKIE>" \
+  -d '{"delta":15}'
+```
+
+Should echo `{"ok":true,"credits":…}`.
+If that works but the UI still fails, only the front-end call needs adjusting.
+
+Apply the matching fix, refresh, and the alert should now read “Credits updated ✓”. Let me know if any step still complains and we’ll trace deeper. 🚀

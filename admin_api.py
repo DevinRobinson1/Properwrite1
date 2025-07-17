@@ -608,11 +608,29 @@ def get_user_details(user_id):
 def add_user_credits(user_id):
     """Add credits to a user account"""
     try:
-        data = request.get_json()
-        credits = data.get('credits', 0)
+        # Log the request for debugging
+        logging.info(f"Adding credits request for user {user_id}")
         
-        if not credits or credits <= 0:
-            return jsonify({'error': 'Invalid credits amount'}), 400
+        data = request.get_json()
+        if not data:
+            logging.error(f"No JSON data provided for user {user_id}")
+            return jsonify({'error': 'No data provided'}), 400
+            
+        logging.info(f"Request data: {data}")
+        
+        credits = data.get('credits', 0)
+        reason = data.get('reason', 'Admin credit addition')
+        
+        # Convert credits to integer if it's a string
+        try:
+            credits = int(credits)
+        except (ValueError, TypeError):
+            logging.error(f"Invalid credits format for user {user_id}: {credits}")
+            return jsonify({'error': 'Credits must be a valid number'}), 400
+        
+        if credits <= 0:
+            logging.error(f"Invalid credits amount for user {user_id}: {credits}")
+            return jsonify({'error': 'Credits amount must be greater than 0'}), 400
         
         with get_db_session() as db:
             user = db.query(User).filter(User.id == user_id).first()
@@ -632,7 +650,7 @@ def add_user_credits(user_id):
                 team_id=team.id,
                 user_id=user.id,
                 delta=credits,
-                reason=f"Admin credit addition: {credits} credits"
+                reason=f"{reason}: {credits} credits"
             )
             db.add(credit_log)
             db.commit()
