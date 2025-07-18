@@ -1909,25 +1909,22 @@ ${getUserName() || 'User'}`);
                         
                         if (userNameEl) userNameEl.textContent = data.user.name || 'User';
                         if (userEmailEl) userEmailEl.textContent = data.user.email || '';
-                        if (userInitialsEl) userInitialsEl.textContent = data.user.initials || 'U';
-                        if (currentPlanEl) currentPlanEl.textContent = data.team.tier || 'Unknown';
+                        if (userInitialsEl) {
+                            // Generate initials from name
+                            const name = data.user.name || 'User';
+                            const nameParts = name.split(' ');
+                            const initials = nameParts.length >= 2 ? 
+                                nameParts[0][0] + nameParts[1][0] : 
+                                nameParts[0][0] + nameParts[0][1] || 'U';
+                            userInitialsEl.textContent = initials.toUpperCase();
+                        }
+                        if (currentPlanEl) currentPlanEl.textContent = data.team.plan || 'Unknown';
                         if (creditsRemainingEl) creditsRemainingEl.textContent = (data.team.credit_balance || 0).toLocaleString();
-                        if (teamSizeEl) teamSizeEl.textContent = `${data.team.total_members || 1} / ${data.team.max_members || 1}`;
+                        if (teamSizeEl) teamSizeEl.textContent = `${data.team.seats_used || 1} / ${data.team.seats_max || 1}`;
                         
                         // Update renewal date
                         if (renewalDateEl) {
-                            if (data.stripe_details && data.stripe_details.subscriptions && data.stripe_details.subscriptions.length > 0) {
-                                const subscription = data.stripe_details.subscriptions[0];
-                                if (subscription.current_period_end) {
-                                    const date = new Date(subscription.current_period_end * 1000);
-                                    renewalDateEl.textContent = date.toLocaleDateString('en-US', { 
-                                        month: 'short', 
-                                        day: 'numeric' 
-                                    });
-                                }
-                            } else {
-                                renewalDateEl.textContent = 'Manual Management';
-                            }
+                            renewalDateEl.textContent = data.team.renewal_date || 'N/A';
                         }
                     }
                     
@@ -1936,7 +1933,11 @@ ${getUserName() || 'User'}`);
                     if (plansSection) {
                         const creditsRemainingElements = plansSection.querySelectorAll('.text-3xl');
                         if (creditsRemainingElements[0]) {
-                            creditsRemainingElements[0].textContent = (data.team.credit_balance || 0).toLocaleString();
+                            if (data.team.unlimited_credits) {
+                                creditsRemainingElements[0].textContent = 'Unlimited';
+                            } else {
+                                creditsRemainingElements[0].textContent = (data.team.credit_balance || 0).toLocaleString();
+                            }
                         }
                         if (creditsRemainingElements[1]) {
                             creditsRemainingElements[1].textContent = (data.team.credits_used_this_month || 0).toLocaleString();
@@ -1949,30 +1950,24 @@ ${getUserName() || 'User'}`);
                     const nextBillingDate = document.getElementById('next-billing-date');
                     
                     if (currentPlanName) {
-                        // Use actual tier name from database
-                        const tierName = data.team.tier ? data.team.tier.charAt(0).toUpperCase() + data.team.tier.slice(1) : 'Unknown';
-                        currentPlanName.textContent = tierName;
+                        currentPlanName.textContent = data.team.plan || 'Unknown';
                     }
                     if (currentPlanCredits) {
-                        currentPlanCredits.textContent = data.team.credit_balance ? data.team.credit_balance.toLocaleString() : '0';
+                        if (data.team.unlimited_credits) {
+                            currentPlanCredits.textContent = 'Unlimited';
+                        } else {
+                            currentPlanCredits.textContent = data.team.credit_balance ? data.team.credit_balance.toLocaleString() : '0';
+                        }
                     }
                     if (nextBillingDate) {
-                        if (data.stripe_details && data.stripe_details.subscriptions && data.stripe_details.subscriptions.length > 0) {
-                            const subscription = data.stripe_details.subscriptions[0];
-                            if (subscription.current_period_end) {
-                                const renewalDate = new Date(subscription.current_period_end * 1000);
-                                nextBillingDate.textContent = renewalDate.toLocaleDateString();
-                            }
-                        } else {
-                            nextBillingDate.textContent = 'Manual/Database Management';
-                        }
+                        nextBillingDate.textContent = data.subscription.next_billing_date || 'Manual Management';
                     }
                     
                     // Update team member count in team section
                     const teamSectionHeaders = document.querySelectorAll('h3');
                     teamSectionHeaders.forEach(header => {
                         if (header.textContent.includes('Team Members')) {
-                            header.textContent = `Team Members (${data.team.total_members || 1}/${data.team.max_members || 1})`;
+                            header.textContent = `Team Members (${data.team.seats_used || 1}/${data.team.seats_max || 1})`;
                         }
                     });
                     
@@ -2150,6 +2145,62 @@ ${getUserName() || 'User'}`);
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(email);
         }
+
+        async function loadTeamMembers() {
+            try {
+                const response = await fetch('/api/team/members', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.members) {
+                        updateTeamMemberList(data.members);
+                    } else {
+                        // Show default member (current user)
+                        const defaultMember = {
+                            id: 'current-user',
+                            name: 'Devin (PFP Solutions)',
+                            email: 'devin@pfpsolutions.us',
+                            role: 'owner',
+                            is_active: true,
+                            last_active: new Date().toISOString()
+                        };
+                        updateTeamMemberList([defaultMember]);
+                    }
+                } else {
+                    console.error('Failed to load team members');
+                    // Show default member
+                    const defaultMember = {
+                        id: 'current-user',
+                        name: 'Devin (PFP Solutions)',
+                        email: 'devin@pfpsolutions.us',
+                        role: 'owner',
+                        is_active: true,
+                        last_active: new Date().toISOString()
+                    };
+                    updateTeamMemberList([defaultMember]);
+                }
+            } catch (error) {
+                console.error('Error loading team members:', error);
+                // Show default member
+                const defaultMember = {
+                    id: 'current-user',
+                    name: 'Devin (PFP Solutions)',
+                    email: 'devin@pfpsolutions.us',
+                    role: 'owner',
+                    is_active: true,
+                    last_active: new Date().toISOString()
+                };
+                updateTeamMemberList([defaultMember]);
+            }
+        }
+
+
 
         async function loadTeamData() {
             // This function is now handled by loadUserData()

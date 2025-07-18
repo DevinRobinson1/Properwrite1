@@ -3495,6 +3495,49 @@ def get_subscription_details():
         logging.error(f"Error getting subscription details: {e}")
         return jsonify({'success': False, 'error': 'Internal server error'}), 500
 
+@app.route('/api/team/members', methods=['GET'])
+def get_team_members():
+    """Get team members"""
+    try:
+        # Check for user_id in session
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+        
+        # Get user and team info
+        with Session(engine) as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            
+            if not user or not user.is_active:
+                return jsonify({'success': False, 'error': 'User not found or inactive'}), 404
+            
+            team_data = user.team
+            if not team_data:
+                return jsonify({'success': False, 'error': 'Team not found'}), 404
+            
+            # Get all team members
+            team_members = db.query(User).filter(User.team_id == team_data.id, User.is_active == True).all()
+            
+            members_data = []
+            for member in team_members:
+                members_data.append({
+                    'id': str(member.id),
+                    'name': member.name or 'User',
+                    'email': member.email,
+                    'role': member.role or 'analyst',
+                    'is_active': member.is_active,
+                    'last_active': member.last_login.isoformat() if member.last_login else None
+                })
+            
+            return jsonify({
+                'success': True,
+                'members': members_data
+            })
+        
+    except Exception as e:
+        logging.error(f"Error getting team members: {e}")
+        return jsonify({'success': False, 'error': 'Internal server error'}), 500
+
 @app.route('/api/billing/update-payment-method', methods=['POST'])
 @require_auth
 def update_payment_method():
