@@ -479,7 +479,14 @@ class SmartCompsService:
             'rules_broken': comp.rules_broken,
             'rules_broken_descriptions': [
                 self.rules[rule]['description'] for rule in comp.rules_broken
-            ]
+            ],
+            # Additional formatting for frontend display
+            'formatted_price': f"${comp.price:,.0f}",
+            'formatted_specs': f"{comp.beds} bd, {comp.baths} ba, {comp.sqft:,} sqft",
+            'formatted_distance': f"{comp.distance_mi:.1f} mi away",
+            'formatted_sale_date': f"Sold {comp.close_date}",
+            'price_per_sqft': round(comp.price / comp.sqft, 0) if comp.sqft > 0 else 0,
+            'days_ago': 0  # Will be calculated based on close_date
         }
 
 # Global instance
