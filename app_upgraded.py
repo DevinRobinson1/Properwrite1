@@ -3339,6 +3339,7 @@ def jv_admin_update_deal_status(deal_id):
 # ==================== BILLING & SUBSCRIPTION ENDPOINTS ====================
 
 @app.route('/api/billing/create-checkout', methods=['POST'])
+@csrf.exempt
 @require_auth
 def create_checkout():
     """Create Stripe checkout session for subscription or credit purchase"""
@@ -3526,7 +3527,7 @@ def get_team_members():
                     'email': member.email,
                     'role': member.role or 'analyst',
                     'is_active': member.is_active,
-                    'last_active': member.last_login.isoformat() if member.last_login else None
+                    'last_active': member.created_at.isoformat() if member.created_at else None
                 })
             
             return jsonify({
