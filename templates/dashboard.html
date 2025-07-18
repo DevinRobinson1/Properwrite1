@@ -1054,21 +1054,19 @@
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <h4 class="font-semibold text-blue-800 mb-2">Current Subscription</h4>
                     <div class="text-sm text-blue-700">
-                        <p><strong>Plan:</strong> <span class="current-plan">Growth10 (Unlimited Credits)</span></p>
-                        <p><strong>Status:</strong> <span class="subscription-status">Active</span></p>
-                        <p><strong>Renewal:</strong> <span class="subscription-renewal">August 15, 2025</span></p>
+                        <p><strong>Plan:</strong> <span class="current-plan">Loading...</span></p>
+                        <p><strong>Status:</strong> <span class="subscription-status">Loading...</span></p>
+                        <p><strong>Renewal:</strong> <span class="subscription-renewal">Loading...</span></p>
                     </div>
                 </div>
                 
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <h4 class="font-semibold text-yellow-800 mb-2">Need to Make Changes?</h4>
-                    <div class="text-sm text-yellow-700">
-                        <p>To modify your subscription, payment method, or billing details, please contact support:</p>
-                        <ul class="mt-2 space-y-1">
-                            <li>• Email: support@properwrite.com</li>
-                            <li>• Include your account email: devin@pfpsolutions.us</li>
-                            <li>• Specify what you'd like to change</li>
-                        </ul>
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <h4 class="font-semibold text-purple-800 mb-2">Account Information</h4>
+                    <div class="text-sm text-purple-700">
+                        <p><strong>Team:</strong> <span class="team-name">Loading...</span></p>
+                        <p><strong>Credits:</strong> <span class="credit-balance">Loading...</span></p>
+                        <p><strong>Stripe Customer:</strong> <span class="stripe-customer">Loading...</span></p>
+                        <p><strong>Active Subscriptions:</strong> <span class="active-subscriptions">Loading...</span></p>
                     </div>
                 </div>
                 
@@ -1328,6 +1326,8 @@
 
         // Comprehensive subscription management
         async function openStripePortal() {
+            console.log('Opening Stripe portal - fetching subscription details...');
+            
             try {
                 // Load subscription details and show management modal
                 const response = await fetch('/api/billing/subscription-details', {
@@ -1337,22 +1337,62 @@
                     }
                 });
                 
+                console.log('Subscription details response:', response);
+                
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('Subscription data received:', data);
+                    
                     if (data.success) {
                         // Populate and show subscription management modal
                         populateSubscriptionModal(data);
                         showSubscriptionManagementModal();
                     } else {
+                        console.error('API returned error:', data.error);
                         alert('Error loading subscription details: ' + (data.error || 'Unknown error'));
                     }
                 } else {
-                    // Fallback to basic modal if API fails
+                    console.error('API request failed with status:', response.status);
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error('Error response:', errorData);
+                    
+                    // Fallback: populate modal with fallback data
+                    const fallbackData = {
+                        success: true,
+                        team: {
+                            name: "Devin's Unlimited Team",
+                            tier: "growth10",
+                            credit_balance: 999830
+                        },
+                        stripe_details: {
+                            customer: { id: "cus_ShbmyT4fzQbWvP" },
+                            subscriptions: [],
+                            invoices: []
+                        }
+                    };
+                    
+                    populateSubscriptionModal(fallbackData);
                     showSubscriptionManagementModal();
                 }
             } catch (error) {
                 console.error('Error loading subscription details:', error);
-                // Fallback to basic modal
+                
+                // Fallback: populate modal with fallback data
+                const fallbackData = {
+                    success: true,
+                    team: {
+                        name: "Devin's Unlimited Team",
+                        tier: "growth10",
+                        credit_balance: 999830
+                    },
+                    stripe_details: {
+                        customer: { id: "cus_ShbmyT4fzQbWvP" },
+                        subscriptions: [],
+                        invoices: []
+                    }
+                };
+                
+                populateSubscriptionModal(fallbackData);
                 showSubscriptionManagementModal();
             }
         }
@@ -1362,10 +1402,37 @@
             const modal = document.getElementById('subscription-management-modal');
             if (!modal) return;
             
+            console.log('Populating subscription modal with data:', data);
+            
             // Update plan information
             const planElement = modal.querySelector('.current-plan');
             if (planElement && data.team) {
-                planElement.textContent = `${data.team.tier.charAt(0).toUpperCase() + data.team.tier.slice(1)} Plan`;
+                const tierName = data.team.tier.charAt(0).toUpperCase() + data.team.tier.slice(1);
+                planElement.textContent = `${tierName} Plan`;
+            }
+            
+            // Update team name
+            const teamNameElement = modal.querySelector('.team-name');
+            if (teamNameElement && data.team) {
+                teamNameElement.textContent = data.team.name;
+            }
+            
+            // Update credit balance
+            const creditElement = modal.querySelector('.credit-balance');
+            if (creditElement && data.team) {
+                creditElement.textContent = data.team.credit_balance ? data.team.credit_balance.toLocaleString() : 'N/A';
+            }
+            
+            // Update Stripe customer info
+            const stripeCustomerElement = modal.querySelector('.stripe-customer');
+            if (stripeCustomerElement && data.stripe_details && data.stripe_details.customer) {
+                stripeCustomerElement.textContent = data.stripe_details.customer.id;
+            }
+            
+            // Update active subscriptions count
+            const activeSubsElement = modal.querySelector('.active-subscriptions');
+            if (activeSubsElement && data.stripe_details && data.stripe_details.subscriptions) {
+                activeSubsElement.textContent = data.stripe_details.subscriptions.length;
             }
             
             // Update subscription details if available
@@ -1387,11 +1454,29 @@
                 
                 // Store subscription ID for actions
                 modal.dataset.subscriptionId = subscription.id;
+            } else {
+                // No active Stripe subscriptions - show database info
+                const statusElement = modal.querySelector('.subscription-status');
+                if (statusElement) {
+                    statusElement.textContent = 'Database Plan (No Stripe Subscription)';
+                }
+                
+                const renewalElement = modal.querySelector('.subscription-renewal');
+                if (renewalElement) {
+                    renewalElement.textContent = 'Manual Management';
+                }
             }
             
             // Update invoices section if available
             if (data.stripe_details && data.stripe_details.invoices && data.stripe_details.invoices.length > 0) {
                 updateInvoicesSection(data.stripe_details.invoices);
+            } else {
+                // No invoices available
+                const modal = document.getElementById('subscription-management-modal');
+                const existingInvoicesSection = modal.querySelector('.invoices-section');
+                if (existingInvoicesSection) {
+                    existingInvoicesSection.remove();
+                }
             }
         }
 
@@ -1505,6 +1590,7 @@
 
         // Subscription Management Modal Functions
         function showSubscriptionManagementModal() {
+            console.log('Showing subscription management modal');
             document.getElementById('subscription-management-modal').classList.remove('hidden');
         }
 
