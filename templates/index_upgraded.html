@@ -7626,7 +7626,12 @@
                                           id.includes('ackerman');
                         
                         if (isCurrency) {
-                            element.textContent = formatUSD(value);
+                            // Format as currency without dollar sign for Ackerman elements
+                            if (id.includes('ackerman')) {
+                                element.textContent = Math.round(value).toLocaleString();
+                            } else {
+                                element.textContent = formatUSD(value);
+                            }
                         } else {
                             element.textContent = Math.round(value).toLocaleString();
                         }
@@ -8395,6 +8400,9 @@
 
             // Store total fees for MAO recalculation
             window.currentInstallmentFees = totalCombinedFees;
+
+            // CRITICAL: Recalculate Ackerman offers when fees change
+            recalculateInstallment();
 
             // Update MLS/Novation calculation since it depends on installment closing costs
             calculateMLSNovation();
