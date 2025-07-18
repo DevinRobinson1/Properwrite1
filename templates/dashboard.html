@@ -279,11 +279,11 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm text-gray-600">Active Plan</p>
-                                <p class="text-2xl font-bold text-blue-600" id="current-plan-name">Pro</p>
+                                <p class="text-2xl font-bold text-blue-600" id="current-plan-name">Loading...</p>
                             </div>
                             <div class="text-right">
                                 <p class="text-sm text-gray-600">Credits</p>
-                                <p class="text-2xl font-bold text-green-600" id="current-plan-credits">247</p>
+                                <p class="text-2xl font-bold text-green-600" id="current-plan-credits">Loading...</p>
                             </div>
                         </div>
                         <div class="mt-4 pt-4 border-t border-gray-200">
@@ -313,14 +313,14 @@
                                 </div>
                             </div>
 
-                            <!-- Pro Plan -->
-                            <div class="border border-blue-500 rounded-lg p-4 bg-blue-50 plan-card current-plan-card" data-plan="pro">
+                            <!-- Growth10 Plan -->
+                            <div class="border border-blue-500 rounded-lg p-4 bg-blue-50 plan-card current-plan-card" data-plan="growth10">
                                 <div class="text-center">
-                                    <h3 class="font-semibold text-gray-900">Pro</h3>
+                                    <h3 class="font-semibold text-gray-900">Growth10</h3>
                                     <div class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full inline-block mb-2">Current</div>
-                                    <p class="text-2xl font-bold text-blue-600">$79<span class="text-sm text-gray-500">/month</span></p>
-                                    <p class="text-sm text-gray-600 mt-1">300 credits/month</p>
-                                    <p class="text-xs text-gray-500">1 user</p>
+                                    <p class="text-2xl font-bold text-blue-600">$399<span class="text-sm text-gray-500">/month</span></p>
+                                    <p class="text-sm text-gray-600 mt-1">Unlimited credits</p>
+                                    <p class="text-xs text-gray-500">10 users</p>
                                 </div>
                                 <div class="mt-4">
                                     <button disabled class="w-full px-4 py-2 bg-gray-300 text-gray-500 rounded-md cursor-not-allowed text-sm">
@@ -1884,27 +1884,42 @@ ${getUserName() || 'User'}`);
         async function loadUserData() {
             try {
                 // Load dashboard data
-                const response = await fetch('/api/dashboard-data');
+                const response = await fetch('/api/billing/subscription-details');
                 const data = await response.json();
                 
                 if (data.success) {
                     // Update user info in header
-                    document.getElementById('user-name').textContent = data.user.name;
-                    document.getElementById('user-email').textContent = data.user.email;
-                    document.getElementById('user-initials').textContent = data.user.initials;
-                    
-                    // Update team stats
-                    document.getElementById('current-plan').textContent = data.team.plan;
-                    document.getElementById('credits-remaining').textContent = data.team.credits_remaining.toLocaleString();
-                    document.getElementById('team-size').textContent = `${data.team.total_members} / ${data.team.max_members}`;
-                    
-                    // Update renewal date
-                    if (data.team.next_billing_date) {
-                        const date = new Date(data.team.next_billing_date);
-                        document.getElementById('renewal-date').textContent = date.toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric' 
-                        });
+                    if (data.user) {
+                        const userNameEl = document.getElementById('user-name');
+                        const userEmailEl = document.getElementById('user-email');
+                        const userInitialsEl = document.getElementById('user-initials');
+                        const currentPlanEl = document.getElementById('current-plan');
+                        const creditsRemainingEl = document.getElementById('credits-remaining');
+                        const teamSizeEl = document.getElementById('team-size');
+                        const renewalDateEl = document.getElementById('renewal-date');
+                        
+                        if (userNameEl) userNameEl.textContent = data.user.name || 'User';
+                        if (userEmailEl) userEmailEl.textContent = data.user.email || '';
+                        if (userInitialsEl) userInitialsEl.textContent = data.user.initials || 'U';
+                        if (currentPlanEl) currentPlanEl.textContent = data.team.tier || 'Unknown';
+                        if (creditsRemainingEl) creditsRemainingEl.textContent = (data.team.credit_balance || 0).toLocaleString();
+                        if (teamSizeEl) teamSizeEl.textContent = `${data.team.total_members || 1} / ${data.team.max_members || 1}`;
+                        
+                        // Update renewal date
+                        if (renewalDateEl) {
+                            if (data.stripe_details && data.stripe_details.subscriptions && data.stripe_details.subscriptions.length > 0) {
+                                const subscription = data.stripe_details.subscriptions[0];
+                                if (subscription.current_period_end) {
+                                    const date = new Date(subscription.current_period_end * 1000);
+                                    renewalDateEl.textContent = date.toLocaleDateString('en-US', { 
+                                        month: 'short', 
+                                        day: 'numeric' 
+                                    });
+                                }
+                            } else {
+                                renewalDateEl.textContent = 'Manual Management';
+                            }
+                        }
                     }
                     
                     // Update credit usage stats in Plans section
@@ -1912,41 +1927,48 @@ ${getUserName() || 'User'}`);
                     if (plansSection) {
                         const creditsRemainingElements = plansSection.querySelectorAll('.text-3xl');
                         if (creditsRemainingElements[0]) {
-                            creditsRemainingElements[0].textContent = data.team.credits_remaining.toLocaleString();
+                            creditsRemainingElements[0].textContent = (data.team.credit_balance || 0).toLocaleString();
                         }
                         if (creditsRemainingElements[1]) {
-                            creditsRemainingElements[1].textContent = data.team.credits_used_this_month.toLocaleString();
+                            creditsRemainingElements[1].textContent = (data.team.credits_used_this_month || 0).toLocaleString();
                         }
                     }
                     
                     // Update current plan info
                     const currentPlanName = document.getElementById('current-plan-name');
                     const currentPlanCredits = document.getElementById('current-plan-credits');
+                    const nextBillingDate = document.getElementById('next-billing-date');
+                    
                     if (currentPlanName) {
-                        currentPlanName.textContent = data.team.plan || 'Pro';
+                        // Use actual tier name from database
+                        const tierName = data.team.tier ? data.team.tier.charAt(0).toUpperCase() + data.team.tier.slice(1) : 'Unknown';
+                        currentPlanName.textContent = tierName;
                     }
                     if (currentPlanCredits) {
-                        currentPlanCredits.textContent = data.team.credits_remaining.toLocaleString();
+                        currentPlanCredits.textContent = data.team.credit_balance ? data.team.credit_balance.toLocaleString() : '0';
+                    }
+                    if (nextBillingDate) {
+                        if (data.stripe_details && data.stripe_details.subscriptions && data.stripe_details.subscriptions.length > 0) {
+                            const subscription = data.stripe_details.subscriptions[0];
+                            if (subscription.current_period_end) {
+                                const renewalDate = new Date(subscription.current_period_end * 1000);
+                                nextBillingDate.textContent = renewalDate.toLocaleDateString();
+                            }
+                        } else {
+                            nextBillingDate.textContent = 'Manual/Database Management';
+                        }
                     }
                     
                     // Update team member count in team section
                     const teamSectionHeaders = document.querySelectorAll('h3');
                     teamSectionHeaders.forEach(header => {
                         if (header.textContent.includes('Team Members')) {
-                            header.textContent = `Team Members (${data.team.total_members}/${data.team.max_members})`;
+                            header.textContent = `Team Members (${data.team.total_members || 1}/${data.team.max_members || 1})`;
                         }
                     });
                     
-                    // Update team members table
-                    if (data.members && data.members.length > 0) {
-                        updateTeamMemberList(data.members);
-                    } else {
-                        // Show empty state if no members
-                        const memberTableBody = document.querySelector('#team-members-table tbody');
-                        if (memberTableBody) {
-                            memberTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500 py-8">No team members found</td></tr>';
-                        }
-                    }
+                    // Load team members separately
+                    loadTeamMembers();
                     
                     // Load pending invites
                     loadPendingInvites();
@@ -1954,10 +1976,10 @@ ${getUserName() || 'User'}`);
                     // Populate profile settings fields
                     const profileNameField = document.getElementById('profile-name');
                     const profileEmailField = document.getElementById('profile-email');
-                    if (profileNameField) {
+                    if (profileNameField && data.user) {
                         profileNameField.value = data.user.name || '';
                     }
-                    if (profileEmailField) {
+                    if (profileEmailField && data.user) {
                         profileEmailField.value = data.user.email || '';
                     }
                     

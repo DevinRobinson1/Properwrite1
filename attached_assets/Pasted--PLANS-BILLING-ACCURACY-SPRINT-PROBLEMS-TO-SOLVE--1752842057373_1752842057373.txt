@@ -1,0 +1,77 @@
+/**
+ * 💳  PLANS & BILLING ACCURACY SPRINT
+ *
+ * 🔥  PROBLEMS TO SOLVE
+ * ---------------------
+ * 1. Dashboard shows wrong plan names / prices → looks hard-coded.
+ * 2. “Next billing date” field never loads.
+ * 3. Users on 5-credit demo display as “Pro”.
+ *
+ * ☑️  ACCEPTANCE CRITERIA
+ * -----------------------
+ *   • Plan cards (Individual, Pro, Team5, Growth10) are rendered
+ *     DIRECTLY from Stripe **Price IDs** – no magic numbers in JSX.
+ *   • Current plan & next billing date come from the user’s live
+ *     Stripe Subscription (`current_period_end`).
+ *   • Demo users show “Free Trial (5 credits remaining)” instead of Pro.
+ *   • Front-end and API tests confirm data integrity.
+ *
+ * 🗂  FILES INVOLVED
+ * ------------------
+ *   server/
+ *     services/stripe.js
+ *     routes/billing.js
+ *   client/
+ *     pages/Dashboard/Plans.jsx
+ *     hooks/useSubscription.js
+ *   tests/
+ *     billing.spec.js
+ *
+ * 🔧  TASK LIST
+ * -------------
+ *
+ * 1️⃣  **Replace Hard-coded Plan Catalog**
+ *     - Query Stripe once at server boot:
+ *         const prices = await stripe.prices.list({expand:['data.product']});
+ *     - Cache as `global.planCatalog`:
+ *         [
+ *           {id:'price_individual', name:'Individual', amount:2700, credits:100, users:1},
+ *           {id:'price_pro',        name:'Pro',        amount:7900, credits:300, users:1},
+ *           {id:'price_team5',     name:'Team5',      amount:19900, credits:1000, users:5},
+ *           {id:'price_growth10',  name:'Growth10',   amount:39900, credits:'∞', users:10}
+ *         ]
+ *     - Expose via GET `/api/billing/plans`.
+ *
+ * 2️⃣  **Current Subscription Endpoint**
+ *     - GET `/api/billing/me`
+ *         ▸ looks up Stripe Subscription by `customer_id`
+ *         ▸ returns { planId, planName, credits, nextBilling: current_period_end }
+ *     - Free-demo users (no sub) → { planId:'demo', planName:'Free Trial', credits }
+ *
+ * 3️⃣  **React Hook**
+ *     - `useSubscription()` fetches `/api/billing/me` + `/api/billing/plans`.
+ *     - Dashboard <Plans> component renders plan tiles from plans array,
+ *       marks `current` where plan.id === sub.planId.
+ *     - If sub.planId === 'demo' show special badge “Demo (5 credits left)”.
+ *
+ * 4️⃣  **Next Billing Date**
+ *     - Convert `nextBilling` (unix) → `format(new Date(nextBilling*1000),'PPP')`.
+ *     - If demo / free: hide field.
+ *
+ * 5️⃣  **Guardrail: demo ≠ pro**
+ *     - In credits middleware: if `subscription_id` is null → role='demo'.
+ *     - Prevent “Pro” badge unless role==='subscriber'.
+ *
+ * 6️⃣  **Unit Tests (Jest + Supertest)**
+ *     - Mock Stripe with `stripe-mock`.
+ *     - Test `/api/billing/me` for: demo, active Pro, cancelled sub.
+ *     - Snapshot Dashboard render (React Testing Library) to ensure correct badges.
+ *
+ * 7️⃣  **Remove Dead Code / TODO**
+ *     - Delete any leftover hard-coded price arrays in client.
+ *     - Mark TODO lines with `// FIXME(remove-hardcode)` so we never re-introduce.
+ *
+ * 8️⃣  **Commit & Report**
+ *     - Commit message: "fix: dynamic plans & accurate billing data".
+ *     - Create `docs/billing-audit.md` summarizing changes + screenshots.
+ */
