@@ -1045,6 +1045,52 @@
         </div>
     </div>
 
+    <!-- Subscription Management Modal -->
+    <div id="subscription-management-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full mx-4">
+            <h3 class="text-lg font-semibold mb-4">Subscription Management</h3>
+            
+            <div class="space-y-4">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 class="font-semibold text-blue-800 mb-2">Current Subscription</h4>
+                    <div class="text-sm text-blue-700">
+                        <p><strong>Plan:</strong> Growth10 (Unlimited Credits)</p>
+                        <p><strong>Status:</strong> Active</p>
+                        <p><strong>Renewal:</strong> August 15, 2025</p>
+                    </div>
+                </div>
+                
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <h4 class="font-semibold text-yellow-800 mb-2">Need to Make Changes?</h4>
+                    <div class="text-sm text-yellow-700">
+                        <p>To modify your subscription, payment method, or billing details, please contact support:</p>
+                        <ul class="mt-2 space-y-1">
+                            <li>• Email: support@properwrite.com</li>
+                            <li>• Include your account email: devin@pfpsolutions.us</li>
+                            <li>• Specify what you'd like to change</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h4 class="font-semibold text-green-800 mb-2">Available Actions</h4>
+                    <div class="space-y-2">
+                        <button onclick="downloadInvoice()" class="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm">
+                            <i class="fas fa-download mr-2"></i>Download Latest Invoice
+                        </button>
+                        <button onclick="contactSupport()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">
+                            <i class="fas fa-envelope mr-2"></i>Contact Support
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-3 mt-6">
+                <button onclick="closeSubscriptionManagementModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Mobile Bottom Navigation -->
     <div class="mobile-nav sm:hidden">
         <div class="flex justify-around py-2">
@@ -1299,6 +1345,9 @@
                     
                     if (result.error && result.error.includes('No Stripe customer ID')) {
                         alert('To manage your subscription, you need to have an active subscription. Please purchase a plan first.');
+                    } else if (result.error && result.error.includes('not configured')) {
+                        // Show subscription management modal instead
+                        showSubscriptionManagementModal();
                     } else {
                         alert('Error opening subscription portal: ' + (result.error || 'Unknown error'));
                     }
@@ -1352,6 +1401,43 @@
         function closeRedeemCodeModal() {
             document.getElementById('redeem-code-modal').classList.add('hidden');
             document.getElementById('redeem-code-input').value = '';
+        }
+
+        // Subscription Management Modal Functions
+        function showSubscriptionManagementModal() {
+            document.getElementById('subscription-management-modal').classList.remove('hidden');
+        }
+
+        function closeSubscriptionManagementModal() {
+            document.getElementById('subscription-management-modal').classList.add('hidden');
+        }
+
+        function downloadInvoice() {
+            // For now, show a message - this would need to be implemented with Stripe API
+            alert('Invoice download functionality is being set up. Please contact support for your latest invoice.');
+        }
+
+        function contactSupport() {
+            // Open email client with pre-filled information
+            const subject = encodeURIComponent('Subscription Management Request');
+            const body = encodeURIComponent(`Hello,
+
+I need assistance with my subscription management.
+
+Account Email: devin@pfpsolutions.us
+Current Plan: Growth10 (Unlimited Credits)
+Request: [Please describe what you'd like to change]
+
+Thank you,
+${getUserName() || 'User'}`);
+            
+            window.open(`mailto:support@properwrite.com?subject=${subject}&body=${body}`);
+        }
+
+        function getUserName() {
+            // Get user name from the UI if available
+            const nameElement = document.querySelector('[data-user-name]');
+            return nameElement ? nameElement.textContent : null;
         }
 
         async function redeemCreditCode() {
