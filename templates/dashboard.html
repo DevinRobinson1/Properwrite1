@@ -197,7 +197,7 @@
                                 </div>
                                 <div class="ml-4">
                                     <p class="text-sm text-gray-600">Plan</p>
-                                    <p class="text-xl font-semibold text-gray-900" id="current-plan">Pro</p>
+                                    <p class="text-xl font-semibold text-gray-900" id="current-plan">Loading...</p>
                                 </div>
                             </div>
                         </div>
@@ -209,7 +209,7 @@
                                 </div>
                                 <div class="ml-4">
                                     <p class="text-sm text-gray-600">Credits</p>
-                                    <p class="text-xl font-semibold text-gray-900" id="credits-remaining">247</p>
+                                    <p class="text-xl font-semibold text-gray-900" id="credits-remaining">Loading...</p>
                                 </div>
                             </div>
                         </div>
@@ -221,7 +221,7 @@
                                 </div>
                                 <div class="ml-4">
                                     <p class="text-sm text-gray-600">Team Size</p>
-                                    <p class="text-xl font-semibold text-gray-900" id="team-size">3 / 5</p>
+                                    <p class="text-xl font-semibold text-gray-900" id="team-size">Loading...</p>
                                 </div>
                             </div>
                         </div>
@@ -233,7 +233,7 @@
                                 </div>
                                 <div class="ml-4">
                                     <p class="text-sm text-gray-600">Renewal</p>
-                                    <p class="text-xl font-semibold text-gray-900" id="renewal-date">Aug 15</p>
+                                    <p class="text-xl font-semibold text-gray-900" id="renewal-date">Loading...</p>
                                 </div>
                             </div>
                         </div>
@@ -1883,9 +1883,18 @@ ${getUserName() || 'User'}`);
 
         async function loadUserData() {
             try {
-                // Load dashboard data
-                const response = await fetch('/api/billing/subscription-details');
+                // Load dashboard data with credentials
+                const response = await fetch('/api/billing/subscription-details', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                console.log('Subscription details response status:', response.status);
                 const data = await response.json();
+                console.log('Subscription details response data:', data);
                 
                 if (data.success) {
                     // Update user info in header
@@ -1985,12 +1994,34 @@ ${getUserName() || 'User'}`);
                     
                 } else {
                     console.error('Error loading dashboard data:', data.error);
-                    // Show error message
+                    // Show error message but try to populate what we can
                     showErrorMessage('Failed to load dashboard data. Please try refreshing the page.');
+                    
+                    // Set fallback values to avoid showing "Loading..." indefinitely
+                    const currentPlanEl = document.getElementById('current-plan');
+                    const creditsRemainingEl = document.getElementById('credits-remaining');
+                    const teamSizeEl = document.getElementById('team-size');
+                    const renewalDateEl = document.getElementById('renewal-date');
+                    
+                    if (currentPlanEl) currentPlanEl.textContent = 'Error loading';
+                    if (creditsRemainingEl) creditsRemainingEl.textContent = 'Error loading';
+                    if (teamSizeEl) teamSizeEl.textContent = 'Error loading';
+                    if (renewalDateEl) renewalDateEl.textContent = 'Error loading';
                 }
             } catch (error) {
                 console.error('Error loading user data:', error);
                 showErrorMessage('Failed to load dashboard data. Please try refreshing the page.');
+                
+                // Set fallback values to avoid showing "Loading..." indefinitely
+                const currentPlanEl = document.getElementById('current-plan');
+                const creditsRemainingEl = document.getElementById('credits-remaining');
+                const teamSizeEl = document.getElementById('team-size');
+                const renewalDateEl = document.getElementById('renewal-date');
+                
+                if (currentPlanEl) currentPlanEl.textContent = 'Error loading';
+                if (creditsRemainingEl) creditsRemainingEl.textContent = 'Error loading';
+                if (teamSizeEl) teamSizeEl.textContent = 'Error loading';
+                if (renewalDateEl) renewalDateEl.textContent = 'Error loading';
             }
         }
 

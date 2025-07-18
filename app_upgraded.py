@@ -3428,20 +3428,72 @@ def get_billing_history():
         return jsonify({'error': 'Internal server error'}), 500
 
 @app.route('/api/billing/subscription-details', methods=['GET'])
-@require_auth
 def get_subscription_details():
     """Get comprehensive subscription details"""
     try:
-        team_id = g.current_user['team_id']
+        # Check for user_id in session (same as user-status endpoint)
+        user_id = session.get('user_id')
+        logging.info(f"Subscription details - user_id from session: {user_id}")
+        if not user_id:
+            logging.warning("No user_id found in session for subscription details")
+            return jsonify({'success': False, 'error': 'Not authenticated'}), 401
         
-        # Get subscription details
-        result = billing_service.get_subscription_details(team_id)
+        # Get user and team info (same as user-status endpoint)
+        with Session(engine) as db:
+            user = db.query(User).filter(User.id == user_id).first()
+            
+            if not user or not user.is_active:
+                return jsonify({'success': False, 'error': 'User not found or inactive'}), 404
+            
+            team_data = user.team
+            if not team_data:
+                return jsonify({'success': False, 'error': 'Team not found'}), 404
         
-        return jsonify(result)
+        # Return subscription details (similar to user-status endpoint)
+        plan_name = team_data.tier.upper() if team_data.tier else 'STARTER'
+        if plan_name == 'GROWTH10':
+            plan_name = 'Growth10'
+        elif plan_name == 'TEAM5':
+            plan_name = 'Team5'
+        elif plan_name == 'PRO':
+            plan_name = 'Pro'
+        
+        # Get current team member count
+        team_member_count = db.query(User).filter(User.team_id == team_data.id, User.is_active == True).count()
+        
+        # Calculate renewal date (placeholder - you can implement actual Stripe subscription date logic later)
+        from datetime import datetime, timedelta
+        renewal_date = datetime.now() + timedelta(days=30)
+        
+        return jsonify({
+            'success': True,
+            'user': {
+                'id': str(user.id),
+                'email': user.email,
+                'name': user.name or 'User'
+            },
+            'team': {
+                'id': str(team_data.id),
+                'name': team_data.name,
+                'plan': plan_name,
+                'tier': team_data.tier,
+                'credit_balance': team_data.credit_balance,
+                'unlimited_credits': team_data.tier == 'growth10',
+                'seats_used': team_member_count,
+                'seats_max': team_data.seats_max,
+                'renewal_date': renewal_date.strftime('%b %d')
+            },
+            'subscription': {
+                'status': 'active',
+                'plan_name': plan_name,
+                'billing_cycle': 'monthly',
+                'next_billing_date': renewal_date.strftime('%Y-%m-%d')
+            }
+        })
         
     except Exception as e:
         logging.error(f"Error getting subscription details: {e}")
-        return jsonify({'error': 'Internal server error'}), 500
+        return jsonify({'success': False, 'error': 'Internal server error'}), 500
 
 @app.route('/api/billing/update-payment-method', methods=['POST'])
 @require_auth
