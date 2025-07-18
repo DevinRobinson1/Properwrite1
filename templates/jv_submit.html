@@ -2,7 +2,7 @@
 {% block title %}Submit a JV Deal{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/jv_submit.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/jv_submit_fixed.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/jv_enhanced.css') }}">
 
 <!-- Modern Hero Section -->
@@ -40,7 +40,7 @@
 </div>
 
 <!-- Main Wizard Container -->
-<section id="jv-wizard" class="max-w-6xl mx-auto px-4 py-8">
+<section id="jv-wizard" class="max-w-4xl mx-auto px-4 py-8">
   <!-- Progress Bar -->
   <div class="mb-8">
     <div class="max-w-4xl mx-auto mb-6">
@@ -58,36 +58,34 @@
   </div>
 
   <!-- Step Indicators -->
-  <div class="mb-12 max-w-4xl mx-auto">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center space-x-8">
-        <div class="step-indicator active" data-step="1">
-          <div class="step-circle">
-            <img src="{{ url_for('static', filename='PFPS_Icon_Mark_Dark.png') }}" alt="PFPS" class="w-6 h-6">
-          </div>
-          <div class="step-label">Partner Info</div>
+  <div class="mb-8 max-w-4xl mx-auto">
+    <div class="flex items-center justify-between space-x-2 md:space-x-8 overflow-x-auto pb-4">
+      <div class="step-indicator active flex-shrink-0" data-step="1">
+        <div class="step-circle">
+          <img src="{{ url_for('static', filename='PFPS_Icon_Mark_Dark.png') }}" alt="PFPS" class="w-6 h-6">
         </div>
-        <div class="step-connector"></div>
-        <div class="step-indicator" data-step="2">
-          <div class="step-circle">
-            <i class="fas fa-home"></i>
-          </div>
-          <div class="step-label">Property Details</div>
+        <div class="step-label">Partner Info</div>
+      </div>
+      <div class="step-connector flex-shrink-0"></div>
+      <div class="step-indicator flex-shrink-0" data-step="2">
+        <div class="step-circle">
+          <i class="fas fa-home"></i>
         </div>
-        <div class="step-connector"></div>
-        <div class="step-indicator" data-step="3">
-          <div class="step-circle">
-            <i class="fas fa-calculator"></i>
-          </div>
-          <div class="step-label">Deal Numbers</div>
+        <div class="step-label">Property Details</div>
+      </div>
+      <div class="step-connector flex-shrink-0"></div>
+      <div class="step-indicator flex-shrink-0" data-step="3">
+        <div class="step-circle">
+          <i class="fas fa-calculator"></i>
         </div>
-        <div class="step-connector"></div>
-        <div class="step-indicator" data-step="4">
-          <div class="step-circle">
-            <i class="fas fa-check"></i>
-          </div>
-          <div class="step-label">Review & Submit</div>
+        <div class="step-label">Deal Numbers</div>
+      </div>
+      <div class="step-connector flex-shrink-0"></div>
+      <div class="step-indicator flex-shrink-0" data-step="4">
+        <div class="step-circle">
+          <i class="fas fa-check"></i>
         </div>
+        <div class="step-label">Review & Submit</div>
       </div>
     </div>
   </div>
