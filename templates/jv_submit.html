@@ -40,12 +40,10 @@
 </div>
 
 <!-- Main Wizard Container -->
-<section id="jv-wizard" class="max-w-7xl mx-auto px-4 py-8 flex gap-8">
-  <!-- Left Side - Main Form -->
-  <div class="flex-1 max-w-4xl">
-  <!-- Animated Progress Bar -->
+<section id="jv-wizard" class="max-w-6xl mx-auto px-4 py-8">
+  <!-- Progress Bar -->
   <div class="mb-8">
-    <div class="max-w-2xl mx-auto mb-6">
+    <div class="max-w-4xl mx-auto mb-6">
       <div class="relative">
         <div class="h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
           <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-500 via-green-500 via-purple-500 to-orange-500 rounded-full transition-all duration-700 ease-out transform origin-left" style="width: 25%"></div>
@@ -59,8 +57,8 @@
     </div>
   </div>
 
-  <!-- Modern Progress Bar -->
-  <div class="mb-12">
+  <!-- Step Indicators -->
+  <div class="mb-12 max-w-4xl mx-auto">
     <div class="flex items-center justify-between">
       <div class="flex items-center space-x-8">
         <div class="step-indicator active" data-step="1">
@@ -94,8 +92,11 @@
     </div>
   </div>
 
-  <!-- Form Steps -->
-  <form id="jv-form" autocomplete="off" class="space-y-8">
+  <!-- Main Form Container -->
+  <div class="max-w-4xl mx-auto">
+
+    <!-- Form Steps -->
+    <form id="jv-form" autocomplete="off" class="space-y-8">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
     <!-- STEP 1 – Partner Info -->
     <fieldset data-step="1" class="step-content">
@@ -511,6 +512,7 @@
         </div>
       </div>
     </div>
+    </form>
   </div>
 </section>
 

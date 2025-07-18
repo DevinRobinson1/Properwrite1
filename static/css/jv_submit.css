@@ -60,19 +60,67 @@
 /* Form Styles */
 .step-content {
   @apply transition-all duration-300 ease-in-out;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
 }
 
-/* Step-specific styling */
+/* Fix clickability issues */
+.form-input, .form-select, .deal-type-card, .btn-primary, .btn-secondary {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.deal-type-option {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+/* Ensure proper layout */
+#jv-wizard {
+  position: relative;
+  z-index: 1;
+}
+
+.deal-type-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 1rem;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.deal-type-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
+.deal-type-option input[type="radio"]:checked + .deal-type-card {
+  border-color: #3b82f6;
+  background: #f0f9ff;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
+}
+
+/* Step-specific styling - removed border-left to fix layout issues */
 fieldset[data-step="1"] {
-  @apply border-l-4 border-blue-500;
+  @apply relative;
 }
 
 fieldset[data-step="2"] {
-  @apply border-l-4 border-green-500;
+  @apply relative;
 }
 
 fieldset[data-step="3"] {
-  @apply border-l-4 border-purple-500;
+  @apply relative;
+}
+
+fieldset[data-step="4"] {
+  @apply relative;
 }
 
 fieldset[data-step="4"] {
