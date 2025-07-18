@@ -22,7 +22,6 @@ class JVWizard {
     this.initNumberFormatting();
     this.loadFromStorage();
     this.updateUI();
-    this.initEnhancedFeatures();
   }
 
   bindEvents() {
@@ -65,6 +64,20 @@ class JVWizard {
         const stepNum = parseInt(indicator.dataset.step);
         if (stepNum <= this.currentStep) {
           this.goToStep(stepNum);
+        }
+      });
+    });
+
+    // Deal type option clicks
+    document.querySelectorAll('.deal-type-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        const radioInput = card.parentElement.querySelector('input[type="radio"]');
+        if (radioInput) {
+          radioInput.checked = true;
+          // Update visual state
+          document.querySelectorAll('.deal-type-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          this.saveToStorage();
         }
       });
     });

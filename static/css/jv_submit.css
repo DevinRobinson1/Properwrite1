@@ -100,10 +100,54 @@
   transform: translateY(-2px);
 }
 
-.deal-type-option input[type="radio"]:checked + .deal-type-card {
-  border-color: #3b82f6;
-  background: #f0f9ff;
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
+.deal-type-option input[type="radio"]:checked + .deal-type-card,
+.deal-type-card.selected {
+  border-color: #3b82f6 !important;
+  background: #f0f9ff !important;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Additional click event handlers for deal type options */
+.deal-type-option label {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  z-index: 10;
+  display: block;
+  width: 100%;
+}
+
+.deal-type-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Ensure form fields are above overlays */
+.form-input, .form-select, .form-input:focus, .form-select:focus {
+  position: relative;
+  z-index: 5;
+  background: white;
+}
+
+/* Fix button clickability */
+.btn-primary, .btn-secondary {
+  position: relative;
+  z-index: 10;
+  cursor: pointer;
+  display: inline-block;
+}
+
+/* Fix input wrappers */
+.input-wrapper {
+  position: relative;
+  z-index: 5;
+}
+
+.input-wrapper input {
+  position: relative;
+  z-index: 6;
 }
 
 /* Step-specific styling - removed border-left to fix layout issues */
