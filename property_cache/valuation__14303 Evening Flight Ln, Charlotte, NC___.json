@@ -15,7 +15,7 @@
       "year_built": 2014
     },
     "rentcast": {
-      "estimate": 324000,
+      "estimate": 323000,
       "source": "RentCast Property Data",
       "confidence": "high",
       "matched_address": null,
@@ -36,8 +36,8 @@
       "confidence": "High",
       "samples": 31,
       "radius_miles": 1.5,
-      "credits_remaining": 964,
-      "updated": "2025-07-15"
+      "credits_remaining": 898,
+      "updated": "2025-07-18"
     }
   },
   "sources_tried": [
@@ -60,7 +60,7 @@
     "longitude": null
   },
   "cache_used": false,
-  "timestamp": "2025-07-15T15:13:08.056375",
+  "timestamp": "2025-07-18T15:19:56.767678",
   "rent_estimate": 2123,
   "rent_data_source": "Rentometer"
 }

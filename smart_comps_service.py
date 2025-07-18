@@ -367,7 +367,7 @@ class SmartCompsService:
         try:
             from simple_comps_service import SimpleCompsService
             service = SimpleCompsService()
-            result = service.search_comparable_properties(
+            result = service.search_comparable_sales(
                 search_params.address,
                 search_params.beds,
                 search_params.baths,

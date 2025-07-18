@@ -2635,6 +2635,7 @@ def analyze_comps():
         
         # Create search parameters for enhanced service
         # Uses beds/baths/sqft from Subject Property header for matching
+        from enhanced_comps_service import SearchParams
         search_params = SearchParams(
             beds=int(beds),
             baths=float(baths),
@@ -2684,7 +2685,18 @@ def analyze_comps():
                 
                 # Final fallback to enhanced service
                 try:
-                    enhanced_result = enhanced_comps_service.search_comparable_sales(search_params)
+                    # Create search parameters with zip_code as positional argument
+                    from enhanced_comps_service import SearchParams
+                    enhanced_search_params = SearchParams(
+                        beds=int(beds),
+                        baths=float(baths),
+                        sqft=int(sqft),
+                        lat=lat or 0.0,
+                        lng=lng or 0.0,
+                        address=address,
+                        zip_code=zip_code or ""
+                    )
+                    enhanced_result = enhanced_comps_service.search_comparable_sales(enhanced_search_params)
                     if enhanced_result.get('success') and enhanced_result.get('comps'):
                         result = enhanced_result
                         result['fallback_used'] = True
