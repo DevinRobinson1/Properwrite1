@@ -1281,8 +1281,32 @@
         }
 
         // Placeholder functions for various actions
-        function openStripePortal() {
-            window.open('/api/billing/customer-portal', '_blank');
+        async function openStripePortal() {
+            try {
+                const response = await fetch('/api/billing/customer-portal', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (response.ok) {
+                    // If successful, redirect to the portal URL
+                    window.location.href = response.url;
+                } else {
+                    // Parse the error response
+                    const result = await response.json();
+                    
+                    if (result.error && result.error.includes('No Stripe customer ID')) {
+                        alert('To manage your subscription, you need to have an active subscription. Please purchase a plan first.');
+                    } else {
+                        alert('Error opening subscription portal: ' + (result.error || 'Unknown error'));
+                    }
+                }
+            } catch (error) {
+                console.error('Error opening Stripe portal:', error);
+                alert('Error opening subscription portal. Please try again.');
+            }
         }
 
         function exportUsageCSV() {

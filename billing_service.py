@@ -797,6 +797,56 @@ class BillingService:
         
         return PROMO_BONUSES.get(promo_code, 0)
     
+    def create_stripe_customer_for_team(self, team_id: str) -> Dict:
+        """
+        Create a Stripe customer for an existing team that doesn't have one
+        """
+        try:
+            with Session(engine) as db:
+                # Get team information
+                team = db.query(Team).filter(Team.id == team_id).first()
+                if not team:
+                    return {'success': False, 'error': 'Team not found'}
+                
+                if team.stripe_customer_id:
+                    return {'success': True, 'customer_id': team.stripe_customer_id}
+                
+                # Get team owner's email
+                owner = db.query(User).filter(
+                    User.team_id == team_id,
+                    User.role == 'owner'
+                ).first()
+                
+                if not owner:
+                    return {'success': False, 'error': 'Team owner not found'}
+                
+                # Create Stripe customer
+                customer = stripe.Customer.create(
+                    email=owner.email,
+                    name=owner.name,
+                    description=f"Team: {team.name}",
+                    metadata={
+                        'team_id': str(team_id),
+                        'user_id': str(owner.id),
+                        'tier': team.tier
+                    }
+                )
+                
+                # Update team with Stripe customer ID
+                team.stripe_customer_id = customer.id
+                db.commit()
+                
+                logging.info(f"Created Stripe customer {customer.id} for team {team_id}")
+                
+                return {
+                    'success': True,
+                    'customer_id': customer.id
+                }
+                
+        except Exception as e:
+            logging.error(f"Error creating Stripe customer for team: {e}")
+            return {'success': False, 'error': str(e)}
+
     def create_customer_portal_session(self, team_id: str, return_url: str = None) -> Dict:
         """
         Create a Stripe customer portal session for subscription management
@@ -808,8 +858,17 @@ class BillingService:
                 if not team:
                     return {'success': False, 'error': 'Team not found'}
                 
+                # If team doesn't have a Stripe customer ID, create one
                 if not team.stripe_customer_id:
-                    return {'success': False, 'error': 'No Stripe customer ID found'}
+                    customer_result = self.create_stripe_customer_for_team(team_id)
+                    if not customer_result['success']:
+                        return {
+                            'success': False, 
+                            'error': 'Unable to create customer portal. Please contact support.'
+                        }
+                    
+                    # Refresh team data
+                    team = db.query(Team).filter(Team.id == team_id).first()
                 
                 # Set default return URL if not provided
                 if not return_url:
@@ -828,6 +887,15 @@ class BillingService:
                 
         except Exception as e:
             logging.error(f"Error creating customer portal session: {e}")
+            
+            # Handle specific Stripe configuration errors
+            error_msg = str(e)
+            if "No configuration provided" in error_msg and "customer portal settings" in error_msg:
+                return {
+                    'success': False, 
+                    'error': 'Stripe customer portal is not configured. Please contact support to set up subscription management.'
+                }
+            
             return {'success': False, 'error': str(e)}
     
     def remove_team_member(self, team_id: str, member_id: str) -> Dict:
