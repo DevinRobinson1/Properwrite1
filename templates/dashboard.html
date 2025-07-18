@@ -344,17 +344,17 @@
                                 </div>
                             </div>
 
-                            <!-- Growth10 Plan -->
-                            <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition-colors plan-card" data-plan="growth10">
+                            <!-- Pro Plan -->
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition-colors plan-card" data-plan="pro">
                                 <div class="text-center">
-                                    <h3 class="font-semibold text-gray-900">Growth10</h3>
-                                    <p class="text-2xl font-bold text-blue-600 mt-2">$399<span class="text-sm text-gray-500">/month</span></p>
-                                    <p class="text-sm text-gray-600 mt-1">Unlimited credits</p>
-                                    <p class="text-xs text-gray-500">10 users</p>
+                                    <h3 class="font-semibold text-gray-900">Pro</h3>
+                                    <p class="text-2xl font-bold text-blue-600 mt-2">$79<span class="text-sm text-gray-500">/month</span></p>
+                                    <p class="text-sm text-gray-600 mt-1">300 credits/month</p>
+                                    <p class="text-xs text-gray-500">1 user</p>
                                 </div>
                                 <div class="mt-4">
-                                    <button onclick="changePlan('growth10')" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">
-                                        Upgrade
+                                    <button onclick="changePlan('pro')" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">
+                                        Downgrade
                                     </button>
                                 </div>
                             </div>
@@ -1692,7 +1692,78 @@ ${getUserName() || 'User'}`);
         }
 
         async function changePlan(planKey) {
-            if (!confirm(`Are you sure you want to change to the ${planKey} plan?`)) {
+            // Show payment portal for plan changes
+            await showPaymentPortal(planKey);
+        }
+        
+        async function showPaymentPortal(planKey) {
+            const modal = document.getElementById('payment-portal-modal');
+            if (!modal) {
+                console.error('Payment portal modal not found');
+                return;
+            }
+            
+            try {
+                // Get current plan details
+                const response = await fetch('/api/billing/subscription-details', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Populate the payment portal with plan change details
+                    populatePaymentPortal(data, planKey);
+                    modal.classList.remove('hidden');
+                } else {
+                    console.error('Error loading subscription details:', data.error);
+                    alert('Error loading subscription details. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error loading payment portal:', error);
+                alert('Error loading payment portal. Please try again.');
+            }
+        }
+        
+        function populatePaymentPortal(subscriptionData, newPlanKey) {
+            const planNames = {
+                'individual': 'Individual ($27/month)',
+                'pro': 'Pro ($79/month)', 
+                'team5': 'Team5 ($199/month)',
+                'growth10': 'Growth10 ($399/month)'
+            };
+            
+            const currentPlan = subscriptionData.team.plan;
+            const newPlan = planNames[newPlanKey] || newPlanKey;
+            
+            document.getElementById('current-plan-portal').textContent = planNames[currentPlan.toLowerCase()] || currentPlan;
+            document.getElementById('new-plan-portal').textContent = newPlan;
+            
+            // Store the plan key for later use
+            document.getElementById('payment-portal-modal').dataset.planKey = newPlanKey;
+        }
+        
+        function closePaymentPortal() {
+            const modal = document.getElementById('payment-portal-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+        
+        async function confirmPlanChange() {
+            const modal = document.getElementById('payment-portal-modal');
+            const planKey = modal.dataset.planKey;
+            
+            if (!planKey) {
+                alert('Error: No plan selected');
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to change to the ${planKey} plan? This will take effect immediately.`)) {
                 return;
             }
             
@@ -1710,11 +1781,14 @@ ${getUserName() || 'User'}`);
                 if (result.success) {
                     alert(`Successfully changed from ${result.old_plan} to ${result.new_plan} plan!`);
                     
+                    // Close payment portal
+                    closePaymentPortal();
+                    
                     // Update UI to reflect new plan
                     updatePlanUI(result.new_plan);
                     
                     // Refresh dashboard data
-                    await loadDashboardData();
+                    await loadUserData();
                 } else {
                     alert(`Error: ${result.error}`);
                 }
@@ -2548,5 +2622,80 @@ ${getUserName() || 'User'}`);
             }
         }
     </script>
+
+    <!-- Payment Portal Modal -->
+    <div id="payment-portal-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Plan Change Payment Portal</h3>
+                    <button onclick="closePaymentPortal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <h4 class="text-sm font-medium text-blue-900 mb-2">Plan Change Summary</h4>
+                        <div class="text-sm text-blue-800">
+                            <div class="flex justify-between mb-1">
+                                <span>Current Plan:</span>
+                                <span id="current-plan-portal">Loading...</span>
+                            </div>
+                            <div class="flex justify-between mb-1">
+                                <span>New Plan:</span>
+                                <span id="new-plan-portal">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                        <h4 class="text-sm font-medium text-green-900 mb-2">Payment Tracking</h4>
+                        <div class="text-sm text-green-800">
+                            <div class="flex items-center mb-2">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>Plan changes are prorated automatically</span>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>Payment receipt sent to your email</span>
+                            </div>
+                            <div class="flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>Credits adjusted immediately</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                        <h4 class="text-sm font-medium text-amber-900 mb-2">Important Notes</h4>
+                        <ul class="text-sm text-amber-800 space-y-1">
+                            <li>• Plan changes take effect immediately</li>
+                            <li>• You can track all payment history in your subscription management</li>
+                            <li>• Contact support if you need assistance with billing</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button onclick="closePaymentPortal()" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button onclick="confirmPlanChange()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        Confirm Plan Change
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
