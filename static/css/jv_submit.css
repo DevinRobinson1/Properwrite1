@@ -209,6 +209,13 @@ fieldset[data-step="4"] .bg-gray-50 {
   line-height: 1.5;
 }
 
+/* Make address input wider with more space for long addresses */
+#autocomplete.form-input {
+  @apply w-full;
+  min-width: 400px;
+  max-width: 100%;
+}
+
 textarea.form-input {
   @apply pl-4 resize-none;
 }
