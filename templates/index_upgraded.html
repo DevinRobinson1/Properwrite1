@@ -2845,6 +2845,10 @@
                                         <h4 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
                                             <i class="fas fa-building mr-2 text-teal-600"></i>
                                             Comparable Properties
+                                            <span id="comps-overall-score" class="ml-3 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full hidden">
+                                                <i class="fas fa-chart-line mr-1"></i>
+                                                Overall Score: --
+                                            </span>
                                         </h4>
                                         
                                         <!-- Horizontal scrollable card container -->
@@ -7911,17 +7915,34 @@
         }
         
         function displayCompsResults(data) {
-            console.log('Displaying premium comps results:', data);
+            console.log('Displaying Smart Comps 2.0 results:', data);
             document.getElementById('comps-results').classList.remove('hidden');
             
             // Store comps data globally
             window.compsData = data;
             
+            // Update overall score for Smart Comps 2.0
+            const overallScoreEl = document.getElementById('comps-overall-score');
+            if (overallScoreEl && data.overall_score !== undefined) {
+                overallScoreEl.classList.remove('hidden');
+                overallScoreEl.innerHTML = `<i class="fas fa-chart-line mr-1"></i>Overall Score: ${data.overall_score.toFixed(1)}%`;
+                
+                // Update badge color based on score
+                overallScoreEl.classList.remove('bg-red-100', 'text-red-700', 'bg-yellow-100', 'text-yellow-700', 'bg-green-100', 'text-green-700');
+                if (data.overall_score >= 90) {
+                    overallScoreEl.classList.add('bg-green-100', 'text-green-700');
+                } else if (data.overall_score >= 70) {
+                    overallScoreEl.classList.add('bg-yellow-100', 'text-yellow-700');
+                } else {
+                    overallScoreEl.classList.add('bg-red-100', 'text-red-700');
+                }
+            }
+            
             if (data.comps && data.comps.length > 0) {
                 // Update summary statistics
                 updateCompsSummary(data);
                 
-                // Display comparable properties cards
+                // Display comparable properties cards with Smart Comps 2.0 features
                 displayCompsCards(data.comps);
                 
                 // Hide no results message
@@ -8039,6 +8060,23 @@
                          onerror="this.src='/static/placeholder-property.svg'">
                 </div>
                 <div class="p-4">
+                    <!-- Smart Comps 2.0 Accuracy Badge -->
+                    ${comp.accuracy_badge ? `
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-medium px-2 py-1 rounded-full ${
+                                comp.accuracy_badge === 'green' ? 'bg-green-100 text-green-800' :
+                                comp.accuracy_badge === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-red-100 text-red-800'
+                            }">
+                                ${comp.accuracy_score ? `${comp.accuracy_score}% Accuracy` : 'Accuracy Unknown'}
+                            </span>
+                            ${comp.rules_broken && comp.rules_broken.length > 0 ? `
+                                <span class="text-xs text-gray-500 cursor-help" title="Rules relaxed: ${comp.rules_broken_descriptions ? comp.rules_broken_descriptions.join(', ') : comp.rules_broken.join(', ')}">
+                                    <i class="fas fa-info-circle"></i>
+                                </span>
+                            ` : ''}
+                        </div>
+                    ` : ''}
                     <div class="flex justify-between items-start mb-2">
                         <div class="flex-1">
                             <h4 class="text-lg font-semibold text-gray-900">${price}</h4>

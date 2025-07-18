@@ -2645,31 +2645,25 @@ def analyze_comps():
             zip_code=zip_code
         )
         
-        # PREMIUM COMPS SERVICE INTEGRATION
-        # Enhanced comparable properties with strict underwriting logic
-        from premium_comps_service import premium_comps_service
+        # SMART COMPS 2.0 SERVICE INTEGRATION
+        # Rule-Adaptive Comparable Search with progressive relaxation
+        from smart_comps_service import smart_comps_service
         
-        # Get subject property features for filtering
-        subject_has_pool = data.get('has_pool', False)
-        subject_has_hoa = data.get('has_hoa', False)
-        subject_is_waterfront = data.get('is_waterfront', False)
-        
-        # Search for comparable properties using premium service
-        result = premium_comps_service.search_comparable_properties(
+        # Search for comparable properties using Smart Comps 2.0
+        result = smart_comps_service.search_comparable_properties(
             subject_address=address,
             subject_beds=int(beds),
             subject_baths=float(baths),
             subject_sqft=int(sqft),
             subject_lat=lat or 0.0,
             subject_lng=lng or 0.0,
-            subject_has_pool=subject_has_pool,
-            subject_has_hoa=subject_has_hoa,
-            subject_is_waterfront=subject_is_waterfront
+            max_distance=max_distance,
+            days_filter=days_filter
         )
         
-        # If premium service fails, fallback to unified service
+        # If Smart Comps 2.0 service fails, fallback to unified service
         if not result.get('success') or not result.get('comps'):
-            logging.warning("Premium service failed, falling back to unified service")
+            logging.warning("Smart Comps 2.0 service failed, falling back to unified service")
             
             try:
                 unified_service = get_unified_property_service()
