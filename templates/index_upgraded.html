@@ -6228,7 +6228,8 @@
             const ackerman1st = Math.round(maxAllowableOffer * 0.65);
             const ackerman2nd = Math.round(maxAllowableOffer * 0.85);
             const ackerman3rd = Math.round(maxAllowableOffer * 0.95);
-            const ackerman4th = Math.round(maxAllowableOffer * 1.00); // 100% of MAO
+            // 4th offer (Max): ARV - Repairs - Discount to sell Fast - Minimum Acceptable Profit
+            const ackerman4th = Math.round(arv - repairs - discountToSellFast - ourMinimumProfit);
             
             updateElementIfExists('ackerman-1st', ackerman1st);
             updateElementIfExists('ackerman-2nd', ackerman2nd);
@@ -8504,7 +8505,8 @@
             const ackerman1st = Math.round(maxAllowableOffer * 0.65);
             const ackerman2nd = Math.round(maxAllowableOffer * 0.85);
             const ackerman3rd = Math.round(maxAllowableOffer * 0.95);
-            const ackerman4th = Math.round(maxAllowableOffer * 1.00); // 100% of MAO
+            // 4th offer (Max): ARV - Repairs - Discount to sell Fast - Minimum Acceptable Profit
+            const ackerman4th = Math.round(arv - repairs - discountToSellFast - ourMinimumProfit);
             
             // Update Ackerman offers in the HTML
             updateElementIfExists('ackerman-1st', ackerman1st);

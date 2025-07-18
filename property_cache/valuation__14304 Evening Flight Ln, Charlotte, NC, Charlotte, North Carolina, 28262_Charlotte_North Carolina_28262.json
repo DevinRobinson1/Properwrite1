@@ -1,0 +1,66 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 356900,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 121326845,
+      "matched_address": "14304 Evening Flight Ln, Charlotte, NC, Charlotte, North Carolina, 28262, Charlotte, North Carolina 28262",
+      "images": [
+        "https://maps.googleapis.com/maps/api/streetview?location=14304+Evening+Flight+Ln%2C+Charlotte%2C+NC+28262&size=400x300&source=outdoor&signature=PHqx9EQiYQt4oUVMqVJwJ4NGhHI%3D"
+      ],
+      "bedrooms": 3.0,
+      "bathrooms": 2.0,
+      "square_feet": null,
+      "year_built": 2014
+    },
+    "rentcast": {
+      "estimate": 323000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    },
+    "rentometer": {
+      "rent_estimate": 2123,
+      "rent_median": 2165,
+      "rent_range": {
+        "min": 1700,
+        "max": 2780
+      },
+      "source": "Rentometer",
+      "confidence": "High",
+      "samples": 31,
+      "radius_miles": 1.5,
+      "credits_remaining": 889,
+      "updated": "2025-07-18"
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin",
+    "Rentometer"
+  ],
+  "sources_used": [
+    "Zillow",
+    "RentCast",
+    "Rentometer"
+  ],
+  "address_info": {
+    "address": "14304 Evening Flight Ln, Charlotte, NC, Charlotte, North Carolina, 28262",
+    "city": "Charlotte",
+    "state": "North Carolina",
+    "zip_code": "28262",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-18T18:09:19.198043",
+  "rent_estimate": 2123,
+  "rent_data_source": "Rentometer"
+}
