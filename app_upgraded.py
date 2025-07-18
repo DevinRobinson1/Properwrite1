@@ -3427,29 +3427,108 @@ def get_billing_history():
         logging.error(f"Error getting billing history: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
-@app.route('/api/billing/customer-portal', methods=['GET'])
+@app.route('/api/billing/subscription-details', methods=['GET'])
 @require_auth
-def customer_portal():
-    """Create Stripe customer portal session for subscription management"""
+def get_subscription_details():
+    """Get comprehensive subscription details"""
     try:
-        # Get return URL from query parameters or default to dashboard
-        return_url = request.args.get('return_url', request.url_root + 'dashboard')
+        team_id = g.current_user['team_id']
         
-        # Create customer portal session
-        result = billing_service.create_customer_portal_session(
-            team_id=g.current_user['team_id'],
-            return_url=return_url
-        )
+        # Get subscription details
+        result = billing_service.get_subscription_details(team_id)
         
-        if result.get('success'):
-            # Redirect to Stripe customer portal
-            return redirect(result['portal_url'])
-        else:
-            # Return error as JSON for AJAX requests
-            return jsonify(result), 400
-            
+        return jsonify(result)
+        
     except Exception as e:
-        logging.error(f"Error creating customer portal session: {e}")
+        logging.error(f"Error getting subscription details: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/billing/update-payment-method', methods=['POST'])
+@require_auth
+def update_payment_method():
+    """Update default payment method"""
+    try:
+        data = request.get_json()
+        payment_method_id = data.get('payment_method_id')
+        
+        if not payment_method_id:
+            return jsonify({'error': 'Payment method ID required'}), 400
+        
+        team_id = g.current_user['team_id']
+        
+        # Update payment method
+        result = billing_service.update_payment_method(team_id, payment_method_id)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logging.error(f"Error updating payment method: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/billing/cancel-subscription', methods=['POST'])
+@require_auth
+def cancel_subscription():
+    """Cancel subscription"""
+    try:
+        data = request.get_json()
+        subscription_id = data.get('subscription_id')
+        
+        if not subscription_id:
+            return jsonify({'error': 'Subscription ID required'}), 400
+        
+        team_id = g.current_user['team_id']
+        
+        # Cancel subscription
+        result = billing_service.cancel_subscription(team_id, subscription_id)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logging.error(f"Error cancelling subscription: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/billing/change-plan', methods=['POST'])
+@require_auth
+def change_subscription_plan():
+    """Change subscription plan"""
+    try:
+        data = request.get_json()
+        new_plan_id = data.get('plan_id')
+        
+        if not new_plan_id:
+            return jsonify({'error': 'Plan ID required'}), 400
+        
+        team_id = g.current_user['team_id']
+        
+        # Change plan
+        result = billing_service.change_subscription_plan(team_id, new_plan_id)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logging.error(f"Error changing subscription plan: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/billing/download-invoice', methods=['POST'])
+@require_auth
+def download_invoice():
+    """Get invoice download URL"""
+    try:
+        data = request.get_json()
+        invoice_id = data.get('invoice_id')
+        
+        if not invoice_id:
+            return jsonify({'error': 'Invoice ID required'}), 400
+        
+        team_id = g.current_user['team_id']
+        
+        # Get invoice download URL
+        result = billing_service.download_invoice(team_id, invoice_id)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logging.error(f"Error downloading invoice: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
 @app.route('/api/team/stats')

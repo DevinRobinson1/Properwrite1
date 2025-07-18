@@ -1054,9 +1054,9 @@
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <h4 class="font-semibold text-blue-800 mb-2">Current Subscription</h4>
                     <div class="text-sm text-blue-700">
-                        <p><strong>Plan:</strong> Growth10 (Unlimited Credits)</p>
-                        <p><strong>Status:</strong> Active</p>
-                        <p><strong>Renewal:</strong> August 15, 2025</p>
+                        <p><strong>Plan:</strong> <span class="current-plan">Growth10 (Unlimited Credits)</span></p>
+                        <p><strong>Status:</strong> <span class="subscription-status">Active</span></p>
+                        <p><strong>Renewal:</strong> <span class="subscription-renewal">August 15, 2025</span></p>
                     </div>
                 </div>
                 
@@ -1326,10 +1326,11 @@
             }
         }
 
-        // Placeholder functions for various actions
+        // Comprehensive subscription management
         async function openStripePortal() {
             try {
-                const response = await fetch('/api/billing/customer-portal', {
+                // Load subscription details and show management modal
+                const response = await fetch('/api/billing/subscription-details', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1337,24 +1338,123 @@
                 });
                 
                 if (response.ok) {
-                    // If successful, redirect to the portal URL
-                    window.location.href = response.url;
-                } else {
-                    // Parse the error response
-                    const result = await response.json();
-                    
-                    if (result.error && result.error.includes('No Stripe customer ID')) {
-                        alert('To manage your subscription, you need to have an active subscription. Please purchase a plan first.');
-                    } else if (result.error && result.error.includes('not configured')) {
-                        // Show subscription management modal instead
+                    const data = await response.json();
+                    if (data.success) {
+                        // Populate and show subscription management modal
+                        populateSubscriptionModal(data);
                         showSubscriptionManagementModal();
                     } else {
-                        alert('Error opening subscription portal: ' + (result.error || 'Unknown error'));
+                        alert('Error loading subscription details: ' + (data.error || 'Unknown error'));
                     }
+                } else {
+                    // Fallback to basic modal if API fails
+                    showSubscriptionManagementModal();
                 }
             } catch (error) {
-                console.error('Error opening Stripe portal:', error);
-                alert('Error opening subscription portal. Please try again.');
+                console.error('Error loading subscription details:', error);
+                // Fallback to basic modal
+                showSubscriptionManagementModal();
+            }
+        }
+
+        // Populate subscription modal with actual data
+        function populateSubscriptionModal(data) {
+            const modal = document.getElementById('subscription-management-modal');
+            if (!modal) return;
+            
+            // Update plan information
+            const planElement = modal.querySelector('.current-plan');
+            if (planElement && data.team) {
+                planElement.textContent = `${data.team.tier.charAt(0).toUpperCase() + data.team.tier.slice(1)} Plan`;
+            }
+            
+            // Update subscription details if available
+            if (data.stripe_details && data.stripe_details.subscriptions && data.stripe_details.subscriptions.length > 0) {
+                const subscription = data.stripe_details.subscriptions[0];
+                
+                // Update status
+                const statusElement = modal.querySelector('.subscription-status');
+                if (statusElement) {
+                    statusElement.textContent = subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1);
+                }
+                
+                // Update renewal date
+                const renewalElement = modal.querySelector('.subscription-renewal');
+                if (renewalElement && subscription.current_period_end) {
+                    const renewalDate = new Date(subscription.current_period_end * 1000);
+                    renewalElement.textContent = renewalDate.toLocaleDateString();
+                }
+                
+                // Store subscription ID for actions
+                modal.dataset.subscriptionId = subscription.id;
+            }
+            
+            // Update invoices section if available
+            if (data.stripe_details && data.stripe_details.invoices && data.stripe_details.invoices.length > 0) {
+                updateInvoicesSection(data.stripe_details.invoices);
+            }
+        }
+
+        // Update invoices section with real data
+        function updateInvoicesSection(invoices) {
+            const modal = document.getElementById('subscription-management-modal');
+            if (!modal) return;
+            
+            // Find or create invoices section
+            let invoicesSection = modal.querySelector('.invoices-section');
+            if (!invoicesSection) {
+                invoicesSection = document.createElement('div');
+                invoicesSection.className = 'invoices-section bg-gray-50 border border-gray-200 rounded-lg p-4 mt-4';
+                
+                const availableActions = modal.querySelector('.bg-green-50');
+                if (availableActions) {
+                    availableActions.parentNode.insertBefore(invoicesSection, availableActions);
+                }
+            }
+            
+            // Clear existing content
+            invoicesSection.innerHTML = `
+                <h4 class="font-semibold text-gray-800 mb-2">Recent Invoices</h4>
+                <div class="space-y-2">
+                    ${invoices.slice(0, 3).map(invoice => `
+                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                            <div>
+                                <span class="text-sm font-medium">${invoice.number || 'Invoice'}</span>
+                                <span class="text-xs text-gray-500 ml-2">${new Date(invoice.created * 1000).toLocaleDateString()}</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm font-bold">$${(invoice.amount_paid / 100).toFixed(2)}</span>
+                                <button onclick="downloadInvoiceById('${invoice.id}')" class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded hover:bg-blue-200">
+                                    Download
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Download specific invoice
+        async function downloadInvoiceById(invoiceId) {
+            try {
+                const response = await fetch('/api/billing/download-invoice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ invoice_id: invoiceId })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.invoice_url) {
+                    window.open(result.invoice_url, '_blank');
+                } else {
+                    alert('Error downloading invoice: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error downloading invoice:', error);
+                alert('Error downloading invoice. Please try again.');
             }
         }
 
@@ -1413,8 +1513,21 @@
         }
 
         function downloadInvoice() {
-            // For now, show a message - this would need to be implemented with Stripe API
-            alert('Invoice download functionality is being set up. Please contact support for your latest invoice.');
+            // Check if we have real invoice data loaded
+            const modal = document.getElementById('subscription-management-modal');
+            const invoicesSection = modal?.querySelector('.invoices-section');
+            
+            if (invoicesSection) {
+                // Use the first available invoice download button
+                const firstDownloadBtn = invoicesSection.querySelector('button[onclick*="downloadInvoiceById"]');
+                if (firstDownloadBtn) {
+                    firstDownloadBtn.click();
+                    return;
+                }
+            }
+            
+            // Fallback message
+            alert('No invoices available for download. Please contact support for your latest invoice.');
         }
 
         function contactSupport() {
