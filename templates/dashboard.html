@@ -1546,6 +1546,20 @@
             }
         }
 
+        // Upgrade plan function
+        function upgradePlan() {
+            // Close the current modal
+            closeSubscriptionManagementModal();
+            
+            // Show the credit purchase modal instead
+            // This makes sense because users on Growth10 plan already have unlimited credits
+            // But they might want to add more credits for other team members
+            const creditModal = document.getElementById('credit-purchase-modal');
+            if (creditModal) {
+                creditModal.classList.remove('hidden');
+            }
+        }
+
         function exportUsageCSV() {
             // Implement CSV export functionality
             console.log('Exporting usage data...');
