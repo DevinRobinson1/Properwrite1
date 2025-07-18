@@ -1,0 +1,49 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 867700,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 200833037,
+      "matched_address": "5449 E North Shore Landing Dr Buckeye Lake, OH 43008",
+      "images": [
+        "https://maps.googleapis.com/maps/api/staticmap?mobile=false&sensor=true&maptype=satellite&size=400x300&zoom=17&center=39.9318962097168%2C-82.47941589355469&signature=5GmkuPEwhzskhCuuWkKhDa7eayE%3D"
+      ],
+      "bedrooms": 3.0,
+      "bathrooms": 2.0,
+      "square_feet": null,
+      "year_built": 2013
+    },
+    "rentcast": {
+      "estimate": 325000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin",
+    "Rentometer"
+  ],
+  "sources_used": [
+    "Zillow",
+    "RentCast"
+  ],
+  "address_info": {
+    "address": "E N Shore Landing Dr, Buckeye Lake, OH",
+    "city": "",
+    "state": "",
+    "zip_code": "",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-18T11:23:30.163549"
+}

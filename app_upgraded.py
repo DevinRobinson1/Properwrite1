@@ -3427,6 +3427,31 @@ def get_billing_history():
         logging.error(f"Error getting billing history: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/api/billing/customer-portal', methods=['GET'])
+@require_auth
+def customer_portal():
+    """Create Stripe customer portal session for subscription management"""
+    try:
+        # Get return URL from query parameters or default to dashboard
+        return_url = request.args.get('return_url', request.url_root + 'dashboard')
+        
+        # Create customer portal session
+        result = billing_service.create_customer_portal_session(
+            team_id=g.current_user['team_id'],
+            return_url=return_url
+        )
+        
+        if result.get('success'):
+            # Redirect to Stripe customer portal
+            return redirect(result['portal_url'])
+        else:
+            # Return error as JSON for AJAX requests
+            return jsonify(result), 400
+            
+    except Exception as e:
+        logging.error(f"Error creating customer portal session: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
 @app.route('/api/team/stats')
 def get_team_stats():
     """Get team statistics and billing information"""

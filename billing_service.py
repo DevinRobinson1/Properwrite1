@@ -797,6 +797,39 @@ class BillingService:
         
         return PROMO_BONUSES.get(promo_code, 0)
     
+    def create_customer_portal_session(self, team_id: str, return_url: str = None) -> Dict:
+        """
+        Create a Stripe customer portal session for subscription management
+        """
+        try:
+            with Session(engine) as db:
+                # Get team information
+                team = db.query(Team).filter(Team.id == team_id).first()
+                if not team:
+                    return {'success': False, 'error': 'Team not found'}
+                
+                if not team.stripe_customer_id:
+                    return {'success': False, 'error': 'No Stripe customer ID found'}
+                
+                # Set default return URL if not provided
+                if not return_url:
+                    return_url = f"{os.environ.get('BASE_URL', 'https://properwrite.com')}/dashboard"
+                
+                # Create customer portal session
+                portal_session = stripe.billing_portal.Session.create(
+                    customer=team.stripe_customer_id,
+                    return_url=return_url
+                )
+                
+                return {
+                    'success': True,
+                    'portal_url': portal_session.url
+                }
+                
+        except Exception as e:
+            logging.error(f"Error creating customer portal session: {e}")
+            return {'success': False, 'error': str(e)}
+    
     def remove_team_member(self, team_id: str, member_id: str) -> Dict:
         """
         Remove a team member
