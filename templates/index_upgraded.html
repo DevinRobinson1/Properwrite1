@@ -4470,7 +4470,7 @@
                                         <div class="flex justify-between items-center">
                                             <label class="text-sm text-gray-700">Flat Fee Listing Service</label>
                                             <div class="flex items-center">
-                                                <input type="number" id="flat-fee-listing" value="500" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="flat-fee-listing" value="500" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                                 <span class="text-sm text-gray-500 ml-1" title="Default: $500">ℹ️</span>
                                             </div>
                                         </div>
@@ -4478,7 +4478,7 @@
                                         <div class="flex justify-between items-center">
                                             <label class="text-sm text-gray-700">Listing Agent Commission (%)</label>
                                             <div class="flex items-center">
-                                                <input type="number" id="listing-commission" value="2" step="0.1" class="w-16 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="listing-commission" value="2" step="0.1" class="w-16 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                                 <span class="text-sm text-gray-500 ml-1" title="Default: 2% of List Price">ℹ️</span>
                                             </div>
                                         </div>
@@ -4486,7 +4486,7 @@
                                         <div class="flex justify-between items-center">
                                             <label class="text-sm text-gray-700">Buyer's Agent Commission (%)</label>
                                             <div class="flex items-center">
-                                                <input type="number" id="buyer-commission" value="2" step="0.1" class="w-16 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="buyer-commission" value="2" step="0.1" class="w-16 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                                 <span class="text-sm text-gray-500 ml-1" title="Default: 2% of List Price">ℹ️</span>
                                             </div>
                                         </div>
@@ -4494,7 +4494,7 @@
                                         <div class="flex justify-between items-center">
                                             <label class="text-sm text-gray-700">Title & Escrow Fees (%)</label>
                                             <div class="flex items-center">
-                                                <input type="number" id="title-fees-percent" value="1" step="0.1" class="w-16 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="title-fees-percent" value="1" step="0.1" class="w-16 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                                 <span class="text-sm text-gray-500 ml-1" title="Default: 1% of List Price">ℹ️</span>
                                             </div>
                                         </div>
@@ -4502,7 +4502,7 @@
                                         <div class="flex justify-between items-center">
                                             <label class="text-sm text-gray-700">Loan Concessions to Buyer</label>
                                             <div class="flex items-center">
-                                                <input type="number" id="loan-concessions" value="400" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="loan-concessions" value="400" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                                 <span class="text-sm text-gray-500 ml-1" title="Default: $400 or 0.25%">ℹ️</span>
                                             </div>
                                         </div>
@@ -8400,9 +8400,6 @@
 
             // Store total fees for MAO recalculation
             window.currentInstallmentFees = totalCombinedFees;
-
-            // CRITICAL: Recalculate Ackerman offers when fees change
-            recalculateInstallment();
 
             // Update MLS/Novation calculation since it depends on installment closing costs
             calculateMLSNovation();
