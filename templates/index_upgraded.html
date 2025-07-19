@@ -3819,25 +3819,87 @@
                     <!-- New Construction Tab Content -->
                     <div id="new-construction-content" class="construction-tab-content hidden">
                         <div class="p-6">
-                            <!-- Key Legend -->
-                            <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
-                                <h3 class="text-lg font-semibold text-blue-800 mb-3">Key</h3>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                    <div class="flex items-center">
-                                        <div class="w-6 h-6 bg-white border-2 border-gray-300 rounded mr-2"></div>
-                                        <span>Editable fields</span>
+                            <!-- Enhanced New Construction Header -->
+                            <div class="bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-6 mb-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <h2 class="text-2xl font-bold text-orange-800 mb-2">New Construction Calculator</h2>
+                                        <p class="text-orange-700">Professional-grade development cost estimator with comprehensive financial modeling</p>
                                     </div>
-                                    <div class="flex items-center">
-                                        <div class="w-6 h-6 bg-gray-200 border-2 border-gray-300 rounded mr-2"></div>
-                                        <span>Do not change</span>
+                                    <div class="hidden md:flex items-center space-x-4">
+                                        <div class="text-center">
+                                            <div id="nc-status-indicator" class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md">
+                                                ✓
+                                            </div>
+                                            <div class="text-xs text-gray-600 mt-1">Calculator Ready</div>
+                                        </div>
                                     </div>
-                                    <div class="flex items-center">
-                                        <div class="w-6 h-6 bg-green-200 border-2 border-green-300 rounded mr-2"></div>
-                                        <span>Profit cells</span>
+                                </div>
+                                
+                                <!-- Enhanced Legend with Help -->
+                                <div class="bg-white rounded-lg p-4 shadow-sm">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h4 class="text-sm font-semibold text-gray-700">Field Legend:</h4>
+                                        <button onclick="toggleNewConstructionHelp()" class="text-orange-600 hover:text-orange-800 text-sm font-medium transition-colors">
+                                            <span id="nc-help-toggle">Show Help</span> ℹ️
+                                        </button>
                                     </div>
-                                    <div class="flex items-center">
-                                        <div class="w-6 h-6 bg-red-100 border-2 border-red-300 rounded mr-2"></div>
-                                        <span>Warnings</span>
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                                        <div class="flex items-center group relative">
+                                            <div class="w-6 h-6 bg-white border-2 border-orange-300 rounded mr-2"></div>
+                                            <span>Editable inputs</span>
+                                            <div class="invisible group-hover:visible absolute bottom-full left-0 bg-gray-800 text-white text-xs rounded px-2 py-1 mb-1 whitespace-nowrap z-10">
+                                                White fields you can modify
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center group relative">
+                                            <div class="w-6 h-6 bg-gray-200 border-2 border-gray-300 rounded mr-2"></div>
+                                            <span>Auto-calculated</span>
+                                            <div class="invisible group-hover:visible absolute bottom-full left-0 bg-gray-800 text-white text-xs rounded px-2 py-1 mb-1 whitespace-nowrap z-10">
+                                                Grey fields auto-update
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center group relative">
+                                            <div class="w-6 h-6 bg-green-200 border-2 border-green-300 rounded mr-2"></div>
+                                            <span>Profit indicators</span>
+                                            <div class="invisible group-hover:visible absolute bottom-full left-0 bg-gray-800 text-white text-xs rounded px-2 py-1 mb-1 whitespace-nowrap z-10">
+                                                Green = positive profit
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center group relative">
+                                            <div class="w-6 h-6 bg-red-100 border-2 border-red-300 rounded mr-2"></div>
+                                            <span>Warning alerts</span>
+                                            <div class="invisible group-hover:visible absolute bottom-full left-0 bg-gray-800 text-white text-xs rounded px-2 py-1 mb-1 whitespace-nowrap z-10">
+                                                Red = needs attention
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Collapsible Help Section -->
+                                    <div id="nc-help-section" class="hidden mt-4 pt-4 border-t border-gray-200">
+                                        <div class="grid md:grid-cols-2 gap-4 text-sm text-gray-600">
+                                            <div>
+                                                <h5 class="font-semibold text-gray-700 mb-2">📊 Key Calculations:</h5>
+                                                <ul class="space-y-1 text-xs">
+                                                    <li>• <strong>Target ROI:</strong> 20% of gross income</li>
+                                                    <li>• <strong>Build Cost:</strong> Cost per sqft × Total sqft</li>
+                                                    <li>• <strong>Development Fee:</strong> 5% of total project cost</li>
+                                                    <li>• <strong>Final Profit:</strong> Revenue - All expenses</li>
+                                                </ul>
+                                            </div>
+                                            <div>
+                                                <h5 class="font-semibold text-gray-700 mb-2">🏗️ Industry Standards:</h5>
+                                                <ul class="space-y-1 text-xs">
+                                                    <li>• <strong>Cost per sqft:</strong> $150-200 typical</li>
+                                                    <li>• <strong>Hold time:</strong> 4-6 months average</li>
+                                                    <li>• <strong>Profit margin:</strong> 15-25% target</li>
+                                                    <li>• <strong>Realtor fees:</strong> 4-6% of sale price</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 p-3 bg-orange-50 rounded border border-orange-200">
+                                            <p class="text-xs text-orange-700"><strong>💡 Pro Tip:</strong> Start with conservative cost estimates and adjust based on local market conditions. Monitor your holding costs closely as they can significantly impact profitability.</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -4016,7 +4078,7 @@
                                         <div class="space-y-4">
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">AB Closing Cost (%)</label>
-                                                <input type="number" id="nc-ab-closing-percent" value="6" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                                <input type="number" id="nc-ab-closing-percent" value="6" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()" step="0.1" min="0">
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">AB Closing Cost ($)</label>
@@ -4028,7 +4090,7 @@
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">BC Selling Closing Cost (%)</label>
-                                                <input type="number" id="nc-bc-closing-percent" value="1" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                                <input type="number" id="nc-bc-closing-percent" value="1" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()" step="0.1" min="0">
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">BC Selling Closing Cost ($)</label>
@@ -4052,7 +4114,7 @@
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Points (%)</label>
-                                                <input type="number" id="nc-points" value="2" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                                <input type="number" id="nc-points" value="2" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()" step="0.1" min="0">
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Total Hold Cost</label>
@@ -12525,10 +12587,10 @@
                 const buildCost = totalSqft * costPerSqft;
                 const estimatedProfitBasic = grossIncome - landPadReady - buildCost - developmentCost;
                 
-                // Closing costs calculations
-                const abClosingPercent = 6; // Fixed at 6%
+                // Closing costs calculations (now user-editable)
+                const abClosingPercent = parseFloat(document.getElementById('nc-ab-closing-percent').value) || 6;
                 const abClosingCost = landPrice * (abClosingPercent / 100);
-                const bcClosingPercent = 1; // Fixed at 1%  
+                const bcClosingPercent = parseFloat(document.getElementById('nc-bc-closing-percent').value) || 1;
                 const bcClosingCost = sellPrice * (bcClosingPercent / 100); // BC cost is on sell price, not gross income
                 const totalCC = abClosingCost + bcClosingCost + otherAbCost;
                 
@@ -12545,7 +12607,7 @@
                 const monthlyRate = annualRate / 12;
                 const dailyRate = annualRate / 365;
                 const holdTime = constructionTime; // Hold time in days
-                const points = 2; // Fixed at 2%
+                const points = parseFloat(document.getElementById('nc-points').value) || 2; // Now user-editable
                 const pointsCost = totalLoan * (points / 100);
                 const totalHoldCost = (dailyRate * holdTime) + pointsCost;
                 
