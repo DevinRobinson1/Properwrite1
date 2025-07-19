@@ -3885,10 +3885,7 @@
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Pad price before pad ready</label>
-                                                <div class="relative">
-                                                    <span class="absolute left-3 top-2 text-gray-500">$</span>
-                                                    <input type="text" id="nc-pad-price" value="70,000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white pl-8" onchange="calculateNewConstruction()" oninput="formatNumber(this)">
-                                                </div>
+                                                <input type="number" id="nc-pad-price" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Build Cost Available after Land Acq</label>
@@ -3978,7 +3975,7 @@
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Total Sq ft</label>
-                                                <input type="number" id="nc-total-sqft" value="3000" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                                <input type="number" id="nc-total-sqft" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Cost per sq ft</label>
@@ -12514,27 +12511,29 @@
                 const grossIncome = sellPrice * units;
                 const targetRoi = grossIncome * 0.20; // 20% ROI
                 
-                // Land calculations
-                const padPrice = padPriceBeforePadReady; // Now using editable field
-                const landPadReady = landPrice; // Land (Pad Ready Cost) Purchase = Land Purchase Price
-                const buildCostAvailable = targetRoi - landPadReady;
+                // Land calculations per Excel template spec
+                const padPrice = landPrice / units; // Pad price before pad ready = Land Purchase Price / Number of Units  
+                const landPadReady = grossIncome * 0.20; // Land (Pad Ready Cost) Purchase = 20% of Gross Income
+                const buildCostAvailable = (sellPrice * 0.20) - landPrice; // Build Cost Available = (Sell Price × 20%) - Land Price
                 
                 // Development costs
                 const developmentCost = sewerWater + surveys + soilTest + clearing + civilPlans + entitlement + architectural + grading;
-                const padReadyCost = landPrice + developmentCost; // Land + Development = Pad ready cost
+                const padReadyCost = developmentCost / units; // Pad ready cost = Development Cost / Number of Units
                 
                 // Vertical construction
                 const totalSqft = units * sqftPerUnit;
                 const buildCost = totalSqft * costPerSqft;
                 const estimatedProfitBasic = grossIncome - landPadReady - buildCost - developmentCost;
                 
-                // Total loan amount calculation (for development fee)
+                // Closing costs calculations
                 const abClosingPercent = 6; // Fixed at 6%
                 const abClosingCost = landPrice * (abClosingPercent / 100);
-                const bcClosingPercent = 1; // Fixed at 1%
-                const bcClosingCost = grossIncome * (bcClosingPercent / 100);
+                const bcClosingPercent = 1; // Fixed at 1%  
+                const bcClosingCost = sellPrice * (bcClosingPercent / 100); // BC cost is on sell price, not gross income
                 const totalCC = abClosingCost + bcClosingCost + otherAbCost;
-                const totalLoan = landPrice + developmentCost + buildCost + totalCC;
+                
+                // Total loan amount per Excel template: (Development Cost + Build Cost) × Number of Units
+                const totalLoan = (developmentCost + buildCost) * units;
                 
                 // Development fee calculation (percentage of total loan)
                 const developmentFee = totalLoan * (developmentFeePercent / 100);
@@ -12597,12 +12596,14 @@
                 updateElement('nc-gross-income', grossIncome);
                 updateElement('nc-target-roi', targetRoi);
                 updateElement('nc-land-pad-ready', landPadReady);
+                updateElement('nc-pad-price', padPrice); // Now calculated field
                 updateElement('nc-build-cost-available', buildCostAvailable);
                 
                 updateElement('nc-development-cost', developmentCost);
                 updateElement('nc-pad-ready-cost', padReadyCost);
                 
                 updateElement('nc-build-cost', buildCost);
+                updateElement('nc-total-sqft', totalSqft); // Update total sqft as calculated field
                 updateElement('nc-estimated-profit-basic', estimatedProfitBasic);
                 updateElement('nc-development-fee', developmentFee);
                 
@@ -12647,12 +12648,7 @@
                 updateElement('nc-total-expenses', totalExpenses);
                 updateElement('nc-final-profit', finalProfit);
                 
-                // Update square footage (non-currency field)
-                const sqftElement = document.getElementById('nc-total-sqft');
-                if (sqftElement) {
-                    sqftElement.value = Math.round(totalSqft).toLocaleString();
-                    console.log(`📏 Updated total sqft: ${Math.round(totalSqft).toLocaleString()}`);
-                }
+                // Total sqft is already updated above via updateElement
                 
                 // Add visual feedback for profit
                 const profitElement = document.getElementById('nc-final-profit');

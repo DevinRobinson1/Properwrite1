@@ -1,0 +1,97 @@
+/**
+ * 🏗  New-Construction Calculator – Formula Wiring
+ *
+ * OVERVIEW
+ * --------
+ *  • Grey cells = auto-calculated  ⚙️
+ *  • White cells = user-editable   ✏️
+ *  • All numbers recalc live on change (React useEffect).
+ *  • Spreadsheet source: “Template - New Construction Breakdown.xlsx” sheet1
+ *    (see parsed text lines in docs) :contentReference[oaicite:0]{index=0}
+ *
+ * FIELD MAP & FORMULAS
+ * --------------------
+ * 1.  ✏️ **Sell Home Price**      ➔ input: sellPrice
+ * 2.  **Gross Income**           ➔ sellPrice × numUnits
+ * 3.  **Target ROI @ 20 %**      ➔ grossIncome × 0.20
+ * 4.  ✏️ **Land Purchase Price** ➔ landPrice
+ * 5.  **Pad Price Before Pad Ready**      ➔ landPrice / numUnits
+ * 6.  **Build Cost Available after Land Acq**  
+ *       ➔ (sellPrice × 0.20) − landPrice
+ * 7.  ✏️ Development-Cost inputs  
+ *       sewerTaps, surveys, soils, clearing, civilPlans, entitlement,
+ *       archPlans, grading
+ *     **Development Cost**         ➔ sum(dev inputs)
+ * 8.  **Pad Ready Cost**           ➔ developmentCost / numUnits
+ * 9.  ✏️ **Build Cost**            default: 7 500 000 × 0.06  
+ *     ✏️ **Custom Build Cost**     ➔ customSqft × 9 500
+ * 10. **Total Sq Ft**              ➔ sqftPerUnit × numUnits
+ * 11. **Cost Per Sq Ft**           ➔ buildCost / totalSqft
+ *     ✏️ customCostPerSqFt (overrides)
+ * 12. **Est. Profit (no hold/CC/RE)**  
+ *       ➔ grossIncome − landPrice − developmentCost − buildCost
+ *
+ * --- Closing Cost ------------
+ * 13. ✏️ abPct   (AB Closing Cost %)
+ * 14. **AB Closing Cost $**       ➔ landPrice × abPct
+ * 15. ✏️ bcPct   (BC Selling CC %)
+ * 16. **BC Selling Closing Cost $** ➔ sellPrice × bcPct
+ * 17. **Total CC (ex Realtor)**   ➔ ab$ + otherAB + bc$ + miscBC
+ *
+ * --- Loan --------------------
+ * 18. **Total Loan Amount**       ➔ (developmentCost + buildCost) × numUnits
+ * 19. **Hold-Cost (Y/M/D)**       ➔ loan × rate × (holdDays/365)
+ * 20.  rate, holdDays, points editable; per-day = holdCost/holdDays
+ *
+ * --- Alt Holding -------------
+ * 21. insurance / taxes / utils editable  
+ *     **Alt Hold Cost (Y/M/D)**   ➔ same pattern
+ *     **Total Alt Hold**          ➔ altPerDay × holdDays
+ *
+ * --- Final Sheet -------------
+ * 22. **Sell Price**              ➔ grossIncome
+ * 23. **Purchase**                ➔ landPrice
+ * 24. **Development**             ➔ developmentCost
+ * 25. **Vertical Construction**   ➔ buildCost
+ * 26. **Holding Cost**            ➔ holdCost
+ * 27. **Alt Holding Cost**        ➔ totalAltHold
+ * 28. **Closing Cost**            ➔ totalCC
+ * 29. **Realtor Fees**            ➔ sellPrice × realtorPct (editable)
+ * 30. **Total Expenses**          ➔ sum rows 23–29
+ * 31. **Profit (CPSF-B30)**       ➔ sellPrice − totalExpenses
+ *
+ * COMPONENT CHANGES
+ * -----------------
+ *  • /client/components/NewConstructionCalc.jsx
+ *      - Replace grey text-inputs with <ReadOnlyField value={calc} />.
+ *      - Add two new editable boxes:  ➜  customBuildCost, customCostPerSqFt.
+ *
+ *  • /client/hooks/useNewConstruction.ts
+ *      - Store all user inputs in state.
+ *      - useEffect(()=>recalc(), [all editable fields]).
+ *
+ *  • /services/newConstructionMath.ts
+ *      export function recalc(state): Calculated
+ *      { grossIncome, targetRoi, padPrice, … profit }
+ *
+ * TESTS
+ * -----
+ *  • tests/newConstruction.spec.ts
+ *      ✓ given sample from sheet → profit === 1 288 101.75
+ *      ✓ changing numUnits updates totals
+ *      ✓ customBuildCost overrides buildCost
+ *
+ * LINT & COMMIT
+ * -------------
+ *  • yarn lint --fix
+ *  • commit: "feat: wire new-construction formulas to UI"
+ */
+Notes
+
+The spreadsheet values (e.g., 7 500 000 × 0.06, 4.5 % realtor fee, etc.) are pulled directly from the sample on page 1 of the PDF Template - New Construc…. Adjust hard defaults only if the product team supplies new baselines.
+
+Any cell you marked editable stays white; everything else renders as grey readonly.
+
+The recalc() helper should round currency as .toLocaleString('en-US',{style:'currency',currency:'USD'}) for display but keep raw numbers for math.
+
+Paste the spec, let Ghostwriter scaffold the math service and hook, then confirm the grey boxes populate exactly like the spreadsheet.
