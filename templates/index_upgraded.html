@@ -12586,8 +12586,11 @@
                 const updateElement = (id, value) => {
                     const element = document.getElementById(id);
                     if (element) {
-                        element.value = formatUSD(value);
-                        console.log(`📝 Updated ${id}: ${formatUSD(value)}`);
+                        const formattedValue = formatUSD(value);
+                        element.value = formattedValue;
+                        // Force refresh display
+                        element.setAttribute('value', formattedValue);
+                        console.log(`📝 Updated ${id}: ${formattedValue} (element found: ${!!element})`);
                     } else {
                         console.warn(`⚠️ Element not found: ${id}`);
                     }
@@ -12663,6 +12666,21 @@
                 }
                 
                 console.log('✅ New Construction calculation completed successfully');
+                
+                // Force page refresh of calculated values after a small delay
+                setTimeout(() => {
+                    console.log('🔄 Forcing display refresh...');
+                    updateElement('nc-final-sell-price', finalSellPrice);
+                    updateElement('nc-final-purchase', finalPurchase);
+                    updateElement('nc-final-development', finalDevelopment);
+                    updateElement('nc-final-vertical', finalVertical);
+                    updateElement('nc-final-holding', finalHolding);
+                    updateElement('nc-final-alt-holding', finalAltHolding);
+                    updateElement('nc-final-closing', finalClosing);
+                    updateElement('nc-final-realtor', finalRealtor);
+                    updateElement('nc-total-expenses', totalExpenses);
+                    updateElement('nc-final-profit', finalProfit);
+                }, 100);
                 
             } catch (error) {
                 console.error('❌ Error calculating new construction:', error);
@@ -13025,8 +13043,11 @@
         // Initialize construction section when page loads
         document.addEventListener('DOMContentLoaded', function() {
             loadConstructionCatalog();
-            // Run initial calculation to format numbers with commas
-            calculateNewConstruction();
+            // Run initial calculation to format numbers with commas and populate Final Numbers
+            setTimeout(() => {
+                console.log('🚀 Running initial New Construction calculation on page load...');
+                calculateNewConstruction();
+            }, 500);
             
             // Initialize the New Construction calculator on page load
             setTimeout(() => {
