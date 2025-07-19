@@ -4121,43 +4121,43 @@
                                         <div class="space-y-4">
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Sell Price</label>
-                                                <input type="number" id="nc-final-sell-price" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                                <div id="nc-final-sell-price" class="px-3 py-2 border border-gray-300 rounded bg-gray-200 text-right font-medium">$0</div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Purchase</label>
-                                                <input type="number" id="nc-final-purchase" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                                <div id="nc-final-purchase" class="px-3 py-2 border border-gray-300 rounded bg-gray-200 text-right font-medium">$0</div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Development</label>
-                                                <input type="number" id="nc-final-development" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                                <div id="nc-final-development" class="px-3 py-2 border border-gray-300 rounded bg-gray-200 text-right font-medium">$0</div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Vertical Construction</label>
-                                                <input type="number" id="nc-final-vertical" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                                <div id="nc-final-vertical" class="px-3 py-2 border border-gray-300 rounded bg-gray-200 text-right font-medium">$0</div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Holding Cost</label>
-                                                <input type="number" id="nc-final-holding" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                                <div id="nc-final-holding" class="px-3 py-2 border border-gray-300 rounded bg-gray-200 text-right font-medium">$0</div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Alternative Holding Cost</label>
-                                                <input type="number" id="nc-final-alt-holding" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                                <div id="nc-final-alt-holding" class="px-3 py-2 border border-gray-300 rounded bg-gray-200 text-right font-medium">$0</div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Closing Cost</label>
-                                                <input type="number" id="nc-final-closing" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                                <div id="nc-final-closing" class="px-3 py-2 border border-gray-300 rounded bg-gray-200 text-right font-medium">$0</div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Realtor Fees</label>
-                                                <input type="number" id="nc-final-realtor" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                                <div id="nc-final-realtor" class="px-3 py-2 border border-gray-300 rounded bg-gray-200 text-right font-medium">$0</div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Total Expenses</label>
-                                                <input type="number" id="nc-total-expenses" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                                <div id="nc-total-expenses" class="px-3 py-2 border border-gray-300 rounded bg-gray-200 text-right font-medium text-red-600">$0</div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Profit</label>
-                                                <input type="number" id="nc-final-profit" readonly class="px-3 py-2 border border-gray-300 rounded bg-green-200 cursor-not-allowed">
+                                                <div id="nc-final-profit" class="px-3 py-2 border border-gray-300 rounded bg-green-200 text-right font-bold text-green-800">$0</div>
                                             </div>
                                         </div>
                                     </div>
@@ -12586,11 +12586,25 @@
                 const updateElement = (id, value) => {
                     const element = document.getElementById(id);
                     if (element) {
-                        const formattedValue = formatUSD(value);
-                        element.value = formattedValue;
-                        // Force refresh display
-                        element.setAttribute('value', formattedValue);
-                        console.log(`📝 Updated ${id}: ${formattedValue} (element found: ${!!element})`);
+                        // For Final Numbers section (now using divs), use textContent
+                        if (id.startsWith('nc-final-') || id === 'nc-total-expenses') {
+                            const formattedValue = formatUSD(value);
+                            element.textContent = formattedValue;
+                            // Color coding for profit
+                            if (id === 'nc-final-profit') {
+                                if (value >= 0) {
+                                    element.className = element.className.replace('text-red-600', 'text-green-800');
+                                } else {
+                                    element.className = element.className.replace('text-green-800', 'text-red-600');
+                                }
+                            }
+                            console.log(`📝 Updated ${id}: ${formattedValue} (displayed)`);
+                        } else {
+                            // For input fields, use value property
+                            const formattedValue = formatUSD(value);
+                            element.value = formattedValue;
+                            console.log(`📝 Updated ${id}: ${formattedValue}`);
+                        }
                     } else {
                         console.warn(`⚠️ Element not found: ${id}`);
                     }
