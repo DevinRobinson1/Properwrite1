@@ -3880,12 +3880,15 @@
                                                 <label class="text-sm font-medium text-gray-700">Land Purchase Price</label>
                                                 <div class="relative">
                                                     <span class="absolute left-3 top-2 text-gray-500">$</span>
-                                                    <input type="text" id="nc-land-price" value="1,350,000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white pl-8" onchange="calculateNewConstruction()" oninput="formatNumber(this)">
+                                                    <input type="text" id="nc-land-price" value="350,000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white pl-8" onchange="calculateNewConstruction()" oninput="formatNumber(this)">
                                                 </div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Pad price before pad ready</label>
-                                                <input type="number" id="nc-pad-price" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
+                                                <div class="relative">
+                                                    <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                                    <input type="text" id="nc-pad-price" value="70,000" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white pl-8" onchange="calculateNewConstruction()" oninput="formatNumber(this)">
+                                                </div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
                                                 <label class="text-sm font-medium text-gray-700">Build Cost Available after Land Acq</label>
@@ -3997,7 +4000,11 @@
                                                 <input type="number" id="nc-estimated-profit-basic" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
-                                                <label class="text-sm font-medium text-gray-700">Development Fee</label>
+                                                <label class="text-sm font-medium text-gray-700">Development Fee (%)</label>
+                                                <input type="number" id="nc-development-fee-percent" value="5" step="0.1" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white" onchange="calculateNewConstruction()">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <label class="text-sm font-medium text-gray-700">Development Fee ($)</label>
                                                 <input type="number" id="nc-development-fee" readonly class="px-3 py-2 border border-gray-300 rounded bg-gray-200 cursor-not-allowed">
                                             </div>
                                         </div>
@@ -12477,11 +12484,13 @@
                 const projectDuration = parseFloat(document.getElementById('nc-project-duration').value) || 365;
                 const units = parseFloat(document.getElementById('nc-units').value) || 5;
                 const landPrice = parseCurrency(document.getElementById('nc-land-price').value) || 350000;
+                const padPriceBeforePadReady = parseCurrency(document.getElementById('nc-pad-price').value) || 70000;
                 const costPerSqft = parseCurrency(document.getElementById('nc-cost-per-sqft').value) || 300;
                 const sqftPerUnit = parseFloat(document.getElementById('nc-sqft-per-unit').value) || 1900;
                 const constructionTime = parseFloat(document.getElementById('nc-construction-time').value) || 150;
                 const rate = parseFloat(document.getElementById('nc-rate').value) || 12;
                 const realtorPercent = parseFloat(document.getElementById('nc-realtor-percent').value) || 4.5;
+                const developmentFeePercent = parseFloat(document.getElementById('nc-development-fee-percent').value) || 5;
                 
                 // Development costs using parseCurrency
                 const sewerWater = parseCurrency(document.getElementById('nc-sewer-water').value) || 15000;
@@ -12501,32 +12510,36 @@
                 const maintenance = parseFloat(document.getElementById('nc-maintenance').value) || 0;
                 const otherExpenses = parseFloat(document.getElementById('nc-other-expenses').value) || 0;
                 
-                // Template-based calculations (matching exact formulas from PDF)
+                // Template-based calculations (matching exact formulas from Excel template)
                 const grossIncome = sellPrice * units;
                 const targetRoi = grossIncome * 0.20; // 20% ROI
-                const landPadReady = grossIncome * 0.20; // 20% of Gross Income per template
-                const padPrice = landPrice / units;
+                
+                // Land calculations
+                const padPrice = padPriceBeforePadReady; // Now using editable field
+                const landPadReady = landPrice; // Land (Pad Ready Cost) Purchase = Land Purchase Price
                 const buildCostAvailable = targetRoi - landPadReady;
                 
                 // Development costs
                 const developmentCost = sewerWater + surveys + soilTest + clearing + civilPlans + entitlement + architectural + grading;
-                const padReadyCost = developmentCost * 0.20; // 20% of development cost per template
+                const padReadyCost = landPrice + developmentCost; // Land + Development = Pad ready cost
                 
                 // Vertical construction
                 const totalSqft = units * sqftPerUnit;
                 const buildCost = totalSqft * costPerSqft;
                 const estimatedProfitBasic = grossIncome - landPadReady - buildCost - developmentCost;
-                const developmentFee = (landPrice + developmentCost + buildCost) * 0.05; // 5% development fee
                 
-                // Loan calculations (matching template)
+                // Total loan amount calculation (for development fee)
                 const abClosingPercent = 6; // Fixed at 6%
                 const abClosingCost = landPrice * (abClosingPercent / 100);
                 const bcClosingPercent = 1; // Fixed at 1%
                 const bcClosingCost = grossIncome * (bcClosingPercent / 100);
                 const totalCC = abClosingCost + bcClosingCost + otherAbCost;
-                
-                // Total loan amount
                 const totalLoan = landPrice + developmentCost + buildCost + totalCC;
+                
+                // Development fee calculation (percentage of total loan)
+                const developmentFee = totalLoan * (developmentFeePercent / 100);
+                
+                // Loan calculations already done above for development fee calculation
                 
                 // Holding cost calculations (matching template with daily/monthly/yearly breakdown)
                 const annualRate = totalLoan * (rate / 100);
@@ -12584,7 +12597,6 @@
                 updateElement('nc-gross-income', grossIncome);
                 updateElement('nc-target-roi', targetRoi);
                 updateElement('nc-land-pad-ready', landPadReady);
-                updateElement('nc-pad-price', padPrice);
                 updateElement('nc-build-cost-available', buildCostAvailable);
                 
                 updateElement('nc-development-cost', developmentCost);
