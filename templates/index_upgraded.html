@@ -2137,17 +2137,18 @@
                                     <div class="space-y-2 text-sm">
                                         <div class="flex justify-between">
                                             <span class="text-gray-600">Target Price:</span>
-                                            <span class="font-bold text-green-600" id="volume-flipper-price">$355,000</span>
+                                            <span class="font-bold text-green-600" id="volume-flipper-price">$190,070</span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-gray-600">Min Flip Profit:</span>
                                             <input type="text" id="volume-flipper-min-flip" value="25,000" 
                                                    class="w-16 px-1 py-0 border border-gray-300 rounded text-xs text-right"
-                                                   onchange="formatAndRecalculateDispositions(this)">
+                                                   onchange="formatAndRecalculateDispositions(this); recalculateVolumeFlipperOnly();"
+                                                   oninput="recalculateVolumeFlipperOnly();">
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-gray-600">Formula:</span>
-                                            <span class="text-xs text-gray-500" title="70% of ARV minus repairs and $3.5k buffer for acquisition closing/resale fees">70% ARV - Repairs - $3.5k buffer</span>
+                                            <span class="text-xs text-gray-500" title="70% of ARV minus repairs, min flip profit, and $3.5k buffer">70% ARV - Repairs - Min Flip Profit - $3.5k buffer</span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-gray-600">Timeline:</span>
@@ -7027,6 +7028,43 @@
         function formatAndRecalculateDispositions(input) {
             formatNumber(input);
             recalculateAllDispositionStrategies();
+        }
+        
+        // Force Volume Flipper recalculation specifically
+        function recalculateVolumeFlipperOnly() {
+            try {
+                const arv = parseFloat(document.getElementById('arv')?.value?.replace(/,/g, '')) || 355000;
+                const repairs = parseFloat(document.getElementById('repairs')?.value?.replace(/,/g, '')) || 30000;
+                const volumeFlipperMinFlip = parseFloat(document.getElementById('volume-flipper-min-flip')?.value?.replace(/,/g, '')) || 0;
+                const buffer = 3500;
+                
+                const volumeFlipperPrice = (arv * 0.70) - repairs - volumeFlipperMinFlip - buffer;
+                
+                console.log('🔥 VOLUME FLIPPER ONLY calculation:', { 
+                    arv, 
+                    arv70: arv * 0.70, 
+                    repairs, 
+                    volumeFlipperMinFlip, 
+                    buffer, 
+                    volumeFlipperPrice,
+                    formula: `${arv} * 0.70 - ${repairs} - ${volumeFlipperMinFlip} - ${buffer} = ${volumeFlipperPrice}`
+                });
+                
+                const targetElement = document.getElementById('volume-flipper-price');
+                const newValue = '$' + Math.round(volumeFlipperPrice).toLocaleString();
+                console.log('🔥 Updating volume flipper price element to:', newValue);
+                
+                if (targetElement) {
+                    targetElement.textContent = newValue;
+                    console.log('🔥 Successfully updated volume flipper price to:', targetElement.textContent);
+                } else {
+                    console.error('🔥 Element "volume-flipper-price" not found!');
+                }
+                
+                return volumeFlipperPrice;
+            } catch (error) {
+                console.error('🔥 Error in recalculateVolumeFlipperOnly:', error);
+            }
         }
         
         function toggleWholesaleBuyers() {
