@@ -4510,7 +4510,7 @@
                                         <div class="flex justify-between items-center">
                                             <label class="text-sm text-gray-700">Home Warranty</label>
                                             <div class="flex items-center">
-                                                <input type="number" id="home-warranty" value="650" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="home-warranty" value="650" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                                 <span class="text-sm text-gray-500 ml-1" title="Default: $650">ℹ️</span>
                                             </div>
                                         </div>
@@ -4523,7 +4523,7 @@
                                         <div class="flex justify-between items-center">
                                             <label class="text-sm text-gray-700">Professional Staging</label>
                                             <div class="flex items-center">
-                                                <input type="number" id="staging-fee" value="2500" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="staging-fee" value="2500" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                                 <span class="text-sm text-gray-500 ml-1" title="Default: $2,500">ℹ️</span>
                                             </div>
                                         </div>
@@ -4531,7 +4531,7 @@
                                         <div class="flex justify-between items-center">
                                             <label class="text-sm text-gray-700">Make-Ready Cleaning</label>
                                             <div class="flex items-center">
-                                                <input type="number" id="cleaning-fee" value="750" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="cleaning-fee" value="750" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                                 <span class="text-sm text-gray-500 ml-1" title="Default: $750">ℹ️</span>
                                             </div>
                                         </div>
@@ -4539,7 +4539,7 @@
                                         <div class="flex justify-between items-center">
                                             <label class="text-sm text-gray-700">Photography</label>
                                             <div class="flex items-center">
-                                                <input type="number" id="photography-fee" value="350" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="photography-fee" value="350" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                                 <span class="text-sm text-gray-500 ml-1" title="Default: $350">ℹ️</span>
                                             </div>
                                         </div>
@@ -4547,7 +4547,7 @@
                                         <div class="flex justify-between items-center">
                                             <label class="text-sm text-gray-700">Matterport</label>
                                             <div class="flex items-center">
-                                                <input type="number" id="matterport-fee" value="250" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="matterport-fee" value="250" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                                 <span class="text-sm text-gray-500 ml-1" title="Default: $250">ℹ️</span>
                                             </div>
                                         </div>
@@ -4555,7 +4555,7 @@
                                         <div class="flex justify-between items-center">
                                             <label class="text-sm text-gray-700">Inspection Fee</label>
                                             <div class="flex items-center">
-                                                <input type="number" id="inspection-fee" value="1000" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="inspection-fee" value="1000" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                                 <span class="text-sm text-gray-500 ml-1" title="Default: $1,000">ℹ️</span>
                                             </div>
                                         </div>
@@ -4563,7 +4563,7 @@
                                         <div class="flex justify-between items-center">
                                             <label class="text-sm text-gray-700">Max Repairs Prior to Closing</label>
                                             <div class="flex items-center">
-                                                <input type="number" id="max-repairs" value="3000" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="max-repairs" value="3000" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                                 <span class="text-sm text-gray-500 ml-1" title="Default: $3,000 or 10% of repair budget">ℹ️</span>
                                             </div>
                                         </div>
@@ -4579,15 +4579,15 @@
                                         <div class="space-y-3">
                                             <div class="flex justify-between items-center">
                                                 <label class="text-sm text-gray-700">HOA Resale Certificate</label>
-                                                <input type="number" id="hoa-resale" value="500" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="hoa-resale" value="500" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                             </div>
                                             <div class="flex justify-between items-center">
                                                 <label class="text-sm text-gray-700">HOA Transfer Fee</label>
-                                                <input type="number" id="hoa-transfer" value="350" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="hoa-transfer" value="350" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                             </div>
                                             <div class="flex justify-between items-center">
                                                 <label class="text-sm text-gray-700">Survey Fee</label>
-                                                <input type="number" id="survey-fee" value="650" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="survey-fee" value="650" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                             </div>
                                         </div>
                                     </div>
@@ -4597,15 +4597,15 @@
                                         <div class="space-y-3">
                                             <div class="flex justify-between items-center">
                                                 <input type="text" id="other-1-label" placeholder="Other Fee 1" class="w-32 px-2 py-1 border border-gray-300 rounded text-sm">
-                                                <input type="number" id="other-1-amount" value="0" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="other-1-amount" value="0" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                             </div>
                                             <div class="flex justify-between items-center">
                                                 <input type="text" id="other-2-label" placeholder="Other Fee 2" class="w-32 px-2 py-1 border border-gray-300 rounded text-sm">
-                                                <input type="number" id="other-2-amount" value="0" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="other-2-amount" value="0" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                             </div>
                                             <div class="flex justify-between items-center">
                                                 <input type="text" id="other-3-label" placeholder="Other Fee 3" class="w-32 px-2 py-1 border border-gray-300 rounded text-sm">
-                                                <input type="number" id="other-3-amount" value="0" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees()">
+                                                <input type="number" id="other-3-amount" value="0" class="w-20 px-2 py-1 border border-orange-300 rounded text-right bg-orange-50" onchange="recalculateInstallmentFees(); recalculateInstallment()">
                                             </div>
                                         </div>
                                     </div>
@@ -6206,8 +6206,8 @@
             // Get total combined fees from the installment fee calculator
             const totalCombinedFees = recalculateInstallmentFees();
             
-            // Use global minimum acceptable profit
-            const ourMinimumProfit = window.globalMinAcceptableProfit || 15000;
+            // Read local installment minimum profit from the input field
+            const ourMinimumProfit = parseFloat(document.getElementById('installment-min-profit')?.value?.replace(/[^\d]/g, '')) || 15000;
             
             // Calculate Maximum Allowable Offer based on mode
             let maxAllowableOffer;
