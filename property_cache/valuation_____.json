@@ -1,0 +1,20 @@
+{
+  "valuations": {},
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin",
+    "Rentometer"
+  ],
+  "sources_used": [],
+  "address_info": {
+    "address": "",
+    "city": "",
+    "state": "",
+    "zip_code": "",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-19T15:17:48.897812"
+}
