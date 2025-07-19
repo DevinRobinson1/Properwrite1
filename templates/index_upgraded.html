@@ -4039,11 +4039,37 @@
                                                 <label class="text-sm font-medium text-gray-700">Total Sq ft</label>
                                                 <div id="nc-total-sqft" class="px-3 py-2 border border-gray-300 rounded bg-gray-200 text-right font-medium">0</div>
                                             </div>
-                                            <div class="grid grid-cols-2 gap-4">
-                                                <label class="text-sm font-medium text-gray-700">Cost per sq ft</label>
-                                                <div class="relative">
-                                                    <span class="absolute left-3 top-2 text-gray-500">$</span>
-                                                    <input type="text" id="nc-cost-per-sqft" value="1,500" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white pl-8" onchange="calculateNewConstruction()" oninput="formatNumber(this)">
+                                            <!-- Enhanced Cost per sqft with Auto/Custom Toggle -->
+                                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <label class="text-sm font-medium text-gray-700">Cost per sq ft</label>
+                                                    <div class="flex items-center space-x-2">
+                                                        <span class="text-xs text-gray-600">Auto</span>
+                                                        <label class="relative inline-flex items-center cursor-pointer">
+                                                            <input type="checkbox" id="nc-cost-sqft-toggle" class="sr-only" onchange="toggleCostPerSqft()">
+                                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+                                                        </label>
+                                                        <span class="text-xs text-gray-600">Custom</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Auto-calculated cost per sqft (readonly) -->
+                                                <div id="nc-auto-cost-sqft-container" class="grid grid-cols-2 gap-4">
+                                                    <label class="text-sm text-gray-600">Calculated (Build Cost ÷ Total Sqft)</label>
+                                                    <div id="nc-auto-cost-per-sqft" class="px-3 py-2 border border-gray-300 rounded bg-gray-200 text-right font-medium">$200</div>
+                                                </div>
+                                                
+                                                <!-- Custom cost per sqft (editable) -->
+                                                <div id="nc-custom-cost-sqft-container" class="grid grid-cols-2 gap-4 hidden">
+                                                    <label class="text-sm text-gray-600">Custom Override</label>
+                                                    <div class="relative">
+                                                        <span class="absolute left-3 top-2 text-gray-500">$</span>
+                                                        <input type="text" id="nc-cost-per-sqft" value="1,500" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-white pl-8" onchange="calculateNewConstruction()" oninput="formatNumber(this)">
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mt-2 text-xs text-gray-500">
+                                                    <span id="nc-cost-explanation">Using automatic calculation based on build cost and total square footage</span>
                                                 </div>
                                             </div>
                                             <div class="grid grid-cols-2 gap-4">
@@ -12584,7 +12610,25 @@
                 
                 // Vertical construction
                 const totalSqft = units * sqftPerUnit;
-                const buildCost = totalSqft * costPerSqft;
+                
+                // Determine which cost per sqft to use (auto-calculated or custom)
+                const useCustomCost = document.getElementById('nc-cost-sqft-toggle') && document.getElementById('nc-cost-sqft-toggle').checked;
+                let effectiveCostPerSqft;
+                
+                if (useCustomCost) {
+                    // Use custom input value
+                    effectiveCostPerSqft = parseCurrency(document.getElementById('nc-cost-per-sqft').value) || 200;
+                } else {
+                    // Use the current cost per sqft input value as base calculation
+                    effectiveCostPerSqft = parseCurrency(document.getElementById('nc-cost-per-sqft').value) || 200;
+                }
+                
+                const buildCost = totalSqft * effectiveCostPerSqft;
+                
+                // Update the auto-calculated display to show the derived cost per sqft
+                if (document.getElementById('nc-auto-cost-per-sqft')) {
+                    document.getElementById('nc-auto-cost-per-sqft').textContent = formatUSD(effectiveCostPerSqft);
+                }
                 const estimatedProfitBasic = grossIncome - landPadReady - buildCost - developmentCost;
                 
                 // Closing costs calculations (now user-editable)
@@ -13142,6 +13186,29 @@
                 calculateNewConstruction();
             }, 100);
         });
+
+        // Cost Per Sqft Toggle Function
+        function toggleCostPerSqft() {
+            const toggle = document.getElementById('nc-cost-sqft-toggle');
+            const autoContainer = document.getElementById('nc-auto-cost-sqft-container');
+            const customContainer = document.getElementById('nc-custom-cost-sqft-container');
+            const explanation = document.getElementById('nc-cost-explanation');
+            
+            if (toggle && toggle.checked) {
+                // Show custom, hide auto
+                if (autoContainer) autoContainer.classList.add('hidden');
+                if (customContainer) customContainer.classList.remove('hidden');
+                if (explanation) explanation.textContent = 'Using custom cost per square foot override';
+            } else {
+                // Show auto, hide custom
+                if (autoContainer) autoContainer.classList.remove('hidden');
+                if (customContainer) customContainer.classList.add('hidden');
+                if (explanation) explanation.textContent = 'Using automatic calculation based on build cost and total square footage';
+            }
+            
+            // Recalculate with new cost per sqft method
+            calculateNewConstruction();
+        }
     </script>
     
     <!-- Include Billing Modal -->
