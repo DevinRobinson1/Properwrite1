@@ -7085,7 +7085,15 @@
                 const volumeFlipperMinFlip = parseFloat(document.getElementById('volume-flipper-min-flip')?.value?.replace(/,/g, '')) || 25000;
                 const buffer = 3500; // Fixed buffer amount
                 const volumeFlipperPrice = (arv * 0.70) - repairs - volumeFlipperMinFlip - buffer;
-                console.log('Volume Flipper calculation:', { arv70: arv * 0.70, repairs, volumeFlipperMinFlip, buffer, volumeFlipperPrice });
+                console.log('Volume Flipper calculation:', { 
+                    arv, 
+                    arv70: arv * 0.70, 
+                    repairs, 
+                    volumeFlipperMinFlip, 
+                    buffer, 
+                    volumeFlipperPrice,
+                    formula: `${arv} * 0.70 - ${repairs} - ${volumeFlipperMinFlip} - ${buffer} = ${volumeFlipperPrice}`
+                });
                 console.log('Updating volume flipper price to:', '$' + Math.round(volumeFlipperPrice).toLocaleString());
                 updateElementIfExists('volume-flipper-price', '$' + Math.round(volumeFlipperPrice).toLocaleString());
                 
