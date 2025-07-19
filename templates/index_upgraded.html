@@ -2140,7 +2140,7 @@
                                             <span class="font-bold text-green-600" id="volume-flipper-price">$355,000</span>
                                         </div>
                                         <div class="flex justify-between">
-                                            <span class="text-gray-600">Min Flip Amount:</span>
+                                            <span class="text-gray-600">Min Flip Profit:</span>
                                             <input type="text" id="volume-flipper-min-flip" value="25,000" 
                                                    class="w-16 px-1 py-0 border border-gray-300 rounded text-xs text-right"
                                                    onchange="formatAndRecalculateDispositions(this)">
@@ -7081,7 +7081,7 @@
                 updateElementIfExists('rent-rule-price', '$' + Math.round(rentRulePrice).toLocaleString());
                 updateElementIfExists('rent-rule-ratio', ((rent / rentRulePrice) * 100).toFixed(1) + '%');
                 
-                // Update Volume Flipper - CORRECTED FORMULA: (ARV × 0.70) − Repairs − Min Flip Amount − Buffer
+                // Update Volume Flipper - CORRECTED FORMULA: (ARV × 0.70) − Repairs − Min Flip Profit − Buffer
                 const volumeFlipperMinFlip = parseFloat(document.getElementById('volume-flipper-min-flip')?.value?.replace(/,/g, '')) || 25000;
                 const buffer = 3500; // Fixed buffer amount
                 const volumeFlipperPrice = (arv * 0.70) - repairs - volumeFlipperMinFlip - buffer;
