@@ -6194,7 +6194,8 @@
             const strategyType = document.getElementById('installment-strategy-type')?.value || 'installment';
             
             // Calculate refundable and non-refundable costs
-            const refundableConsideration = parseFloat(document.getElementById('refundable-consideration')?.value?.replace(/[^\d]/g, '')) || 1000;
+            const refundableInput = document.getElementById('refundable-consideration')?.value?.replace(/[^\d]/g, '') || '0';
+            const refundableConsideration = parseFloat(refundableInput);
             const nonRefundableCosts = parseFloat(document.getElementById('non-refundable-costs')?.value || 3500);
             const totalEquitableDeposit = refundableConsideration + nonRefundableCosts;
             
