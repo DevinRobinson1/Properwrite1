@@ -104,6 +104,8 @@ properwrite.com is a Flask-based web application that generates professional pro
 
 ## Changelog
 
+- July 21, 2025. CREDIT ADMINISTRATION: Successfully added 100 credits to user account rhen@bartlettholdings.com. Account balance updated from 5 credits to 105 credits total using backend billing service with admin grant designation for proper audit trail.
+
 - July 19, 2025. CRITICAL VOLUME FLIPPER CALCULATION FIX: Fixed Volume Flipper target price not updating when Min Flip Profit changes. Root cause was combination of hardcoded display value ($355,000) in template and insufficient event triggering. Implemented comprehensive fix: updated hardcoded value to correct calculation result ($190,070), created dedicated recalculateVolumeFlipperOnly() function with extensive debugging, added both onchange and oninput event handlers for real-time updates, updated formula description to include Min Flip Profit component. Volume Flipper now properly calculates: ARV × 70% - Repairs - Min Flip Profit - $3,500 Buffer = Target Price. System critical for real financial decisions.
 
 - July 19, 2025. FINAL UI REFINEMENTS: Updated "Min Flip Amount" terminology to "Min Flip Profit" in Volume Flipper section for better clarity per user preference.
