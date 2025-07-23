@@ -6124,6 +6124,7 @@
                 // Initialize Google Maps for comps section
                 setTimeout(() => {
                     initializeCompsMap();
+                    updateCompsSubjectProperty(); // Update subject property info when comps tab is shown
                 }, 100);
             }
         }
@@ -7911,9 +7912,25 @@
             }
         }
 
+        // Update subject property info in comps section
+        function updateCompsSubjectProperty() {
+            const address = document.getElementById('address')?.value || 'Property Address';
+            const beds = document.getElementById('bedrooms')?.value || '-';
+            const baths = document.getElementById('bathrooms')?.value || '-';
+            const sqft = document.getElementById('square_feet')?.value?.replace(/,/g, '') || '-';
+            
+            updateElementIfExists('comps-subject-address', address);
+            updateElementIfExists('comps-subject-beds', beds);
+            updateElementIfExists('comps-subject-baths', baths);
+            updateElementIfExists('comps-subject-sqft', formatNumber(sqft));
+        }
+
         // Main function to run comps analysis with map interface
         async function runMapCompsAnalysis() {
             console.log('🗺️ Starting map-based comps analysis...');
+            
+            // Update subject property display first
+            updateCompsSubjectProperty();
             
             // Show loading state
             showElement('comps-list-loading');
@@ -7944,9 +7961,9 @@
                         address: address,
                         max_distance: parseFloat(radius),
                         days_filter: parseInt(timeframe),
-                        beds: parseInt(document.getElementById('beds')?.value || '3'),
-                        baths: parseFloat(document.getElementById('baths')?.value || '2'),
-                        sqft: parseInt(document.getElementById('sqft')?.value || '1500')
+                        beds: parseInt(document.getElementById('bedrooms')?.value || '3'),
+                        baths: parseFloat(document.getElementById('bathrooms')?.value || '2'),
+                        sqft: parseInt(document.getElementById('square_feet')?.value?.replace(/,/g, '') || '1500')
                     })
                 });
                 
