@@ -7980,6 +7980,7 @@
                 }
                 
                 // Process and display results
+                console.log('🎯 About to call displayMapCompsResults with:', data);
                 displayMapCompsResults(data);
                 
             } catch (error) {
@@ -8011,9 +8012,12 @@
             currentCompsData = comparables;
             
             if (comparables.length === 0) {
+                console.log('❌ No comparables found - showing no results');
                 showElement('comps-no-results');
                 return;
             }
+            
+            console.log('✅ Found', comparables.length, 'comparables - proceeding with display');
             
             // Show results header with stats
             showElement('comps-list-header');
@@ -8036,6 +8040,10 @@
             updateElementIfExists('analysis-count', comparables.length.toString());
             updateElementIfExists('analysis-avg-price', formatCurrency(avgPrice));
             updateElementIfExists('analysis-arv', formatCurrency(avgPrice * 1.05)); // 5% above avg
+            
+            console.log('📊 Updated Market Analysis elements:');
+            console.log('  - Properties Found:', comparables.length);
+            console.log('  - Average Price:', formatCurrency(avgPrice));
             
             console.log('✅ Analysis panel updated successfully');
             
