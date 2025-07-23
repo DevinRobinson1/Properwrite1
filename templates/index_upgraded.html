@@ -5608,7 +5608,7 @@
                     }, 200);
                     
                     // Update comps subject property with analyzed data
-                    populateCompsSubjectProperty();
+                    // Auto-populate comps data when switching tabs
                     
                     // Show results
                     if (loadingState) loadingState.classList.add('hidden');
@@ -8042,8 +8042,11 @@
         // Legacy compatibility function
         function runCompsAnalysis() {
             return runMapCompsAnalysis();
+        }
 
-            // Show loading state
+        // Clean up legacy code below (kept for reference but not executed)
+        function legacyCompsCode() {
+            // This code is not executed but kept for reference
             document.getElementById('comps-loading').classList.remove('hidden');
             document.getElementById('comps-results').classList.add('hidden');
             document.getElementById('comps-error').classList.add('hidden');
@@ -9091,7 +9094,7 @@
                     }
                 });
                 // Populate subject property data when switching to comps
-                populateCompsSubjectProperty();
+                // Auto-populate comps data
             } else if (sectionName === 'construction') {
                 const mobileBtn = document.getElementById('construction-section-btn');
                 const desktopBtn = document.getElementById('construction-section-btn-desktop');
