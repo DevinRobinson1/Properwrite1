@@ -6300,7 +6300,7 @@
                 recalculateSellerFinance();
                 updateComparisonResults();
             } catch (error) {
-                console.log('Calculation update in progress...');
+                console.log('Calculation update in progress...', error.message);
             }
             
             // Update dispositions separately (client-side only, no API calls)
@@ -6308,7 +6308,7 @@
                 recalculateAllDispositionStrategies();
                 calculateMLSNovation(); // Calculate MLS/Novation values
             } catch (dispositionError) {
-                console.log('Dispositions calculation in progress...');
+                console.log('Dispositions calculation in progress...', dispositionError.message);
             }
         }
 
