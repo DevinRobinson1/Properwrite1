@@ -14,30 +14,19 @@
       "square_feet": null,
       "year_built": 2014
     },
-    "rentcast": {
-      "estimate": 323000,
-      "source": "RentCast Property Data",
-      "confidence": "high",
-      "matched_address": null,
-      "bedrooms": null,
-      "bathrooms": null,
-      "square_feet": null,
-      "property_type": null,
-      "api_confidence": 0.95
-    },
     "rentometer": {
-      "rent_estimate": 2123,
-      "rent_median": 2165,
+      "rent_estimate": 2117,
+      "rent_median": 2149,
       "rent_range": {
         "min": 1700,
         "max": 2780
       },
       "source": "Rentometer",
       "confidence": "High",
-      "samples": 31,
+      "samples": 29,
       "radius_miles": 1.5,
-      "credits_remaining": 897,
-      "updated": "2025-07-18"
+      "credits_remaining": 859,
+      "updated": "2025-07-23"
     }
   },
   "sources_tried": [
@@ -48,7 +37,6 @@
   ],
   "sources_used": [
     "Zillow",
-    "RentCast",
     "Rentometer"
   ],
   "address_info": {
@@ -60,7 +48,7 @@
     "longitude": null
   },
   "cache_used": false,
-  "timestamp": "2025-07-18T15:20:01.729125",
-  "rent_estimate": 2123,
+  "timestamp": "2025-07-23T12:07:57.191604",
+  "rent_estimate": 2117,
   "rent_data_source": "Rentometer"
 }
