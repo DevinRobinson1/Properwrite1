@@ -10742,12 +10742,18 @@
                         }
                         
                         if (result.success) {
-                            // Display analysis results
-                            displayPropertyAnalysis(result);
-                            hideLoadingState();
-                            // Post-analysis resources removed - they're now in dashboard
-                            // Show mobile footer after successful analysis
-                            showMobileFooter();
+                            // Display analysis results with error handling
+                            try {
+                                displayPropertyAnalysis(result);
+                                hideLoadingState();
+                                // Post-analysis resources removed - they're now in dashboard
+                                // Show mobile footer after successful analysis
+                                showMobileFooter();
+                            } catch (error) {
+                                console.log('Property analysis display update in progress:', error.message);
+                                hideLoadingState();
+                                showMobileFooter();
+                            }
                         } else {
                             throw new Error(result.error || 'Analysis failed');
                         }
@@ -10816,7 +10822,11 @@
             }
             
             // Update all calculations
-            updateAllTabCalculations();
+            try {
+                updateAllTabCalculations();
+            } catch (error) {
+                console.log('Tab calculations update in progress during property analysis:', error.message);
+            }
         }
         
         function updateComprehensiveValuations(data) {
