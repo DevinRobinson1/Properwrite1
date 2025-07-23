@@ -7998,11 +7998,14 @@
             // Hide loading
             hideElement('comps-list-loading');
             
-            // Handle Smart Comps 2.0 response structure
-            let comparables = data.comps || data.comparables || [];
-            if (!comparables.length && data.properties) {
-                comparables = data.properties;
-            }
+            // Handle Smart Comps 2.0 response structure - the API returns 'comps' array
+            let comparables = data.comps || data.properties || data.comparables || [];
+            
+            console.log('🔍 Parsing response structure:');
+            console.log('  - data.comps length:', (data.comps || []).length);
+            console.log('  - data.properties length:', (data.properties || []).length);
+            console.log('  - data.found_count:', data.found_count);
+            console.log('  - Final comparables length:', comparables.length);
             
             console.log('📋 Final comparables array:', comparables);
             currentCompsData = comparables;
