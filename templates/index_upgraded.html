@@ -7930,12 +7930,20 @@
             updateElementIfExists('comps-subject-sqft', formatNumber(sqft));
         }
 
+        // Add global error handler for unhandled promise rejections
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('🚨 Unhandled promise rejection in comps:', event.reason);
+            console.error('🚨 Promise:', event.promise);
+            event.preventDefault(); // Prevent the default browser behavior
+        });
+
         // Main function to run comps analysis with map interface
         async function runMapCompsAnalysis() {
             console.log('🗺️ Starting map-based comps analysis...');
             
-            // Update subject property display first
-            updateCompsSubjectProperty();
+            try {
+                // Update subject property display first
+                updateCompsSubjectProperty();
             
             // Show loading state
             showElement('comps-list-loading');
@@ -7972,9 +7980,14 @@
                     })
                 });
                 
+                console.log('📞 Raw API response status:', response.status);
+                console.log('📞 Raw API response ok:', response.ok);
+                
                 const data = await response.json();
+                console.log('📞 Parsed API response:', data);
                 
                 if (!response.ok || data.error) {
+                    console.error('❌ API error response:', data);
                     showCompsError(data.error || `API error: ${response.status}`);
                     return;
                 }
@@ -7985,16 +7998,21 @@
                 
             } catch (error) {
                 console.error('❌ Comps analysis error:', error);
-                showCompsError('An error occurred while searching for comparable properties');
+                console.error('❌ Error details:', error.message, error.stack);
+                showCompsError(`Analysis failed: ${error.message || 'An error occurred while searching for comparable properties'}`);
+            } catch (outerError) {
+                console.error('🚨 Critical error in runMapCompsAnalysis:', outerError);
+                showCompsError('Critical error in analysis function');
             }
         }
 
         // Display comps results on map and in list
         function displayMapCompsResults(data) {
-            console.log('📊 Displaying map comps results:', data);
-            console.log('🔍 Response keys:', Object.keys(data));
-            console.log('📈 Found count:', data.found_count);
-            console.log('🎯 Overall score:', data.overall_score);
+            try {
+                console.log('📊 Displaying map comps results:', data);
+                console.log('🔍 Response keys:', Object.keys(data));
+                console.log('📈 Found count:', data.found_count);
+                console.log('🎯 Overall score:', data.overall_score);
             
             // Hide loading
             hideElement('comps-list-loading');
@@ -8056,6 +8074,14 @@
             
             // Generate market insights
             generateMarketInsights(comparables, avgPrice);
+            
+            console.log('✅ Successfully completed displayMapCompsResults');
+            
+            } catch (error) {
+                console.error('🚨 Error in displayMapCompsResults:', error);
+                console.error('🚨 Error details:', error.message, error.stack);
+                showCompsError('Error displaying results');
+            }
         }
 
         // Display comparable properties in the left sidebar list
