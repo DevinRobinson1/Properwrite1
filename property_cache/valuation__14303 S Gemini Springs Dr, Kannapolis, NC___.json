@@ -1,16 +1,5 @@
 {
   "valuations": {
-    "rentcast": {
-      "estimate": 404000,
-      "source": "RentCast Property Data",
-      "confidence": "high",
-      "matched_address": null,
-      "bedrooms": null,
-      "bathrooms": null,
-      "square_feet": null,
-      "property_type": null,
-      "api_confidence": 0.95
-    },
     "rentometer": {
       "rent_estimate": 2038,
       "rent_median": 1985,
@@ -22,8 +11,8 @@
       "confidence": "High",
       "samples": 16,
       "radius_miles": 2.0,
-      "credits_remaining": 883,
-      "updated": "2025-07-19"
+      "credits_remaining": 856,
+      "updated": "2025-07-23"
     }
   },
   "sources_tried": [
@@ -33,7 +22,6 @@
     "Rentometer"
   ],
   "sources_used": [
-    "RentCast",
     "Rentometer"
   ],
   "address_info": {
@@ -45,7 +33,7 @@
     "longitude": null
   },
   "cache_used": false,
-  "timestamp": "2025-07-19T01:36:48.283255",
+  "timestamp": "2025-07-23T12:09:32.414313",
   "rent_estimate": 2038,
   "rent_data_source": "Rentometer"
 }

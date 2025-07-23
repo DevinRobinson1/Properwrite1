@@ -6119,9 +6119,12 @@
             // Add active class to clicked button
             event.target.classList.add('active');
             
-            // Auto-populate comps data when switching to comps tab
+            // Initialize functionality for specific tabs
             if (tabName === 'comps') {
-                autoPopulateCompsData();
+                // Initialize Google Maps for comps section
+                setTimeout(() => {
+                    initializeCompsMap();
+                }, 100);
             }
         }
 
@@ -7721,6 +7724,154 @@
             }
         }
 
+        // Show/Hide element utility functions
+        function showElement(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.classList.remove('hidden');
+                element.style.display = '';
+            }
+        }
+
+        function hideElement(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.classList.add('hidden');
+                element.style.display = 'none';
+            }
+        }
+
+        // Show error message in comps section
+        function showCompsError(message) {
+            console.error('❌ Comps Error:', message);
+            hideElement('comps-list-loading');
+            hideElement('comps-list-header');
+            hideElement('comps-list-container');
+            showElement('comps-no-results');
+            
+            // Update error message if available
+            const errorElement = document.getElementById('comps-error-message');
+            if (errorElement) {
+                errorElement.textContent = message;
+            }
+            
+            showToast(message, 'error');
+        }
+
+        // Plot comparable properties on Google Map
+        function plotCompsOnMap(subjectProperty, comparables) {
+            if (!compsMap || !Array.isArray(comparables)) return;
+            
+            // Clear existing markers
+            compsMarkers.forEach(marker => marker.setMap(null));
+            compsMarkers = [];
+            if (subjectPropertyMarker) {
+                subjectPropertyMarker.setMap(null);
+            }
+            
+            // Create bounds to fit all properties
+            const bounds = new google.maps.LatLngBounds();
+            
+            // Add subject property marker (red)
+            if (subjectProperty && subjectProperty.lat && subjectProperty.lng) {
+                subjectPropertyMarker = new google.maps.Marker({
+                    position: { lat: parseFloat(subjectProperty.lat), lng: parseFloat(subjectProperty.lng) },
+                    map: compsMap,
+                    title: 'Subject Property',
+                    icon: {
+                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" fill="#dc2626" stroke="white" stroke-width="2"/>
+                                <text x="12" y="16" font-family="Arial" font-size="12" fill="white" text-anchor="middle">S</text>
+                            </svg>`),
+                        scaledSize: new google.maps.Size(24, 24)
+                    }
+                });
+                bounds.extend(new google.maps.LatLng(subjectProperty.lat, subjectProperty.lng));
+            }
+            
+            // Add comparable property markers (green)
+            comparables.forEach((comp, index) => {
+                if (!comp.lat || !comp.lng) return;
+                
+                const marker = new google.maps.Marker({
+                    position: { lat: parseFloat(comp.lat), lng: parseFloat(comp.lng) },
+                    map: compsMap,
+                    title: `${comp.address} - ${formatCurrency(comp.price || 0)}`,
+                    icon: {
+                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" fill="#16a34a" stroke="white" stroke-width="2"/>
+                                <text x="12" y="16" font-family="Arial" font-size="10" fill="white" text-anchor="middle">${index + 1}</text>
+                            </svg>`),
+                        scaledSize: new google.maps.Size(24, 24)
+                    }
+                });
+                
+                // Add click listener to highlight corresponding list item
+                marker.addListener('click', () => {
+                    selectCompsProperty(index);
+                });
+                
+                compsMarkers.push(marker);
+                bounds.extend(new google.maps.LatLng(comp.lat, comp.lng));
+            });
+            
+            // Fit map to show all markers
+            if (bounds.getNorthEast().equals(bounds.getSouthWest())) {
+                compsMap.setCenter(bounds.getNorthEast());
+                compsMap.setZoom(15);
+            } else {
+                compsMap.fitBounds(bounds);
+            }
+        }
+
+        // Select and highlight a comparable property
+        function selectCompsProperty(index) {
+            // Remove previous selection
+            document.querySelectorAll('#comps-list-container > div').forEach(div => {
+                div.classList.remove('bg-blue-100', 'border-blue-300');
+            });
+            
+            // Highlight selected property
+            const selectedDiv = document.querySelector(`#comps-list-container > div:nth-child(${index + 1})`);
+            if (selectedDiv) {
+                selectedDiv.classList.add('bg-blue-100', 'border-blue-300');
+                selectedDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            // Center map on selected property
+            if (currentCompsData[index] && currentCompsData[index].lat && currentCompsData[index].lng) {
+                compsMap.setCenter({
+                    lat: parseFloat(currentCompsData[index].lat),
+                    lng: parseFloat(currentCompsData[index].lng)
+                });
+                compsMap.setZoom(16);
+            }
+        }
+
+        // Generate market insights from comparable sales
+        function generateMarketInsights(comparables, avgPrice) {
+            if (!Array.isArray(comparables) || comparables.length === 0) return;
+            
+            // Calculate market metrics
+            const prices = comparables.map(comp => comp.price || 0).filter(p => p > 0);
+            const sqftValues = comparables.map(comp => (comp.price || 0) / (comp.sqft || 1)).filter(p => p > 0);
+            
+            const insights = {
+                marketTrend: avgPrice > 300000 ? 'Strong Market' : avgPrice > 200000 ? 'Stable Market' : 'Emerging Market',
+                priceRange: `${formatCurrency(Math.min(...prices))} - ${formatCurrency(Math.max(...prices))}`,
+                avgPricePerSqft: formatCurrency(sqftValues.reduce((a, b) => a + b, 0) / sqftValues.length),
+                recommendations: avgPrice > 350000 ? 'Consider premium finishes' : 'Focus on value-add opportunities'
+            };
+            
+            // Update insights display if elements exist
+            updateElementIfExists('market-trend', insights.marketTrend);
+            updateElementIfExists('price-range', insights.priceRange);
+            updateElementIfExists('avg-price-sqft', insights.avgPricePerSqft);
+            updateElementIfExists('market-recommendations', insights.recommendations);
+        }
+
         // Interactive Map Comps Analysis Functions
         
         // Global variables for map functionality
@@ -7791,8 +7942,8 @@
                     },
                     body: JSON.stringify({
                         address: address,
-                        radius: parseFloat(radius),
-                        days: parseInt(timeframe),
+                        max_distance: parseFloat(radius),
+                        days_filter: parseInt(timeframe),
                         beds: parseInt(document.getElementById('beds')?.value || '3'),
                         baths: parseFloat(document.getElementById('baths')?.value || '2'),
                         sqft: parseInt(document.getElementById('sqft')?.value || '1500')
@@ -7801,8 +7952,8 @@
                 
                 const data = await response.json();
                 
-                if (data.error) {
-                    showCompsError(data.error);
+                if (!response.ok || data.error) {
+                    showCompsError(data.error || `API error: ${response.status}`);
                     return;
                 }
                 
@@ -7822,7 +7973,7 @@
             // Hide loading
             hideElement('comps-list-loading');
             
-            const comparables = data.comparables || [];
+            const comparables = data.comps || data.comparables || [];
             currentCompsData = comparables;
             
             if (comparables.length === 0) {
@@ -7852,8 +8003,9 @@
             // Display properties in list
             displayCompsPropertyList(comparables);
             
-            // Plot on map
-            plotCompsOnMap(data.subject_property || {}, comparables);
+            // Plot on map  
+            const subjectProperty = data.subject_property || data.subject || { lat: 35.2271, lng: -80.8431 };
+            plotCompsOnMap(subjectProperty, comparables);
             
             // Generate market insights
             generateMarketInsights(comparables, avgPrice);
@@ -7889,38 +8041,7 @@
 
         // Legacy compatibility function
         function runCompsAnalysis() {
-            // Check authentication before allowing analysis
-            if (!isAuthenticated) {
-                showRegistrationModal('Please create an account to access Comparable Properties Analysis');
-                return;
-            }
-            
-            // Auto-populate subject property from header data if available
-            populateCompsSubjectProperty();
-            
-            // Try to get address from multiple possible sources, prioritizing subject property data
-            const address = document.getElementById('comps-subject-address')?.textContent ||
-                           document.getElementById('address')?.value || 
-                           document.getElementById('street-address')?.value ||
-                           window.lastPropertyData?.address;
-            
-            if (!address || address === 'Loading...') {
-                showToast('Please enter a property address first and run property analysis', 'error');
-                return;
-            }
-
-            // Get property data from subject property inputs (populated from header)
-            const beds = parseInt(document.getElementById('comps-subject-beds-input')?.value) || 
-                        parseInt(document.getElementById('bedrooms')?.value) || 
-                        parseInt(document.getElementById('beds')?.value) || 3;
-            const baths = parseFloat(document.getElementById('comps-subject-baths-input')?.value) || 
-                         parseFloat(document.getElementById('bathrooms')?.value) || 
-                         parseFloat(document.getElementById('baths')?.value) || 2;
-            const sqft = parseInt((document.getElementById('comps-subject-sqft-input')?.value || 
-                                 document.getElementById('square_feet')?.value || 
-                                 document.getElementById('sqft')?.value || '1500').replace(/,/g, ''));
-            const maxDistance = parseFloat(document.getElementById('comps-max-distance')?.value) || 0.5;
-            const daysFilter = parseInt(document.getElementById('comps-days-filter')?.value) || 180;
+            return runMapCompsAnalysis();
 
             // Show loading state
             document.getElementById('comps-loading').classList.remove('hidden');
