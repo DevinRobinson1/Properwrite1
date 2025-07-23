@@ -7914,14 +7914,19 @@
 
         // Update subject property info in comps section
         function updateCompsSubjectProperty() {
+            // Try to get analyzed property data first, then fall back to form fields
+            const analyzedData = window.lastPropertyData || {};
+            
             const address = document.getElementById('address')?.value || 'Property Address';
-            const beds = document.getElementById('bedrooms')?.value || '-';
-            const baths = document.getElementById('bathrooms')?.value || '-';
-            const sqft = document.getElementById('square_feet')?.value?.replace(/,/g, '') || '-';
+            const beds = analyzedData.bedrooms || document.getElementById('bedrooms')?.value || '-';
+            const baths = analyzedData.bathrooms || document.getElementById('bathrooms')?.value || '-';
+            const sqft = analyzedData.square_feet || document.getElementById('square_feet')?.value?.replace(/,/g, '') || '-';
+            
+            console.log('🏠 Updating subject property with:', {address, beds, baths, sqft});
             
             updateElementIfExists('comps-subject-address', address);
             updateElementIfExists('comps-subject-beds', beds);
-            updateElementIfExists('comps-subject-baths', baths);
+            updateElementIfExists('comps-subject-baths', baths);  
             updateElementIfExists('comps-subject-sqft', formatNumber(sqft));
         }
 
@@ -7986,11 +7991,20 @@
         // Display comps results on map and in list
         function displayMapCompsResults(data) {
             console.log('📊 Displaying map comps results:', data);
+            console.log('🔍 Response keys:', Object.keys(data));
+            console.log('📈 Found count:', data.found_count);
+            console.log('🎯 Overall score:', data.overall_score);
             
             // Hide loading
             hideElement('comps-list-loading');
             
-            const comparables = data.comps || data.comparables || [];
+            // Handle Smart Comps 2.0 response structure
+            let comparables = data.comps || data.comparables || [];
+            if (!comparables.length && data.properties) {
+                comparables = data.properties;
+            }
+            
+            console.log('📋 Final comparables array:', comparables);
             currentCompsData = comparables;
             
             if (comparables.length === 0) {
@@ -8012,10 +8026,15 @@
             updateElementIfExists('comps-avg-display', formatCurrency(avgPrice));
             updateElementIfExists('comps-range-display', `${formatCurrency(minPrice)} - ${formatCurrency(maxPrice)}`);
             
-            // Update analysis panel
+            // Update analysis panel with proper debugging
+            console.log('📊 Updating analysis panel with', comparables.length, 'properties');
+            console.log('💰 Average price:', avgPrice);
+            
             updateElementIfExists('analysis-count', comparables.length.toString());
             updateElementIfExists('analysis-avg-price', formatCurrency(avgPrice));
             updateElementIfExists('analysis-arv', formatCurrency(avgPrice * 1.05)); // 5% above avg
+            
+            console.log('✅ Analysis panel updated successfully');
             
             // Display properties in list
             displayCompsPropertyList(comparables);
