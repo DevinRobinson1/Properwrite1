@@ -392,6 +392,37 @@ def index():
     return render_template('index_upgraded.html', 
                          google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY') or os.environ.get('GOOGLE_API_KEY'))
 
+@app.route('/rei-connect')
+def rei_connect_landing():
+    """REI Connect landing page with 50 credit offer"""
+    # Auto-apply the 50 credit promo code for REI Connect
+    session['rei_connect_promo'] = 'REICONNECT50'
+    session['rei_connect_credits'] = 50
+    session['promo_applied'] = True
+    
+    # Check if user is already logged in and auto-apply credits
+    if session.get('user_id'):
+        try:
+            billing_service = BillingService()
+            result = billing_service.add_credits(
+                user_email=session.get('email'),
+                credits=50,
+                payment_method='promo_code',
+                description='REI Connect 50 Credit Welcome Bonus'
+            )
+            if result.get('success'):
+                flash('Welcome! 50 free credits have been added to your account!', 'success')
+            else:
+                flash('Welcome to REI Connect! Sign up to claim your 50 free credits.', 'info')
+        except Exception as e:
+            logging.error(f"Error applying REI Connect credits: {e}")
+            flash('Welcome to REI Connect! Sign up to claim your 50 free credits.', 'info')
+    else:
+        flash('Welcome to REI Connect! Sign up now to claim your 50 free credits.', 'info')
+    
+    return render_template('rei_connect_landing.html',
+                         google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY') or os.environ.get('GOOGLE_API_KEY'))
+
 @app.route('/dashboard')
 def dashboard():
     """User Account Dashboard"""
