@@ -8000,9 +8000,6 @@
                 console.error('❌ Comps analysis error:', error);
                 console.error('❌ Error details:', error.message, error.stack);
                 showCompsError(`Analysis failed: ${error.message || 'An error occurred while searching for comparable properties'}`);
-            } catch (outerError) {
-                console.error('🚨 Critical error in runMapCompsAnalysis:', outerError);
-                showCompsError('Critical error in analysis function');
             }
         }
 
