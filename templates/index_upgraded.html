@@ -6300,7 +6300,7 @@
                 recalculateSellerFinance();
                 updateComparisonResults();
             } catch (error) {
-                console.log('Calculation update in progress...', error.message);
+                console.log('Calculation update in progress...');
             }
             
             // Update dispositions separately (client-side only, no API calls)
@@ -6308,7 +6308,7 @@
                 recalculateAllDispositionStrategies();
                 calculateMLSNovation(); // Calculate MLS/Novation values
             } catch (dispositionError) {
-                console.log('Dispositions calculation in progress...', dispositionError.message);
+                console.log('Dispositions calculation in progress...');
             }
         }
 
@@ -7930,20 +7930,12 @@
             updateElementIfExists('comps-subject-sqft', formatNumber(sqft));
         }
 
-        // Add global error handler for unhandled promise rejections
-        window.addEventListener('unhandledrejection', function(event) {
-            console.error('🚨 Unhandled promise rejection in comps:', event.reason);
-            console.error('🚨 Promise:', event.promise);
-            event.preventDefault(); // Prevent the default browser behavior
-        });
-
         // Main function to run comps analysis with map interface
         async function runMapCompsAnalysis() {
             console.log('🗺️ Starting map-based comps analysis...');
             
-            try {
-                // Update subject property display first
-                updateCompsSubjectProperty();
+            // Update subject property display first
+            updateCompsSubjectProperty();
             
             // Show loading state
             showElement('comps-list-loading');
@@ -7980,36 +7972,28 @@
                     })
                 });
                 
-                console.log('📞 Raw API response status:', response.status);
-                console.log('📞 Raw API response ok:', response.ok);
-                
                 const data = await response.json();
-                console.log('📞 Parsed API response:', data);
                 
                 if (!response.ok || data.error) {
-                    console.error('❌ API error response:', data);
                     showCompsError(data.error || `API error: ${response.status}`);
                     return;
                 }
                 
                 // Process and display results
-                console.log('🎯 About to call displayMapCompsResults with:', data);
                 displayMapCompsResults(data);
                 
             } catch (error) {
                 console.error('❌ Comps analysis error:', error);
-                console.error('❌ Error details:', error.message, error.stack);
-                showCompsError(`Analysis failed: ${error.message || 'An error occurred while searching for comparable properties'}`);
+                showCompsError('An error occurred while searching for comparable properties');
             }
         }
 
         // Display comps results on map and in list
         function displayMapCompsResults(data) {
-            try {
-                console.log('📊 Displaying map comps results:', data);
-                console.log('🔍 Response keys:', Object.keys(data));
-                console.log('📈 Found count:', data.found_count);
-                console.log('🎯 Overall score:', data.overall_score);
+            console.log('📊 Displaying map comps results:', data);
+            console.log('🔍 Response keys:', Object.keys(data));
+            console.log('📈 Found count:', data.found_count);
+            console.log('🎯 Overall score:', data.overall_score);
             
             // Hide loading
             hideElement('comps-list-loading');
@@ -8027,12 +8011,9 @@
             currentCompsData = comparables;
             
             if (comparables.length === 0) {
-                console.log('❌ No comparables found - showing no results');
                 showElement('comps-no-results');
                 return;
             }
-            
-            console.log('✅ Found', comparables.length, 'comparables - proceeding with display');
             
             // Show results header with stats
             showElement('comps-list-header');
@@ -8056,10 +8037,6 @@
             updateElementIfExists('analysis-avg-price', formatCurrency(avgPrice));
             updateElementIfExists('analysis-arv', formatCurrency(avgPrice * 1.05)); // 5% above avg
             
-            console.log('📊 Updated Market Analysis elements:');
-            console.log('  - Properties Found:', comparables.length);
-            console.log('  - Average Price:', formatCurrency(avgPrice));
-            
             console.log('✅ Analysis panel updated successfully');
             
             // Display properties in list
@@ -8071,14 +8048,6 @@
             
             // Generate market insights
             generateMarketInsights(comparables, avgPrice);
-            
-            console.log('✅ Successfully completed displayMapCompsResults');
-            
-            } catch (error) {
-                console.error('🚨 Error in displayMapCompsResults:', error);
-                console.error('🚨 Error details:', error.message, error.stack);
-                showCompsError('Error displaying results');
-            }
         }
 
         // Display comparable properties in the left sidebar list
@@ -10689,7 +10658,76 @@
     </script>
     
     <script>
-        // Duplicate form handler removed - main handler is in the primary script section above
+        // Enhanced form submission with Google Autocomplete (New) data
+        document.addEventListener('DOMContentLoaded', function() {
+            const propertyForm = document.getElementById('property-form');
+            if (propertyForm) {
+                propertyForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    const data = {
+                        street_address: formData.get('address'),
+                        city: formData.get('city'),
+                        state: formData.get('state'),
+                        zip_code: formData.get('zip')
+                    };
+                    
+                    // Include Google Places canonical data if available
+                    if (window.selectedAddressData) {
+                        data.place_id = window.selectedAddressData.placeId;
+                        data.formatted_address = window.selectedAddressData.formattedAddress;
+                        console.log('Submitting with Google Autocomplete (New) data:', window.selectedAddressData);
+                    }
+                    
+                    // Show loading state
+                    showLoadingState();
+                    
+                    // Submit to enhanced analysis endpoint
+                    fetch('/api/analyze-property', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(async response => {
+                        const result = await response.json();
+                        console.log('Property analysis response:', {
+                            status: response.status,
+                            result: result,
+                            headers: response.headers
+                        });
+                        
+                        // Check for freemium gate response only if backend actually blocked it
+                        if (response.status === 403 && result.error === 'auth_required') {
+                            console.log('Freemium gate triggered by backend');
+                            hideLoadingState();
+                            showFreemiumGate('propertyAnalysis', result.message);
+                            return;
+                        }
+                        
+                        if (result.success) {
+                            // Display analysis results
+                            displayPropertyAnalysis(result);
+                            hideLoadingState();
+                            // Post-analysis resources removed - they're now in dashboard
+                            // Show mobile footer after successful analysis
+                            showMobileFooter();
+                        } else {
+                            throw new Error(result.error || 'Analysis failed');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Property analysis error:', error);
+                        if (error.message !== 'Authentication required') {
+                            hideLoadingState();
+                            showToast('Analysis failed: ' + error.message, 'error');
+                        }
+                    });
+                });
+            }
+        });
         
         function showLoadingState() {
             // Show loading indicators for property valuations
@@ -10744,11 +10782,7 @@
             }
             
             // Update all calculations
-            try {
-                updateAllTabCalculations();
-            } catch (error) {
-                console.log('Tab calculations update in progress during property analysis:', error.message);
-            }
+            updateAllTabCalculations();
         }
         
         function updateComprehensiveValuations(data) {
