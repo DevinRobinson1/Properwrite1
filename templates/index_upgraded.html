@@ -7761,7 +7761,21 @@
 
         // Plot comparable properties on Google Map
         function plotCompsOnMap(subjectProperty, comparables) {
-            if (!compsMap || !Array.isArray(comparables)) return;
+            console.log('🗺️ Starting plotCompsOnMap with:', {
+                hasMap: !!compsMap,
+                comparablesLength: Array.isArray(comparables) ? comparables.length : 0,
+                subjectProperty: subjectProperty
+            });
+            
+            if (!compsMap) {
+                console.error('❌ Google Maps not initialized');
+                return;
+            }
+            
+            if (!Array.isArray(comparables)) {
+                console.error('❌ Comparables is not an array:', comparables);
+                return;
+            }
             
             // Clear existing markers
             compsMarkers.forEach(marker => marker.setMap(null));
@@ -7772,58 +7786,107 @@
             
             // Create bounds to fit all properties
             const bounds = new google.maps.LatLngBounds();
+            let hasValidMarkers = false;
             
-            // Add subject property marker (red)
-            if (subjectProperty && subjectProperty.lat && subjectProperty.lng) {
-                subjectPropertyMarker = new google.maps.Marker({
-                    position: { lat: parseFloat(subjectProperty.lat), lng: parseFloat(subjectProperty.lng) },
-                    map: compsMap,
-                    title: 'Subject Property',
-                    icon: {
-                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="10" fill="#dc2626" stroke="white" stroke-width="2"/>
-                                <text x="12" y="16" font-family="Arial" font-size="12" fill="white" text-anchor="middle">S</text>
-                            </svg>`),
-                        scaledSize: new google.maps.Size(24, 24)
-                    }
-                });
-                bounds.extend(new google.maps.LatLng(subjectProperty.lat, subjectProperty.lng));
+            // Add subject property marker (red) - try multiple coordinate field names
+            let subjectCoords = null;
+            if (subjectProperty) {
+                subjectCoords = {
+                    lat: subjectProperty.lat || subjectProperty.latitude || 
+                         window.lastPropertyData?.latitude,
+                    lng: subjectProperty.lng || subjectProperty.longitude || 
+                         window.lastPropertyData?.longitude
+                };
             }
             
-            // Add comparable property markers (green)
+            if (subjectCoords?.lat && subjectCoords?.lng) {
+                console.log('📍 Adding subject property marker at:', subjectCoords);
+                try {
+                    subjectPropertyMarker = new google.maps.Marker({
+                        position: { lat: parseFloat(subjectCoords.lat), lng: parseFloat(subjectCoords.lng) },
+                        map: compsMap,
+                        title: 'Subject Property',
+                        icon: {
+                            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" fill="#dc2626" stroke="white" stroke-width="2"/>
+                                    <text x="12" y="16" font-family="Arial" font-size="12" fill="white" text-anchor="middle">S</text>
+                                </svg>`),
+                            scaledSize: new google.maps.Size(24, 24)
+                        }
+                    });
+                    bounds.extend(new google.maps.LatLng(subjectCoords.lat, subjectCoords.lng));
+                    hasValidMarkers = true;
+                } catch (error) {
+                    console.error('❌ Error creating subject property marker:', error);
+                }
+            } else {
+                console.warn('⚠️ Subject property missing coordinates');
+            }
+            
+            // Add comparable property markers (green) - try multiple coordinate field names
+            let addedMarkers = 0;
             comparables.forEach((comp, index) => {
-                if (!comp.lat || !comp.lng) return;
+                const coords = {
+                    lat: comp.lat || comp.latitude,
+                    lng: comp.lng || comp.longitude
+                };
                 
-                const marker = new google.maps.Marker({
-                    position: { lat: parseFloat(comp.lat), lng: parseFloat(comp.lng) },
-                    map: compsMap,
-                    title: `${comp.address} - ${formatCurrency(comp.price || 0)}`,
-                    icon: {
-                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="10" fill="#16a34a" stroke="white" stroke-width="2"/>
-                                <text x="12" y="16" font-family="Arial" font-size="10" fill="white" text-anchor="middle">${index + 1}</text>
-                            </svg>`),
-                        scaledSize: new google.maps.Size(24, 24)
-                    }
-                });
+                if (!coords.lat || !coords.lng) {
+                    console.warn(`⚠️ Comp ${index + 1} missing coordinates:`, comp.address);
+                    return;
+                }
                 
-                // Add click listener to highlight corresponding list item
-                marker.addListener('click', () => {
-                    selectCompsProperty(index);
-                });
-                
-                compsMarkers.push(marker);
-                bounds.extend(new google.maps.LatLng(comp.lat, comp.lng));
+                try {
+                    const marker = new google.maps.Marker({
+                        position: { lat: parseFloat(coords.lat), lng: parseFloat(coords.lng) },
+                        map: compsMap,
+                        title: `${comp.address || 'Property'} - ${formatCurrency(comp.price || 0)}`,
+                        icon: {
+                            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" fill="#16a34a" stroke="white" stroke-width="2"/>
+                                    <text x="12" y="16" font-family="Arial" font-size="10" fill="white" text-anchor="middle">${index + 1}</text>
+                                </svg>`),
+                            scaledSize: new google.maps.Size(24, 24)
+                        }
+                    });
+                    
+                    // Add click listener to highlight corresponding list item
+                    marker.addListener('click', () => {
+                        selectCompsProperty(index);
+                    });
+                    
+                    compsMarkers.push(marker);
+                    bounds.extend(new google.maps.LatLng(coords.lat, coords.lng));
+                    addedMarkers++;
+                    hasValidMarkers = true;
+                    
+                } catch (error) {
+                    console.error(`❌ Error creating marker for comp ${index + 1}:`, error);
+                }
             });
             
-            // Fit map to show all markers
-            if (bounds.getNorthEast().equals(bounds.getSouthWest())) {
-                compsMap.setCenter(bounds.getNorthEast());
-                compsMap.setZoom(15);
+            console.log(`✅ Added ${addedMarkers} comparable property markers`);
+            
+            // Fit map to show all markers or default view
+            if (hasValidMarkers) {
+                try {
+                    if (bounds.getNorthEast().equals(bounds.getSouthWest())) {
+                        compsMap.setCenter(bounds.getNorthEast());
+                        compsMap.setZoom(15);
+                    } else {
+                        compsMap.fitBounds(bounds);
+                    }
+                    console.log('✅ Map bounds adjusted successfully');
+                } catch (error) {
+                    console.error('❌ Error fitting map bounds:', error);
+                }
             } else {
-                compsMap.fitBounds(bounds);
+                console.warn('⚠️ No valid markers to display, keeping default map view');
+                // Set to Charlotte, NC default if no coordinates available
+                compsMap.setCenter({ lat: 35.2271, lng: -80.8431 });
+                compsMap.setZoom(12);
             }
         }
 
@@ -7955,6 +8018,8 @@
             }
             
             try {
+                console.log('🔄 Making API request to /api/comps/analyze...');
+                
                 // Call the comps API
                 const response = await fetch('/api/comps/analyze', {
                     method: 'POST',
@@ -7970,21 +8035,49 @@
                         baths: parseFloat(document.getElementById('bathrooms')?.value || '2'),
                         sqft: parseInt(document.getElementById('square_feet')?.value?.replace(/,/g, '') || '1500')
                     })
+                }).catch(fetchError => {
+                    console.error('❌ Network error during fetch:', fetchError);
+                    throw new Error('Network connection failed. Please check your internet connection.');
                 });
                 
-                const data = await response.json();
+                console.log('📡 API response received, status:', response.status);
+                
+                let data;
+                try {
+                    data = await response.json();
+                    console.log('📋 API response data:', data);
+                } catch (jsonError) {
+                    console.error('❌ Error parsing JSON response:', jsonError);
+                    throw new Error('Invalid response format from server');
+                }
                 
                 if (!response.ok || data.error) {
-                    showCompsError(data.error || `API error: ${response.status}`);
+                    const errorMessage = data.error || `Server error: ${response.status} ${response.statusText}`;
+                    console.error('❌ API error:', errorMessage);
+                    showCompsError(errorMessage);
                     return;
                 }
                 
+                // Ensure map is initialized before processing results
+                if (!compsMap) {
+                    console.log('🗺️ Map not initialized, initializing now...');
+                    initializeCompsMap();
+                    
+                    // Wait a moment for map to initialize
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+                
                 // Process and display results
-                displayMapCompsResults(data);
+                try {
+                    displayMapCompsResults(data);
+                } catch (displayError) {
+                    console.error('❌ Error displaying results:', displayError);
+                    showCompsError('Error displaying comparable properties on map');
+                }
                 
             } catch (error) {
                 console.error('❌ Comps analysis error:', error);
-                showCompsError('An error occurred while searching for comparable properties');
+                showCompsError(error.message || 'An error occurred while searching for comparable properties');
             }
         }
 
@@ -8008,6 +8101,15 @@
             console.log('  - Final comparables length:', comparables.length);
             
             console.log('📋 Final comparables array:', comparables);
+            
+            // Debug coordinate availability
+            const propsWithCoords = comparables.filter(comp => comp.latitude && comp.longitude);
+            const propsWithoutCoords = comparables.filter(comp => !comp.latitude || !comp.longitude);
+            console.log(`🗺️ Properties with coordinates: ${propsWithCoords.length}/${comparables.length}`);
+            if (propsWithoutCoords.length > 0) {
+                console.log('⚠️ Properties missing coordinates:', propsWithoutCoords.map(comp => comp.address));
+            }
+            
             currentCompsData = comparables;
             
             if (comparables.length === 0) {

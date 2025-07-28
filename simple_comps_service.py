@@ -25,7 +25,7 @@ class SimpleCompsService:
         }
     
     def search_comparable_sales(self, address: str, beds: int, baths: float, sqft: int,
-                              lat: float = None, lng: float = None) -> Dict:
+                              lat: Optional[float] = None, lng: Optional[float] = None) -> Dict:
         """
         Search for comparable sales properties using Zillow RapidAPI
         """
@@ -110,7 +110,7 @@ class SimpleCompsService:
                     'success': False,
                     'debug_info': {
                         'strategies_tried': len(search_strategies),
-                        'last_response_keys': list(data.keys()) if isinstance(data, dict) else None
+                        'last_response_keys': list(data.keys()) if 'data' in locals() and isinstance(data, dict) else None
                     }
                 }
             
@@ -247,7 +247,7 @@ class SimpleCompsService:
             return None
     
     def analyze_comparables(self, subject_address: str, beds: int, baths: float, sqft: int,
-                           lat: float = None, lng: float = None) -> Dict:
+                           lat: Optional[float] = None, lng: Optional[float] = None) -> Dict:
         """
         Analyze comparable properties and generate summary
         """
