@@ -1507,6 +1507,7 @@ def update_jv_deal(deal_id):
 @require_jv_admin_api
 def delete_jv_deal(deal_id):
     """Delete JV deal permanently"""
+    logging.info(f"Delete JV deal request received for deal_id: {deal_id}")
     try:
         jv_db = JVDatabase()
         with jv_db.get_connection() as conn:
@@ -1524,8 +1525,16 @@ def delete_jv_deal(deal_id):
                 if not deal:
                     return jsonify({'error': 'Deal not found'}), 404
                 
+                # Get property address safely
+                property_address = 'N/A'
+                try:
+                    if deal.get('deal_json') and isinstance(deal['deal_json'], dict):
+                        property_address = deal['deal_json'].get('property_address', 'N/A')
+                except (TypeError, AttributeError):
+                    property_address = 'N/A'
+                
                 # Log the deletion for audit purposes
-                logging.info(f"Admin deleting JV deal {deal_id}: {deal['partner_name']} - {deal.get('deal_json', {}).get('property_address', 'N/A')}")
+                logging.info(f"Admin deleting JV deal {deal_id}: {deal.get('partner_name', 'Unknown')} - {property_address}")
                 
                 # Delete the deal
                 cur.execute("DELETE FROM jv_deals WHERE id = %s", (deal_id,))
@@ -1542,9 +1551,9 @@ def delete_jv_deal(deal_id):
                     
                     webhook_data = {
                         'deal_id': deal_id,
-                        'partner_name': deal['partner_name'],
-                        'partner_email': deal['partner_email'],
-                        'property_address': deal.get('deal_json', {}).get('property_address', 'N/A'),
+                        'partner_name': deal.get('partner_name', 'Unknown'),
+                        'partner_email': deal.get('partner_email', ''),
+                        'property_address': property_address,
                         'action': 'deleted',
                         'deleted_at': datetime.utcnow().isoformat(),
                         'deleted_by': 'admin'
