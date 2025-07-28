@@ -8009,10 +8009,14 @@
             // Get search parameters
             const radius = document.getElementById('comps-radius')?.value || '0.5';
             const timeframe = document.getElementById('comps-timeframe')?.value || '180';
+            console.log('📏 Search parameters:', { radius, timeframe });
             
             // Get current address
             const address = document.getElementById('address')?.value;
+            console.log('🏠 Address from input:', address);
+            
             if (!address) {
+                console.error('❌ No address provided');
                 showCompsError('Please enter a property address first');
                 return;
             }
@@ -8020,25 +8024,43 @@
             try {
                 console.log('🔄 Making API request to /api/comps/analyze...');
                 
-                // Call the comps API
-                const response = await fetch('/api/comps/analyze', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || ''
-                    },
-                    body: JSON.stringify({
-                        address: address,
-                        max_distance: parseFloat(radius),
-                        days_filter: parseInt(timeframe),
-                        beds: parseInt(document.getElementById('bedrooms')?.value || '3'),
-                        baths: parseFloat(document.getElementById('bathrooms')?.value || '2'),
-                        sqft: parseInt(document.getElementById('square_feet')?.value?.replace(/,/g, '') || '1500')
-                    })
-                }).catch(fetchError => {
+                // Prepare request data
+                const requestData = {
+                    address: address,
+                    max_distance: parseFloat(radius),
+                    days_filter: parseInt(timeframe),
+                    beds: parseInt(document.getElementById('bedrooms')?.value || '3'),
+                    baths: parseFloat(document.getElementById('bathrooms')?.value || '2'),
+                    sqft: parseInt(document.getElementById('square_feet')?.value?.replace(/,/g, '') || '1500')
+                };
+                
+                console.log('📤 Request payload:', requestData);
+                
+                // Get CSRF token
+                const csrfToken = document.querySelector('meta[name=csrf-token]')?.getAttribute('content');
+                console.log('🔐 CSRF token found:', !!csrfToken);
+                
+                // Call the comps API with comprehensive error handling
+                let response;
+                try {
+                    response = await fetch('/api/comps/analyze', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken || ''
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+                    console.log('📡 Fetch completed, response received');
+                } catch (fetchError) {
                     console.error('❌ Network error during fetch:', fetchError);
-                    throw new Error('Network connection failed. Please check your internet connection.');
-                });
+                    console.error('❌ Fetch error details:', {
+                        name: fetchError.name,
+                        message: fetchError.message,
+                        stack: fetchError.stack
+                    });
+                    throw new Error(`Network connection failed: ${fetchError.message}`);
+                }
                 
                 console.log('📡 API response received, status:', response.status);
                 
@@ -8077,7 +8099,16 @@
                 
             } catch (error) {
                 console.error('❌ Comps analysis error:', error);
+                console.error('❌ Error details:', {
+                    name: error.name,
+                    message: error.message,
+                    stack: error.stack
+                });
+                
+                hideElement('comps-list-loading');
                 showCompsError(error.message || 'An error occurred while searching for comparable properties');
+            } finally {
+                console.log('🏁 Comps analysis function completed');
             }
         }
 
@@ -8182,8 +8213,31 @@
 
         // Legacy compatibility function
         function runCompsAnalysis() {
+            console.log('📞 runCompsAnalysis called - delegating to runMapCompsAnalysis');
             return runMapCompsAnalysis();
         }
+
+        // Add global error handlers for debugging
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('🚨 Unhandled Promise Rejection:', event.reason);
+            console.error('🚨 Promise:', event.promise);
+            console.error('🚨 Stack trace:', event.reason?.stack);
+            
+            // If this is related to comps analysis, show user-friendly error
+            if (event.reason?.message?.includes('comps') || 
+                event.reason?.message?.includes('comparable') ||
+                event.reason?.message?.includes('analysis')) {
+                console.log('🔧 This appears to be a comps-related error, showing user feedback');
+                hideElement('comps-list-loading');
+                showCompsError('Failed to load comparable properties. Please try again.');
+            }
+        });
+
+        window.addEventListener('error', function(event) {
+            console.error('🚨 Global JavaScript Error:', event.error);
+            console.error('🚨 Message:', event.message);
+            console.error('🚨 Source:', event.filename, 'Line:', event.lineno);
+        });
 
         // Clean up legacy code below (kept for reference but not executed)
         function legacyCompsCode() {
