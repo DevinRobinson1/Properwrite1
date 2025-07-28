@@ -1502,6 +1502,71 @@ def update_jv_deal(deal_id):
         logging.error(f"Error updating JV deal: {e}")
         return jsonify({'error': str(e)}), 500
 
+@admin_api_bp.route('/jv-deals/<deal_id>', methods=['DELETE'])
+@csrf.exempt
+@require_jv_admin_api
+def delete_jv_deal(deal_id):
+    """Delete JV deal permanently"""
+    try:
+        jv_db = JVDatabase()
+        with jv_db.get_connection() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+                # Get deal data for logging/webhook before deletion
+                cur.execute("""
+                    SELECT d.*, p.name as partner_name, p.email as partner_email
+                    FROM jv_deals d
+                    JOIN partners p ON d.partner_id = p.id
+                    WHERE d.id = %s
+                """, (deal_id,))
+                
+                deal = cur.fetchone()
+                
+                if not deal:
+                    return jsonify({'error': 'Deal not found'}), 404
+                
+                # Log the deletion for audit purposes
+                logging.info(f"Admin deleting JV deal {deal_id}: {deal['partner_name']} - {deal.get('deal_json', {}).get('property_address', 'N/A')}")
+                
+                # Delete the deal
+                cur.execute("DELETE FROM jv_deals WHERE id = %s", (deal_id,))
+                
+                if cur.rowcount == 0:
+                    return jsonify({'error': 'Deal not found or already deleted'}), 404
+                
+                conn.commit()
+                
+                # Optional: Trigger webhook for deal deletion (if needed)
+                try:
+                    from zapier_webhook_service import ZapierWebhookService
+                    webhook_service = ZapierWebhookService()
+                    
+                    webhook_data = {
+                        'deal_id': deal_id,
+                        'partner_name': deal['partner_name'],
+                        'partner_email': deal['partner_email'],
+                        'property_address': deal.get('deal_json', {}).get('property_address', 'N/A'),
+                        'action': 'deleted',
+                        'deleted_at': datetime.utcnow().isoformat(),
+                        'deleted_by': 'admin'
+                    }
+                    
+                    # You can create a new webhook method for deletions if needed
+                    # webhook_service.trigger_jv_deal_deleted(webhook_data)
+                    
+                except Exception as webhook_error:
+                    logging.error(f"Webhook error during deal deletion: {webhook_error}")
+                    # Don't fail the deletion if webhook fails
+                
+                return jsonify({
+                    'success': True,
+                    'message': 'Deal deleted successfully',
+                    'deal_id': deal_id
+                })
+                
+    except Exception as e:
+        logging.error(f"Error deleting JV deal: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @admin_api_bp.route('/jv-deals/metrics', methods=['GET'])
 @csrf.exempt
 @require_jv_admin_api
