@@ -1532,3 +1532,28 @@ class BillingService:
         except Exception as e:
             logging.error(f"Error getting billing history: {e}")
             return []
+    
+    def update_user_password(self, email: str, new_password: str) -> bool:
+        """
+        Update user password
+        """
+        try:
+            with self.db_session() as db:
+                user = db.query(User).filter(User.email == email).first()
+                
+                if not user:
+                    logging.error(f"User not found for email: {email}")
+                    return False
+                
+                # Hash the new password
+                from werkzeug.security import generate_password_hash
+                user.password_hash = generate_password_hash(new_password)
+                
+                db.commit()
+                logging.info(f"Password updated successfully for user: {email}")
+                
+                return True
+                
+        except Exception as e:
+            logging.error(f"Error updating password for {email}: {e}")
+            return False

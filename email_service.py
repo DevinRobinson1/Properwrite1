@@ -268,7 +268,7 @@ class EmailService:
     def send_password_reset_email(self, user_email: str, reset_token: str) -> bool:
         """Send password reset email"""
         subject = "Reset Your Properwrite Password"
-        reset_url = f"https://properwrite.com/reset-password?token={reset_token}"
+        reset_url = f"https://properwrite.com/reset-password/{reset_token}?email={user_email}"
         
         html_content = f"""
         <html>

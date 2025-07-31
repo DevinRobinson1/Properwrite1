@@ -661,6 +661,97 @@ def api_forgot_password():
             'error': 'An error occurred. Please try again.'
         }), 500
 
+@app.route('/reset-password/<token>')
+def reset_password_page(token):
+    """Display password reset page with token"""
+    try:
+        # Extract email from URL parameters
+        email = request.args.get('email')
+        
+        if not email or not token:
+            flash('Invalid reset link. Please request a new password reset.', 'error')
+            return redirect(url_for('forgot_password'))
+        
+        # Verify reset token
+        token_key = f'reset_token_{email}'
+        stored_token = session.get(token_key)
+        
+        if not stored_token:
+            flash('Reset link has expired. Please request a new password reset.', 'error')
+            return redirect(url_for('forgot_password'))
+        
+        if stored_token['token'] != token:
+            flash('Invalid reset link. Please request a new password reset.', 'error')
+            return redirect(url_for('forgot_password'))
+        
+        if datetime.now() > stored_token['expires']:
+            flash('Reset link has expired. Please request a new password reset.', 'error')
+            return redirect(url_for('forgot_password'))
+        
+        return render_template('auth/reset_password.html', token=token, email=email)
+        
+    except Exception as e:
+        logging.error(f"Error in reset password page: {str(e)}")
+        flash('An error occurred. Please try again.', 'error')
+        return redirect(url_for('forgot_password'))
+
+@app.route('/api/reset-password', methods=['POST'])
+@limiter.limit("5 per minute")
+def api_reset_password():
+    """Handle password reset API request"""
+    try:
+        token = request.form.get('token')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if not all([token, email, password, confirm_password]):
+            return jsonify({'success': False, 'error': 'All fields are required'}), 400
+        
+        if password != confirm_password:
+            return jsonify({'success': False, 'error': 'Passwords do not match'}), 400
+        
+        if len(password) < 8:
+            return jsonify({'success': False, 'error': 'Password must be at least 8 characters long'}), 400
+        
+        # Verify reset token
+        token_key = f'reset_token_{email}'
+        stored_token = session.get(token_key)
+        
+        if not stored_token:
+            return jsonify({'success': False, 'error': 'Reset link has expired. Please request a new password reset.'}), 400
+        
+        if stored_token['token'] != token:
+            return jsonify({'success': False, 'error': 'Invalid reset link. Please request a new password reset.'}), 400
+        
+        if datetime.now() > stored_token['expires']:
+            return jsonify({'success': False, 'error': 'Reset link has expired. Please request a new password reset.'}), 400
+        
+        # Update password using billing service
+        billing_service = BillingService()
+        success = billing_service.update_user_password(email, password)
+        
+        if success:
+            # Clear the reset token
+            session.pop(token_key, None)
+            
+            return jsonify({
+                'success': True,
+                'message': 'Password updated successfully. You can now login with your new password.'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to update password. Please try again.'
+            }), 500
+            
+    except Exception as e:
+        logging.error(f"Error in reset password API: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'An error occurred. Please try again.'
+        }), 500
+
 @app.route('/api/dashboard-data', methods=['GET'])
 def get_dashboard_data():
     """Get dashboard data for current user"""
