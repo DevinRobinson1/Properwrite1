@@ -6,404 +6,426 @@
     <title>PFP Joint Venture Partnership - People First Property Solutions</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .tooltip {
-            position: relative;
-            display: inline-block;
-        }
-
-        .tooltip .tooltip-content {
-            visibility: hidden;
-            width: 280px;
-            background-color: #1f2937;
-            color: white;
-            text-align: left;
-            border-radius: 8px;
-            padding: 12px;
-            position: absolute;
-            z-index: 9999;
-            top: 100%;
-            left: 50%;
-            margin-left: -140px;
-            margin-top: 8px;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-            font-size: 13px;
-            line-height: 1.5;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-            border: 1px solid #374151;
-        }
-
-        .tooltip .tooltip-content::after {
-            content: "";
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: transparent transparent #1f2937 transparent;
-        }
-
-        .tooltip:hover .tooltip-content {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .option-row:hover {
-            background-color: #f8fafc;
-            transition: background-color 0.2s;
-        }
-
-        .info-icon {
-            color: #6b7280;
-            cursor: help;
-            margin-left: 8px;
-        }
-
-        .info-icon:hover {
-            color: #374151;
-        }
-    </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center py-4">
-                <div class="flex items-center space-x-4">
-                    <img src="/static/PFPS_Horizontal_Logo_Dark.png" alt="PFPS Logo" class="h-10">
-                    <div class="border-l border-gray-300 pl-4">
-                        <h1 class="text-xl font-semibold text-gray-900">Joint Venture Partnership</h1>
-                        <p class="text-sm text-gray-600">People First Property Solutions</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="/" class="text-blue-600 hover:text-blue-800 font-medium">
-                        <i class="fas fa-home mr-2"></i>Back to Platform
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <!-- PFPS Logo Centered -->
-        <div class="text-center mb-8">
-            <img src="/static/PFPS_Horizontal_Logo_Dark.png" alt="People First Property Solutions" class="h-16 mx-auto mb-6">
-            <h1 class="text-3xl font-bold text-gray-900 mb-6">JV Partnership Expectations</h1>
-        </div>
-
-        <!-- Welcome Text -->
-        <div class="text-center mb-8 max-w-3xl mx-auto">
-            <p class="text-gray-600 leading-relaxed">
-                Welcome to the People First Property Solutions JV Network! We believe in people over profit—this isn't just a deal, it's the beginning of a long-term partnership. We exclusively work deals in North Carolina and South Carolina markets with our incredible cash buyer's list, JV novations, installment method, creative finance deals, and top-tier transaction coordination team.
-            </p>
-        </div>
-
-        <!-- Types of JV Deals We Do -->
-        <div class="mb-12">
-            <div class="text-center mb-8">
-                <h2 class="text-2xl font-bold text-gray-900 flex items-center justify-center">
-                    <i class="fas fa-handshake text-blue-600 mr-3"></i>
-                    Types of JV Deals We Do
-                </h2>
-            </div>
-
-            <!-- Deal Types Grid -->
-            <div class="grid md:grid-cols-2 gap-6 mb-8">
-                <!-- JV - You Bring the Contract -->
-                <div class="bg-green-50 border-2 border-green-200 rounded-lg p-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mr-4">
-                            <i class="fas fa-file-contract text-white text-lg"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="text-lg font-bold text-gray-900">JV – You Bring the Contract</h3>
-                            <span class="inline-block bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium mt-1">
-                                <i class="fas fa-star mr-1"></i>Recommended
-                            </span>
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="flex items-center text-gray-700">
-                            <i class="fas fa-check-circle text-green-600 mr-3 flex-shrink-0"></i>
-                            <span>You have a signed deal with a seller</span>
-                        </div>
-                        <div class="flex items-center text-gray-700">
-                            <i class="fas fa-check-circle text-green-600 mr-3 flex-shrink-0"></i>
-                            <span>You want us to dispo the deal and get it closed</span>
-                        </div>
-                        <div class="flex items-center text-gray-700">
-                            <i class="fas fa-check-circle text-green-600 mr-3 flex-shrink-0"></i>
-                            <span>We sign a JV agreement and take over the process</span>
-                        </div>
-                        <div class="flex items-center text-gray-700">
-                            <i class="fas fa-check-circle text-green-600 mr-3 flex-shrink-0"></i>
-                            <span>You get paid your fee at closing</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Bird Dog Referral -->
-                <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
-                            <i class="fas fa-search text-white text-lg"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="text-lg font-bold text-gray-900">Bird Dog Referral</h3>
-                            <span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium mt-1">
-                                <i class="fas fa-dollar-sign mr-1"></i>$1,000 Payout
-                            </span>
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="flex items-center text-gray-700">
-                            <i class="fas fa-check-circle text-blue-600 mr-3 flex-shrink-0"></i>
-                            <span>You have a hot/warm motivated seller lead</span>
-                        </div>
-                        <div class="flex items-center text-gray-700">
-                            <i class="fas fa-check-circle text-blue-600 mr-3 flex-shrink-0"></i>
-                            <span>We get the contract and handle dispo</span>
-                        </div>
-                        <div class="flex items-center text-gray-700">
-                            <i class="fas fa-check-circle text-blue-600 mr-3 flex-shrink-0"></i>
-                            <span>You get $1,000 at closing</span>
-                        </div>
-                        <div class="flex items-center text-gray-700">
-                            <i class="fas fa-check-circle text-blue-600 mr-3 flex-shrink-0"></i>
-                            <span>No effort needed after intro</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Fee Options Section -->
-        <div class="mb-12">
-            <div class="text-center mb-8">
-                <h2 class="text-2xl font-bold text-gray-900 flex items-center justify-center">
-                    <i class="fas fa-dollar-sign text-green-600 mr-3"></i>
-                    Fee Options (Choose One)
-                </h2>
-            </div>
-
-            <!-- Fee Options Grid -->
-            <div class="space-y-6">
-                <!-- Option 1: $3,500 Flat Fee -->
-                <div class="bg-white border-2 border-gray-200 rounded-lg p-6 hover:border-green-300 transition-colors">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center mb-3">
-                                <div class="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
-                                    1
-                                </div>
-                                <h3 class="text-xl font-bold text-gray-900">$3,500 Flat Fee</h3>
-                                <div class="tooltip ml-2">
-                                    <i class="fas fa-info-circle info-icon"></i>
-                                    <div class="tooltip-content">
-                                        <strong>What We Handle:</strong><br>
-                                        • Property marketing & buyer sourcing<br>
-                                        • Buyer qualification & due diligence<br>
-                                        • Contract negotiations & modifications<br>
-                                        • Closing coordination & documentation<br>
-                                        • Title work oversight & problem resolution<br>
-                                        • Timeline management & status updates
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="grid md:grid-cols-2 gap-4">
-                                <div>
-                                    <h4 class="font-semibold text-green-700 mb-2">You Provide:</h4>
-                                    <ul class="text-sm text-gray-600 space-y-1">
-                                        <li>• Signed purchase contract</li>
-                                        <li>• Property access/showing coordination</li>
-                                        <li>• Any property disclosure information</li>
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-blue-700 mb-2">We Handle:</h4>
-                                    <ul class="text-sm text-gray-600 space-y-1">
-                                        <li>• Complete disposition process</li>
-                                        <li>• Marketing & buyer sourcing</li>
-                                        <li>• All closing coordination</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Option 2: 50/50 Split -->
-                <div class="bg-white border-2 border-gray-200 rounded-lg p-6 hover:border-blue-300 transition-colors">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center mb-3">
-                                <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
-                                    2
-                                </div>
-                                <h3 class="text-xl font-bold text-gray-900">50/50 Split</h3>
-                                <div class="tooltip ml-2">
-                                    <i class="fas fa-info-circle info-icon"></i>
-                                    <div class="tooltip-content">
-                                        <strong>What We Handle:</strong><br>
-                                        • Complete buyer acquisition & qualification<br>
-                                        • Professional property marketing campaigns<br>
-                                        • Due diligence coordination & management<br>
-                                        • Contract negotiations & legal reviews<br>
-                                        • Title/escrow coordination & oversight<br>
-                                        • All closing logistics & documentation<br>
-                                        • Post-closing follow-up & support
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="grid md:grid-cols-2 gap-4">
-                                <div>
-                                    <h4 class="font-semibold text-green-700 mb-2">You Provide:</h4>
-                                    <ul class="text-sm text-gray-600 space-y-1">
-                                        <li>• Signed purchase contract</li>
-                                        <li>• Property showing assistance</li>
-                                        <li>• Seller communication coordination</li>
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-blue-700 mb-2">We Handle:</h4>
-                                    <ul class="text-sm text-gray-600 space-y-1">
-                                        <li>• Full disposition & marketing</li>
-                                        <li>• Buyer qualification & closing</li>
-                                        <li>• All transaction management</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Option 3: 75/25 Split -->
-                <div class="bg-white border-2 border-gray-200 rounded-lg p-6 hover:border-purple-300 transition-colors">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center mb-3">
-                                <div class="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
-                                    3
-                                </div>
-                                <h3 class="text-xl font-bold text-gray-900">75/25 Split (You get 75%)</h3>
-                                <div class="tooltip ml-2">
-                                    <i class="fas fa-info-circle info-icon"></i>
-                                    <div class="tooltip-content">
-                                        <strong>What We Handle:</strong><br>
-                                        • Buyer lead generation & initial contact<br>
-                                        • Basic contract review & guidance<br>
-                                        • Closing timeline coordination<br>
-                                        • Title company recommendations<br>
-                                        • Basic transaction support & consultation<br>
-                                        • Problem resolution assistance
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="grid md:grid-cols-2 gap-4">
-                                <div>
-                                    <h4 class="font-semibold text-green-700 mb-2">You Provide:</h4>
-                                    <ul class="text-sm text-gray-600 space-y-1">
-                                        <li>• Signed purchase contract</li>
-                                        <li>• Property marketing & showing</li>
-                                        <li>• Direct buyer negotiations</li>
-                                        <li>• Most transaction coordination</li>
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-blue-700 mb-2">We Handle:</h4>
-                                    <ul class="text-sm text-gray-600 space-y-1">
-                                        <li>• Buyer lead generation</li>
-                                        <li>• Contract guidance & support</li>
-                                        <li>• Closing coordination assistance</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Auto-show JV Expectations Modal -->
+    <div id="jv-expectations-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[95vh] overflow-y-auto">
+        <!-- Modal Header -->
+        <div class="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
+          <div class="flex items-center space-x-4">
+            <img src="/static/PFPS_Icon_Mark_Dark.png" alt="People First Property Solutions" class="w-8 h-8 object-contain">
+            <h2 class="text-2xl font-bold text-gray-900">
+              <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                JV Partnership Expectations
+              </span>
+            </h2>
+          </div>
+          <button onclick="closePFPJVModal()" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times text-xl"></i>
+          </button>
         </div>
         
-        <!-- Important Note -->
-        <div class="bg-blue-50 border-l-4 border-blue-400 p-6 rounded-lg mb-8">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-info-circle text-blue-400"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-blue-700">
-                        <strong>Important:</strong> All payouts are at the B-C transaction closing. Choose the fee structure that best aligns with your business model and involvement level.
-                    </p>
-                </div>
+        <!-- Modal Content -->
+        <div class="p-6">
+          <div class="text-center mb-8">
+            <div class="flex justify-center mb-4">
+              <img src="/static/PFPS_Horizontal_Logo_Dark.png" alt="People First Property Solutions" class="h-10 object-contain">
             </div>
-        </div>
-
-        <!-- Ready to Partner Section -->
-        <div class="bg-gradient-to-r from-green-600 to-blue-600 rounded-lg p-8 text-center text-white mb-12">
-            <h2 class="text-2xl font-bold mb-4">Ready to Partner with PFPS?</h2>
-            <p class="text-lg mb-6 opacity-90">
-                Join our network of successful real estate partners across North Carolina and South Carolina
+            <p class="text-lg text-gray-600">
+              Welcome to the People First Property Solutions JV Network! We believe in people over profit—this isn't just a deal, it's the beginning of a long-term partnership. We exclusively work deals in North Carolina and South Carolina markets with our incredible cash buyer's list, JV novations, installment method, creative finance deals, and top-tier transaction coordination team.
             </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="/jv-submit" class="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center justify-center">
-                    <i class="fas fa-upload mr-2"></i>
-                    Submit a Deal
-                </a>
-                <a href="mailto:partnerships@pfpsolutions.us" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-600 transition-colors inline-flex items-center justify-center">
-                    <i class="fas fa-envelope mr-2"></i>
-                    Contact Us
-                </a>
-            </div>
-        </div>
-
-        <!-- FAQ Section -->
-        <div class="bg-gray-50 rounded-lg p-6 mb-8">
-            <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-question-circle text-blue-600 mr-3"></i>
-                Frequently Asked Questions
+          </div>
+          
+          <!-- Types of JV Deals -->
+          <div class="mb-8">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+              <i class="fas fa-handshake text-blue-600 mr-2"></i>
+              Types of JV Deals We Do
             </h3>
-            <div class="space-y-4">
-                <div>
-                    <h4 class="font-semibold text-gray-900 mb-1">Do you work outside NC and SC?</h4>
-                    <p class="text-gray-600 text-sm">No, we exclusively focus on North Carolina and South Carolina markets where we have established buyer networks and local expertise.</p>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+              <!-- JV with Contract -->
+              <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                <div class="bg-green-50 p-4 border-b border-green-200">
+                  <div class="flex items-center mb-2">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                      <i class="fas fa-file-contract text-green-600"></i>
+                    </div>
+                    <div>
+                      <h4 class="text-lg font-semibold text-green-800">JV – You Bring the Contract</h4>
+                      <span class="inline-block bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        Recommended
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                    <h4 class="font-semibold text-gray-900 mb-1">How quickly can you close a deal?</h4>
-                    <p class="text-gray-600 text-sm">Typical timeline is 14-30 days depending on the deal type and buyer requirements. We prioritize speed while ensuring proper due diligence.</p>
+                <div class="p-4">
+                  <ul class="space-y-2 text-sm text-gray-700">
+                    <li class="flex items-start">
+                      <i class="fas fa-check text-green-500 mr-2 mt-0.5"></i>
+                      <span>You have a signed deal with a seller</span>
+                    </li>
+                    <li class="flex items-start">
+                      <i class="fas fa-check text-green-500 mr-2 mt-0.5"></i>
+                      <span>You want us to dispo the deal and get it closed</span>
+                    </li>
+                    <li class="flex items-start">
+                      <i class="fas fa-check text-green-500 mr-2 mt-0.5"></i>
+                      <span>We sign a JV agreement and take over the process</span>
+                    </li>
+                    <li class="flex items-start">
+                      <i class="fas fa-check text-green-500 mr-2 mt-0.5"></i>
+                      <span>You get paid your fee at closing</span>
+                    </li>
+                  </ul>
                 </div>
-                <div>
-                    <h4 class="font-semibold text-gray-900 mb-1">What if the deal doesn't close?</h4>
-                    <p class="text-gray-600 text-sm">No fees unless we successfully close the transaction. We're aligned with your success and only get paid when you do.</p>
+              </div>
+              
+              <!-- Bird Dog Referral -->
+              <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                <div class="bg-blue-50 p-4 border-b border-blue-200">
+                  <div class="flex items-center mb-2">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                      <i class="fas fa-search text-blue-600"></i>
+                    </div>
+                    <div>
+                      <h4 class="text-lg font-semibold text-blue-800">Bird Dog Referral</h4>
+                      <span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                        <i class="fas fa-dollar-sign mr-1"></i>
+                        $1,000 Payout
+                      </span>
+                    </div>
+                  </div>
                 </div>
+                <div class="p-4">
+                  <ul class="space-y-2 text-sm text-gray-700">
+                    <li class="flex items-start">
+                      <i class="fas fa-check text-blue-500 mr-2 mt-0.5"></i>
+                      <span>You have a hot/warm motivated seller lead</span>
+                    </li>
+                    <li class="flex items-start">
+                      <i class="fas fa-check text-blue-500 mr-2 mt-0.5"></i>
+                      <span>We get the contract and handle dispo</span>
+                    </li>
+                    <li class="flex items-start">
+                      <i class="fas fa-check text-blue-500 mr-2 mt-0.5"></i>
+                      <span>You get $1,000 at closing</span>
+                    </li>
+                    <li class="flex items-start">
+                      <i class="fas fa-check text-blue-500 mr-2 mt-0.5"></i>
+                      <span>No effort needed after intro</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
-        </div>
-    </main>
+          </div>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-8 mt-12">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <div class="flex items-center justify-center mb-4">
-                    <img src="/static/PFPS_Icon_Mark_Dark.png" alt="PFPS Icon" class="h-8 mr-3">
-                    <span class="text-xl font-bold">People First Property Solutions</span>
-                </div>
-                <p class="text-gray-400 mb-4">
-                    Serving North Carolina and South Carolina real estate investors
-                </p>
-                <div class="flex justify-center space-x-6">
-                    <a href="mailto:devin@pfpsolutions.us" class="text-gray-400 hover:text-white">
-                        <i class="fas fa-envelope"></i>
-                    </a>
-                    <a href="tel:+1234567890" class="text-gray-400 hover:text-white">
-                        <i class="fas fa-phone"></i>
-                    </a>
-                </div>
+          <!-- Fee Options -->
+          <div class="mb-8">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+              <i class="fas fa-dollar-sign text-green-600 mr-2"></i>
+              Fee Options (Choose One)
+            </h3>
+            
+            <div class="overflow-x-auto">
+              <table class="w-full bg-white rounded-lg shadow-md border border-gray-200 text-sm">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-900">Option</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-900">Structure</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-900">You Provide</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-900">We Handle</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-900">Your Payout</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3">
+                      <div class="flex items-center">
+                        <i class="fas fa-briefcase text-blue-600 mr-2"></i>
+                        <span class="font-medium">Option 1</span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3">
+                      <span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                        Flat $3,500 Fee
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-700">Seller contract</td>
+                    <td class="px-4 py-3 text-gray-700">Everything</td>
+                    <td class="px-4 py-3">
+                      <span class="font-semibold text-green-600">$3,500 at A-B close</span>
+                    </td>
+                  </tr>
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3">
+                      <div class="flex items-center">
+                        <i class="fas fa-handshake text-purple-600 mr-2"></i>
+                        <span class="font-medium">Option 2</span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3">
+                      <span class="inline-block bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-medium">
+                        50/50 Split
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-700">Seller contract + introduce installment method</td>
+                    <td class="px-4 py-3 text-gray-700">TC & Close</td>
+                    <td class="px-4 py-3">
+                      <span class="font-semibold text-green-600">50% of net profit</span>
+                    </td>
+                  </tr>
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3">
+                      <div class="flex items-center">
+                        <i class="fas fa-repeat text-orange-600 mr-2"></i>
+                        <span class="font-medium">Option 3</span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3">
+                      <span class="inline-block bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">
+                        75/25 Split
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-700">Some help</td>
+                    <td class="px-4 py-3 text-gray-700">Nearly all</td>
+                    <td class="px-4 py-3">
+                      <span class="font-semibold text-green-600">25% of profit + training access</span>
+                    </td>
+                  </tr>
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3">
+                      <div class="flex items-center">
+                        <i class="fas fa-chart-line text-red-600 mr-2"></i>
+                        <span class="font-medium">Option 4</span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3">
+                      <span class="inline-block bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">
+                        90/10 Split
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-700">Minimal input</td>
+                    <td class="px-4 py-3 text-gray-700">All work + funding</td>
+                    <td class="px-4 py-3">
+                      <span class="font-semibold text-green-600">10% of profit</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
+            
+            <div class="mt-3 text-center">
+              <p class="text-sm text-gray-600">
+                <i class="fas fa-info-circle mr-1"></i>
+                Payouts are at the B-C transaction closing, unless Flat Fee is selected.
+              </p>
+            </div>
+          </div>
+
+          <!-- What Not To Do -->
+          <div class="mb-8">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+              <i class="fas fa-times-circle text-red-600 mr-2"></i>
+              What Not To Do
+            </h3>
+            
+            <div class="bg-red-50 rounded-lg p-6 border border-red-200">
+              <div class="grid md:grid-cols-2 gap-4">
+                <div class="flex items-start">
+                  <i class="fas fa-times text-red-500 mr-2 mt-0.5"></i>
+                  <span class="text-red-700 text-sm">Don't contact our buyers directly</span>
+                </div>
+                <div class="flex items-start">
+                  <i class="fas fa-times text-red-500 mr-2 mt-0.5"></i>
+                  <span class="text-red-700 text-sm">Don't advertise deals we're working without coordination</span>
+                </div>
+                <div class="flex items-start">
+                  <i class="fas fa-times text-red-500 mr-2 mt-0.5"></i>
+                  <span class="text-red-700 text-sm">Don't drag feet on timelines</span>
+                </div>
+                <div class="flex items-start">
+                  <i class="fas fa-times text-red-500 mr-2 mt-0.5"></i>
+                  <span class="text-red-700 text-sm">Don't breach the NDA—penalty is $20,000</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick FAQs -->
+          <div class="mb-8">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+              <i class="fas fa-question-circle text-yellow-600 mr-2"></i>
+              Quick FAQs
+            </h3>
+            
+            <div class="space-y-4">
+              <div class="bg-white rounded-lg p-4 border border-gray-200">
+                <h4 class="font-semibold text-gray-900 mb-2 flex items-center">
+                  <i class="fas fa-calendar-check text-green-600 mr-2"></i>
+                  When do I get paid?
+                </h4>
+                <p class="text-gray-700 text-sm">At closing—either A-B (Flat Fee) or B-C (profit split).</p>
+              </div>
+              
+              <div class="bg-white rounded-lg p-4 border border-gray-200">
+                <h4 class="font-semibold text-gray-900 mb-2 flex items-center">
+                  <i class="fas fa-bullhorn text-blue-600 mr-2"></i>
+                  Do I have to market the deal?
+                </h4>
+                <p class="text-gray-700 text-sm">Nope. We handle all dispo unless we mutually agree otherwise.</p>
+              </div>
+              
+              <div class="bg-white rounded-lg p-4 border border-gray-200">
+                <h4 class="font-semibold text-gray-900 mb-2 flex items-center">
+                  <i class="fas fa-lock text-purple-600 mr-2"></i>
+                  Can I co-wholesale with someone else too?
+                </h4>
+                <p class="text-gray-700 text-sm">No. Once we're locked in on a deal, exclusivity is expected.</p>
+              </div>
+              
+              <div class="bg-white rounded-lg p-4 border border-gray-200">
+                <h4 class="font-semibold text-gray-900 mb-2 flex items-center">
+                  <i class="fas fa-map-marker-alt text-orange-600 mr-2"></i>
+                  Do you work deals outside NC/SC?
+                </h4>
+                <p class="text-gray-700 text-sm">No. We exclusively focus on North Carolina and South Carolina markets where we have established buyer networks and local expertise.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Our Competitive Advantages -->
+          <div class="mb-8">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+              <i class="fas fa-star text-yellow-500 mr-2"></i>
+              What Sets Us Apart
+            </h3>
+            
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+                <div class="flex items-center mb-3">
+                  <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-users text-white text-sm"></i>
+                  </div>
+                  <h4 class="text-lg font-bold text-green-800 ml-3">Incredible Cash Buyer's List</h4>
+                </div>
+                <p class="text-gray-700 text-sm">Deep network of qualified cash buyers ready to close quickly on your deals.</p>
+              </div>
+              
+              <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                <div class="flex items-center mb-3">
+                  <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-handshake text-white text-sm"></i>
+                  </div>
+                  <h4 class="text-lg font-bold text-blue-800 ml-3">JV Novations</h4>
+                </div>
+                <p class="text-gray-700 text-sm">Expert novation strategies to maximize profits and minimize risks on your deals.</p>
+              </div>
+              
+              <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
+                <div class="flex items-center mb-3">
+                  <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-chart-line text-white text-sm"></i>
+                  </div>
+                  <h4 class="text-lg font-bold text-purple-800 ml-3">Creative Finance Deals</h4>
+                </div>
+                <p class="text-gray-700 text-sm">Installment method and creative financing solutions for complex deals.</p>
+              </div>
+              
+              <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
+                <div class="flex items-center mb-3">
+                  <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-clipboard-check text-white text-sm"></i>
+                  </div>
+                  <h4 class="text-lg font-bold text-orange-800 ml-3">Top-Tier Transaction Coordination</h4>
+                </div>
+                <p class="text-gray-700 text-sm">Professional team ensuring smooth closings and seamless deal management.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Geographic Focus -->
+          <div class="mb-8">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+              <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>
+              Our Market Focus
+            </h3>
+            
+            <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+              <div class="text-center mb-4">
+                <div class="flex justify-center mb-2">
+                  <img src="/static/PFPS_Horizontal_Logo_Dark.png" alt="People First Property Solutions" class="h-8 object-contain">
+                </div>
+                <p class="text-lg text-blue-800 font-semibold">We exclusively work deals in North Carolina and South Carolina</p>
+              </div>
+              
+              <div class="grid md:grid-cols-2 gap-4">
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                  <h4 class="text-lg font-bold text-blue-800 mb-2 flex items-center">
+                    <i class="fas fa-home text-blue-600 mr-2"></i>
+                    North Carolina Markets
+                  </h4>
+                  <p class="text-gray-700 text-sm">Active in Charlotte, Raleigh, Greensboro, Winston-Salem, and surrounding areas.</p>
+                </div>
+                
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                  <h4 class="text-lg font-bold text-blue-800 mb-2 flex items-center">
+                    <i class="fas fa-home text-blue-600 mr-2"></i>
+                    South Carolina Markets
+                  </h4>
+                  <p class="text-gray-700 text-sm">Active in Charleston, Columbia, Greenville, Rock Hill, and surrounding areas.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Call to Action -->
+          <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white text-center">
+            <div class="flex justify-center mb-4">
+              <img src="/static/PFPS_Horizontal_Logo_Dark.png" alt="People First Property Solutions" class="h-8 object-contain filter brightness-0 invert">
+            </div>
+            <h3 class="text-xl font-bold mb-4">
+              <i class="fas fa-rocket mr-2"></i>
+              Ready to Start?
+            </h3>
+            <p class="mb-4">Let's make some deals together in North Carolina and South Carolina!</p>
+            
+            <div class="space-y-3">
+              <a href="/jv-submit" class="inline-block bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200 mr-4">
+                <i class="fas fa-plus mr-2"></i>
+                Submit a JV Deal
+              </a>
+              <a href="/" class="inline-block bg-transparent border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors duration-200">
+                <i class="fas fa-home mr-2"></i>
+                Back to Platform
+              </a>
+            </div>
+          </div>
         </div>
-    </footer>
+      </div>
+    </div>
+
+    <script>
+    function closePFPJVModal() {
+      window.location.href = '/';
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('jv-expectations-modal')?.addEventListener('click', function(e) {
+      if (e.target === this) {
+        closePFPJVModal();
+      }
+    });
+
+    // Close modal on escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closePFPJVModal();
+      }
+    });
+    </script>
 </body>
 </html>

@@ -104,7 +104,7 @@ properwrite.com is a Flask-based web application that generates professional pro
 
 ## Changelog
 
-- July 31, 2025. PFP-JV PAGE ROUTING FIX: Fixed routing issue where /pfp-jv (lowercase) was not accessible. Added both /PFP-JV and /pfp-jv routes to same function so users can access the redesigned PFP-JV page with either URL format. Completely redesigned page to match user's reference image with "Types of JV Deals We Do" section, clean fee options cards instead of tables, PFPS branding, and proper call-to-action sections.
+- July 31, 2025. PFP-JV EXACT MODAL IMPLEMENTATION: Successfully replaced PFP-JV page with the exact beautiful popup modal the user loves from jv_expectations_modal.html. Fixed routing issue where /pfp-jv (lowercase) was not accessible by adding both /PFP-JV and /pfp-jv routes. Page now displays the exact modal with gradient "JV Partnership Expectations" text, PFPS branding, clean table layout for fee options, dark overlay background, and all content sections. Modal auto-shows on page load and closes with proper redirect functionality. User confirmed this is the exact design and layout they wanted.
 
 - July 31, 2025. JV SUBMISSION BACKEND FIXES: Fixed critical JV submission form backend issues by updating auto-underwrite function to handle correct deal type values from frontend form ("Cash/Dispo Help", "Novation/Installment Deal", "Creative Finance Deal") instead of old values ("wholesale", "creative_finance", "mls_help"). JV submission API now processes all deal types correctly with proper validation and auto-approval logic.
 
