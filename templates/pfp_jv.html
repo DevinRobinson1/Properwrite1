@@ -14,33 +14,35 @@
 
         .tooltip .tooltip-content {
             visibility: hidden;
-            width: 300px;
-            background-color: #333;
+            width: 280px;
+            background-color: #1f2937;
             color: white;
             text-align: left;
-            border-radius: 6px;
-            padding: 10px;
+            border-radius: 8px;
+            padding: 12px;
             position: absolute;
-            z-index: 1000;
-            bottom: 125%;
+            z-index: 9999;
+            top: 100%;
             left: 50%;
-            margin-left: -150px;
+            margin-left: -140px;
+            margin-top: 8px;
             opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 14px;
-            line-height: 1.4;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: opacity 0.3s ease-in-out;
+            font-size: 13px;
+            line-height: 1.5;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid #374151;
         }
 
         .tooltip .tooltip-content::after {
             content: "";
             position: absolute;
-            top: 100%;
+            bottom: 100%;
             left: 50%;
             margin-left: -5px;
             border-width: 5px;
             border-style: solid;
-            border-color: #333 transparent transparent transparent;
+            border-color: transparent transparent #1f2937 transparent;
         }
 
         .tooltip:hover .tooltip-content {

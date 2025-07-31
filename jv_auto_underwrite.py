@@ -17,33 +17,29 @@ def auto_underwrite_deal(deal_data):
     reasons = []
     mao = 0
     
-    if deal_type == 'wholesale':
-        # Wholesale: mao = arv*0.70 - rehabCost
+    if deal_type == 'Cash/Dispo Help':
+        # Cash/Dispo Help: mao = arv*0.70 - rehabCost
         mao = arv * 0.70 - rehab_cost
         
-        if purchase_price is None:
-            return {
-                'status': 'auto-denied',
-                'mao': mao,
-                'reasons': ['Purchase price is required for wholesale deals']
-            }
+        # Use asking price if purchase price not provided
+        effective_price = purchase_price if purchase_price else seller_asking_price
         
-        if purchase_price <= mao:
+        if effective_price <= mao:
             return {
                 'status': 'auto-approved',
                 'mao': mao,
-                'reasons': [f'Purchase price ${purchase_price:,.0f} is within MAO of ${mao:,.0f}']
+                'reasons': [f'Asking price ${effective_price:,.0f} is within MAO of ${mao:,.0f}']
             }
         else:
-            excess = purchase_price - mao
-            reasons.append(f'Purchase price exceeds MAO by ${excess:,.0f}')
+            excess = effective_price - mao
+            reasons.append(f'Asking price exceeds MAO by ${excess:,.0f}')
             return {
                 'status': 'auto-denied',
                 'mao': mao,
                 'reasons': reasons
             }
     
-    elif deal_type == 'creative_finance':
+    elif deal_type == 'Creative Finance Deal':
         # Creative Finance: Check minimum cash flow
         min_cash_flow = 200  # $200/month minimum
         est_rent = (arv * 0.01) / 12  # 1% rule monthly rent
@@ -70,8 +66,8 @@ def auto_underwrite_deal(deal_data):
                 'reasons': reasons
             }
     
-    elif deal_type == 'mls_help':
-        # MLS Help: Approve if arv - rehabCost >= 90% of askingPrice
+    elif deal_type == 'Novation/Installment Deal':
+        # Novation/Installment: Approve if arv - rehabCost >= 90% of askingPrice
         adjusted_arv = arv - rehab_cost
         threshold = seller_asking_price * 0.90
         
