@@ -104,6 +104,10 @@ properwrite.com is a Flask-based web application that generates professional pro
 
 ## Changelog
 
+- July 31, 2025. PFP-JV PAGE ROUTING FIX: Fixed routing issue where /pfp-jv (lowercase) was not accessible. Added both /PFP-JV and /pfp-jv routes to same function so users can access the redesigned PFP-JV page with either URL format. Completely redesigned page to match user's reference image with "Types of JV Deals We Do" section, clean fee options cards instead of tables, PFPS branding, and proper call-to-action sections.
+
+- July 31, 2025. JV SUBMISSION BACKEND FIXES: Fixed critical JV submission form backend issues by updating auto-underwrite function to handle correct deal type values from frontend form ("Cash/Dispo Help", "Novation/Installment Deal", "Creative Finance Deal") instead of old values ("wholesale", "creative_finance", "mls_help"). JV submission API now processes all deal types correctly with proper validation and auto-approval logic.
+
 - July 28, 2025. JV DEALS ADMIN PANEL DELETE FUNCTIONALITY: Successfully implemented comprehensive delete functionality for the JV Deals Admin Panel. Added DELETE API endpoint `/admin/api/jv-deals/<deal_id>` with proper authentication, audit logging, and error handling. Enhanced admin panel interface with delete buttons for all deals, detailed confirmation dialogs showing partner and property information, loading states during deletion, and automatic table refresh after successful operations. Delete operations include comprehensive logging for audit trails and proper error handling with user feedback. System provides safe deletion with detailed confirmation to prevent accidental removals while maintaining data integrity and administrative oversight.
 
 - July 21, 2025. CREDIT ADMINISTRATION: Successfully added 100 credits to user account rhen@bartlettholdings.com. Account balance updated from 5 credits to 105 credits total using backend billing service with admin grant designation for proper audit trail.
