@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PFP Joint Venture Partnership - People First Property Solutions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltip-content {
+            visibility: hidden;
+            width: 300px;
+            background-color: #333;
+            color: white;
+            text-align: left;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -150px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
+            line-height: 1.4;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .tooltip .tooltip-content::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .option-row:hover {
+            background-color: #f8fafc;
+            transition: background-color 0.2s;
+        }
+
+        .info-icon {
+            color: #6b7280;
+            cursor: help;
+            margin-left: 8px;
+        }
+
+        .info-icon:hover {
+            color: #374151;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <img src="/static/PFPS_Horizontal_Logo_Dark.png" alt="PFPS Logo" class="h-10">
+                    <div class="border-l border-gray-300 pl-4">
+                        <h1 class="text-xl font-semibold text-gray-900">Joint Venture Partnership</h1>
+                        <p class="text-sm text-gray-600">People First Property Solutions</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-blue-600 hover:text-blue-800 font-medium">
+                        <i class="fas fa-home mr-2"></i>Back to Platform
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <!-- Hero Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                <i class="fas fa-handshake text-green-600 mr-3"></i>
+                Partner with PFPS
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Join forces with People First Property Solutions and leverage our expertise 
+                in North Carolina and South Carolina real estate markets. Choose the partnership 
+                structure that works best for your business.
+            </p>
+        </div>
+
+        <!-- Fee Options Section -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-green-500 to-blue-600 px-6 py-4">
+                <h2 class="text-2xl font-bold text-white flex items-center">
+                    <i class="fas fa-dollar-sign mr-3"></i>
+                    Fee Options (Choose One)
+                </h2>
+            </div>
+
+            <!-- Options Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-sm font-medium text-gray-900">Option</th>
+                            <th class="px-6 py-4 text-left text-sm font-medium text-gray-900">Structure</th>
+                            <th class="px-6 py-4 text-left text-sm font-medium text-gray-900">You Provide</th>
+                            <th class="px-6 py-4 text-left text-sm font-medium text-gray-900">
+                                We Handle
+                                <i class="fas fa-info-circle text-gray-400 ml-1" title="Hover over the info icons for details"></i>
+                            </th>
+                            <th class="px-6 py-4 text-left text-sm font-medium text-gray-900">Your Payout</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <!-- Option 1 -->
+                        <tr class="option-row">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-star text-blue-500 mr-2"></i>
+                                    <span class="font-medium text-gray-900">Option 1</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    Flat $3,500 Fee
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-600">
+                                Seller contract
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <span class="text-gray-900 font-medium">Everything</span>
+                                    <div class="tooltip">
+                                        <i class="fas fa-question-circle info-icon"></i>
+                                        <div class="tooltip-content">
+                                            <strong>What We Handle:</strong><br>
+                                            • Transaction coordination (TC)<br>
+                                            • Marketing & Open houses<br>
+                                            • Seller communication<br>
+                                            • Finding a buyer<br>
+                                            • Closing the deal<br>
+                                            • Funding if necessary<br>
+                                            • Price Reduction Conversations
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-green-600 font-semibold">$3,500 at A-B close</span>
+                            </td>
+                        </tr>
+
+                        <!-- Option 2 -->
+                        <tr class="option-row">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-balance-scale text-purple-500 mr-2"></i>
+                                    <span class="font-medium text-gray-900">Option 2</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    50/50 Split
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-600">
+                                Seller contract + introduce installment method
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <span class="text-gray-900 font-medium">TC & Close</span>
+                                    <div class="tooltip">
+                                        <i class="fas fa-question-circle info-icon"></i>
+                                        <div class="tooltip-content">
+                                            <strong>Division of Responsibilities:</strong><br>
+                                            <strong>We Handle:</strong><br>
+                                            • Find the buyer<br>
+                                            • Handle all DISPO/Open houses<br><br>
+                                            <strong>You Handle:</strong><br>
+                                            • TC and Acquisitions<br>
+                                            • Seller conversations
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-green-600 font-semibold">50% of net profit</span>
+                            </td>
+                        </tr>
+
+                        <!-- Option 3 -->
+                        <tr class="option-row">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-chart-line text-orange-500 mr-2"></i>
+                                    <span class="font-medium text-gray-900">Option 3</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    75/25 Split
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-600">
+                                Some help
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <span class="text-gray-900 font-medium">Nearly all</span>
+                                    <div class="tooltip">
+                                        <i class="fas fa-question-circle info-icon"></i>
+                                        <div class="tooltip-content">
+                                            <strong>60/40 Split Breakdown:</strong><br>
+                                            <strong>You Handle:</strong><br>
+                                            • All communication with sellers<br>
+                                            • Price reductions<br><br>
+                                            <strong>We Handle:</strong><br>
+                                            • Transaction coordination (TC)<br>
+                                            • Marketing & Open houses<br>
+                                            • Seller communication<br>
+                                            • Finding a buyer<br>
+                                            • Closing the deal
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-green-600 font-semibold">25% of profit + training access</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Important Note -->
+            <div class="bg-blue-50 border-l-4 border-blue-400 p-4 m-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-blue-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-blue-700">
+                            <strong>Important:</strong> Payouts are at the B-C transaction closing, unless Flat Fee is selected.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- What Not To Do Section -->
+        <div class="bg-red-50 rounded-lg border border-red-200 p-6 mb-8">
+            <h3 class="text-lg font-semibold text-red-800 mb-3 flex items-center">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                What Not To Do
+            </h3>
+            <p class="text-red-700">
+                Please avoid any actions that could compromise our partnership integrity or violate local real estate regulations. 
+                All activities must comply with North Carolina and South Carolina real estate laws.
+            </p>
+        </div>
+
+        <!-- Geographic Focus -->
+        <div class="bg-gradient-to-r from-blue-500 to-green-500 rounded-lg p-6 text-white mb-8">
+            <h3 class="text-xl font-bold mb-4 flex items-center">
+                <i class="fas fa-map-marker-alt mr-3"></i>
+                Our Geographic Focus
+            </h3>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-semibold mb-2">North Carolina Markets:</h4>
+                    <ul class="list-disc list-inside space-y-1 text-sm">
+                        <li>Charlotte Metro</li>
+                        <li>Raleigh-Durham</li>
+                        <li>Greensboro-Winston Salem</li>
+                        <li>Asheville</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-2">South Carolina Markets:</h4>
+                    <ul class="list-disc list-inside space-y-1 text-sm">
+                        <li>Charleston Metro</li>
+                        <li>Columbia</li>
+                        <li>Greenville-Spartanburg</li>
+                        <li>Myrtle Beach</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="text-center">
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Ready to Partner?</h3>
+                <p class="text-gray-600 mb-6">
+                    Contact us today to discuss which partnership option works best for your business goals.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="/jv-submit" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition duration-200">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        Submit a Deal
+                    </a>
+                    <a href="mailto:devin@pfpsolutions.us" class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200">
+                        <i class="fas fa-envelope mr-2"></i>
+                        Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="flex items-center justify-center mb-4">
+                    <img src="/static/PFPS_Icon_Mark_Dark.png" alt="PFPS Icon" class="h-8 mr-3">
+                    <span class="text-xl font-bold">People First Property Solutions</span>
+                </div>
+                <p class="text-gray-400 mb-4">
+                    Serving North Carolina and South Carolina real estate investors
+                </p>
+                <div class="flex justify-center space-x-6">
+                    <a href="mailto:devin@pfpsolutions.us" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                    <a href="tel:+1234567890" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-phone"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

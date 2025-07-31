@@ -423,6 +423,11 @@ def rei_connect_landing():
     return render_template('rei_connect_landing.html',
                          google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY') or os.environ.get('GOOGLE_API_KEY'))
 
+@app.route('/PFP-JV')
+def pfp_jv_landing():
+    """PFP Joint Venture Partnership landing page"""
+    return render_template('pfp_jv.html')
+
 @app.route('/dashboard')
 def dashboard():
     """User Account Dashboard"""

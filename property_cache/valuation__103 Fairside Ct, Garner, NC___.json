@@ -1,0 +1,54 @@
+{
+  "valuations": {
+    "zillow": {
+      "zestimate": 367900,
+      "source": "Zillow Property Data",
+      "confidence": "high",
+      "zpid": 6501932,
+      "matched_address": "103 Fairside Ct, Garner, NC, ,  ",
+      "images": [
+        "https://maps.googleapis.com/maps/api/streetview?location=103+Fairside+Ct%2C+Garner%2C+NC+27529&size=400x300&source=outdoor&signature=Wato_liFoB_gnfGKmBwXqPv6GEA%3D"
+      ],
+      "bedrooms": 4.0,
+      "bathrooms": 3.0,
+      "square_feet": null,
+      "year_built": 1988
+    },
+    "rentometer": {
+      "rent_estimate": 2151,
+      "rent_median": 2095,
+      "rent_range": {
+        "min": 1795,
+        "max": 2800
+      },
+      "source": "Rentometer",
+      "confidence": "High",
+      "samples": 24,
+      "radius_miles": 2.0,
+      "credits_remaining": 825,
+      "updated": "2025-07-30"
+    }
+  },
+  "sources_tried": [
+    "Zillow",
+    "RentCast",
+    "Redfin",
+    "Rentometer"
+  ],
+  "sources_used": [
+    "Zillow",
+    "Rentometer"
+  ],
+  "address_info": {
+    "address": "103 Fairside Ct, Garner, NC",
+    "city": "",
+    "state": "",
+    "zip_code": "",
+    "latitude": null,
+    "longitude": null
+  },
+  "cache_used": false,
+  "timestamp": "2025-07-30T16:03:07.189635",
+  "rent_estimate": 2151,
+  "rent_data_source": "Rentometer"
+}
