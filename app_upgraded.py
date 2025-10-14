@@ -11,7 +11,7 @@ load_dotenv()
 import json
 import uuid
 from datetime import datetime, timedelta
-from flask import Flask, render_template, request, jsonify, session, redirect, g, url_for, flash
+from flask import Flask, render_template, request, jsonify, session, redirect, g, url_for, flash, get_flashed_messages
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
