@@ -5214,6 +5214,9 @@ def require_subto_admin(f):
 def subto_admin_login():
     """Admin login for Subject-To lead management"""
     if request.method == 'GET':
+        # Clear any flash messages that aren't from the login page itself
+        # This prevents lead submission success messages from showing up here
+        get_flashed_messages()
         return render_template('subto_admin_login.html')
     
     try:
