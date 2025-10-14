@@ -39,10 +39,29 @@ class SubToDatabase:
                             name TEXT NOT NULL,
                             company TEXT,
                             phone TEXT,
+                            city TEXT,
+                            state TEXT,
                             is_active BOOLEAN DEFAULT true,
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                             last_login TIMESTAMP
                         )
+                    """)
+                    
+                    # Add city and state columns if they don't exist (for existing tables)
+                    cur.execute("""
+                        DO $$ 
+                        BEGIN
+                            BEGIN
+                                ALTER TABLE subto_submitters ADD COLUMN city TEXT;
+                            EXCEPTION
+                                WHEN duplicate_column THEN NULL;
+                            END;
+                            BEGIN
+                                ALTER TABLE subto_submitters ADD COLUMN state TEXT;
+                            EXCEPTION
+                                WHEN duplicate_column THEN NULL;
+                            END;
+                        END $$;
                     """)
                     
                     # Create subto_leads table
@@ -77,7 +96,7 @@ class SubToDatabase:
             logging.error(f"Error initializing Subject-To tables: {e}")
             raise
     
-    def create_submitter(self, email: str, password: str, name: str, company: str = None, phone: str = None) -> Optional[str]:
+    def create_submitter(self, email: str, password: str, name: str, company: str = None, phone: str = None, city: str = None, state: str = None) -> Optional[str]:
         """
         Create new submitter account
         Returns submitter_id or None if email already exists
@@ -95,9 +114,9 @@ class SubToDatabase:
                     password_hash = generate_password_hash(password)
                     
                     cur.execute("""
-                        INSERT INTO subto_submitters (id, email, password_hash, name, company, phone)
-                        VALUES (%s, %s, %s, %s, %s, %s)
-                    """, (submitter_id, email.lower(), password_hash, name, company or '', phone or ''))
+                        INSERT INTO subto_submitters (id, email, password_hash, name, company, phone, city, state)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    """, (submitter_id, email.lower(), password_hash, name, company or '', phone or '', city or '', state or ''))
                     
                     logging.info(f"Created new submitter: {email}")
                     return submitter_id
@@ -115,7 +134,7 @@ class SubToDatabase:
             with self.get_connection() as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as cur:
                     cur.execute("""
-                        SELECT id, email, password_hash, name, company, phone, is_active
+                        SELECT id, email, password_hash, name, company, phone, city, state, is_active
                         FROM subto_submitters 
                         WHERE email = %s
                     """, (email.lower(),))
@@ -308,7 +327,7 @@ class SubToDatabase:
             with self.get_connection() as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as cur:
                     cur.execute("""
-                        SELECT id, name, email, company
+                        SELECT id, name, email, company, city, state
                         FROM subto_submitters 
                         WHERE is_active = true
                         ORDER BY 
@@ -321,6 +340,54 @@ class SubToDatabase:
         except Exception as e:
             logging.error(f"Error getting submitters: {e}")
             return []
+    
+    @staticmethod
+    def mask_company_name(company: str) -> str:
+        """
+        Mask company name for privacy
+        Examples: 
+        - 'ABC Real Estate' -> 'ABC R*** E******'
+        - 'Smith Investments' -> 'Smith I**********'
+        """
+        if not company or not company.strip():
+            return ''
+        
+        words = company.strip().split()
+        if len(words) == 0:
+            return ''
+        
+        masked_words = []
+        for word in words:
+            if len(word) <= 3:
+                # Keep short words as-is
+                masked_words.append(word)
+            else:
+                # Show first letter + asterisks for remaining letters
+                masked_words.append(word[0] + '*' * (len(word) - 1))
+        
+        return ' '.join(masked_words)
+    
+    def get_display_name(self, submitter: Dict) -> str:
+        """
+        Get display name for submitter dropdown
+        Format: 'Masked Company Name - City, ST' or 'Masked Name - City, ST'
+        """
+        # Use company name if available, otherwise use personal name
+        name = submitter.get('company', '').strip() or submitter.get('name', '').strip()
+        
+        # Mask the name
+        masked_name = self.mask_company_name(name)
+        
+        # Add location if available
+        city = submitter.get('city', '').strip()
+        state = submitter.get('state', '').strip()
+        
+        if city and state:
+            return f"{masked_name} - {city}, {state}"
+        elif city:
+            return f"{masked_name} - {city}"
+        else:
+            return masked_name
 
 # Initialize database on import
 subto_db = SubToDatabase()

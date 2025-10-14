@@ -4720,6 +4720,8 @@ def subto_register():
         name = request.form.get('name', '').strip()
         company = request.form.get('company', '').strip()
         phone = request.form.get('phone', '').strip()
+        city = request.form.get('city', '').strip()
+        state = request.form.get('state', '').strip().upper()
         
         # Validate required fields
         if not all([email, password, name]):
@@ -4727,7 +4729,7 @@ def subto_register():
             return redirect(url_for('subto_register'))
         
         # Create submitter account
-        submitter_id = subto_db.create_submitter(email, password, name, company, phone)
+        submitter_id = subto_db.create_submitter(email, password, name, company, phone, city, state)
         
         if not submitter_id:
             flash('An account with this email already exists', 'error')
@@ -4911,6 +4913,9 @@ def subto_quick_submit():
     if request.method == 'GET':
         # Get all submitters for dropdown
         submitters = subto_db.get_all_submitters()
+        # Add display names with masking
+        for submitter in submitters:
+            submitter['display_name'] = subto_db.get_display_name(submitter)
         return render_template('subto_quick_submit.html', submitters=submitters)
     
     try:

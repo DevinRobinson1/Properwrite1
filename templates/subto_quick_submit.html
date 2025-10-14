@@ -74,11 +74,7 @@
               <option value="">-- Select Your Company/Name --</option>
               {% for submitter in submitters %}
               <option value="{{ submitter.id }}">
-                {% if submitter.company and submitter.company != '' %}
-                  {{ submitter.company }} ({{ submitter.name }})
-                {% else %}
-                  {{ submitter.name }}
-                {% endif %}
+                {{ submitter.display_name }}
               </option>
               {% endfor %}
             </select>
