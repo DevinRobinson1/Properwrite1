@@ -4639,6 +4639,277 @@ def submit_jv_deal():
         logging.error(f"Error submitting JV deal: {e}")
         return jsonify({'error': 'Failed to submit deal. Please try again.'}), 500
 
+# ===============================
+# JV Document Management Routes
+# ===============================
+
+@app.route('/api/jv-deals/<deal_id>/documents', methods=['GET'])
+def get_deal_documents(deal_id):
+    """Get all documents for a deal"""
+    try:
+        # Check if user has admin or partner access
+        is_admin = session.get('is_jv_admin', False)
+        partner_email = request.args.get('partner_email')
+        
+        if not is_admin and not partner_email:
+            return jsonify({'error': 'Unauthorized'}), 401
+        
+        from jv_database import JVDatabase
+        jv_db = JVDatabase()
+        
+        # Get deal to verify it exists and get partner_id
+        deal = jv_db.get_deal_by_id(deal_id)
+        if not deal:
+            return jsonify({'error': 'Deal not found'}), 404
+        
+        partner_id = deal['partner_id']
+        
+        # Get documents
+        documents = jv_doc_service.get_deal_documents(
+            deal_id=deal_id,
+            partner_id=partner_id if not is_admin else None,
+            partner_view=not is_admin
+        )
+        
+        return jsonify({
+            'success': True,
+            'documents': documents
+        })
+        
+    except Exception as e:
+        logging.error(f"Error getting deal documents: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/jv-deals/<deal_id>/documents/upload', methods=['POST'])
+def upload_deal_document(deal_id):
+    """Upload a document for a deal (admin only)"""
+    try:
+        # Check admin authentication
+        if not session.get('is_jv_admin'):
+            return jsonify({'error': 'Admin access required'}), 401
+        
+        # Validate deal exists
+        from jv_database import JVDatabase
+        jv_db = JVDatabase()
+        deal = jv_db.get_deal_by_id(deal_id)
+        if not deal:
+            return jsonify({'error': 'Deal not found'}), 404
+        
+        # Get file from request
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file provided'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+        
+        # Get form data
+        document_type = request.form.get('document_type', 'other')
+        description = request.form.get('description', '')
+        requires_signature = request.form.get('requires_signature', 'false') == 'true'
+        share_with_partner = request.form.get('share_with_partner', 'false') == 'true'
+        
+        # Upload document
+        admin_email = session.get('jv_admin_email', 'admin@properwrite.com')
+        document_id = jv_doc_service.upload_document(
+            file=file,
+            deal_id=deal_id,
+            partner_id=deal['partner_id'],
+            document_type=document_type,
+            uploaded_by=admin_email,
+            description=description,
+            requires_signature=requires_signature,
+            share_with_partner=share_with_partner
+        )
+        
+        return jsonify({
+            'success': True,
+            'document_id': document_id,
+            'message': 'Document uploaded successfully'
+        })
+        
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        logging.error(f"Error uploading document: {e}")
+        return jsonify({'error': 'Failed to upload document'}), 500
+
+@app.route('/api/jv-documents/<document_id>/share', methods=['POST'])
+def share_document(document_id):
+    """Share a document with partner (admin only)"""
+    try:
+        # Check admin authentication
+        if not session.get('is_jv_admin'):
+            return jsonify({'error': 'Admin access required'}), 401
+        
+        admin_email = session.get('jv_admin_email', 'admin@properwrite.com')
+        
+        # Share document
+        success = jv_doc_service.share_document_with_partner(document_id, admin_email)
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Document shared with partner'
+            })
+        else:
+            return jsonify({'error': 'Failed to share document'}), 500
+        
+    except Exception as e:
+        logging.error(f"Error sharing document: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/jv-documents/<document_id>/view', methods=['POST'])
+def mark_document_viewed(document_id):
+    """Mark document as viewed by partner"""
+    try:
+        partner_email = request.json.get('partner_email')
+        
+        if not partner_email:
+            return jsonify({'error': 'Partner email required'}), 400
+        
+        # Mark as viewed
+        ip_address = request.remote_addr
+        user_agent = request.user_agent.string
+        
+        success = jv_doc_service.mark_document_viewed(
+            document_id=document_id,
+            partner_email=partner_email,
+            ip_address=ip_address,
+            user_agent=user_agent
+        )
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Document marked as viewed'
+            })
+        else:
+            return jsonify({'error': 'Failed to mark document as viewed'}), 500
+        
+    except Exception as e:
+        logging.error(f"Error marking document viewed: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/jv-documents/<document_id>/sign', methods=['POST'])
+def sign_document(document_id):
+    """Mark document as signed by partner"""
+    try:
+        partner_email = request.json.get('partner_email')
+        
+        if not partner_email:
+            return jsonify({'error': 'Partner email required'}), 400
+        
+        # Mark as signed
+        ip_address = request.remote_addr
+        
+        success = jv_doc_service.mark_document_signed(
+            document_id=document_id,
+            partner_email=partner_email,
+            ip_address=ip_address
+        )
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Document marked as signed'
+            })
+        else:
+            return jsonify({'error': 'Failed to mark document as signed'}), 500
+        
+    except Exception as e:
+        logging.error(f"Error signing document: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/jv-documents/<document_id>', methods=['DELETE'])
+def delete_document(document_id):
+    """Delete a document (admin only)"""
+    try:
+        # Check admin authentication
+        if not session.get('is_jv_admin'):
+            return jsonify({'error': 'Admin access required'}), 401
+        
+        admin_email = session.get('jv_admin_email', 'admin@properwrite.com')
+        
+        # Delete document
+        success = jv_doc_service.delete_document(document_id, admin_email)
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Document deleted successfully'
+            })
+        else:
+            return jsonify({'error': 'Document not found or already deleted'}), 404
+        
+    except Exception as e:
+        logging.error(f"Error deleting document: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/jv-documents/<document_id>/access-log', methods=['GET'])
+def get_document_access_log(document_id):
+    """Get access log for a document (admin only)"""
+    try:
+        # Check admin authentication
+        if not session.get('is_jv_admin'):
+            return jsonify({'error': 'Admin access required'}), 401
+        
+        # Get access log
+        logs = jv_doc_service.get_document_access_log(document_id)
+        
+        return jsonify({
+            'success': True,
+            'logs': logs
+        })
+        
+    except Exception as e:
+        logging.error(f"Error getting document access log: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/jv-documents/<document_id>/download')
+def download_document(document_id):
+    """Download a document"""
+    try:
+        # Get document info
+        document = jv_doc_service.get_document_by_id(document_id)
+        
+        if not document:
+            return "Document not found", 404
+        
+        # Check permissions
+        is_admin = session.get('is_jv_admin', False)
+        partner_email = request.args.get('partner_email')
+        
+        if not is_admin:
+            # Partner access - must be shared
+            if not document['shared_with_partner']:
+                return "Access denied", 403
+        
+        # Log download
+        if is_admin:
+            admin_email = session.get('jv_admin_email', 'admin@properwrite.com')
+            jv_doc_service._log_access(
+                document_id, admin_email, 'admin', 'downloaded',
+                jv_doc_service.get_connection()
+            )
+        elif partner_email:
+            jv_doc_service._log_access(
+                document_id, partner_email, 'partner', 'downloaded',
+                jv_doc_service.get_connection()
+            )
+        
+        # Send file
+        from flask import send_file
+        return send_file(
+            document['file_path'],
+            as_attachment=True,
+            download_name=document['original_filename']
+        )
+        
+    except Exception as e:
+        logging.error(f"Error downloading document: {e}")
+        return "Error downloading document", 500
+
 # Freemium Access Gate API Endpoints
 @app.route('/api/freemium/clear-cookie', methods=['POST'])
 def clear_freemium_cookie():
@@ -4706,6 +4977,7 @@ def api_feature_access(feature_name):
 # SUBJECT-TO LEAD SUBMISSION SYSTEM
 # ========================================
 from subto_database import subto_db
+from jv_document_service import jv_doc_service
 
 @app.route('/subto-register', methods=['GET', 'POST'])
 def subto_register():
