@@ -4665,6 +4665,82 @@ def submit_jv_deal():
         return jsonify({'error': 'Failed to submit deal. Please try again.'}), 500
 
 # ===============================
+# JV Deal Progress Tracking Routes
+# ===============================
+
+@app.route('/api/jv-deals/<deal_id>/contract', methods=['PUT'])
+def update_deal_contract(deal_id):
+    """Update contract information for a deal (admin only)"""
+    try:
+        # Check admin authentication
+        if not session.get('is_jv_admin'):
+            return jsonify({'error': 'Admin access required'}), 401
+        
+        data = request.json
+        has_contract = data.get('has_contract', False)
+        contract_date = data.get('contract_date')
+        contract_notes = data.get('contract_notes', '')
+        
+        from jv_database import JVDatabase
+        jv_db = JVDatabase()
+        
+        success = jv_db.update_contract_info(
+            deal_id=deal_id,
+            has_contract=has_contract,
+            contract_date=contract_date,
+            contract_notes=contract_notes
+        )
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Contract information updated successfully'
+            })
+        else:
+            return jsonify({'error': 'Failed to update contract information'}), 500
+        
+    except Exception as e:
+        logging.error(f"Error updating contract info: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/jv-deals/<deal_id>/buyer', methods=['PUT'])
+def update_deal_buyer(deal_id):
+    """Update buyer information for a deal (admin only)"""
+    try:
+        # Check admin authentication
+        if not session.get('is_jv_admin'):
+            return jsonify({'error': 'Admin access required'}), 401
+        
+        data = request.json
+        has_buyer = data.get('has_buyer', False)
+        buyer_name = data.get('buyer_name', '')
+        down_payment = data.get('down_payment')
+        buyer_notes = data.get('buyer_notes', '')
+        
+        from jv_database import JVDatabase
+        jv_db = JVDatabase()
+        
+        success = jv_db.update_buyer_info(
+            deal_id=deal_id,
+            has_buyer=has_buyer,
+            buyer_name=buyer_name,
+            down_payment=float(down_payment) if down_payment else None,
+            buyer_notes=buyer_notes
+        )
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Buyer information updated successfully'
+            })
+        else:
+            return jsonify({'error': 'Failed to update buyer information'}), 500
+        
+    except Exception as e:
+        logging.error(f"Error updating buyer info: {e}")
+        return jsonify({'error': str(e)}), 500
+
+# ===============================
 # JV Document Management Routes
 # ===============================
 

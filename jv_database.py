@@ -70,6 +70,15 @@ class JVDatabase:
                     cur.execute("ALTER TABLE jv_deals ADD COLUMN IF NOT EXISTS admin_notes TEXT")
                     cur.execute("ALTER TABLE jv_deals ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
                     
+                    # Add contract and buyer tracking fields
+                    cur.execute("ALTER TABLE jv_deals ADD COLUMN IF NOT EXISTS has_contract BOOLEAN DEFAULT false")
+                    cur.execute("ALTER TABLE jv_deals ADD COLUMN IF NOT EXISTS contract_date DATE")
+                    cur.execute("ALTER TABLE jv_deals ADD COLUMN IF NOT EXISTS contract_notes TEXT")
+                    cur.execute("ALTER TABLE jv_deals ADD COLUMN IF NOT EXISTS has_buyer BOOLEAN DEFAULT false")
+                    cur.execute("ALTER TABLE jv_deals ADD COLUMN IF NOT EXISTS buyer_name TEXT")
+                    cur.execute("ALTER TABLE jv_deals ADD COLUMN IF NOT EXISTS down_payment DECIMAL(12,2)")
+                    cur.execute("ALTER TABLE jv_deals ADD COLUMN IF NOT EXISTS buyer_notes TEXT")
+                    
                     # Ensure phone_number is not nullable in partners table
                     cur.execute("ALTER TABLE partners ALTER COLUMN phone SET NOT NULL")
                     
@@ -337,6 +346,40 @@ class JVDatabase:
                     
         except Exception as e:
             logging.error(f"Error updating deal final status: {e}")
+            return False
+    
+    def update_contract_info(self, deal_id: str, has_contract: bool, contract_date: str = None, contract_notes: str = None) -> bool:
+        """Update contract information for a deal"""
+        try:
+            with self.get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        UPDATE jv_deals
+                        SET has_contract = %s, contract_date = %s, contract_notes = %s, updated_at = CURRENT_TIMESTAMP
+                        WHERE id = %s
+                    """, (has_contract, contract_date, contract_notes, deal_id))
+                    
+                    return cur.rowcount > 0
+                    
+        except Exception as e:
+            logging.error(f"Error updating contract info: {e}")
+            return False
+    
+    def update_buyer_info(self, deal_id: str, has_buyer: bool, buyer_name: str = None, down_payment: float = None, buyer_notes: str = None) -> bool:
+        """Update buyer information for a deal"""
+        try:
+            with self.get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        UPDATE jv_deals
+                        SET has_buyer = %s, buyer_name = %s, down_payment = %s, buyer_notes = %s, updated_at = CURRENT_TIMESTAMP
+                        WHERE id = %s
+                    """, (has_buyer, buyer_name, down_payment, buyer_notes, deal_id))
+                    
+                    return cur.rowcount > 0
+                    
+        except Exception as e:
+            logging.error(f"Error updating buyer info: {e}")
             return False
     
     def get_dashboard_stats(self) -> Dict:
