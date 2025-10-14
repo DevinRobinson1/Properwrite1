@@ -301,6 +301,26 @@ class SubToDatabase:
         except Exception as e:
             logging.error(f"Error getting lead by ID: {e}")
             return None
+    
+    def get_all_submitters(self) -> List[Dict]:
+        """Get all active submitters for dropdown selection"""
+        try:
+            with self.get_connection() as conn:
+                with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                    cur.execute("""
+                        SELECT id, name, email, company
+                        FROM subto_submitters 
+                        WHERE is_active = true
+                        ORDER BY 
+                            CASE WHEN company IS NOT NULL AND company != '' THEN company ELSE name END
+                    """)
+                    
+                    submitters = cur.fetchall()
+                    return [dict(submitter) for submitter in submitters]
+                    
+        except Exception as e:
+            logging.error(f"Error getting submitters: {e}")
+            return []
 
 # Initialize database on import
 subto_db = SubToDatabase()

@@ -4905,5 +4905,49 @@ def api_subto_update_status():
         logging.error(f"Error updating lead status: {e}")
         return jsonify({'error': 'Failed to update status'}), 500
 
+@app.route('/subto-quick-submit', methods=['GET', 'POST'])
+def subto_quick_submit():
+    """Quick Subject-To lead submission with company dropdown"""
+    if request.method == 'GET':
+        # Get all submitters for dropdown
+        submitters = subto_db.get_all_submitters()
+        return render_template('subto_quick_submit.html', submitters=submitters)
+    
+    try:
+        # Get submitter ID from dropdown
+        submitter_id = request.form.get('submitter_id', '').strip()
+        
+        if not submitter_id:
+            flash('Please select a company', 'error')
+            return redirect(url_for('subto_quick_submit'))
+        
+        # Get form data
+        lead_data = {
+            'seller_name': request.form.get('seller_name', '').strip(),
+            'property_address': request.form.get('property_address', '').strip(),
+            'seller_phone': request.form.get('seller_phone', '').strip(),
+            'loan_balance': request.form.get('loan_balance', '').strip() or None,
+            'interest_rate': request.form.get('interest_rate', '').strip() or None,
+            'monthly_payment': request.form.get('monthly_payment', '').strip() or None,
+            'arrears': request.form.get('arrears', '').strip() or 0,
+            'cash_to_seller': request.form.get('cash_to_seller', '').strip() or 0
+        }
+        
+        # Validate required fields
+        if not all([lead_data['seller_name'], lead_data['property_address'], lead_data['seller_phone']]):
+            flash('Seller name, property address, and phone number are required', 'error')
+            return redirect(url_for('subto_quick_submit'))
+        
+        # Create lead
+        lead_id = subto_db.create_lead(submitter_id, lead_data)
+        
+        flash('Lead submitted successfully! Thank you for your submission.', 'success')
+        return redirect(url_for('subto_quick_submit'))
+        
+    except Exception as e:
+        logging.error(f"Error in quick submit: {e}")
+        flash('Failed to submit lead. Please try again.', 'error')
+        return redirect(url_for('subto_quick_submit'))
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
