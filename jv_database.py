@@ -79,6 +79,10 @@ class JVDatabase:
                     cur.execute("ALTER TABLE jv_deals ADD COLUMN IF NOT EXISTS down_payment DECIMAL(12,2)")
                     cur.execute("ALTER TABLE jv_deals ADD COLUMN IF NOT EXISTS buyer_notes TEXT")
                     
+                    # Add cancellation tracking fields
+                    cur.execute("ALTER TABLE jv_deals ADD COLUMN IF NOT EXISTS needs_cancellation BOOLEAN DEFAULT false")
+                    cur.execute("ALTER TABLE jv_deals ADD COLUMN IF NOT EXISTS cancellation_reason TEXT")
+                    
                     # Ensure phone_number is not nullable in partners table
                     cur.execute("ALTER TABLE partners ALTER COLUMN phone SET NOT NULL")
                     
@@ -348,16 +352,18 @@ class JVDatabase:
             logging.error(f"Error updating deal final status: {e}")
             return False
     
-    def update_contract_info(self, deal_id: str, has_contract: bool, contract_date: str = None, contract_notes: str = None) -> bool:
+    def update_contract_info(self, deal_id: str, has_contract: bool, contract_date: str = None, contract_notes: str = None, 
+                            needs_cancellation: bool = False, cancellation_reason: str = None) -> bool:
         """Update contract information for a deal"""
         try:
             with self.get_connection() as conn:
                 with conn.cursor() as cur:
                     cur.execute("""
                         UPDATE jv_deals
-                        SET has_contract = %s, contract_date = %s, contract_notes = %s, updated_at = CURRENT_TIMESTAMP
+                        SET has_contract = %s, contract_date = %s, contract_notes = %s, 
+                            needs_cancellation = %s, cancellation_reason = %s, updated_at = CURRENT_TIMESTAMP
                         WHERE id = %s
-                    """, (has_contract, contract_date, contract_notes, deal_id))
+                    """, (has_contract, contract_date, contract_notes, needs_cancellation, cancellation_reason, deal_id))
                     
                     return cur.rowcount > 0
                     

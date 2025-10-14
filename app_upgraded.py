@@ -4680,6 +4680,8 @@ def update_deal_contract(deal_id):
         has_contract = data.get('has_contract', False)
         contract_date = data.get('contract_date')
         contract_notes = data.get('contract_notes', '')
+        needs_cancellation = data.get('needs_cancellation', False)
+        cancellation_reason = data.get('cancellation_reason', '')
         
         from jv_database import JVDatabase
         jv_db = JVDatabase()
@@ -4688,7 +4690,9 @@ def update_deal_contract(deal_id):
             deal_id=deal_id,
             has_contract=has_contract,
             contract_date=contract_date,
-            contract_notes=contract_notes
+            contract_notes=contract_notes,
+            needs_cancellation=needs_cancellation,
+            cancellation_reason=cancellation_reason
         )
         
         if success:

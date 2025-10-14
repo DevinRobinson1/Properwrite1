@@ -77,6 +77,16 @@
                         <p class="text-sm text-gray-700">{{ deal.contract_notes }}</p>
                     </div>
                     {% endif %}
+                    {% if deal.needs_cancellation %}
+                    <div class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p class="text-xs font-medium text-red-800 mb-1 flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>Needs Cancellation
+                        </p>
+                        {% if deal.cancellation_reason %}
+                        <p class="text-sm text-red-700">{{ deal.cancellation_reason }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
                     <button onclick="editContract()" class="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <i class="fas fa-edit mr-2"></i>Update Contract Info
                     </button>
@@ -585,6 +595,18 @@
                             class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Add any notes about the contract..."></textarea>
                     </div>
+                    <div class="border-t pt-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="needsCancellation" class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                            <span class="ml-2 text-sm text-gray-700 font-medium">Needs Cancellation</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Cancellation Reason</label>
+                        <textarea id="cancellationReason" rows="3" 
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                            placeholder="Explain why this contract needs to be canceled (e.g., inspection issues, financing fell through, buyer backed out)"></textarea>
+                    </div>
                 </div>
             `;
             
@@ -595,6 +617,8 @@
             const hasContract = document.getElementById('hasContract').checked;
             const contractDate = document.getElementById('contractDate').value;
             const contractNotes = document.getElementById('contractNotes').value;
+            const needsCancellation = document.getElementById('needsCancellation').checked;
+            const cancellationReason = document.getElementById('cancellationReason').value;
             
             try {
                 const response = await fetch(`/api/jv-deals/${dealId}/contract`, {
@@ -603,7 +627,9 @@
                     body: JSON.stringify({
                         has_contract: hasContract,
                         contract_date: contractDate || null,
-                        contract_notes: contractNotes
+                        contract_notes: contractNotes,
+                        needs_cancellation: needsCancellation,
+                        cancellation_reason: cancellationReason
                     })
                 });
                 
