@@ -71,6 +71,78 @@
       </div>
     </div>
 
+    <div class="bg-white shadow-xl rounded-lg border border-gray-200 mb-8">
+      <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-blue-50">
+        <h2 class="text-lg font-semibold text-gray-900">
+          <i class="fas fa-magic mr-2 text-purple-600"></i>
+          AI Script Generator
+        </h2>
+        <p class="text-sm text-gray-600 mt-1">Get custom talking points powered by ChatGPT</p>
+      </div>
+      <div class="p-6">
+        <form id="scriptGeneratorForm" class="space-y-4">
+          <div>
+            <label for="situation" class="block text-sm font-medium text-gray-700 mb-2">
+              Describe the Situation *
+            </label>
+            <textarea id="situation" name="situation" rows="3"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder="e.g., Seller is behind on payments, facing foreclosure, house needs work, can't afford traditional sale..."></textarea>
+          </div>
+          <div>
+            <label for="seller_type" class="block text-sm font-medium text-gray-700 mb-2">
+              Seller Type (Optional)
+            </label>
+            <select id="seller_type" name="seller_type"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+              <option value="">Select type...</option>
+              <option value="Distressed">Distressed (behind on payments)</option>
+              <option value="Motivated">Motivated (needs quick sale)</option>
+              <option value="Inherited">Inherited Property</option>
+              <option value="Relocating">Relocating</option>
+              <option value="Divorce">Divorce Situation</option>
+              <option value="Job Loss">Job Loss</option>
+            </select>
+          </div>
+          <button type="submit" id="generateBtn"
+            class="w-full inline-flex justify-center items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+            <i class="fas fa-magic mr-2"></i>
+            Generate Custom Script
+          </button>
+        </form>
+        
+        <div id="generatedScript" class="hidden mt-6">
+          <div class="border-t pt-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-md font-semibold text-gray-900">
+                <i class="fas fa-comment-dots text-green-600 mr-2"></i>
+                Your Custom Script
+              </h3>
+              <button onclick="copyScript()"
+                class="text-sm text-blue-600 hover:text-blue-800">
+                <i class="fas fa-copy mr-1"></i> Copy
+              </button>
+            </div>
+            <div id="scriptContent" class="bg-green-50 border-l-4 border-green-500 p-4 rounded text-sm text-gray-800 italic leading-relaxed whitespace-pre-wrap">
+            </div>
+          </div>
+        </div>
+        
+        <div id="scriptError" class="hidden mt-4">
+          <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+            <p class="text-sm text-red-800" id="errorMessage"></p>
+          </div>
+        </div>
+        
+        <div id="scriptLoading" class="hidden mt-4">
+          <div class="flex items-center justify-center py-4">
+            <i class="fas fa-spinner fa-spin text-purple-600 text-2xl mr-3"></i>
+            <span class="text-gray-600">Generating your custom script...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="bg-white shadow-xl rounded-lg border border-gray-200 overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
         <h2 class="text-lg font-semibold text-gray-900">
@@ -238,6 +310,67 @@ function showLeadDetails(leadId, leadData) {
 
 function closeLeadDetails() {
   document.getElementById('leadDetailsModal').classList.add('hidden');
+}
+
+document.getElementById('scriptGeneratorForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  const situation = document.getElementById('situation').value.trim();
+  const sellerType = document.getElementById('seller_type').value;
+  
+  if (!situation) {
+    showError('Please describe the situation');
+    return;
+  }
+  
+  document.getElementById('scriptLoading').classList.remove('hidden');
+  document.getElementById('scriptError').classList.add('hidden');
+  document.getElementById('generatedScript').classList.add('hidden');
+  document.getElementById('generateBtn').disabled = true;
+  
+  try {
+    const response = await fetch('/api/subto/generate-script', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        situation: situation,
+        seller_type: sellerType
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      document.getElementById('scriptContent').textContent = data.script;
+      document.getElementById('generatedScript').classList.remove('hidden');
+    } else {
+      showError(data.error || 'Failed to generate script');
+    }
+  } catch (error) {
+    showError('Failed to generate script. Please try again.');
+  } finally {
+    document.getElementById('scriptLoading').classList.add('hidden');
+    document.getElementById('generateBtn').disabled = false;
+  }
+});
+
+function showError(message) {
+  document.getElementById('errorMessage').textContent = message;
+  document.getElementById('scriptError').classList.remove('hidden');
+}
+
+function copyScript() {
+  const scriptContent = document.getElementById('scriptContent').textContent;
+  navigator.clipboard.writeText(scriptContent).then(() => {
+    const copyBtn = event.target.closest('button');
+    const originalHTML = copyBtn.innerHTML;
+    copyBtn.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
+    setTimeout(() => {
+      copyBtn.innerHTML = originalHTML;
+    }, 2000);
+  });
 }
 </script>
 {% endblock %}

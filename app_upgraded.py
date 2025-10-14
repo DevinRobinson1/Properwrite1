@@ -4949,5 +4949,65 @@ def subto_quick_submit():
         flash('Failed to submit lead. Please try again.', 'error')
         return redirect(url_for('subto_quick_submit'))
 
+@app.route('/api/subto/generate-script', methods=['POST'])
+@csrf.exempt
+def api_generate_subto_script():
+    """API endpoint to generate custom talking scripts using ChatGPT"""
+    try:
+        # Check if submitter is logged in
+        submitter_id = session.get('subto_submitter_id')
+        if not submitter_id:
+            return jsonify({'error': 'Please log in to use this feature'}), 401
+        
+        data = request.get_json()
+        situation = data.get('situation', '').strip()
+        seller_type = data.get('seller_type', '').strip()
+        
+        if not situation:
+            return jsonify({'error': 'Please describe the situation'}), 400
+        
+        # Import OpenAI
+        from openai import OpenAI
+        client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+        
+        # Create the prompt for GPT
+        prompt = f"""You are a real estate expert helping partners present subject-to deals to sellers. 
+
+Situation: {situation}
+Seller Type: {seller_type or 'General'}
+
+Create a professional, empathetic talking script for presenting a subject-to deal. The partner works with People First Property Solutions (Devin). Subject-to means purchasing the property while leaving the existing mortgage in place so the seller can walk away, get some cash, and not worry about the house anymore.
+
+Provide a natural, conversational script (2-3 paragraphs) that:
+1. Acknowledges the seller's situation empathetically
+2. Introduces the subject-to solution naturally
+3. Explains the benefit (walk away, get cash, no more worry)
+4. Mentions partnering with Devin from People First Property Solutions
+5. Asks if they'd be interested
+
+Keep it concise, warm, and professional. Do not use bullet points or lists - write it as a natural conversation script."""
+
+        # Call GPT-4
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a real estate expert who creates empathetic, professional talking scripts for subject-to deals."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=500
+        )
+        
+        script = response.choices[0].message.content.strip()
+        
+        return jsonify({
+            'success': True,
+            'script': script
+        })
+        
+    except Exception as e:
+        logging.error(f"Error generating script: {e}")
+        return jsonify({'error': 'Failed to generate script. Please try again.'}), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
