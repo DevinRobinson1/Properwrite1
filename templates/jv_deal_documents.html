@@ -51,6 +51,75 @@
             </div>
         </div>
 
+        <!-- Deal Progress Tracking -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Contract Status -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-file-contract mr-2 text-blue-600"></i>Contract Status
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700">Contract Secured:</span>
+                        <span id="contractStatus" class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
+                            {{ 'Yes' if deal.has_contract else 'No' }}
+                        </span>
+                    </div>
+                    {% if deal.contract_date %}
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700">Contract Date:</span>
+                        <span class="text-sm text-gray-900">{{ deal.contract_date }}</span>
+                    </div>
+                    {% endif %}
+                    {% if deal.contract_notes %}
+                    <div class="mt-3 p-3 bg-blue-50 rounded-lg">
+                        <p class="text-xs font-medium text-blue-800 mb-1">Notes:</p>
+                        <p class="text-sm text-gray-700">{{ deal.contract_notes }}</p>
+                    </div>
+                    {% endif %}
+                    <button onclick="editContract()" class="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <i class="fas fa-edit mr-2"></i>Update Contract Info
+                    </button>
+                </div>
+            </div>
+
+            <!-- Buyer Information -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-user-tie mr-2 text-green-600"></i>Buyer Information
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700">Buyer Found:</span>
+                        <span id="buyerStatus" class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
+                            {{ 'Yes' if deal.has_buyer else 'No' }}
+                        </span>
+                    </div>
+                    {% if deal.buyer_name %}
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700">Buyer Name:</span>
+                        <span class="text-sm text-gray-900">{{ deal.buyer_name }}</span>
+                    </div>
+                    {% endif %}
+                    {% if deal.down_payment %}
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700">Down Payment:</span>
+                        <span class="text-sm font-bold text-green-600">${{ "{:,.2f}".format(deal.down_payment) }}</span>
+                    </div>
+                    {% endif %}
+                    {% if deal.buyer_notes %}
+                    <div class="mt-3 p-3 bg-green-50 rounded-lg">
+                        <p class="text-xs font-medium text-green-800 mb-1">Notes:</p>
+                        <p class="text-sm text-gray-700">{{ deal.buyer_notes }}</p>
+                    </div>
+                    {% endif %}
+                    <button onclick="editBuyer()" class="w-full mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <i class="fas fa-edit mr-2"></i>Update Buyer Info
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Document Upload Section -->
         <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">
@@ -492,6 +561,134 @@
             } catch (error) {
                 console.error('Update notes error:', error);
                 showError('Error updating notes');
+            }
+        }
+
+        // Edit contract information
+        async function editContract() {
+            const contractHtml = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="hasContract" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <span class="ml-2 text-sm text-gray-700">Contract Secured</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Contract Date</label>
+                        <input type="date" id="contractDate" 
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                        <textarea id="contractNotes" rows="3" 
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Add any notes about the contract..."></textarea>
+                    </div>
+                </div>
+            `;
+            
+            showModal('Update Contract Information', contractHtml, saveContract);
+        }
+
+        async function saveContract() {
+            const hasContract = document.getElementById('hasContract').checked;
+            const contractDate = document.getElementById('contractDate').value;
+            const contractNotes = document.getElementById('contractNotes').value;
+            
+            try {
+                const response = await fetch(`/api/jv-deals/${dealId}/contract`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        has_contract: hasContract,
+                        contract_date: contractDate || null,
+                        contract_notes: contractNotes
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess('Contract information updated successfully');
+                    location.reload();
+                } else {
+                    showError(data.error || 'Failed to update contract information');
+                }
+            } catch (error) {
+                console.error('Update contract error:', error);
+                showError('Error updating contract information');
+            }
+        }
+
+        // Edit buyer information
+        async function editBuyer() {
+            const buyerHtml = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="hasBuyer" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                            <span class="ml-2 text-sm text-gray-700">Buyer Found</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Buyer Name</label>
+                        <input type="text" id="buyerName" 
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                            placeholder="Enter buyer name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Down Payment</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">$</span>
+                            </div>
+                            <input type="number" id="downPayment" step="0.01" 
+                                class="block w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                                placeholder="0.00">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                        <textarea id="buyerNotes" rows="3" 
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                            placeholder="Add any notes about the buyer..."></textarea>
+                    </div>
+                </div>
+            `;
+            
+            showModal('Update Buyer Information', buyerHtml, saveBuyer);
+        }
+
+        async function saveBuyer() {
+            const hasBuyer = document.getElementById('hasBuyer').checked;
+            const buyerName = document.getElementById('buyerName').value;
+            const downPayment = document.getElementById('downPayment').value;
+            const buyerNotes = document.getElementById('buyerNotes').value;
+            
+            try {
+                const response = await fetch(`/api/jv-deals/${dealId}/buyer`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        has_buyer: hasBuyer,
+                        buyer_name: buyerName || null,
+                        down_payment: downPayment || null,
+                        buyer_notes: buyerNotes
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess('Buyer information updated successfully');
+                    location.reload();
+                } else {
+                    showError(data.error || 'Failed to update buyer information');
+                }
+            } catch (error) {
+                console.error('Update buyer error:', error);
+                showError('Error updating buyer information');
             }
         }
 
