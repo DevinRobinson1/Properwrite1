@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Submit Subject-To Lead{% endblock %}
+{% block title %}Submit Low-Equity Lead{% endblock %}
 
 {% block content %}
 <div class="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12">
@@ -10,11 +10,11 @@
       </div>
       <h1 class="text-4xl font-bold text-gray-900 mb-4">
         <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Submit Subject-To Lead
+          Submit Low-Equity Lead
         </span>
       </h1>
       <p class="text-lg text-gray-600">
-        Welcome, <strong>{{ submitter_name }}</strong>! Submit your Subject-To seller lead to <strong>People First Property Solutions</strong>.
+        Welcome, <strong>{{ submitter_name }}</strong>! Submit your low-equity seller lead to <strong>People First Property Solutions</strong>.
       </p>
       <div class="mt-4">
         <a href="{{ url_for('subto_dashboard') }}" class="inline-flex items-center text-blue-600 hover:text-blue-800">
@@ -33,15 +33,30 @@
       <form method="POST" action="{{ url_for('subto_submit') }}" class="space-y-6">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         
-        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded mb-4">
           <div class="flex">
             <div class="flex-shrink-0">
               <i class="fas fa-info-circle text-blue-500"></i>
             </div>
             <div class="ml-3">
               <p class="text-sm text-blue-700">
+                <strong>Low-Equity Leads:</strong> Perfect for Subject-To acquisitions where the seller has little to no equity.<br>
                 <strong>Required:</strong> Seller name, property address, and phone number.<br>
                 <strong>Optional:</strong> Loan details help us evaluate the deal faster.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <i class="fas fa-comments text-green-600"></i>
+            </div>
+            <div class="ml-3">
+              <h4 class="text-sm font-semibold text-green-900 mb-2">Talking Points for Your Clients:</h4>
+              <p class="text-sm text-green-800 italic leading-relaxed">
+                "It seems like our cash offer doesn't work, but we have a partner that helps in these situations. His name is Devin from People First Property Solutions. They do something where they purchase the property but leave the existing mortgage in place so you're able to walk away, get some cash in your pocket and not have to worry about the house anymore. Would you be interested in something like this?"
               </p>
             </div>
           </div>
