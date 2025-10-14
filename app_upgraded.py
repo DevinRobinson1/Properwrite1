@@ -4731,6 +4731,7 @@ def upload_deal_document(deal_id):
         # Get form data
         document_type = request.form.get('document_type', 'other')
         description = request.form.get('description', '')
+        notes = request.form.get('notes', '')
         requires_signature = request.form.get('requires_signature', 'false') == 'true'
         share_with_partner = request.form.get('share_with_partner', 'false') == 'true'
         
@@ -4743,6 +4744,7 @@ def upload_deal_document(deal_id):
             document_type=document_type,
             uploaded_by=admin_email,
             description=description,
+            notes=notes,
             requires_signature=requires_signature,
             share_with_partner=share_with_partner
         )
@@ -4877,6 +4879,36 @@ def delete_document(document_id):
         
     except Exception as e:
         logging.error(f"Error deleting document: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/jv-documents/<document_id>/notes', methods=['PUT'])
+def update_document_notes(document_id):
+    """Update notes for a document (admin only)"""
+    try:
+        # Check admin authentication
+        if not session.get('is_jv_admin'):
+            return jsonify({'error': 'Admin access required'}), 401
+        
+        notes = request.json.get('notes', '')
+        admin_email = session.get('jv_admin_email', 'admin@properwrite.com')
+        ip_address = request.remote_addr
+        user_agent = request.user_agent.string
+        
+        # Update notes with audit logging
+        success = jv_doc_service.update_document_notes(
+            document_id, notes, admin_email, ip_address, user_agent
+        )
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Notes updated successfully'
+            })
+        else:
+            return jsonify({'error': 'Failed to update notes'}), 500
+        
+    except Exception as e:
+        logging.error(f"Error updating document notes: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/jv-documents/<document_id>/access-log', methods=['GET'])

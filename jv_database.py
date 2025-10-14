@@ -106,6 +106,12 @@ class JVDatabase:
                         )
                     """)
                     
+                    # Add notes column for additional context
+                    cur.execute("""
+                        ALTER TABLE jv_documents 
+                        ADD COLUMN IF NOT EXISTS notes TEXT
+                    """)
+                    
                     # Create document_access_log table for audit trail
                     cur.execute("""
                         CREATE TABLE IF NOT EXISTS document_access_log (

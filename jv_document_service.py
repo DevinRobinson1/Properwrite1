@@ -78,6 +78,7 @@ class JVDocumentService:
         document_type: str,
         uploaded_by: str,
         description: str = None,
+        notes: str = None,
         requires_signature: bool = False,
         share_with_partner: bool = False
     ) -> Optional[str]:
@@ -138,13 +139,13 @@ class JVDocumentService:
                         INSERT INTO jv_documents (
                             id, deal_id, partner_id, filename, original_filename,
                             file_type, file_size, file_path, document_type,
-                            description, version, is_current_version, uploaded_by, 
+                            description, notes, version, is_current_version, uploaded_by, 
                             shared_with_partner, requires_signature, signature_status
-                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """, (
                         document_id, deal_id, partner_id, secure_fname, file.filename,
                         file.content_type, file_size, file_path, document_type,
-                        description, next_version, True, uploaded_by, share_with_partner,
+                        description, notes, next_version, True, uploaded_by, share_with_partner,
                         requires_signature, signature_status
                     ))
                     
@@ -355,6 +356,27 @@ class JVDocumentService:
         except Exception as e:
             logging.error(f"Error getting document access log: {e}")
             return []
+    
+    def update_document_notes(self, document_id: str, notes: str, admin_email: str, ip_address: str = None, user_agent: str = None) -> bool:
+        """Update notes for a document"""
+        try:
+            with self.get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        UPDATE jv_documents
+                        SET notes = %s, updated_at = CURRENT_TIMESTAMP
+                        WHERE id = %s
+                    """, (notes, document_id))
+                    
+                    # Log update action
+                    self._log_access(document_id, admin_email, 'admin', 'updated', conn, ip_address, user_agent)
+                    
+                    conn.commit()
+                    return True
+                    
+        except Exception as e:
+            logging.error(f"Error updating document notes: {e}")
+            return False
     
     def _log_access(
         self,

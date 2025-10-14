@@ -91,7 +91,17 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
                     <textarea id="description" name="description" rows="2"
                         class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Add any notes about this document..."></textarea>
+                        placeholder="Brief description of this document..."></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-sticky-note mr-1 text-gray-400"></i>Additional Notes
+                    </label>
+                    <textarea id="notes" name="notes" rows="3"
+                        class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Add extra context, instructions, or important details about this document..."></textarea>
+                    <p class="text-xs text-gray-500 mt-1">These notes are visible to admins and can be edited later</p>
                 </div>
                 
                 <div class="flex items-center space-x-6">
@@ -221,6 +231,14 @@
                                     Uploaded ${formatDate(doc.uploaded_at)}
                                 </p>
                                 ${doc.description ? `<p class="text-sm text-gray-600 mt-1">${doc.description}</p>` : ''}
+                                ${doc.notes ? `
+                                    <div class="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                                        <p class="text-xs font-medium text-yellow-800 flex items-center">
+                                            <i class="fas fa-sticky-note mr-1"></i>Notes:
+                                        </p>
+                                        <p class="text-sm text-gray-700 mt-1">${doc.notes}</p>
+                                    </div>
+                                ` : ''}
                                 <div class="mt-2 flex items-center space-x-4">
                                     ${doc.shared_with_partner ? 
                                         `<span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
@@ -244,6 +262,10 @@
                             </div>
                         </div>
                         <div class="flex items-center space-x-2">
+                            <button onclick="editNotes('${doc.id}', ${JSON.stringify(doc.notes || '').replace(/'/g, "\\'")})" 
+                                class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 text-sm">
+                                <i class="fas fa-sticky-note mr-1"></i>Notes
+                            </button>
                             ${!doc.shared_with_partner ? 
                                 `<button onclick="shareDocument('${doc.id}')" 
                                     class="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 text-sm">
@@ -284,6 +306,7 @@
             formData.append('file', file);
             formData.append('document_type', document.getElementById('documentType').value);
             formData.append('description', document.getElementById('description').value);
+            formData.append('notes', document.getElementById('notes').value);
             formData.append('share_with_partner', document.getElementById('shareWithPartner').checked);
             formData.append('requires_signature', document.getElementById('requiresSignature').checked);
             
@@ -427,6 +450,49 @@
 
         function showError(message) {
             alert('Error: ' + message); // Replace with better notification system
+        }
+
+        // Edit document notes
+        let currentEditDocId = null;
+        async function editNotes(documentId, currentNotes) {
+            currentEditDocId = documentId;
+            
+            const notesHtml = `
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Document Notes</label>
+                    <textarea id="editNotesInput" rows="4" 
+                        class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Add extra context, instructions, or important details...">${currentNotes || ''}</textarea>
+                    <p class="text-xs text-gray-500 mt-1">These notes are visible to admins only and can help track document context</p>
+                </div>
+            `;
+            
+            showModal('Edit Document Notes', notesHtml, saveNotes);
+        }
+
+        async function saveNotes() {
+            const notes = document.getElementById('editNotesInput').value;
+            
+            try {
+                const response = await fetch(`/api/jv-documents/${currentEditDocId}/notes`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notes: notes })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess('Notes updated successfully');
+                    loadDocuments();
+                    closeModal();
+                } else {
+                    showError(data.error || 'Failed to update notes');
+                }
+            } catch (error) {
+                console.error('Update notes error:', error);
+                showError('Error updating notes');
+            }
         }
 
         function showModal(title, message, confirmCallback) {
