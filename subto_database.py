@@ -373,14 +373,16 @@ class SubToDatabase:
         Format: 'Masked Company Name - City, ST' or 'Masked Name - City, ST'
         """
         # Use company name if available, otherwise use personal name
-        name = submitter.get('company', '').strip() or submitter.get('name', '').strip()
+        company = submitter.get('company') or ''
+        name = submitter.get('name') or ''
+        display = company.strip() if company else name.strip()
         
         # Mask the name
-        masked_name = self.mask_company_name(name)
+        masked_name = self.mask_company_name(display)
         
         # Add location if available
-        city = submitter.get('city', '').strip()
-        state = submitter.get('state', '').strip()
+        city = (submitter.get('city') or '').strip()
+        state = (submitter.get('state') or '').strip()
         
         if city and state:
             return f"{masked_name} - {city}, {state}"

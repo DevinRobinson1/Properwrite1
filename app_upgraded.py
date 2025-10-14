@@ -4976,27 +4976,28 @@ def api_generate_subto_script():
         client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
         
         # Create the prompt for GPT
-        prompt = f"""You are a real estate expert helping partners present subject-to deals to sellers. 
+        prompt = f"""You are a real estate expert helping partners create effective handoff scripts to transition seller leads to People First Property Solutions' Trust Equity Protection program.
 
 Situation: {situation}
 Seller Type: {seller_type or 'General'}
 
-Create a professional, empathetic talking script for presenting a subject-to deal. The partner works with People First Property Solutions (Devin). Subject-to means purchasing the property while leaving the existing mortgage in place so the seller can walk away, get some cash, and not worry about the house anymore.
+Create a professional, empathetic talking script for transitioning this seller lead to People First Property Solutions (contact: Devin). The Trust Equity Protection program uses subject-to acquisition, which means purchasing the property while leaving the existing mortgage in place. This allows the seller to walk away with cash, avoid foreclosure, protect their credit, and eliminate the burden of the property.
 
-Provide a natural, conversational script (2-3 paragraphs) that:
-1. Acknowledges the seller's situation empathetically
-2. Introduces the subject-to solution naturally
-3. Explains the benefit (walk away, get cash, no more worry)
-4. Mentions partnering with Devin from People First Property Solutions
-5. Asks if they'd be interested
+Provide a natural, conversational handoff script (2-3 paragraphs) that:
+1. Acknowledges the seller's specific situation with genuine empathy
+2. Transitions naturally by saying your cash offer may not work, but you have a trusted partner
+3. Introduces the Trust Equity Protection program and Devin from People First Property Solutions
+4. Explains the unique benefits: they can walk away, get cash in their pocket, keep the existing mortgage in place, avoid foreclosure impact, and stop worrying about the property
+5. Builds trust by positioning this as a specialized solution for low-equity situations
+6. Ends with a soft ask if they'd be open to learning more
 
-Keep it concise, warm, and professional. Do not use bullet points or lists - write it as a natural conversation script."""
+Keep it concise, warm, professional, and conversational. Write as a natural spoken script the partner can use when talking to the seller. Do not use bullet points or lists."""
 
         # Call GPT-4
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a real estate expert who creates empathetic, professional talking scripts for subject-to deals."},
+                {"role": "system", "content": "You are a real estate expert who creates empathetic, professional handoff scripts to help partners transition seller leads to People First Property Solutions' Trust Equity Protection program (subject-to acquisitions)."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
