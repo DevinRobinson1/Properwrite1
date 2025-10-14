@@ -73,6 +73,65 @@ class JVDatabase:
                     # Ensure phone_number is not nullable in partners table
                     cur.execute("ALTER TABLE partners ALTER COLUMN phone SET NOT NULL")
                     
+                    # Create jv_documents table for secure document management
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS jv_documents (
+                            id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+                            deal_id TEXT NOT NULL REFERENCES jv_deals(id) ON DELETE CASCADE,
+                            partner_id TEXT NOT NULL REFERENCES partners(id),
+                            filename TEXT NOT NULL,
+                            original_filename TEXT NOT NULL,
+                            file_type TEXT NOT NULL,
+                            file_size INTEGER NOT NULL,
+                            file_path TEXT NOT NULL,
+                            document_type TEXT NOT NULL CHECK (document_type IN (
+                                'agreement', 'contract', 'addendum', 'inspection', 
+                                'appraisal', 'title', 'insurance', 'other'
+                            )),
+                            description TEXT,
+                            version INTEGER DEFAULT 1,
+                            is_current_version BOOLEAN DEFAULT true,
+                            uploaded_by TEXT NOT NULL,
+                            uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            shared_with_partner BOOLEAN DEFAULT false,
+                            partner_viewed_at TIMESTAMP,
+                            partner_signed_at TIMESTAMP,
+                            requires_signature BOOLEAN DEFAULT false,
+                            signature_status TEXT CHECK (signature_status IN (
+                                'not_required', 'pending', 'signed', 'declined'
+                            )) DEFAULT 'not_required',
+                            metadata JSONB DEFAULT '{}'::jsonb,
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        )
+                    """)
+                    
+                    # Create document_access_log table for audit trail
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS document_access_log (
+                            id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+                            document_id TEXT NOT NULL REFERENCES jv_documents(id) ON DELETE CASCADE,
+                            user_email TEXT NOT NULL,
+                            user_type TEXT NOT NULL CHECK (user_type IN ('admin', 'partner')),
+                            action TEXT NOT NULL CHECK (action IN (
+                                'uploaded', 'viewed', 'downloaded', 'shared', 
+                                'signed', 'deleted', 'updated'
+                            )),
+                            ip_address TEXT,
+                            user_agent TEXT,
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        )
+                    """)
+                    
+                    # Create indexes for document management
+                    cur.execute("CREATE INDEX IF NOT EXISTS idx_jv_documents_deal_id ON jv_documents(deal_id)")
+                    cur.execute("CREATE INDEX IF NOT EXISTS idx_jv_documents_partner_id ON jv_documents(partner_id)")
+                    cur.execute("CREATE INDEX IF NOT EXISTS idx_jv_documents_type ON jv_documents(document_type)")
+                    cur.execute("CREATE INDEX IF NOT EXISTS idx_jv_documents_uploaded_at ON jv_documents(uploaded_at)")
+                    cur.execute("CREATE INDEX IF NOT EXISTS idx_jv_documents_version ON jv_documents(deal_id, version, is_current_version)")
+                    cur.execute("CREATE INDEX IF NOT EXISTS idx_document_access_log_document_id ON document_access_log(document_id)")
+                    cur.execute("CREATE INDEX IF NOT EXISTS idx_document_access_log_created_at ON document_access_log(created_at)")
+                    
                     conn.commit()
                     logging.info("Database tables initialized successfully")
                     
