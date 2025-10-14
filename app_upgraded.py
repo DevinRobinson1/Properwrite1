@@ -4923,7 +4923,7 @@ def subto_admin():
     except Exception as e:
         logging.error(f"Error loading admin panel: {e}")
         flash('Failed to load admin panel. Please try again.', 'error')
-        return redirect(url_for('home'))
+        return redirect(url_for('subto_admin_login'))
 
 @app.route('/api/subto/update-status', methods=['POST'])
 @require_subto_admin
