@@ -4768,9 +4768,13 @@ def share_document(document_id):
             return jsonify({'error': 'Admin access required'}), 401
         
         admin_email = session.get('jv_admin_email', 'admin@properwrite.com')
+        ip_address = request.remote_addr
+        user_agent = request.user_agent.string
         
-        # Share document
-        success = jv_doc_service.share_document_with_partner(document_id, admin_email)
+        # Share document with audit logging
+        success = jv_doc_service.share_document_with_partner(
+            document_id, admin_email, ip_address, user_agent
+        )
         
         if success:
             return jsonify({
@@ -4855,9 +4859,13 @@ def delete_document(document_id):
             return jsonify({'error': 'Admin access required'}), 401
         
         admin_email = session.get('jv_admin_email', 'admin@properwrite.com')
+        ip_address = request.remote_addr
+        user_agent = request.user_agent.string
         
-        # Delete document
-        success = jv_doc_service.delete_document(document_id, admin_email)
+        # Delete document with audit logging
+        success = jv_doc_service.delete_document(
+            document_id, admin_email, ip_address, user_agent
+        )
         
         if success:
             return jsonify({
@@ -4910,18 +4918,23 @@ def download_document(document_id):
             if not document['shared_with_partner']:
                 return "Access denied", 403
         
-        # Log download
-        if is_admin:
-            admin_email = session.get('jv_admin_email', 'admin@properwrite.com')
-            jv_doc_service._log_access(
-                document_id, admin_email, 'admin', 'downloaded',
-                jv_doc_service.get_connection()
-            )
-        elif partner_email:
-            jv_doc_service._log_access(
-                document_id, partner_email, 'partner', 'downloaded',
-                jv_doc_service.get_connection()
-            )
+        # Log download with full audit trail
+        ip_address = request.remote_addr
+        user_agent = request.user_agent.string
+        
+        with jv_doc_service.get_connection() as conn:
+            if is_admin:
+                admin_email = session.get('jv_admin_email', 'admin@properwrite.com')
+                jv_doc_service._log_access(
+                    document_id, admin_email, 'admin', 'downloaded',
+                    conn, ip_address, user_agent
+                )
+            elif partner_email:
+                jv_doc_service._log_access(
+                    document_id, partner_email, 'partner', 'downloaded',
+                    conn, ip_address, user_agent
+                )
+            conn.commit()
         
         # Send file
         from flask import send_file

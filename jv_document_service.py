@@ -82,7 +82,7 @@ class JVDocumentService:
         share_with_partner: bool = False
     ) -> Optional[str]:
         """
-        Upload a document and create database record
+        Upload a document and create database record with proper versioning
         Returns document_id or None on failure
         """
         try:
@@ -104,24 +104,47 @@ class JVDocumentService:
             # Save file
             file_path, secure_fname = self.save_file(file, deal_id)
             
-            # Create database record
+            # Create database record with versioning
             with self.get_connection() as conn:
                 with conn.cursor() as cur:
-                    document_id = str(uuid.uuid4())
+                    # CRITICAL FIX: Verify partner_id matches the deal
+                    cur.execute("SELECT partner_id FROM jv_deals WHERE id = %s", (deal_id,))
+                    result = cur.fetchone()
+                    if not result:
+                        raise ValueError("Deal not found")
+                    if result[0] != partner_id:
+                        raise ValueError("Partner ID does not match the deal")
                     
+                    # VERSIONING FIX: Get the next version number for this deal/document_type
+                    cur.execute("""
+                        SELECT COALESCE(MAX(version), 0) + 1 as next_version
+                        FROM jv_documents
+                        WHERE deal_id = %s AND document_type = %s
+                    """, (deal_id, document_type))
+                    next_version = cur.fetchone()[0]
+                    
+                    # Mark all previous versions of this document type as not current
+                    cur.execute("""
+                        UPDATE jv_documents
+                        SET is_current_version = false
+                        WHERE deal_id = %s AND document_type = %s AND is_current_version = true
+                    """, (deal_id, document_type))
+                    
+                    document_id = str(uuid.uuid4())
                     signature_status = 'pending' if requires_signature else 'not_required'
                     
+                    # Insert new document with correct version
                     cur.execute("""
                         INSERT INTO jv_documents (
                             id, deal_id, partner_id, filename, original_filename,
                             file_type, file_size, file_path, document_type,
-                            description, uploaded_by, shared_with_partner,
-                            requires_signature, signature_status
-                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                            description, version, is_current_version, uploaded_by, 
+                            shared_with_partner, requires_signature, signature_status
+                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """, (
                         document_id, deal_id, partner_id, secure_fname, file.filename,
                         file.content_type, file_size, file_path, document_type,
-                        description, uploaded_by, share_with_partner,
+                        description, next_version, True, uploaded_by, share_with_partner,
                         requires_signature, signature_status
                     ))
                     
@@ -129,7 +152,7 @@ class JVDocumentService:
                     self._log_access(document_id, uploaded_by, 'admin', 'uploaded', conn)
                     
                     conn.commit()
-                    logging.info(f"Document uploaded: {document_id}")
+                    logging.info(f"Document uploaded: {document_id} (version {next_version})")
                     return document_id
                     
         except Exception as e:
@@ -207,7 +230,7 @@ class JVDocumentService:
             logging.error(f"Error getting document by ID: {e}")
             return None
     
-    def share_document_with_partner(self, document_id: str, admin_email: str) -> bool:
+    def share_document_with_partner(self, document_id: str, admin_email: str, ip_address: str = None, user_agent: str = None) -> bool:
         """Share a document with the partner"""
         try:
             with self.get_connection() as conn:
@@ -218,8 +241,8 @@ class JVDocumentService:
                         WHERE id = %s
                     """, (document_id,))
                     
-                    # Log share action
-                    self._log_access(document_id, admin_email, 'admin', 'shared', conn)
+                    # AUDIT FIX: Log share action with full context
+                    self._log_access(document_id, admin_email, 'admin', 'shared', conn, ip_address, user_agent)
                     
                     conn.commit()
                     return True
@@ -273,7 +296,7 @@ class JVDocumentService:
             logging.error(f"Error marking document signed: {e}")
             return False
     
-    def delete_document(self, document_id: str, admin_email: str) -> bool:
+    def delete_document(self, document_id: str, admin_email: str, ip_address: str = None, user_agent: str = None) -> bool:
         """Delete a document (soft delete by marking as not current)"""
         try:
             with self.get_connection() as conn:
@@ -292,8 +315,8 @@ class JVDocumentService:
                             WHERE id = %s
                         """, (document_id,))
                         
-                        # Log delete action
-                        self._log_access(document_id, admin_email, 'admin', 'deleted', conn)
+                        # AUDIT FIX: Log delete action with full context
+                        self._log_access(document_id, admin_email, 'admin', 'deleted', conn, ip_address, user_agent)
                         
                         # Delete physical file
                         if os.path.exists(file_path):
