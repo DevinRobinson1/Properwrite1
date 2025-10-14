@@ -4858,8 +4858,57 @@ def subto_dashboard():
         flash('Failed to load dashboard. Please try again.', 'error')
         return redirect(url_for('subto_login'))
 
+def require_subto_admin(f):
+    """Decorator to require Subject-To admin authentication"""
+    from functools import wraps
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('subto_admin_authenticated'):
+            return redirect(url_for('subto_admin_login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/subto-admin-login', methods=['GET', 'POST'])
+def subto_admin_login():
+    """Admin login for Subject-To lead management"""
+    if request.method == 'GET':
+        return render_template('subto_admin_login.html')
+    
+    try:
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        
+        # Check credentials against environment variables
+        admin_username = os.environ.get('SUBTO_ADMIN_USERNAME', 'pfps_admin')
+        admin_password = os.environ.get('SUBTO_ADMIN_PASSWORD', 'PFPSAdmin2024!')
+        
+        if username == admin_username and password == admin_password:
+            session['subto_admin_authenticated'] = True
+            session.permanent = True
+            
+            # Redirect to next URL or admin panel
+            next_url = request.args.get('next')
+            if next_url:
+                return redirect(next_url)
+            return redirect(url_for('subto_admin'))
+        else:
+            flash('Invalid admin credentials', 'error')
+            return redirect(url_for('subto_admin_login'))
+            
+    except Exception as e:
+        logging.error(f"Error in admin login: {e}")
+        flash('Login failed. Please try again.', 'error')
+        return redirect(url_for('subto_admin_login'))
+
+@app.route('/subto-admin-logout')
+def subto_admin_logout():
+    """Admin logout for Subject-To system"""
+    session.pop('subto_admin_authenticated', None)
+    flash('You have been logged out', 'success')
+    return redirect(url_for('subto_admin_login'))
+
 @app.route('/subto-admin')
-@require_auth
+@require_subto_admin
 def subto_admin():
     """Subject-To admin panel - view and manage all leads"""
     try:
@@ -4877,7 +4926,7 @@ def subto_admin():
         return redirect(url_for('home'))
 
 @app.route('/api/subto/update-status', methods=['POST'])
-@require_auth
+@require_subto_admin
 @csrf.exempt
 def api_subto_update_status():
     """API endpoint to update lead status"""
