@@ -4448,6 +4448,31 @@ def jv_admin_dashboard():
     
     return render_template('admin_jv_deals_enhanced.html')
 
+@app.route('/jv-admin/deal/<deal_id>/documents')
+def jv_admin_deal_documents(deal_id):
+    """JV Admin Deal Documents Management"""
+    # Check if user has JV admin permissions
+    if not session.get('is_jv_admin'):
+        flash('Access denied. JV admin permissions required.', 'error')
+        return redirect('/jv-admin/login')
+    
+    try:
+        from jv_database import JVDatabase
+        jv_db = JVDatabase()
+        
+        # Get deal details
+        deal = jv_db.get_deal_by_id(deal_id)
+        if not deal:
+            flash('Deal not found', 'error')
+            return redirect('/jv-admin/dashboard')
+        
+        return render_template('jv_deal_documents.html', deal=deal)
+        
+    except Exception as e:
+        logging.error(f"Error loading deal documents page: {e}")
+        flash('Error loading deal documents', 'error')
+        return redirect('/jv-admin/dashboard')
+
 # Update the existing enhanced JV deals route to use JV admin auth
 @app.route('/admin/jv-deals-enhanced')
 def admin_jv_deals_enhanced():
