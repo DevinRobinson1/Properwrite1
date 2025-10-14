@@ -8,13 +8,16 @@
   <div class="max-w-7xl mx-auto px-4">
     <div class="mb-8">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-        <div>
+        <div class="flex-1">
+          <div class="flex items-center mb-4">
+            <img src="{{ url_for('static', filename='PFPS_Horizontal_Logo_Dark.png') }}" alt="People First Property Solutions" class="h-12 mr-4">
+          </div>
           <h1 class="text-3xl font-bold text-gray-900 mb-2">
             <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Subject-To Leads Admin
             </span>
           </h1>
-          <p class="text-gray-600">Manage all Subject-To lead submissions</p>
+          <p class="text-gray-600">Manage all Subject-To lead submissions for <strong>People First Property Solutions</strong></p>
         </div>
         <div class="mt-4 md:mt-0">
           <a href="{{ url_for('home') }}"
