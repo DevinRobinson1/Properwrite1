@@ -4702,5 +4702,208 @@ def api_feature_access(feature_name):
             'message': 'Error checking feature access'
         }), 500
 
+# ========================================
+# SUBJECT-TO LEAD SUBMISSION SYSTEM
+# ========================================
+from subto_database import subto_db
+
+@app.route('/subto-register', methods=['GET', 'POST'])
+def subto_register():
+    """Subject-To submitter registration"""
+    if request.method == 'GET':
+        return render_template('subto_register.html')
+    
+    try:
+        # Get form data
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '').strip()
+        name = request.form.get('name', '').strip()
+        company = request.form.get('company', '').strip()
+        phone = request.form.get('phone', '').strip()
+        
+        # Validate required fields
+        if not all([email, password, name]):
+            flash('Email, password, and name are required', 'error')
+            return redirect(url_for('subto_register'))
+        
+        # Create submitter account
+        submitter_id = subto_db.create_submitter(email, password, name, company, phone)
+        
+        if not submitter_id:
+            flash('An account with this email already exists', 'error')
+            return redirect(url_for('subto_register'))
+        
+        # Auto-login after registration
+        session['subto_submitter_id'] = submitter_id
+        session['subto_submitter_name'] = name
+        session.permanent = True
+        
+        flash('Account created successfully!', 'success')
+        return redirect(url_for('subto_dashboard'))
+        
+    except Exception as e:
+        logging.error(f"Error in submitter registration: {e}")
+        flash('Registration failed. Please try again.', 'error')
+        return redirect(url_for('subto_register'))
+
+@app.route('/subto-login', methods=['GET', 'POST'])
+def subto_login():
+    """Subject-To submitter login"""
+    if request.method == 'GET':
+        return render_template('subto_login.html')
+    
+    try:
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '').strip()
+        
+        if not all([email, password]):
+            flash('Email and password are required', 'error')
+            return redirect(url_for('subto_login'))
+        
+        # Authenticate submitter
+        submitter = subto_db.authenticate_submitter(email, password)
+        
+        if not submitter:
+            flash('Invalid email or password', 'error')
+            return redirect(url_for('subto_login'))
+        
+        # Set session
+        session['subto_submitter_id'] = submitter['id']
+        session['subto_submitter_name'] = submitter['name']
+        session.permanent = True
+        
+        flash(f'Welcome back, {submitter["name"]}!', 'success')
+        return redirect(url_for('subto_dashboard'))
+        
+    except Exception as e:
+        logging.error(f"Error in submitter login: {e}")
+        flash('Login failed. Please try again.', 'error')
+        return redirect(url_for('subto_login'))
+
+@app.route('/subto-logout')
+def subto_logout():
+    """Subject-To submitter logout"""
+    session.pop('subto_submitter_id', None)
+    session.pop('subto_submitter_name', None)
+    flash('You have been logged out', 'info')
+    return redirect(url_for('subto_login'))
+
+@app.route('/subto-submit', methods=['GET', 'POST'])
+def subto_submit():
+    """Subject-To lead submission form"""
+    # Check if submitter is logged in
+    submitter_id = session.get('subto_submitter_id')
+    if not submitter_id:
+        flash('Please log in to submit leads', 'error')
+        return redirect(url_for('subto_login'))
+    
+    if request.method == 'GET':
+        submitter_name = session.get('subto_submitter_name', 'Submitter')
+        return render_template('subto_submit.html', submitter_name=submitter_name)
+    
+    try:
+        # Get form data
+        lead_data = {
+            'seller_name': request.form.get('seller_name', '').strip(),
+            'property_address': request.form.get('property_address', '').strip(),
+            'seller_phone': request.form.get('seller_phone', '').strip(),
+            'loan_balance': request.form.get('loan_balance', '').strip() or None,
+            'interest_rate': request.form.get('interest_rate', '').strip() or None,
+            'monthly_payment': request.form.get('monthly_payment', '').strip() or None,
+            'arrears': request.form.get('arrears', '').strip() or 0,
+            'cash_to_seller': request.form.get('cash_to_seller', '').strip() or 0
+        }
+        
+        # Validate required fields
+        if not all([lead_data['seller_name'], lead_data['property_address'], lead_data['seller_phone']]):
+            flash('Seller name, property address, and phone number are required', 'error')
+            return redirect(url_for('subto_submit'))
+        
+        # Create lead
+        lead_id = subto_db.create_lead(submitter_id, lead_data)
+        
+        flash('Lead submitted successfully! You can track its status in your dashboard.', 'success')
+        return redirect(url_for('subto_dashboard'))
+        
+    except Exception as e:
+        logging.error(f"Error submitting lead: {e}")
+        flash('Failed to submit lead. Please try again.', 'error')
+        return redirect(url_for('subto_submit'))
+
+@app.route('/subto-dashboard')
+def subto_dashboard():
+    """Subject-To submitter dashboard - view all their leads"""
+    # Check if submitter is logged in
+    submitter_id = session.get('subto_submitter_id')
+    if not submitter_id:
+        flash('Please log in to view your dashboard', 'error')
+        return redirect(url_for('subto_login'))
+    
+    try:
+        # Get submitter info
+        submitter = subto_db.get_submitter_by_id(submitter_id)
+        if not submitter:
+            flash('Account not found', 'error')
+            return redirect(url_for('subto_login'))
+        
+        # Get all leads for this submitter
+        leads = subto_db.get_leads_by_submitter(submitter_id)
+        
+        return render_template('subto_dashboard.html', submitter=submitter, leads=leads)
+        
+    except Exception as e:
+        logging.error(f"Error loading dashboard: {e}")
+        flash('Failed to load dashboard. Please try again.', 'error')
+        return redirect(url_for('subto_login'))
+
+@app.route('/subto-admin')
+@require_auth
+def subto_admin():
+    """Subject-To admin panel - view and manage all leads"""
+    try:
+        # Get filter from query params
+        status_filter = request.args.get('status')
+        
+        # Get all leads
+        leads = subto_db.get_all_leads(status_filter)
+        
+        return render_template('subto_admin.html', leads=leads, current_filter=status_filter)
+        
+    except Exception as e:
+        logging.error(f"Error loading admin panel: {e}")
+        flash('Failed to load admin panel. Please try again.', 'error')
+        return redirect(url_for('home'))
+
+@app.route('/api/subto/update-status', methods=['POST'])
+@require_auth
+@csrf.exempt
+def api_subto_update_status():
+    """API endpoint to update lead status"""
+    try:
+        data = request.get_json()
+        lead_id = data.get('lead_id')
+        status = data.get('status')
+        admin_notes = data.get('admin_notes', '')
+        
+        if not all([lead_id, status]):
+            return jsonify({'error': 'Lead ID and status are required'}), 400
+        
+        # Validate status
+        valid_statuses = ['pending', 'reviewing', 'approved', 'declined', 'closed']
+        if status not in valid_statuses:
+            return jsonify({'error': 'Invalid status'}), 400
+        
+        # Update status
+        success = subto_db.update_lead_status(lead_id, status, admin_notes)
+        
+        if success:
+            return jsonify({'success': True, 'message': 'Status updated successfully'})
+        else:
+            return jsonify({'error': 'Failed to update status'}), 500
+            
+    except Exception as e:
+        logging.error(f"Error updating lead status: {e}")
+        return jsonify({'error': 'Failed to update status'}), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)

@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}Submit Subject-To Lead{% endblock %}
+
+{% block content %}
+<div class="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12">
+  <div class="max-w-3xl mx-auto px-4">
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">
+        <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Submit Subject-To Lead
+        </span>
+      </h1>
+      <p class="text-lg text-gray-600">
+        Welcome, <strong>{{ submitter_name }}</strong>! Submit your seller lead details below.
+      </p>
+      <div class="mt-4">
+        <a href="{{ url_for('subto_dashboard') }}" class="inline-flex items-center text-blue-600 hover:text-blue-800">
+          <i class="fas fa-arrow-left mr-2"></i>
+          Back to Dashboard
+        </a>
+        <span class="mx-3 text-gray-300">|</span>
+        <a href="{{ url_for('subto_logout') }}" class="inline-flex items-center text-gray-600 hover:text-gray-800">
+          <i class="fas fa-sign-out-alt mr-2"></i>
+          Logout
+        </a>
+      </div>
+    </div>
+
+    <div class="bg-white shadow-xl rounded-2xl p-8 border border-gray-200">
+      <form method="POST" action="{{ url_for('subto_submit') }}" class="space-y-6">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <i class="fas fa-info-circle text-blue-500"></i>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm text-blue-700">
+                <strong>Required:</strong> Seller name, property address, and phone number.<br>
+                <strong>Optional:</strong> Loan details help us evaluate the deal faster.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6">
+          <div>
+            <label for="seller_name" class="block text-sm font-medium text-gray-700 mb-2">
+              Seller Name *
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-user text-gray-400"></i>
+              </div>
+              <input type="text" id="seller_name" name="seller_name" required
+                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Jane Doe">
+            </div>
+          </div>
+
+          <div>
+            <label for="property_address" class="block text-sm font-medium text-gray-700 mb-2">
+              Property Address *
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-home text-gray-400"></i>
+              </div>
+              <input type="text" id="property_address" name="property_address" required
+                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="123 Main St, City, State 12345">
+            </div>
+          </div>
+
+          <div>
+            <label for="seller_phone" class="block text-sm font-medium text-gray-700 mb-2">
+              Seller Phone Number *
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-phone text-gray-400"></i>
+              </div>
+              <input type="tel" id="seller_phone" name="seller_phone" required
+                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="(555) 123-4567">
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-200 pt-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">
+            <i class="fas fa-calculator text-blue-600 mr-2"></i>
+            Loan Details (Optional)
+          </h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="loan_balance" class="block text-sm font-medium text-gray-700 mb-2">
+                Principal Loan Balance
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span class="text-gray-400">$</span>
+                </div>
+                <input type="number" id="loan_balance" name="loan_balance" step="0.01"
+                  class="block w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="250000">
+              </div>
+            </div>
+
+            <div>
+              <label for="interest_rate" class="block text-sm font-medium text-gray-700 mb-2">
+                Interest Rate
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <span class="text-gray-400">%</span>
+                </div>
+                <input type="number" id="interest_rate" name="interest_rate" step="0.01"
+                  class="block w-full pl-3 pr-7 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="4.5">
+              </div>
+            </div>
+
+            <div>
+              <label for="monthly_payment" class="block text-sm font-medium text-gray-700 mb-2">
+                Monthly Payment
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span class="text-gray-400">$</span>
+                </div>
+                <input type="number" id="monthly_payment" name="monthly_payment" step="0.01"
+                  class="block w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="1500">
+              </div>
+            </div>
+
+            <div>
+              <label for="arrears" class="block text-sm font-medium text-gray-700 mb-2">
+                Arrears (if any)
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span class="text-gray-400">$</span>
+                </div>
+                <input type="number" id="arrears" name="arrears" step="0.01"
+                  class="block w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="0">
+              </div>
+            </div>
+
+            <div>
+              <label for="cash_to_seller" class="block text-sm font-medium text-gray-700 mb-2">
+                Cash to Seller
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span class="text-gray-400">$</span>
+                </div>
+                <input type="number" id="cash_to_seller" name="cash_to_seller" step="0.01"
+                  class="block w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="0">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-200 pt-6">
+          <button type="submit"
+            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+            <i class="fas fa-paper-plane mr-2"></i>
+            Submit Lead
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
