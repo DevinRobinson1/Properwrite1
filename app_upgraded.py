@@ -752,6 +752,96 @@ def api_reset_password():
             'error': 'An error occurred. Please try again.'
         }), 500
 
+@app.route('/magic-login', methods=['GET', 'POST'])
+def magic_login():
+    """Magic link login - send login link to email"""
+    if request.method == 'GET':
+        return render_template('auth/magic_login.html')
+    
+    elif request.method == 'POST':
+        email = request.form.get('email')
+        
+        if not email:
+            flash('Email is required', 'error')
+            return render_template('auth/magic_login.html')
+        
+        # Generate magic link token
+        import secrets
+        magic_token = secrets.token_urlsafe(32)
+        
+        # Store token in session (expires in 15 minutes)
+        session[f'magic_token_{email}'] = {
+            'token': magic_token,
+            'expires': datetime.now() + timedelta(minutes=15)
+        }
+        
+        # Send magic link email
+        try:
+            magic_link = url_for('verify_magic_link', token=magic_token, email=email, _external=True)
+            email_sent = email_service.send_magic_link_email(email, magic_link)
+            
+            if email_sent:
+                flash('Login link sent! Check your email and click the link to login.', 'success')
+            else:
+                flash('Login link created! Use the link sent to your email.', 'info')
+        except Exception as e:
+            logging.error(f"Error sending magic link email: {str(e)}")
+            flash('Magic link generated. Check your email.', 'info')
+        
+        return render_template('auth/magic_login.html')
+
+@app.route('/verify-magic-link')
+def verify_magic_link():
+    """Verify magic link and log user in"""
+    try:
+        email = request.args.get('email')
+        token = request.args.get('token')
+        
+        if not email or not token:
+            flash('Invalid login link', 'error')
+            return redirect(url_for('login_page'))
+        
+        # Verify token
+        token_key = f'magic_token_{email}'
+        stored_token = session.get(token_key)
+        
+        if not stored_token:
+            flash('Login link has expired. Please request a new one.', 'error')
+            return redirect(url_for('magic_login'))
+        
+        if stored_token['token'] != token:
+            flash('Invalid login link', 'error')
+            return redirect(url_for('magic_login'))
+        
+        if datetime.now() > stored_token['expires']:
+            flash('Login link has expired. Please request a new one.', 'error')
+            return redirect(url_for('magic_login'))
+        
+        # Get user from database
+        billing_service = BillingService()
+        with billing_service.db_session() as db:
+            user = db.query(User).filter(User.email == email).first()
+            
+            if not user or not user.is_active:
+                flash('Account not found or inactive', 'error')
+                return redirect(url_for('login_page'))
+            
+            # Log user in
+            session['user_id'] = str(user.id)
+            session['user_email'] = user.email
+            session['email'] = user.email
+            
+            # Clear the magic token
+            session.pop(token_key, None)
+            
+            flash('Login successful!', 'success')
+            return redirect(url_for('dashboard'))
+        
+    except Exception as e:
+        logging.error(f"Error verifying magic link: {str(e)}")
+        flash('An error occurred. Please try again.', 'error')
+        return redirect(url_for('login_page'))
+
 @app.route('/api/dashboard-data', methods=['GET'])
 def get_dashboard_data():
     """Get dashboard data for current user"""
