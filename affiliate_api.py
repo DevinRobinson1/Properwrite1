@@ -26,7 +26,15 @@ def get_db_session():
     from sqlalchemy.orm import sessionmaker
     import os
     
-    DATABASE_URL = os.environ.get("DATABASE_URL")
+    pg_host = os.environ.get("PGHOST")
+    pg_user = os.environ.get("PGUSER")
+    pg_password = os.environ.get("PGPASSWORD")
+    pg_database = os.environ.get("PGDATABASE")
+    pg_port = os.environ.get("PGPORT", "5432")
+    if pg_host and pg_user and pg_password and pg_database:
+        DATABASE_URL = f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_database}?sslmode=require"
+    else:
+        DATABASE_URL = os.environ.get("DATABASE_URL")
     engine = create_engine(
         DATABASE_URL,
         pool_pre_ping=True,
