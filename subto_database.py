@@ -12,19 +12,9 @@ from typing import Dict, List, Optional
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
-def _get_db_url():
-    pg_host = os.environ.get("PGHOST")
-    pg_user = os.environ.get("PGUSER")
-    pg_password = os.environ.get("PGPASSWORD")
-    pg_database = os.environ.get("PGDATABASE")
-    pg_port = os.environ.get("PGPORT", "5432")
-    if pg_host and pg_user and pg_password and pg_database:
-        return f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_database}?sslmode=require"
-    return os.environ.get("DATABASE_URL")
-
 class SubToDatabase:
     def __init__(self):
-        self.database_url = _get_db_url()
+        self.database_url = os.environ.get("DATABASE_URL")
         if not self.database_url:
             raise ValueError("DATABASE_URL environment variable not set")
         

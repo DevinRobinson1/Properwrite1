@@ -404,17 +404,7 @@ class JVDocumentService:
             # Don't raise - access logging shouldn't break the main operation
 
 # Initialize service
-def _get_db_url():
-    pg_host = os.environ.get("PGHOST")
-    pg_user = os.environ.get("PGUSER")
-    pg_password = os.environ.get("PGPASSWORD")
-    pg_database = os.environ.get("PGDATABASE")
-    pg_port = os.environ.get("PGPORT", "5432")
-    if pg_host and pg_user and pg_password and pg_database:
-        return f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_database}?sslmode=require"
-    return os.environ.get('DATABASE_URL')
-
 jv_doc_service = JVDocumentService(
-    database_url=_get_db_url(),
+    database_url=os.environ.get('DATABASE_URL'),
     upload_folder=os.path.join(os.getcwd(), 'jv_documents')
 )

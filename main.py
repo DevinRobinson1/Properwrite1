@@ -17,21 +17,8 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-# Database configuration - use Replit's PG vars if DATABASE_URL is unavailable
-def get_database_url():
-    db_url = os.environ.get("DATABASE_URL")
-    # Build from individual PG vars as fallback (Replit managed PostgreSQL)
-    pg_host = os.environ.get("PGHOST")
-    pg_user = os.environ.get("PGUSER")
-    pg_password = os.environ.get("PGPASSWORD")
-    pg_database = os.environ.get("PGDATABASE")
-    pg_port = os.environ.get("PGPORT", "5432")
-    if pg_host and pg_user and pg_password and pg_database:
-        constructed = f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{pg_database}?sslmode=require"
-        return constructed
-    return db_url
-
-app.config["SQLALCHEMY_DATABASE_URI"] = get_database_url()
+# Database configuration
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     'pool_pre_ping': True,
