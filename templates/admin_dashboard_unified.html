@@ -1,19 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-WXR2WK4Q');</script>
-    <!-- End Google Tag Manager -->
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - properwrite.com</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -53,11 +43,6 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WXR2WK4Q"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
-    
     <!-- Header -->
     <header class="bg-white shadow-sm border-b">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -650,7 +635,9 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Assign to Affiliate</label>
                     <select id="promo-affiliate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">Select Affiliate</option>
-                        <!-- Affiliates will be populated dynamically from database -->
+                        <option value="sample-affiliate-1">John Martinez</option>
+                        <option value="sample-affiliate-2">Sarah Thompson</option>
+                        <option value="sample-affiliate-3">Mike Rodriguez</option>
                     </select>
                 </div>
                 <div class="mb-4">
@@ -997,134 +984,11 @@
         }
         
         function editPromoCode(id) {
-            // First, get the promo code data
-            fetch(`/admin/api/promo-codes/${id}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showEditPromoCodeModal(data.promo_code);
-                    } else {
-                        alert('Error loading promo code: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading promo code:', error);
-                    alert('Error loading promo code');
-                });
-        }
-        
-        function showEditPromoCodeModal(promoCode) {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50';
-            modal.innerHTML = `
-                <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-                    <div class="mt-3">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Edit Promo Code</h3>
-                        <form id="editPromoCodeForm">
-                            <div class="mb-3">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Code</label>
-                                <input type="text" id="editPromoCode" value="${promoCode.code}" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                                <select id="editPromoType" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
-                                    <option value="PERCENTAGE_DISCOUNT" ${promoCode.type === 'PERCENTAGE_DISCOUNT' ? 'selected' : ''}>Percentage Discount</option>
-                                    <option value="CREDIT_PACK" ${promoCode.type === 'CREDIT_PACK' ? 'selected' : ''}>Credit Pack</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Value</label>
-                                <input type="number" id="editPromoValue" value="${promoCode.discount_percentage || promoCode.credit_amount}" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Max Uses</label>
-                                <input type="number" id="editMaxUses" value="${promoCode.max_uses}" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="flex items-center">
-                                    <input type="checkbox" id="editIsActive" ${promoCode.is_active ? 'checked' : ''} class="mr-2">
-                                    <span class="text-sm font-medium text-gray-700">Active</span>
-                                </label>
-                            </div>
-                            <div class="flex justify-end space-x-2">
-                                <button type="button" onclick="document.body.removeChild(this.closest('.fixed'))" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
-                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Update</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            // Handle form submission
-            document.getElementById('editPromoCodeForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                updatePromoCode(promoCode.id, modal);
-            });
-        }
-        
-        function updatePromoCode(id, modal) {
-            const formData = {
-                code: document.getElementById('editPromoCode').value,
-                type: document.getElementById('editPromoType').value,
-                value: parseFloat(document.getElementById('editPromoValue').value),
-                max_uses: parseInt(document.getElementById('editMaxUses').value),
-                is_active: document.getElementById('editIsActive').checked
-            };
-            
-            fetch(`/admin/api/promo-codes/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.body.removeChild(modal);
-                    loadPromoCodesData(); // Refresh the table
-                    showSuccessToast('Promo code updated successfully!');
-                } else {
-                    alert('Error updating promo code: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error updating promo code:', error);
-                alert('Error updating promo code');
-            });
+            alert('Edit promo code: ' + id);
         }
         
         function deletePromoCode(id) {
-            if (confirm('Are you sure you want to delete this promo code? This action cannot be undone.')) {
-                fetch(`/admin/api/promo-codes/${id}`, {
-                    method: 'DELETE'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        loadPromoCodesData(); // Refresh the table
-                        showSuccessToast('Promo code deleted successfully!');
-                    } else {
-                        alert('Error deleting promo code: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error deleting promo code:', error);
-                    alert('Error deleting promo code');
-                });
-            }
-        }
-        
-        function showSuccessToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-            toast.innerHTML = `<i class="fas fa-check mr-2"></i>${message}`;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
+            alert('Delete promo code: ' + id);
         }
         
         function viewTeam(id) {
@@ -1916,7 +1780,6 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Admin-Token': 'admin123'
                     },
                     body: JSON.stringify({ user_ids: selectedUsers })
                 })
@@ -1949,7 +1812,6 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Admin-Token': 'admin123'
                     },
                     body: JSON.stringify({ user_ids: selectedUsers })
                 })
@@ -1982,7 +1844,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Admin-Token': 'admin123'
+                        'X-CSRFToken': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({ user_ids: selectedUsers })
                 })
@@ -2332,7 +2194,6 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Admin-Token': 'admin123'
                     }
                 })
                 .then(response => response.json())
@@ -2381,17 +2242,12 @@
             
             const credits = prompt('Enter the number of credits to add:');
             if (credits && !isNaN(credits) && credits > 0) {
-                const reason = prompt('Enter reason for credit addition (optional):') || 'Admin credit addition';
-                
                 fetch(`/admin/api/users/${currentUserData.id}/add-credits`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ 
-                        credits: parseInt(credits),
-                        reason: reason
-                    })
+                    body: JSON.stringify({ credits: parseInt(credits) })
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -2413,29 +2269,24 @@
         function resetUserPassword() {
             if (!currentUserData) return;
             
-            if (confirm('Are you sure you want to reset this user\'s password?')) {
-                const newPassword = prompt('Enter new password (leave blank for auto-generated):');
-                
+            if (confirm('Are you sure you want to reset this user\'s password? They will receive an email with reset instructions.')) {
                 fetch(`/admin/api/users/${currentUserData.id}/reset-password`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        new_password: newPassword || null
-                    })
+                        'Content-Type': 'application/json',
+                    }
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert(`Password reset successfully! New password: ${data.new_password}`);
+                        alert('Password reset email sent successfully');
                     } else {
-                        alert('Error resetting password: ' + data.error);
+                        alert('Error sending password reset: ' + data.error);
                     }
                 })
                 .catch(error => {
                     console.error('Error resetting password:', error);
-                    alert('Error resetting password');
+                    alert('Error sending password reset');
                 });
             }
         }
@@ -2443,14 +2294,14 @@
         function upgradeUserPlan() {
             if (!currentUserData) return;
             
-            const plans = ['starter', 'pro', 'team5', 'growth10'];
-            const planName = prompt('Enter the plan to upgrade to (starter, pro, team5, growth10):');
+            const plans = ['free', 'pro', 'team5', 'growth10'];
+            const planName = prompt('Enter the plan to upgrade to (free, pro, team5, growth10):');
             
             if (planName && plans.includes(planName)) {
                 fetch(`/admin/api/users/${currentUserData.id}/upgrade-plan`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({ plan: planName })
                 })
@@ -2477,7 +2328,7 @@
             fetch(`/admin/api/users/${currentUserData.id}/send-welcome-email`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 }
             })
             .then(response => response.json())
@@ -2492,184 +2343,6 @@
                 console.error('Error sending welcome email:', error);
                 alert('Error sending welcome email');
             });
-        }
-
-        function grantTrialExtension() {
-            if (!currentUserData) return;
-            
-            const days = prompt('Enter number of days to extend trial:');
-            if (days && !isNaN(days) && parseInt(days) > 0) {
-                fetch(`/admin/api/users/${currentUserData.id}/grant-trial-extension`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        days: parseInt(days)
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(`Trial extended by ${days} days! Added ${data.bonus_credits} bonus credits.`);
-                        // Refresh the user data
-                        viewUser(currentUserData.id, currentUserData.email, currentUserData.name, currentUserData.team, currentUserData.plan, currentUserData.credits, currentUserData.lastActive);
-                    } else {
-                        alert('Error granting trial extension: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error granting trial extension:', error);
-                    alert('Error granting trial extension');
-                });
-            }
-        }
-
-        function flagForReview() {
-            if (!currentUserData) return;
-            
-            const reason = prompt('Enter reason for flagging user for review:');
-            if (reason) {
-                fetch(`/admin/api/users/${currentUserData.id}/flag-for-review`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        reason: reason
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('User flagged for review successfully');
-                    } else {
-                        alert('Error flagging user: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error flagging user:', error);
-                    alert('Error flagging user');
-                });
-            }
-        }
-
-        function exportUserData() {
-            if (!currentUserData) return;
-            
-            fetch(`/admin/api/users/${currentUserData.id}/export-data`, {
-                method: 'GET'
-            })
-            .then(response => response.blob())
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `user_data_${currentUserData.id}.json`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-                alert('User data exported successfully');
-            })
-            .catch(error => {
-                console.error('Error exporting user data:', error);
-                alert('Error exporting user data');
-            });
-        }
-
-        function viewUserActivity() {
-            if (!currentUserData) return;
-            
-            fetch(`/admin/api/users/${currentUserData.id}/activity-log`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Create a simple activity log display
-                    let activityHTML = '<h3>User Activity Log</h3><ul>';
-                    data.activity.forEach(activity => {
-                        activityHTML += `<li>${activity.timestamp}: ${activity.action} - ${activity.description}</li>`;
-                    });
-                    activityHTML += '</ul>';
-                    
-                    // Show in a new window
-                    const newWindow = window.open('', '_blank', 'width=800,height=600');
-                    newWindow.document.write(`
-                        <html>
-                            <head><title>User Activity Log</title></head>
-                            <body>${activityHTML}</body>
-                        </html>
-                    `);
-                } else {
-                    alert('Error viewing activity: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error viewing activity:', error);
-                alert('Error viewing activity');
-            });
-        }
-
-        function viewUserBilling() {
-            if (!currentUserData) return;
-            
-            fetch(`/admin/api/users/${currentUserData.id}/billing-history`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Create a simple billing history display
-                    let billingHTML = '<h3>User Billing History</h3><ul>';
-                    data.billing.forEach(bill => {
-                        billingHTML += `<li>${bill.date}: $${bill.amount} - ${bill.description}</li>`;
-                    });
-                    billingHTML += '</ul>';
-                    
-                    // Show in a new window
-                    const newWindow = window.open('', '_blank', 'width=800,height=600');
-                    newWindow.document.write(`
-                        <html>
-                            <head><title>User Billing History</title></head>
-                            <body>${billingHTML}</body>
-                        </html>
-                    `);
-                } else {
-                    alert('Error viewing billing history: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error viewing billing history:', error);
-                alert('Error viewing billing history');
-            });
-        }
-
-        function reactivateUser() {
-            if (!currentUserData) return;
-            
-            if (confirm('Are you sure you want to reactivate this user?')) {
-                fetch(`/admin/api/users/${currentUserData.id}/suspend`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        suspend: false
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('User reactivated successfully');
-                        // Refresh the user data
-                        viewUser(currentUserData.id, currentUserData.email, currentUserData.name, currentUserData.team, currentUserData.plan, currentUserData.credits, currentUserData.lastActive);
-                    } else {
-                        alert('Error reactivating user: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error reactivating user:', error);
-                    alert('Error reactivating user');
-                });
-            }
         }
 
         function grantTrialExtension() {
@@ -2866,8 +2539,6 @@
         }
 
     </script>
-
-    <!-- Update existing functions to use proper admin endpoints -->
 
     <!-- Comprehensive User View Panel -->
     <div id="user-details-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">

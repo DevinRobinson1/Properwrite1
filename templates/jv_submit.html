@@ -1,523 +1,556 @@
-{% extends "base.html" %}
-{% block title %}Submit a JV Deal{% endblock %}
-
-{% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/jv_submit_fixed.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/jv_enhanced.css') }}">
-
-<!-- Modern Hero Section -->
-<div class="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12">
-  <div class="max-w-4xl mx-auto px-4">
-    <div class="text-center mb-8">
-      <!-- PFPS Logo -->
-      <div class="flex justify-center mb-6">
-        <img src="{{ url_for('static', filename='PFPS_Horizontal_Logo_Dark.png') }}" alt="People First Property Solutions" class="h-16 md:h-20">
-      </div>
-      <h1 class="text-4xl font-bold text-gray-900 mb-4">
-        <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Submit a JV Deal
-        </span>
-      </h1>
-      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-        Partner with <strong>People First Property Solutions</strong> on your next real estate investment opportunity in North Carolina and South Carolina.
-      </p>
-      <div class="mt-6 flex justify-center items-center space-x-6 text-sm text-gray-600">
-        <div class="flex items-center">
-          <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>
-          <span>NC & SC Markets</span>
-        </div>
-        <div class="flex items-center">
-          <i class="fas fa-clock text-green-600 mr-2"></i>
-          <span>4.2 Hour Response</span>
-        </div>
-        <div class="flex items-center">
-          <i class="fas fa-handshake text-purple-600 mr-2"></i>
-          <span>200+ Partners</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Main Wizard Container -->
-<section id="jv-wizard" class="max-w-4xl mx-auto px-4 py-8">
-  <!-- Progress Bar -->
-  <div class="mb-8">
-    <div class="max-w-4xl mx-auto mb-6">
-      <div class="relative">
-        <div class="h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
-          <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-500 via-green-500 via-purple-500 to-orange-500 rounded-full transition-all duration-700 ease-out transform origin-left" style="width: 25%"></div>
-        </div>
-        <div class="absolute -top-1 left-0 w-5 h-5 bg-white border-4 border-blue-500 rounded-full shadow-lg transform -translate-x-2 transition-all duration-700 ease-out" id="progress-dot" style="left: calc(25% - 8px)"></div>
-      </div>
-      <div class="flex justify-between text-sm text-gray-600 mt-3">
-        <span id="progress-text" class="font-medium">Step 1 of 4</span>
-        <span id="progress-percent" class="font-medium">25%</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Step Indicators -->
-  <div class="mb-8 max-w-4xl mx-auto">
-    <div class="flex items-center justify-between space-x-2 md:space-x-8 overflow-x-auto pb-4">
-      <div class="step-indicator active flex-shrink-0" data-step="1">
-        <div class="step-circle">
-          <img src="{{ url_for('static', filename='PFPS_Icon_Mark_Dark.png') }}" alt="PFPS" class="w-6 h-6">
-        </div>
-        <div class="step-label">Partner Info</div>
-      </div>
-      <div class="step-connector flex-shrink-0"></div>
-      <div class="step-indicator flex-shrink-0" data-step="2">
-        <div class="step-circle">
-          <i class="fas fa-home"></i>
-        </div>
-        <div class="step-label">Property Details</div>
-      </div>
-      <div class="step-connector flex-shrink-0"></div>
-      <div class="step-indicator flex-shrink-0" data-step="3">
-        <div class="step-circle">
-          <i class="fas fa-calculator"></i>
-        </div>
-        <div class="step-label">Deal Numbers</div>
-      </div>
-      <div class="step-connector flex-shrink-0"></div>
-      <div class="step-indicator flex-shrink-0" data-step="4">
-        <div class="step-circle">
-          <i class="fas fa-check"></i>
-        </div>
-        <div class="step-label">Review & Submit</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Form Container -->
-  <div class="max-w-4xl mx-auto">
-
-    <!-- Form Steps -->
-    <form id="jv-form" autocomplete="off" class="space-y-8">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    <!-- STEP 1 – Partner Info -->
-    <fieldset data-step="1" class="step-content">
-      <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl shadow-lg overflow-hidden border-2 border-blue-200">
-        <div class="p-8">
-          <div class="flex items-center mb-6 step-header">
-            <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mr-4">
-              <img src="{{ url_for('static', filename='PFPS_Icon_Mark_Dark.png') }}" alt="PFPS" class="w-6 h-6 filter brightness-0 invert">
-            </div>
-            <div class="flex-1">
-              <h2 class="text-2xl font-bold text-blue-900">Partner Information</h2>
-              <p class="text-blue-700">Join the People First Property Solutions network</p>
-            </div>
-            <div class="hidden md:block">
-              <img src="{{ url_for('static', filename='PFPS_Horizontal_Logo_Dark.png') }}" alt="People First Property Solutions" class="h-8 opacity-60">
-            </div>
-          </div>
-          
-          <div class="bg-white rounded-xl p-6 shadow-md">
-            <div class="space-y-6">
-              <div class="form-group">
-                <label class="form-label">Full Name *</label>
-                <div class="input-wrapper">
-                  <i class="fas fa-id-card input-icon"></i>
-                  <input type="text" name="name" class="form-input" placeholder="John Smith" required>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JV Deal Submit - properwrite.com</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places" async defer></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-gray-800">🏘️ JV Deal Submit</h1>
                 </div>
-              </div>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="form-group">
-                  <label class="form-label">Email Address *</label>
-                  <div class="input-wrapper">
-                    <i class="fas fa-envelope input-icon"></i>
-                    <input type="email" name="email" class="form-input" placeholder="your@email.com" required>
-                  </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-blue-600 hover:text-blue-800 font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Analyzer
+                    </a>
                 </div>
-                
-                <div class="form-group">
-                  <label class="form-label">Phone Number *</label>
-                  <div class="input-wrapper">
-                    <i class="fas fa-phone input-icon"></i>
-                    <input type="tel" name="phone" class="form-input" placeholder="(555) 123-4567" required>
-                  </div>
-                </div>
-              </div>
             </div>
-          </div>
         </div>
-        
-        <div class="bg-blue-100 px-8 py-6 flex justify-end border-t-2 border-blue-200">
-          <button type="button" class="btn-primary next">
-            Continue to Property Details
-            <i class="fas fa-arrow-right ml-2"></i>
-          </button>
-        </div>
-      </div>
-    </fieldset>
+    </nav>
 
-    <!-- STEP 2 – Property -->
-    <fieldset data-step="2" class="step-content" hidden>
-      <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl shadow-lg overflow-hidden border-2 border-green-200">
-        <div class="p-8">
-          <div class="flex items-center mb-6 step-header">
-            <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mr-4">
-              <i class="fas fa-home text-white text-xl"></i>
-            </div>
-            <div class="flex-1">
-              <h2 class="text-2xl font-bold text-green-900">Property Details</h2>
-              <p class="text-green-700">NC & SC properties - where PFPS specializes</p>
-            </div>
-            <div class="hidden md:block">
-              <img src="{{ url_for('static', filename='PFPS_Horizontal_Logo_Dark.png') }}" alt="People First Property Solutions" class="h-8 opacity-60">
-            </div>
-          </div>
-          
-          <div class="bg-white rounded-xl p-6 shadow-md">
-            <div class="space-y-6">
-              <div class="form-group">
-                <label class="form-label">Property Address *</label>
-                <div class="input-wrapper">
-                  <i class="fas fa-map-marker-alt input-icon"></i>
-                  <input id="autocomplete" type="text" name="address" class="form-input" placeholder="Start typing the property address..." required>
-                </div>
-                <p class="text-sm text-gray-500 mt-2">
-                  <i class="fas fa-info-circle mr-1"></i>
-                  Uses Google Places autocomplete for accuracy
-                </p>
-              </div>
-              
-              <div class="form-group">
-                <label class="form-label">Deal Type *</label>
-                <div class="space-y-3">
-                  <div class="deal-type-option" data-value="Cash/Dispo Help">
-                    <input type="radio" name="deal_type" value="Cash/Dispo Help" id="cash-dispo" class="sr-only" required>
-                    <label for="cash-dispo" class="deal-type-card">
-                      <div class="flex items-center">
-                        <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mr-4">
-                          <i class="fas fa-dollar-sign text-white"></i>
-                        </div>
-                        <div class="flex-1">
-                          <h4 class="font-semibold text-gray-900">Cash/Dispo Help</h4>
-                          <p class="text-sm text-gray-600">Need cash buyer from our network or help selling quickly</p>
-                        </div>
-                      </div>
-                    </label>
-                  </div>
-                  
-                  <div class="deal-type-option" data-value="Novation/Installment Deal">
-                    <input type="radio" name="deal_type" value="Novation/Installment Deal" id="novation-installment" class="sr-only">
-                    <label for="novation-installment" class="deal-type-card">
-                      <div class="flex items-center">
-                        <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mr-4">
-                          <i class="fas fa-handshake text-white"></i>
-                        </div>
-                        <div class="flex-1">
-                          <h4 class="font-semibold text-gray-900">Novation/Installment Deal</h4>
-                          <p class="text-sm text-gray-600">Seller-friendly installment payment structure</p>
-                        </div>
-                      </div>
-                    </label>
-                  </div>
-                  
-                  <div class="deal-type-option" data-value="Creative Finance Deal">
-                    <input type="radio" name="deal_type" value="Creative Finance Deal" id="creative-finance" class="sr-only">
-                    <label for="creative-finance" class="deal-type-card">
-                      <div class="flex items-center">
-                        <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center mr-4">
-                          <i class="fas fa-lightbulb text-white"></i>
-                        </div>
-                        <div class="flex-1">
-                          <h4 class="font-semibold text-gray-900">Creative Finance Deal</h4>
-                          <p class="text-sm text-gray-600">Subject-to, seller finance, or lease-option strategies</p>
-                        </div>
-                      </div>
-                    </label>
-                  </div>
-                  
-                  <div class="deal-type-option" data-value="not-sure">
-                    <input type="radio" name="deal_type_helper" value="not-sure" id="not-sure" class="sr-only">
-                    <label for="not-sure" class="deal-type-card border-dashed border-gray-300">
-                      <div class="flex items-center">
-                        <div class="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center mr-4">
-                          <i class="fas fa-question text-white"></i>
-                        </div>
-                        <div class="flex-1">
-                          <h4 class="font-semibold text-gray-900">Not Sure?</h4>
-                          <p class="text-sm text-gray-600">We'll help you choose the best strategy</p>
-                        </div>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Submit a Deal to Partner Up</h2>
+            <p class="text-gray-600">Share your real estate opportunity for joint venture partnership evaluation.</p>
         </div>
-        
-        <div class="bg-green-100 px-8 py-6 flex justify-between border-t-2 border-green-200">
-          <button type="button" class="btn-secondary prev">
-            <i class="fas fa-arrow-left mr-2"></i>
-            Back
-          </button>
-          <button type="button" class="btn-primary next">
-            Continue to Deal Numbers
-            <i class="fas fa-arrow-right ml-2"></i>
-          </button>
-        </div>
-      </div>
-    </fieldset>
 
-    <!-- STEP 3 – Deal Numbers -->
-    <fieldset data-step="3" class="step-content" hidden>
-      <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl shadow-lg overflow-hidden border-2 border-purple-200">
-        <div class="p-8">
-          <div class="flex items-center mb-6 step-header">
-            <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mr-4">
-              <i class="fas fa-calculator text-white text-xl"></i>
-            </div>
-            <div class="flex-1">
-              <h2 class="text-2xl font-bold text-purple-900">Deal Numbers</h2>
-              <p class="text-purple-700">PFPS analyzes every deal using our proven MAO system</p>
-            </div>
-            <div class="hidden md:block">
-              <img src="{{ url_for('static', filename='PFPS_Horizontal_Logo_Dark.png') }}" alt="People First Property Solutions" class="h-8 opacity-60">
-            </div>
-          </div>
-          
-          <div class="bg-white rounded-xl p-6 shadow-md">
-            <div class="space-y-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="form-group">
-                  <label class="form-label">Seller Asking Price *</label>
-                  <div class="input-wrapper">
-                    <i class="fas fa-dollar-sign input-icon"></i>
-                    <input type="text" name="asking_price" class="form-input" placeholder="250,000" required>
-                  </div>
+        <!-- Form Container -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <form id="jv-deal-form">
+                <!-- Partner Information -->
+                <div class="mb-8 pb-6 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Partner Information</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                            <input type="text" name="partner_name" id="partner_name" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="John Smith"
+                                   pattern="^[A-Za-z\s]+ [A-Za-z\s]+$"
+                                   title="Please enter at least two words">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                            <input type="email" name="partner_email" id="partner_email" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="john@company.com">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Phone *</label>
+                            <input type="tel" name="partner_phone" id="partner_phone" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="(555) 123-4567"
+                                   pattern="^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$"
+                                   title="Please enter a valid US phone number">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Company (Optional)</label>
+                            <input type="text" name="partner_company" id="partner_company"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Real Estate Investments LLC"
+                                   maxlength="60">
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Primary Market States *</label>
+                            <select name="partner_markets" id="partner_markets" multiple required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    style="height: 120px;">
+                                <option value="AL">Alabama</option>
+                                <option value="AK">Alaska</option>
+                                <option value="AZ">Arizona</option>
+                                <option value="AR">Arkansas</option>
+                                <option value="CA">California</option>
+                                <option value="CO">Colorado</option>
+                                <option value="CT">Connecticut</option>
+                                <option value="DE">Delaware</option>
+                                <option value="FL">Florida</option>
+                                <option value="GA">Georgia</option>
+                                <option value="HI">Hawaii</option>
+                                <option value="ID">Idaho</option>
+                                <option value="IL">Illinois</option>
+                                <option value="IN">Indiana</option>
+                                <option value="IA">Iowa</option>
+                                <option value="KS">Kansas</option>
+                                <option value="KY">Kentucky</option>
+                                <option value="LA">Louisiana</option>
+                                <option value="ME">Maine</option>
+                                <option value="MD">Maryland</option>
+                                <option value="MA">Massachusetts</option>
+                                <option value="MI">Michigan</option>
+                                <option value="MN">Minnesota</option>
+                                <option value="MS">Mississippi</option>
+                                <option value="MO">Missouri</option>
+                                <option value="MT">Montana</option>
+                                <option value="NE">Nebraska</option>
+                                <option value="NV">Nevada</option>
+                                <option value="NH">New Hampshire</option>
+                                <option value="NJ">New Jersey</option>
+                                <option value="NM">New Mexico</option>
+                                <option value="NY">New York</option>
+                                <option value="NC">North Carolina</option>
+                                <option value="ND">North Dakota</option>
+                                <option value="OH">Ohio</option>
+                                <option value="OK">Oklahoma</option>
+                                <option value="OR">Oregon</option>
+                                <option value="PA">Pennsylvania</option>
+                                <option value="RI">Rhode Island</option>
+                                <option value="SC">South Carolina</option>
+                                <option value="SD">South Dakota</option>
+                                <option value="TN">Tennessee</option>
+                                <option value="TX">Texas</option>
+                                <option value="UT">Utah</option>
+                                <option value="VT">Vermont</option>
+                                <option value="VA">Virginia</option>
+                                <option value="WA">Washington</option>
+                                <option value="WV">West Virginia</option>
+                                <option value="WI">Wisconsin</option>
+                                <option value="WY">Wyoming</option>
+                            </select>
+                            <p class="text-sm text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple states</p>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                  <label class="form-label">ARV (After Repair Value) *</label>
-                  <div class="input-wrapper">
-                    <i class="fas fa-chart-line input-icon"></i>
-                    <input type="text" name="arv" class="form-input" placeholder="320,000" required>
-                  </div>
+                <!-- Property Address -->
+                <div class="mb-6 address-input-container">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Property Address *
+                    </label>
+                    <input type="text" id="property-address" name="property_address" 
+                           data-enhanced-address="true"
+                           data-auto-submit="false"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="Start typing property address..."
+                           required>
+                    <p class="text-xs text-gray-500 mt-1">Uses Google Places autocomplete for accuracy</p>
                 </div>
-              </div>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="form-group">
-                  <label class="form-label">Estimated Rehab Cost</label>
-                  <div class="input-wrapper">
-                    <i class="fas fa-tools input-icon"></i>
-                    <input type="text" name="rehab_cost" class="form-input" placeholder="25,000">
-                  </div>
+
+                <!-- Deal Type -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Deal Type *</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="radio" name="deal_type" value="wholesale" class="mr-2" required onchange="updateFormFields()">
+                            <span class="text-gray-700">Wholesale</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="deal_type" value="creative_finance" class="mr-2" required onchange="updateFormFields()">
+                            <span class="text-gray-700">Creative Finance</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="deal_type" value="mls_help" class="mr-2" required onchange="updateFormFields()">
+                            <span class="text-gray-700">MLS Help</span>
+                        </label>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                  <label class="form-label">Current Property Status *</label>
-                  <div class="select-wrapper">
-                    <select name="property_status" class="form-select" required>
-                      <option value="">Select status...</option>
-                      <option value="Under Contract">Under Contract</option>
-                      <option value="Listed">Listed</option>
-                      <option value="Not Listed">Not Listed</option>
-                      <option value="Distressed">Distressed</option>
-                      <option value="Foreclosure">Foreclosure</option>
-                      <option value="Estate Sale">Estate Sale</option>
-                      <option value="Vacant">Vacant</option>
-                      <option value="Occupied">Occupied</option>
+
+                <!-- Price Fields -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- Purchase Price (conditional) -->
+                    <div id="purchase-price-field" class="hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Purchase Price *
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-gray-500">$</span>
+                            <input type="text" id="purchase-price" name="purchase_price" 
+                                   class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="0"
+                                   onchange="formatCurrency(this)">
+                        </div>
+                    </div>
+
+                    <!-- Seller Asking Price -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Seller Asking Price *
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-gray-500">$</span>
+                            <input type="text" id="seller-asking-price" name="seller_asking_price" 
+                                   class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="0"
+                                   required
+                                   onchange="formatCurrency(this)">
+                        </div>
+                    </div>
+
+                    <!-- ARV -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            ARV (After Repair Value) *
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-gray-500">$</span>
+                            <input type="text" id="arv" name="arv" 
+                                   class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="0"
+                                   required
+                                   onchange="formatCurrency(this)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rehab Section -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Rehab Needed? *</label>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="radio" name="rehab_needed" value="yes" class="mr-2" required onchange="toggleRehabFields()">
+                            <span class="text-gray-700">Yes</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="rehab_needed" value="no" class="mr-2" required onchange="toggleRehabFields()">
+                            <span class="text-gray-700">No</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Estimated Rehab Cost (conditional) -->
+                <div id="rehab-cost-field" class="mb-6 hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Estimated Rehab Cost *
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-gray-500">$</span>
+                        <input type="text" id="rehab-cost" name="rehab_cost" 
+                               class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="0"
+                               onchange="formatCurrency(this)">
+                    </div>
+                </div>
+
+                <!-- Property Description -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Property Description
+                    </label>
+                    <textarea id="property-description" name="property_description" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              rows="3"
+                              maxlength="300"
+                              placeholder="Brief description of the property..."></textarea>
+                    <p class="text-xs text-gray-500 mt-1">Maximum 300 characters</p>
+                </div>
+
+                <!-- Photo Link -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Link to Photos / Drive Folder
+                    </label>
+                    <input type="url" id="photos-link" name="photos_link" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="https://drive.google.com/..."
+                           pattern="https?://.*">
+                </div>
+
+                <!-- Property Status -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Current Property Status *
+                    </label>
+                    <select id="property-status" name="property_status" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required>
+                        <option value="">Select status...</option>
+                        <option value="vacant">Vacant</option>
+                        <option value="tenant_occupied">Tenant-Occupied</option>
+                        <option value="owner_occupied">Owner-Occupied</option>
+                        <option value="listed">Listed</option>
                     </select>
-                    <i class="fas fa-chevron-down select-icon"></i>
-                  </div>
                 </div>
-              </div>
-              
-              <div class="form-group">
-                <label class="form-label">Expected Closing Date *</label>
-                <div class="input-wrapper">
-                  <i class="fas fa-calendar input-icon"></i>
-                  <input type="date" name="closing_date" class="form-input" required>
-                </div>
-              </div>
-              
-              <div class="form-group">
-                <label class="form-label">Property Description</label>
-                <textarea name="property_description" class="form-input" rows="3" placeholder="Brief description of the property..." maxlength="300"></textarea>
-                <p class="text-sm text-gray-500 mt-1">Maximum 300 characters</p>
-              </div>
-              
-              <div class="form-group">
-                <label class="form-label">Property Photos</label>
-                <div class="photo-upload-area">
-                  <div id="photo-drop-zone" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition-colors">
-                    <div class="space-y-4">
-                      <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
-                        <i class="fas fa-camera text-blue-600 text-2xl"></i>
-                      </div>
-                      <div>
-                        <p class="text-lg font-medium text-gray-900">Add Property Photos</p>
-                        <p class="text-sm text-gray-600">Drag & drop photos here or click to browse</p>
-                      </div>
-                      <div class="flex justify-center space-x-4">
-                        <button type="button" id="photo-browse" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                          <i class="fas fa-folder-open mr-2"></i>Browse Files
-                        </button>
-                        <button type="button" id="camera-capture" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                          <i class="fas fa-camera mr-2"></i>Take Photo
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <input type="file" id="photo-input" name="photos" multiple accept="image/*" class="hidden">
-                  <input type="file" id="camera-input" accept="image/*" capture="environment" class="hidden">
-                  
-                  <div id="photo-preview" class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 hidden">
-                    <!-- Photo previews will be inserted here -->
-                  </div>
-                  
-                  <div class="mt-4">
-                    <label class="form-label">Or paste a link to Google Drive / Dropbox</label>
-                    <div class="input-wrapper">
-                      <i class="fas fa-link input-icon"></i>
-                      <input type="url" name="photo_link" class="form-input" placeholder="https://drive.google.com/...">
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="form-group">
-                <label class="form-label">Additional Notes / Questions</label>
-                <div class="relative">
-                  <textarea name="additional_notes" class="form-input" rows="3" placeholder="Any additional details or questions..."></textarea>
-                  <button type="button" id="voice-memo" class="absolute bottom-3 right-3 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
-                    <i class="fas fa-microphone"></i>
-                  </button>
-                </div>
-                <div class="mt-2 flex items-center text-sm text-gray-600">
-                  <i class="fas fa-info-circle mr-1"></i>
-                  <span>Tip: Include any unique selling points or urgent timeline needs</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="bg-purple-100 px-8 py-6 flex justify-between border-t-2 border-purple-200">
-          <button type="button" class="btn-secondary prev">
-            <i class="fas fa-arrow-left mr-2"></i>
-            Back
-          </button>
-          <button type="button" class="btn-primary next">
-            Review Deal
-            <i class="fas fa-arrow-right ml-2"></i>
-          </button>
-        </div>
-      </div>
-    </fieldset>
 
-    <!-- STEP 4 – Review -->
-    <fieldset data-step="4" class="step-content" hidden>
-      <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl shadow-lg overflow-hidden border-2 border-orange-200">
-        <div class="p-8">
-          <div class="flex items-center mb-6 step-header">
-            <div class="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center mr-4">
-              <i class="fas fa-check text-white text-xl"></i>
-            </div>
-            <div class="flex-1">
-              <h2 class="text-2xl font-bold text-orange-900">Review Your Deal</h2>
-              <p class="text-orange-700">Ready to partner with People First Property Solutions?</p>
-            </div>
-            <div class="hidden md:block">
-              <img src="{{ url_for('static', filename='PFPS_Horizontal_Logo_Dark.png') }}" alt="People First Property Solutions" class="h-8 opacity-60">
-            </div>
-          </div>
-          
-          <div class="bg-white rounded-xl p-6 shadow-md mb-6">
-            <div id="review-container" class="space-y-4">
-              <!-- Review content will be populated by JavaScript -->
-            </div>
-          </div>
-          
-          <div class="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-xl p-4">
-            <div class="flex items-center">
-              <img src="{{ url_for('static', filename='PFPS_Icon_Mark_Dark.png') }}" alt="PFPS" class="w-8 h-8 mr-3">
-              <div>
-                <p class="text-blue-900 font-semibold">People First Property Solutions</p>
-                <p class="text-blue-700 text-sm">
-                  <strong>Next Steps:</strong> Our NC/SC specialists will review your deal within 4.2 hours and contact you with our decision.
-                </p>
-              </div>
-            </div>
-          </div>
+                <!-- Expected Closing Date -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Expected Closing Date *
+                    </label>
+                    <input type="date" id="closing-date" name="closing_date" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           required>
+                </div>
+
+                <!-- Additional Notes -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Additional Notes / Questions
+                    </label>
+                    <textarea id="additional-notes" name="additional_notes" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              rows="4"
+                              placeholder="Any additional details or questions..."></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-4">
+                    <button type="submit" id="submit-btn" 
+                            class="w-full bg-blue-600 text-white py-3 px-6 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            disabled>
+                        Submit Deal for Review
+                    </button>
+                </div>
+            </form>
         </div>
-        
-        <div class="bg-orange-100 px-8 py-6 flex justify-between border-t-2 border-orange-200">
-          <button type="button" class="btn-secondary prev">
-            <i class="fas fa-arrow-left mr-2"></i>
-            Back
-          </button>
-          <div class="flex items-center space-x-3">
-            <img src="{{ url_for('static', filename='PFPS_Icon_Mark_Dark.png') }}" alt="PFPS" class="w-8 h-8">
-            <button type="submit" class="btn-success">
-              <i class="fas fa-paper-plane mr-2"></i>
-              Submit to People First Property Solutions
-            </button>
-          </div>
+
+        <!-- Result Card (hidden initially) -->
+        <div id="result-card" class="mt-8 hidden">
         </div>
-      </div>
-    </fieldset>
-  </form>
-  </div>
-  
-  <!-- Right Side - Real-Time Deal Calculator -->
-  <div class="hidden lg:block w-80 sticky top-8 h-fit">
-    <div id="deal-calculator" class="bg-gradient-to-br from-green-50 to-blue-50 border-2 border-green-200 rounded-2xl p-6 shadow-xl">
-      <div class="flex items-center mb-4">
-        <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mr-3">
-          <i class="fas fa-calculator text-white"></i>
-        </div>
-        <div>
-          <h3 class="text-lg font-bold text-green-900">Live Deal Analysis</h3>
-          <p class="text-sm text-green-700">Updates as you type</p>
-        </div>
-      </div>
-      
-      <div id="calculator-content" class="space-y-4">
-        <div class="bg-white rounded-lg p-4 border border-green-200">
-          <div class="text-center text-gray-500 py-8">
-            <img src="{{ url_for('static', filename='PFPS_Icon_Mark_Dark.png') }}" alt="PFPS" class="w-12 h-12 mx-auto mb-3 opacity-40">
-            <p>Enter deal details to see live analysis</p>
-          </div>
-        </div>
-      </div>
     </div>
+
+    <script>
+        // Set minimum date to today
+        document.getElementById('closing-date').min = new Date().toISOString().split('T')[0];
+
+        // Format currency inputs
+        function formatCurrency(input) {
+            let value = input.value.replace(/[^\d]/g, '');
+            if (value) {
+                value = parseInt(value).toLocaleString();
+                input.value = value;
+            }
+            validateForm();
+        }
+
+        // Update form fields based on deal type
+        function updateFormFields() {
+            const dealType = document.querySelector('input[name="deal_type"]:checked')?.value;
+            const purchasePriceField = document.getElementById('purchase-price-field');
+            const purchasePriceInput = document.getElementById('purchase-price');
+            
+            if (dealType === 'wholesale') {
+                purchasePriceField.classList.remove('hidden');
+                purchasePriceInput.required = true;
+            } else {
+                purchasePriceField.classList.add('hidden');
+                purchasePriceInput.required = false;
+                purchasePriceInput.value = '';
+            }
+            validateForm();
+        }
+
+        // Toggle rehab fields
+        function toggleRehabFields() {
+            const rehabNeeded = document.querySelector('input[name="rehab_needed"]:checked')?.value;
+            const rehabCostField = document.getElementById('rehab-cost-field');
+            const rehabCostInput = document.getElementById('rehab-cost');
+            
+            if (rehabNeeded === 'yes') {
+                rehabCostField.classList.remove('hidden');
+                rehabCostInput.required = true;
+            } else {
+                rehabCostField.classList.add('hidden');
+                rehabCostInput.required = false;
+                rehabCostInput.value = '';
+            }
+            validateForm();
+        }
+
+        // Validate form and enable/disable submit button
+        function validateForm() {
+            const form = document.getElementById('jv-deal-form');
+            const submitBtn = document.getElementById('submit-btn');
+            const requiredFields = form.querySelectorAll('[required]');
+            
+            let isValid = true;
+            for (let field of requiredFields) {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    break;
+                }
+            }
+            
+            submitBtn.disabled = !isValid;
+        }
+
+        // Add event listeners for form validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('jv-deal-form');
+            const inputs = form.querySelectorAll('input, select, textarea');
+            
+            inputs.forEach(input => {
+                input.addEventListener('change', validateForm);
+                input.addEventListener('input', validateForm);
+            });
+
+            // Form submission
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(form);
+                const data = {};
+                
+                // Convert FormData to object
+                for (let [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+                
+                // Handle multiple select for markets
+                const marketsSelect = document.getElementById('partner_markets');
+                data.partner_markets = Array.from(marketsSelect.selectedOptions).map(option => option.value);
+                
+                // Parse address
+                const fullAddress = data.property_address;
+                const addressParts = fullAddress.split(',').map(part => part.trim());
+                data.street = addressParts[0] || '';
+                data.city = addressParts[1] || '';
+                data.state = addressParts[2] || '';
+                data.zip = addressParts[3] || '';
+                
+                // Clean currency values
+                ['purchase_price', 'seller_asking_price', 'arv', 'rehab_cost'].forEach(field => {
+                    if (data[field]) {
+                        data[field] = data[field].replace(/[^\d]/g, '');
+                    }
+                });
+                
+                try {
+                    const response = await fetch('/api/jv-submit', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        showResultCard(result);
+                        form.reset();
+                        document.getElementById('submit-btn').disabled = true;
+                    } else {
+                        alert('Error: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('Submission failed. Please try again.');
+                    console.error('Submission error:', error);
+                }
+            });
+        });
+
+        // Show result card
+        function showResultCard(result) {
+            const resultCard = document.getElementById('result-card');
+            const isApproved = result.underwrite_result.status === 'auto-approved';
+            
+            const cardClass = isApproved ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
+            const iconClass = isApproved ? 'text-green-600 fa-check-circle' : 'text-red-600 fa-times-circle';
+            const titleClass = isApproved ? 'text-green-800' : 'text-red-800';
+            const title = isApproved ? 'Auto-Approved ✅' : 'Auto-Denied ❌';
+            const subtitle = isApproved ? 'Pending Final PFP Review' : 'Deal Does Not Meet Criteria';
+            
+            let reasonsHtml = '';
+            if (result.underwrite_result.reasons && result.underwrite_result.reasons.length > 0) {
+                reasonsHtml = `
+                    <div class="mt-4">
+                        <h4 class="font-medium ${titleClass} mb-2">Analysis:</h4>
+                        <ul class="space-y-1">
+                            ${result.underwrite_result.reasons.map(reason => `
+                                <li class="text-sm ${titleClass.replace('800', '700')} flex items-start">
+                                    <span class="mr-2">•</span>
+                                    <span>${reason}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            let maoHtml = '';
+            if (result.underwrite_result.mao > 0) {
+                maoHtml = `
+                    <div class="mt-3 p-3 bg-white rounded border">
+                        <div class="text-sm font-medium text-gray-600">Maximum Allowable Offer (MAO)</div>
+                        <div class="text-lg font-bold text-gray-800">$${result.underwrite_result.mao.toLocaleString()}</div>
+                    </div>
+                `;
+            }
+            
+            resultCard.innerHTML = `
+                <div class="rounded-lg border-2 ${cardClass} p-6">
+                    <div class="flex items-center mb-4">
+                        <i class="fas ${iconClass} text-2xl mr-3"></i>
+                        <div>
+                            <h3 class="text-xl font-bold ${titleClass}">${title}</h3>
+                            <p class="text-sm ${titleClass.replace('800', '600')}">${subtitle}</p>
+                        </div>
+                    </div>
+                    ${maoHtml}
+                    ${reasonsHtml}
+                    <div class="mt-4 p-3 bg-white rounded border">
+                        <div class="text-sm text-gray-600">
+                            <strong>Submission ID:</strong> ${result.submission_id}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            resultCard.classList.remove('hidden');
+            resultCard.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+
+    <!-- Google Maps API for Enhanced Address Input -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places"></script>
     
-    <!-- Trust Building Elements -->
-    <div class="mt-6 bg-white border border-gray-200 rounded-xl p-4 shadow-lg">
-      <div class="text-center">
-        <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
-          <i class="fas fa-shield-alt text-white"></i>
-        </div>
-        <div class="mb-3">
-          <img src="{{ url_for('static', filename='PFPS_Icon_Mark_Dark.png') }}" alt="PFPS" class="w-8 h-8 mx-auto mb-2">
-        </div>
-        <h4 class="font-semibold text-gray-900 mb-2">PFPS Advantage</h4>
-        <div class="space-y-2 text-sm text-gray-600">
-          <p><i class="fas fa-check-circle text-green-500 mr-2"></i>NC/SC Market Experts</p>
-          <p><i class="fas fa-check-circle text-green-500 mr-2"></i>4.2 Hour Response Time</p>
-          <p><i class="fas fa-check-circle text-green-500 mr-2"></i>$50M+ Deals Closed</p>
-          <p><i class="fas fa-check-circle text-green-500 mr-2"></i>200+ Active Partners</p>
-          <p><i class="fas fa-check-circle text-green-500 mr-2"></i>JV Novation Specialists</p>
-          <p><i class="fas fa-check-circle text-green-500 mr-2"></i>Creative Finance Experts</p>
-        </div>
-      </div>
-    </div>
-    </form>
-  </div>
-</section>
-
-{% endblock %}
-
-{% block scripts %}
-<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&callback=initJVAutocomplete" async defer></script>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-<script src="{{ url_for('static', filename='js/jv_submit.js') }}?v=20250716-200800"></script>
-{% endblock %}
+    <!-- Enhanced Address Input JavaScript -->
+    <script src="{{ url_for('static', filename='js/enhanced-address-input.js') }}"></script>
+    
+    <script>
+        // Initialize enhanced address input for JV submit form
+        document.addEventListener('DOMContentLoaded', function() {
+            const addressInput = document.getElementById('property-address');
+            if (addressInput) {
+                window.jvAddressHandler = new EnhancedAddressInput(addressInput, {
+                    onAddressSelected: function(address) {
+                        console.log('JV form address selected:', address);
+                        
+                        // Store Google Places data for submission
+                        window.jvSelectedAddressData = address;
+                        
+                        // Update the address field with canonical format
+                        addressInput.value = address.formattedAddress;
+                        
+                        // Mark as validated
+                        addressInput.setAttribute('data-validated', 'true');
+                        addressInput.setAttribute('data-place-id', address.placeId || '');
+                    },
+                    onValidationComplete: function(result) {
+                        console.log('JV address validation complete:', result);
+                        if (result.success) {
+                            window.jvSelectedAddressData = result.address;
+                            addressInput.setAttribute('data-validated', 'true');
+                            addressInput.setAttribute('data-place-id', result.address.place_id || '');
+                        }
+                    },
+                    showConfirmationBanner: false
+                });
+            }
+        });
+    </script>
+</body>
+</html>

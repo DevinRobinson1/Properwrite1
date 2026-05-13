@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-WXR2WK4Q');</script>
-    <!-- End Google Tag Manager -->
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Affiliate Management - ProperWrite Admin</title>
@@ -43,10 +35,6 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WXR2WK4Q"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
     <!-- Header -->
     <div class="admin-gradient text-white">
         <div class="container mx-auto px-6 py-8">
@@ -252,50 +240,6 @@
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Promo Code Modal -->
-    <div id="edit-promo-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
-                <div class="flex items-center justify-between p-6 border-b">
-                    <h3 class="text-lg font-semibold">Edit Promo Code</h3>
-                    <button onclick="closeEditPromoModal()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="p-6 space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Code</label>
-                        <input type="text" id="edit-promo-code" class="w-full border rounded-lg px-3 py-2" placeholder="Enter promo code" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
-                        <select id="edit-promo-type" class="w-full border rounded-lg px-3 py-2">
-                            <option value="percentage_discount">Percentage Discount</option>
-                            <option value="credit_pack">Credit Pack</option>
-                            <option value="team_bonus">Team Bonus</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Value</label>
-                        <input type="number" id="edit-promo-value" class="w-full border rounded-lg px-3 py-2" placeholder="Enter value" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Max Uses</label>
-                        <input type="number" id="edit-promo-max-uses" class="w-full border rounded-lg px-3 py-2" placeholder="Leave blank for unlimited">
-                    </div>
-                    <div class="flex items-center">
-                        <input type="checkbox" id="edit-promo-active" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                        <label for="edit-promo-active" class="ml-2 block text-sm text-gray-900">Active</label>
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-3 p-6 border-t">
-                    <button onclick="closeEditPromoModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                    <button onclick="updatePromoCode()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Update</button>
                 </div>
             </div>
         </div>
@@ -596,107 +540,6 @@
 
         function loadPayoutsData() {
             // Implement payouts loading
-        }
-
-        // Promo Code Functions
-        function editPromoCode(codeId) {
-            const code = promoCodesData.promo_codes?.find(c => c.id === codeId);
-            if (!code) return;
-            
-            // Populate modal with existing data
-            document.getElementById('edit-promo-code').value = code.code;
-            document.getElementById('edit-promo-type').value = code.type;
-            document.getElementById('edit-promo-value').value = code.credit_amount || code.discount_percentage || code.bonus_seats || '';
-            document.getElementById('edit-promo-max-uses').value = code.max_uses || '';
-            document.getElementById('edit-promo-active').checked = code.is_active;
-            
-            // Store the code ID for later use
-            document.getElementById('edit-promo-modal').dataset.codeId = codeId;
-            
-            // Show modal
-            document.getElementById('edit-promo-modal').classList.remove('hidden');
-        }
-
-        function closeEditPromoModal() {
-            document.getElementById('edit-promo-modal').classList.add('hidden');
-        }
-
-        async function updatePromoCode() {
-            const modal = document.getElementById('edit-promo-modal');
-            const codeId = modal.dataset.codeId;
-            
-            const data = {
-                code: document.getElementById('edit-promo-code').value,
-                type: document.getElementById('edit-promo-type').value,
-                max_uses: parseInt(document.getElementById('edit-promo-max-uses').value) || null,
-                is_active: document.getElementById('edit-promo-active').checked
-            };
-            
-            // Add appropriate value field based on type
-            const value = document.getElementById('edit-promo-value').value;
-            if (value) {
-                switch (data.type) {
-                    case 'percentage_discount':
-                        data.discount_percentage = parseFloat(value);
-                        break;
-                    case 'credit_pack':
-                        data.credit_amount = parseInt(value);
-                        break;
-                    case 'team_bonus':
-                        data.bonus_seats = parseInt(value);
-                        break;
-                }
-            }
-            
-            try {
-                const response = await fetch(`/api/admin/promo-codes/${codeId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Admin-Token': 'admin123'
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                if (response.ok) {
-                    closeEditPromoModal();
-                    loadDashboardData(); // Refresh data
-                    alert('Promo code updated successfully!');
-                } else {
-                    const error = await response.json();
-                    alert('Error updating promo code: ' + (error.error || 'Unknown error'));
-                }
-            } catch (error) {
-                console.error('Error updating promo code:', error);
-                alert('Error updating promo code: ' + error.message);
-            }
-        }
-
-        async function deactivatePromoCode(codeId) {
-            if (!confirm('Are you sure you want to deactivate this promo code?')) {
-                return;
-            }
-            
-            try {
-                const response = await fetch(`/api/admin/promo-codes/${codeId}/deactivate`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Admin-Token': 'admin123'
-                    }
-                });
-                
-                if (response.ok) {
-                    loadDashboardData(); // Refresh data
-                    alert('Promo code deactivated successfully!');
-                } else {
-                    const error = await response.json();
-                    alert('Error deactivating promo code: ' + (error.error || 'Unknown error'));
-                }
-            } catch (error) {
-                console.error('Error deactivating promo code:', error);
-                alert('Error deactivating promo code: ' + error.message);
-            }
         }
     </script>
 </body>

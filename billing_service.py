@@ -574,53 +574,14 @@ class BillingService:
                 if existing_user:
                     return {'success': False, 'error': 'User with this email already exists'}
                 
-                # Check if user is joining via team invite
-                invite_token = user_data.get('invite_token')
-                team = None
-                user_role = 'owner'
-                
-                if invite_token:
-                    # Find the invite and validate it
-                    invite = db.query(TeamInvite).filter(TeamInvite.token == invite_token).first()
-                    
-                    if invite and invite.expires_at >= datetime.utcnow():
-                        # Get the team from the invite
-                        team = db.query(Team).filter(Team.id == invite.team_id).first()
-                        
-                        if team:
-                            # Check team capacity
-                            active_users = db.query(User).filter(
-                                and_(User.team_id == team.id, User.is_active == True)
-                            ).count()
-                            
-                            if active_users >= team.seats_max:
-                                return {'success': False, 'error': 'Team is out of seats; ask your admin to upgrade.'}
-                            
-                            user_role = invite.role
-                            
-                            # Mark invite as accepted
-                            invite.status = 'accepted'
-                            invite.accepted_at = datetime.utcnow()
-                            invite.used = True
-                
-                # If no valid invite, create a new team for the user
-                if not team:
-                    team = Team(
-                        id=uuid.uuid4(),
-                        name=f"{user_data.get('name', user_data['email'].split('@')[0])}'s Team",
-                        tier='starter',
-                        credit_balance=5,  # Starting credits
-                        seats_max=1
-                    )
-                    db.add(team)
-                    
-                    # Log the initial free credits
-                    free_credits_log = CreditLog(
-                        team_id=team.id,
-                        delta=5,
-                        reason='signup-bonus'
-                    )
-                    db.add(free_credits_log)
+                # Create a new team for the user
+                team = Team(
+                    id=uuid.uuid4(),
+                    name=f"{user_data.get('name', user_data['email'].split('@')[0])}'s Team",
+                    tier='starter',
+                    credit_balance=5,  # Starting credits
+                    seats_max=1
+                )
                 
                 # Create new user
                 user = User(
@@ -628,7 +589,7 @@ class BillingService:
                     email=user_data['email'],
                     name=user_data.get('name', user_data['email'].split('@')[0]),
                     team=team,
-                    role=user_role,
+                    role='owner',
                     is_active=True
                 )
                 
@@ -637,7 +598,8 @@ class BillingService:
                     from werkzeug.security import generate_password_hash
                     user.password_hash = generate_password_hash(user_data['password'])
                 
-                # Add user to database
+                # Add both team and user to database
+                db.add(team)
                 db.add(user)
                 db.commit()
                 db.refresh(user)
@@ -648,9 +610,7 @@ class BillingService:
                     self._fire_webhook('new_user_signup', {
                         'user_id': str(user.id),
                         'email': user.email,
-                        'name': user.name,
-                        'team_id': str(team.id),
-                        'joined_via_invite': bool(invite_token)
+                        'name': user.name
                     })
                 except Exception as e:
                     logging.warning(f"Webhook firing failed: {e}")
@@ -658,63 +618,16 @@ class BillingService:
                 return {
                     'success': True,
                     'user_id': str(user.id),
-                    'email': user.email,
-                    'team_id': str(team.id),
-                    'team_name': team.name,
-                    'role': user_role
+                    'email': user.email
                 }
                 
         except Exception as e:
             logging.error(f"Error creating user: {e}")
             return {'success': False, 'error': str(e)}
     
-    def seed_free_credits(self, user_id: str) -> bool:
-        """
-        Seed new user with 5 free credits
-        """
-        try:
-            with self.db_session() as db:
-                user = db.query(User).filter(User.id == user_id).first()
-                
-                if not user:
-                    return False
-                
-                # Find user's team
-                team = db.query(Team).filter(Team.id == user.team_id).first()
-                
-                if not team:
-                    return False
-                
-                # Check if user already has signup bonus
-                existing_bonus = db.query(CreditLog).filter(
-                    and_(CreditLog.team_id == team.id, CreditLog.reason == 'signup-bonus')
-                ).first()
-                
-                if existing_bonus:
-                    return True  # Already has bonus
-                
-                # Add 5 free credits
-                team.credit_balance += 5
-                
-                # Log the credit addition
-                credit_log = CreditLog(
-                    team_id=team.id,
-                    delta=5,
-                    reason='signup-bonus'
-                )
-                db.add(credit_log)
-                db.commit()
-                
-                return True
-                
-        except Exception as e:
-            logging.error(f"Error seeding free credits: {e}")
-            return False
-    
     def accept_team_invite(self, token: str, user_id: str) -> Dict:
         """
         Accept a team invitation and add user to the team
-        This method is now primarily for existing users accepting invites
         """
         try:
             with self.db_session() as db:
@@ -738,36 +651,20 @@ class BillingService:
                 ).count()
                 
                 if active_users >= team.seats_max:
-                    return {'success': False, 'error': 'Team is out of seats; ask your admin to upgrade.'}
+                    return {'success': False, 'error': 'Team is at maximum capacity'}
                 
                 # Get the user
                 user = db.query(User).filter(User.id == user_id).first()
                 if not user:
                     return {'success': False, 'error': 'User not found'}
                 
-                # Check if user has their own single-user team that should be cleaned up
-                old_team = user.team
-                should_cleanup_old_team = False
-                
-                if old_team and old_team.id != team.id:
-                    # Check if it's a single-user team that can be safely removed
-                    team_users = db.query(User).filter(User.team_id == old_team.id).count()
-                    if team_users == 1 and old_team.seats_max == 1:
-                        should_cleanup_old_team = True
-                
-                # Add user to new team
+                # Add user to team
                 user.team_id = team.id
-                user.role = invite.role
+                user.team_role = invite.role
                 
-                # Mark the invite as accepted
+                # Mark the invite as accepted instead of deleting it
                 invite.status = 'accepted'
                 invite.accepted_at = datetime.utcnow()
-                invite.used = True
-                
-                # Clean up the old single-user team if appropriate
-                if should_cleanup_old_team:
-                    db.delete(old_team)
-                
                 db.commit()
                 
                 return {
@@ -788,263 +685,10 @@ class BillingService:
             'AFF002': 150,
             'AFF003': 200,
             'WELCOME50': 50,
-            'STARTER100': 100,
-            'subto25': 25,
-            'CG40': 40,
-            'cg30': 30,
-            'F&F25': 25
+            'STARTER100': 100
         }
         
         return PROMO_BONUSES.get(promo_code, 0)
-    
-    def create_stripe_customer_for_team(self, team_id: str) -> Dict:
-        """
-        Create a Stripe customer for an existing team that doesn't have one
-        """
-        try:
-            with Session(engine) as db:
-                # Get team information
-                team = db.query(Team).filter(Team.id == team_id).first()
-                if not team:
-                    return {'success': False, 'error': 'Team not found'}
-                
-                if team.stripe_customer_id:
-                    return {'success': True, 'customer_id': team.stripe_customer_id}
-                
-                # Get team owner's email
-                owner = db.query(User).filter(
-                    User.team_id == team_id,
-                    User.role == 'owner'
-                ).first()
-                
-                if not owner:
-                    return {'success': False, 'error': 'Team owner not found'}
-                
-                # Create Stripe customer
-                customer = stripe.Customer.create(
-                    email=owner.email,
-                    name=owner.name,
-                    description=f"Team: {team.name}",
-                    metadata={
-                        'team_id': str(team_id),
-                        'user_id': str(owner.id),
-                        'tier': team.tier
-                    }
-                )
-                
-                # Update team with Stripe customer ID
-                team.stripe_customer_id = customer.id
-                db.commit()
-                
-                logging.info(f"Created Stripe customer {customer.id} for team {team_id}")
-                
-                return {
-                    'success': True,
-                    'customer_id': customer.id
-                }
-                
-        except Exception as e:
-            logging.error(f"Error creating Stripe customer for team: {e}")
-            return {'success': False, 'error': str(e)}
-
-    def get_subscription_details(self, team_id: str) -> Dict:
-        """
-        Get comprehensive subscription details for a team
-        """
-        try:
-            with Session(engine) as db:
-                # Get team information
-                team = db.query(Team).filter(Team.id == team_id).first()
-                if not team:
-                    return {'success': False, 'error': 'Team not found'}
-                
-                # Get team owner
-                owner = db.query(User).filter(
-                    User.team_id == team_id,
-                    User.role == 'owner'
-                ).first()
-                
-                # Get subscription details from Stripe if customer exists
-                stripe_details = {}
-                if team.stripe_customer_id:
-                    try:
-                        # Get customer details
-                        customer = stripe.Customer.retrieve(team.stripe_customer_id)
-                        
-                        # Get subscriptions
-                        subscriptions = stripe.Subscription.list(
-                            customer=team.stripe_customer_id,
-                            limit=10
-                        )
-                        
-                        # Get payment methods
-                        payment_methods = stripe.PaymentMethod.list(
-                            customer=team.stripe_customer_id,
-                            type='card'
-                        )
-                        
-                        # Get recent invoices
-                        invoices = stripe.Invoice.list(
-                            customer=team.stripe_customer_id,
-                            limit=5
-                        )
-                        
-                        stripe_details = {
-                            'customer': customer,
-                            'subscriptions': subscriptions.data,
-                            'payment_methods': payment_methods.data,
-                            'invoices': invoices.data
-                        }
-                        
-                    except Exception as e:
-                        logging.error(f"Error fetching Stripe details: {e}")
-                        stripe_details = {}
-                
-                return {
-                    'success': True,
-                    'team': {
-                        'id': str(team.id),
-                        'name': team.name,
-                        'tier': team.tier,
-                        'credit_balance': team.credit_balance,
-                        'seats_max': team.seats_max,
-                        'created_at': team.created_at.isoformat() if team.created_at else None
-                    },
-                    'owner': {
-                        'name': owner.name if owner else 'Unknown',
-                        'email': owner.email if owner else 'Unknown'
-                    },
-                    'stripe_details': stripe_details
-                }
-                
-        except Exception as e:
-            logging.error(f"Error getting subscription details: {e}")
-            return {'success': False, 'error': str(e)}
-
-    def update_payment_method(self, team_id: str, payment_method_id: str) -> Dict:
-        """
-        Update the default payment method for a team
-        """
-        try:
-            with Session(engine) as db:
-                team = db.query(Team).filter(Team.id == team_id).first()
-                if not team or not team.stripe_customer_id:
-                    return {'success': False, 'error': 'Team or customer not found'}
-                
-                # Attach payment method to customer
-                stripe.PaymentMethod.attach(
-                    payment_method_id,
-                    customer=team.stripe_customer_id
-                )
-                
-                # Set as default payment method
-                stripe.Customer.modify(
-                    team.stripe_customer_id,
-                    invoice_settings={'default_payment_method': payment_method_id}
-                )
-                
-                return {'success': True, 'message': 'Payment method updated successfully'}
-                
-        except Exception as e:
-            logging.error(f"Error updating payment method: {e}")
-            return {'success': False, 'error': str(e)}
-
-    def cancel_subscription(self, team_id: str, subscription_id: str) -> Dict:
-        """
-        Cancel a subscription for a team
-        """
-        try:
-            with Session(engine) as db:
-                team = db.query(Team).filter(Team.id == team_id).first()
-                if not team:
-                    return {'success': False, 'error': 'Team not found'}
-                
-                # Cancel subscription at period end
-                subscription = stripe.Subscription.modify(
-                    subscription_id,
-                    cancel_at_period_end=True
-                )
-                
-                return {
-                    'success': True, 
-                    'message': 'Subscription will be cancelled at the end of the current period',
-                    'subscription': subscription
-                }
-                
-        except Exception as e:
-            logging.error(f"Error cancelling subscription: {e}")
-            return {'success': False, 'error': str(e)}
-
-    def change_subscription_plan(self, team_id: str, new_plan_id: str) -> Dict:
-        """
-        Change subscription plan for a team
-        """
-        try:
-            with Session(engine) as db:
-                team = db.query(Team).filter(Team.id == team_id).first()
-                if not team or not team.stripe_customer_id:
-                    return {'success': False, 'error': 'Team or customer not found'}
-                
-                # Get current subscription
-                subscriptions = stripe.Subscription.list(
-                    customer=team.stripe_customer_id,
-                    status='active',
-                    limit=1
-                )
-                
-                if not subscriptions.data:
-                    return {'success': False, 'error': 'No active subscription found'}
-                
-                current_subscription = subscriptions.data[0]
-                
-                # Update subscription
-                updated_subscription = stripe.Subscription.modify(
-                    current_subscription.id,
-                    items=[{
-                        'id': current_subscription['items']['data'][0].id,
-                        'price': new_plan_id,
-                    }],
-                    proration_behavior='create_prorations'
-                )
-                
-                return {
-                    'success': True,
-                    'message': 'Subscription plan updated successfully',
-                    'subscription': updated_subscription
-                }
-                
-        except Exception as e:
-            logging.error(f"Error changing subscription plan: {e}")
-            return {'success': False, 'error': str(e)}
-
-    def download_invoice(self, team_id: str, invoice_id: str) -> Dict:
-        """
-        Get download URL for an invoice
-        """
-        try:
-            with Session(engine) as db:
-                team = db.query(Team).filter(Team.id == team_id).first()
-                if not team:
-                    return {'success': False, 'error': 'Team not found'}
-                
-                # Get invoice
-                invoice = stripe.Invoice.retrieve(invoice_id)
-                
-                # Verify invoice belongs to this customer
-                if invoice.customer != team.stripe_customer_id:
-                    return {'success': False, 'error': 'Invoice not found'}
-                
-                return {
-                    'success': True,
-                    'invoice_url': invoice.invoice_pdf,
-                    'invoice_number': invoice.number,
-                    'amount': invoice.amount_due,
-                    'status': invoice.status
-                }
-                
-        except Exception as e:
-            logging.error(f"Error downloading invoice: {e}")
-            return {'success': False, 'error': str(e)}
     
     def remove_team_member(self, team_id: str, member_id: str) -> Dict:
         """
@@ -1532,28 +1176,3 @@ class BillingService:
         except Exception as e:
             logging.error(f"Error getting billing history: {e}")
             return []
-    
-    def update_user_password(self, email: str, new_password: str) -> bool:
-        """
-        Update user password
-        """
-        try:
-            with self.db_session() as db:
-                user = db.query(User).filter(User.email == email).first()
-                
-                if not user:
-                    logging.error(f"User not found for email: {email}")
-                    return False
-                
-                # Hash the new password
-                from werkzeug.security import generate_password_hash
-                user.password_hash = generate_password_hash(new_password)
-                
-                db.commit()
-                logging.info(f"Password updated successfully for user: {email}")
-                
-                return True
-                
-        except Exception as e:
-            logging.error(f"Error updating password for {email}: {e}")
-            return False

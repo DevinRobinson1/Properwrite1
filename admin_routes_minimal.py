@@ -19,13 +19,6 @@ from flask_limiter.util import get_remote_address
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from flask import current_app
 
-# CSRF bypass for authenticated admin users
-def bypass_csrf_for_admin():
-    """Skip CSRF validation for authenticated admin users"""
-    if session.get('is_admin'):
-        return True
-    return False
-
 # Set up logging
 logger = logging.getLogger(__name__)
 
@@ -218,13 +211,8 @@ def dashboard():
         }
         return render_template('admin_dashboard_unified.html', data=dashboard_data, error=str(e))
 
-@admin_bp.route('/jv-deals-enhanced')
-@require_admin
-def jv_deals_enhanced():
-    """Enhanced JV deals admin panel with advanced features"""
-    return render_template('admin_jv_deals_enhanced.html')
-
 @admin_bp.route('/api/affiliates', methods=['GET'])
+@require_admin
 def get_affiliates():
     """Get all affiliates with filtering and pagination"""
     try:
@@ -287,6 +275,7 @@ def get_affiliates():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @admin_bp.route('/api/promo-codes', methods=['GET'])
+@require_admin
 def get_promo_codes():
     """Get all promo codes"""
     try:
@@ -333,146 +322,6 @@ def get_promo_codes():
             
     except Exception as e:
         logger.error(f"Error getting promo codes: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@admin_bp.route('/api/promo-codes/<promo_id>', methods=['GET'])
-def get_promo_code(promo_id):
-    """Get single promo code by ID"""
-    try:
-        with Session(engine) as session:
-            promo_code = session.execute(text("""
-                SELECT 
-                    pc.id,
-                    pc.code,
-                    pc.type,
-                    pc.discount_percentage,
-                    pc.credit_amount,
-                    pc.max_uses,
-                    pc.uses_count,
-                    pc.is_active,
-                    pc.valid_until,
-                    pc.created_at,
-                    a.name as affiliate_name
-                FROM promo_codes pc
-                LEFT JOIN affiliates a ON pc.affiliate_id::text = a.id::text
-                WHERE pc.id = :promo_id
-            """), {'promo_id': promo_id}).fetchone()
-            
-            if not promo_code:
-                return jsonify({'success': False, 'error': 'Promo code not found'}), 404
-            
-            promo_code_data = {
-                'id': str(promo_code.id),
-                'code': promo_code.code,
-                'type': promo_code.type,
-                'discount_percentage': float(promo_code.discount_percentage) if promo_code.discount_percentage else 0,
-                'credit_amount': promo_code.credit_amount or 0,
-                'max_uses': promo_code.max_uses,
-                'uses_count': promo_code.uses_count,
-                'is_active': promo_code.is_active,
-                'affiliate_name': promo_code.affiliate_name or 'Direct',
-                'valid_until': promo_code.valid_until.isoformat() if promo_code.valid_until else None,
-                'created_at': promo_code.created_at.isoformat() if promo_code.created_at else None
-            }
-            
-            return jsonify({
-                'success': True,
-                'promo_code': promo_code_data
-            })
-            
-    except Exception as e:
-        logger.error(f"Error getting promo code: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@admin_bp.route('/api/promo-codes/<promo_id>', methods=['PUT'])
-def update_promo_code(promo_id):
-    """Update promo code"""
-    try:
-        # Simple authentication check - if not admin, require manual confirmation
-        if not session.get('is_admin'):
-            logger.warning(f"Unauthorized promo code update attempt for {promo_id}")
-            return jsonify({'success': False, 'error': 'Authentication required'}), 401
-        
-        # Skip CSRF validation for authenticated admin users
-        if bypass_csrf_for_admin():
-            pass
-        
-        data = request.get_json()
-        code = data.get('code')
-        promo_type = data.get('type')
-        value = data.get('value')
-        max_uses = data.get('max_uses')
-        is_active = data.get('is_active')
-        
-        logger.info(f"Updating promo code {promo_id} with data: {data}")
-        
-        with Session(engine) as session:
-            # Check if promo code exists
-            existing = session.execute(text("""
-                SELECT id FROM promo_codes WHERE id = :promo_id
-            """), {'promo_id': promo_id}).fetchone()
-            
-            if not existing:
-                return jsonify({'success': False, 'error': 'Promo code not found'}), 404
-            
-            # Update promo code
-            session.execute(text("""
-                UPDATE promo_codes 
-                SET 
-                    code = :code,
-                    type = :type,
-                    discount_percentage = :discount_percentage,
-                    credit_amount = :credit_amount,
-                    max_uses = :max_uses,
-                    is_active = :is_active,
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE id = :promo_id
-            """), {
-                'promo_id': promo_id,
-                'code': code,
-                'type': promo_type,
-                'discount_percentage': value if promo_type == 'PERCENTAGE_DISCOUNT' else None,
-                'credit_amount': int(value) if promo_type == 'CREDIT_PACK' else None,
-                'max_uses': max_uses,
-                'is_active': is_active
-            })
-            session.commit()
-            
-            return jsonify({
-                'success': True,
-                'message': 'Promo code updated successfully'
-            })
-            
-    except Exception as e:
-        logger.error(f"Error updating promo code: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@admin_bp.route('/api/promo-codes/<promo_id>', methods=['DELETE'])
-def delete_promo_code(promo_id):
-    """Delete promo code"""
-    try:
-        with Session(engine) as session:
-            # Check if promo code exists
-            existing = session.execute(text("""
-                SELECT id FROM promo_codes WHERE id = :promo_id
-            """), {'promo_id': promo_id}).fetchone()
-            
-            if not existing:
-                return jsonify({'success': False, 'error': 'Promo code not found'}), 404
-            
-            # Delete promo code
-            session.execute(text("""
-                DELETE FROM promo_codes WHERE id = :promo_id
-            """), {'promo_id': promo_id})
-            session.commit()
-            
-            return jsonify({
-                'success': True,
-                'message': 'Promo code deleted successfully'
-            })
-            
-    except Exception as e:
-        logger.error(f"Error deleting promo code: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @admin_bp.route('/api/create-affiliate', methods=['POST'])
@@ -532,9 +381,6 @@ def create_promo_code():
         max_uses = int(data.get('max_uses', 100))
         affiliate_id = data.get('affiliate_id')
         
-        # Convert promo type to uppercase to match database enum
-        promo_type_upper = promo_type.upper()
-        
         with Session(engine) as session:
             # Insert new promo code
             session.execute(text("""
@@ -542,9 +388,9 @@ def create_promo_code():
                 VALUES (:code, :type, :discount_percentage, :credit_amount, :max_uses, :affiliate_id)
             """), {
                 'code': code,
-                'type': promo_type_upper,
+                'type': promo_type,
                 'discount_percentage': discount_value if promo_type == 'percentage_discount' else None,
-                'credit_amount': int(discount_value) if promo_type == 'credit_pack' else None,
+                'credit_amount': int(discount_value) if promo_type == 'credit_bonus' else None,
                 'max_uses': max_uses,
                 'affiliate_id': affiliate_id if affiliate_id else None
             })
@@ -1007,12 +853,61 @@ def get_subscriptions_data():
         logger.error(f"Error getting subscriptions: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-# Disabled - conflicting endpoint, using admin_api.py version instead
-# @admin_bp.route('/api/jv-deals', methods=['GET'])
-# @require_admin
-# def get_jv_deals_data():
-#     """Get JV deals data - DISABLED: Using admin_api.py version"""
-#     pass
+@admin_bp.route('/api/jv-deals', methods=['GET'])
+@require_admin
+def get_jv_deals_data():
+    """Get JV deals data"""
+    try:
+        with Session(engine) as session:
+            # Get JV deals
+            jv_deals = session.execute(text("""
+                SELECT 
+                    id,
+                    partner_id,
+                    deal_json,
+                    auto_status,
+                    final_status,
+                    reasons,
+                    created_at
+                FROM jv_deals
+                ORDER BY created_at DESC
+            """)).fetchall()
+            
+            jv_deals_data = []
+            for deal in jv_deals:
+                # Parse deal_json to extract property details
+                deal_data = {}
+                if deal.deal_json:
+                    try:
+                        import json
+                        deal_data = json.loads(deal.deal_json)
+                    except:
+                        deal_data = {}
+                
+                jv_deals_data.append({
+                    'id': deal.id,
+                    'partner_id': deal.partner_id,
+                    'property_address': deal_data.get('property_address', 'N/A'),
+                    'property_city': deal_data.get('property_city', 'N/A'),
+                    'property_state': deal_data.get('property_state', 'N/A'),
+                    'asking_price': float(deal_data.get('asking_price', 0)) if deal_data.get('asking_price') else 0,
+                    'arv': float(deal_data.get('arv', 0)) if deal_data.get('arv') else 0,
+                    'repair_estimate': float(deal_data.get('repair_estimate', 0)) if deal_data.get('repair_estimate') else 0,
+                    'suggested_offer': float(deal_data.get('suggested_offer', 0)) if deal_data.get('suggested_offer') else 0,
+                    'auto_status': deal.auto_status,
+                    'final_status': deal.final_status,
+                    'reasons': deal.reasons,
+                    'created_at': deal.created_at.isoformat() if deal.created_at else None
+                })
+            
+            return jsonify({
+                'success': True,
+                'jv_deals': jv_deals_data
+            })
+            
+    except Exception as e:
+        logger.error(f"Error getting JV deals: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 

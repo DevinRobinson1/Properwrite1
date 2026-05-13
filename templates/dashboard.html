@@ -1,19 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-WXR2WK4Q');</script>
-    <!-- End Google Tag Manager -->
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account Dashboard - properwrite.com</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -59,10 +49,6 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WXR2WK4Q"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
     <!-- Header -->
     <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -197,7 +183,7 @@
                                 </div>
                                 <div class="ml-4">
                                     <p class="text-sm text-gray-600">Plan</p>
-                                    <p class="text-xl font-semibold text-gray-900" id="current-plan">Loading...</p>
+                                    <p class="text-xl font-semibold text-gray-900" id="current-plan">Pro</p>
                                 </div>
                             </div>
                         </div>
@@ -209,7 +195,7 @@
                                 </div>
                                 <div class="ml-4">
                                     <p class="text-sm text-gray-600">Credits</p>
-                                    <p class="text-xl font-semibold text-gray-900" id="credits-remaining">Loading...</p>
+                                    <p class="text-xl font-semibold text-gray-900" id="credits-remaining">247</p>
                                 </div>
                             </div>
                         </div>
@@ -221,7 +207,7 @@
                                 </div>
                                 <div class="ml-4">
                                     <p class="text-sm text-gray-600">Team Size</p>
-                                    <p class="text-xl font-semibold text-gray-900" id="team-size">Loading...</p>
+                                    <p class="text-xl font-semibold text-gray-900" id="team-size">3 / 5</p>
                                 </div>
                             </div>
                         </div>
@@ -233,7 +219,7 @@
                                 </div>
                                 <div class="ml-4">
                                     <p class="text-sm text-gray-600">Renewal</p>
-                                    <p class="text-xl font-semibold text-gray-900" id="renewal-date">Loading...</p>
+                                    <p class="text-xl font-semibold text-gray-900" id="renewal-date">Aug 15</p>
                                 </div>
                             </div>
                         </div>
@@ -279,11 +265,11 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm text-gray-600">Active Plan</p>
-                                <p class="text-2xl font-bold text-blue-600" id="current-plan-name">Loading...</p>
+                                <p class="text-2xl font-bold text-blue-600" id="current-plan-name">Pro</p>
                             </div>
                             <div class="text-right">
                                 <p class="text-sm text-gray-600">Credits</p>
-                                <p class="text-2xl font-bold text-green-600" id="current-plan-credits">Loading...</p>
+                                <p class="text-2xl font-bold text-green-600" id="current-plan-credits">247</p>
                             </div>
                         </div>
                         <div class="mt-4 pt-4 border-t border-gray-200">
@@ -313,14 +299,14 @@
                                 </div>
                             </div>
 
-                            <!-- Growth10 Plan -->
-                            <div class="border border-blue-500 rounded-lg p-4 bg-blue-50 plan-card current-plan-card" data-plan="growth10">
+                            <!-- Pro Plan -->
+                            <div class="border border-blue-500 rounded-lg p-4 bg-blue-50 plan-card current-plan-card" data-plan="pro">
                                 <div class="text-center">
-                                    <h3 class="font-semibold text-gray-900">Growth10</h3>
+                                    <h3 class="font-semibold text-gray-900">Pro</h3>
                                     <div class="bg-blue-500 text-white text-xs px-2 py-1 rounded-full inline-block mb-2">Current</div>
-                                    <p class="text-2xl font-bold text-blue-600">$399<span class="text-sm text-gray-500">/month</span></p>
-                                    <p class="text-sm text-gray-600 mt-1">Unlimited credits</p>
-                                    <p class="text-xs text-gray-500">10 users</p>
+                                    <p class="text-2xl font-bold text-blue-600">$79<span class="text-sm text-gray-500">/month</span></p>
+                                    <p class="text-sm text-gray-600 mt-1">300 credits/month</p>
+                                    <p class="text-xs text-gray-500">1 user</p>
                                 </div>
                                 <div class="mt-4">
                                     <button disabled class="w-full px-4 py-2 bg-gray-300 text-gray-500 rounded-md cursor-not-allowed text-sm">
@@ -344,17 +330,17 @@
                                 </div>
                             </div>
 
-                            <!-- Pro Plan -->
-                            <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition-colors plan-card" data-plan="pro">
+                            <!-- Growth10 Plan -->
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition-colors plan-card" data-plan="growth10">
                                 <div class="text-center">
-                                    <h3 class="font-semibold text-gray-900">Pro</h3>
-                                    <p class="text-2xl font-bold text-blue-600 mt-2">$79<span class="text-sm text-gray-500">/month</span></p>
-                                    <p class="text-sm text-gray-600 mt-1">300 credits/month</p>
-                                    <p class="text-xs text-gray-500">1 user</p>
+                                    <h3 class="font-semibold text-gray-900">Growth10</h3>
+                                    <p class="text-2xl font-bold text-blue-600 mt-2">$399<span class="text-sm text-gray-500">/month</span></p>
+                                    <p class="text-sm text-gray-600 mt-1">Unlimited credits</p>
+                                    <p class="text-xs text-gray-500">10 users</p>
                                 </div>
                                 <div class="mt-4">
-                                    <button onclick="changePlan('pro')" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">
-                                        Downgrade
+                                    <button onclick="changePlan('growth10')" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">
+                                        Upgrade
                                     </button>
                                 </div>
                             </div>
@@ -489,10 +475,10 @@
                         </div>
                     </div>
 
-                    <!-- Team Invites -->
+                    <!-- Pending Invites -->
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900">Team Invites</h3>
+                            <h3 class="text-lg font-semibold text-gray-900">Pending Invites</h3>
                             <span id="pending-invites-count" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                 <i class="fas fa-clock mr-1"></i>
                                 Loading...
@@ -831,18 +817,11 @@
                                 </div>
                             </div>
                             <p class="text-gray-600 mb-4">Mention Fund Founder or Devin Robinson to get access to apply to one of the best real estate masterminds in the world.</p>
-                            <div class="space-y-2">
-                                <a href="https://go.thecollectivegenius.com/how-cg-works/" target="_blank" 
-                                   class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
-                                    <i class="fas fa-external-link-alt mr-2"></i>
-                                    Apply Now
-                                </a>
-                                <a href="/ref/CG40" 
-                                   class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors ml-2">
-                                    <i class="fas fa-gift mr-2"></i>
-                                    Get 40 Credits (CG40)
-                                </a>
-                            </div>
+                            <a href="https://go.thecollectivegenius.com/how-cg-works/" target="_blank" 
+                               class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
+                                <i class="fas fa-external-link-alt mr-2"></i>
+                                Apply Now
+                            </a>
                         </div>
 
                         <!-- JV with Us -->
@@ -1041,53 +1020,6 @@
                 <button onclick="redeemCreditCode()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
                     <i class="fas fa-gift mr-2"></i>Redeem Code
                 </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Subscription Management Modal -->
-    <div id="subscription-management-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full mx-4">
-            <h3 class="text-lg font-semibold mb-4">Subscription Management</h3>
-            
-            <div class="space-y-4">
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <h4 class="font-semibold text-blue-800 mb-2">Current Subscription</h4>
-                    <div class="text-sm text-blue-700">
-                        <p><strong>Plan:</strong> <span class="current-plan">Loading...</span></p>
-                        <p><strong>Status:</strong> <span class="subscription-status">Loading...</span></p>
-                        <p><strong>Renewal:</strong> <span class="subscription-renewal">Loading...</span></p>
-                    </div>
-                </div>
-                
-                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                    <h4 class="font-semibold text-purple-800 mb-2">Account Information</h4>
-                    <div class="text-sm text-purple-700">
-                        <p><strong>Team:</strong> <span class="team-name">Loading...</span></p>
-                        <p><strong>Credits:</strong> <span class="credit-balance">Loading...</span></p>
-                        <p><strong>Stripe Customer:</strong> <span class="stripe-customer">Loading...</span></p>
-                        <p><strong>Active Subscriptions:</strong> <span class="active-subscriptions">Loading...</span></p>
-                    </div>
-                </div>
-                
-                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <h4 class="font-semibold text-green-800 mb-2">Available Actions</h4>
-                    <div class="space-y-2">
-                        <button onclick="upgradePlan()" class="w-full px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-md hover:from-purple-700 hover:to-blue-700 text-sm font-medium">
-                            <i class="fas fa-arrow-up mr-2"></i>Upgrade Plan
-                        </button>
-                        <button onclick="downloadInvoice()" class="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm">
-                            <i class="fas fa-download mr-2"></i>Download Latest Invoice
-                        </button>
-                        <button onclick="contactSupport()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">
-                            <i class="fas fa-envelope mr-2"></i>Contact Support
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="flex justify-end space-x-3 mt-6">
-                <button onclick="closeSubscriptionManagementModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Close</button>
             </div>
         </div>
     </div>
@@ -1327,232 +1259,9 @@
             }
         }
 
-        // Comprehensive subscription management
-        async function openStripePortal() {
-            console.log('Opening Stripe portal - fetching subscription details...');
-            
-            try {
-                // Load subscription details and show management modal
-                const response = await fetch('/api/billing/subscription-details', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-                
-                console.log('Subscription details response:', response);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Subscription data received:', data);
-                    
-                    if (data.success) {
-                        // Populate and show subscription management modal
-                        populateSubscriptionModal(data);
-                        showSubscriptionManagementModal();
-                    } else {
-                        console.error('API returned error:', data.error);
-                        alert('Error loading subscription details: ' + (data.error || 'Unknown error'));
-                    }
-                } else {
-                    console.error('API request failed with status:', response.status);
-                    const errorData = await response.json().catch(() => ({}));
-                    console.error('Error response:', errorData);
-                    
-                    // Fallback: populate modal with fallback data
-                    const fallbackData = {
-                        success: true,
-                        team: {
-                            name: "Devin's Unlimited Team",
-                            tier: "growth10",
-                            credit_balance: 999830
-                        },
-                        stripe_details: {
-                            customer: { id: "cus_ShbmyT4fzQbWvP" },
-                            subscriptions: [],
-                            invoices: []
-                        }
-                    };
-                    
-                    populateSubscriptionModal(fallbackData);
-                    showSubscriptionManagementModal();
-                }
-            } catch (error) {
-                console.error('Error loading subscription details:', error);
-                
-                // Fallback: populate modal with fallback data
-                const fallbackData = {
-                    success: true,
-                    team: {
-                        name: "Devin's Unlimited Team",
-                        tier: "growth10",
-                        credit_balance: 999830
-                    },
-                    stripe_details: {
-                        customer: { id: "cus_ShbmyT4fzQbWvP" },
-                        subscriptions: [],
-                        invoices: []
-                    }
-                };
-                
-                populateSubscriptionModal(fallbackData);
-                showSubscriptionManagementModal();
-            }
-        }
-
-        // Populate subscription modal with actual data
-        function populateSubscriptionModal(data) {
-            const modal = document.getElementById('subscription-management-modal');
-            if (!modal) return;
-            
-            console.log('Populating subscription modal with data:', data);
-            
-            // Update plan information
-            const planElement = modal.querySelector('.current-plan');
-            if (planElement && data.team) {
-                const tierName = data.team.tier.charAt(0).toUpperCase() + data.team.tier.slice(1);
-                planElement.textContent = `${tierName} Plan`;
-            }
-            
-            // Update team name
-            const teamNameElement = modal.querySelector('.team-name');
-            if (teamNameElement && data.team) {
-                teamNameElement.textContent = data.team.name;
-            }
-            
-            // Update credit balance
-            const creditElement = modal.querySelector('.credit-balance');
-            if (creditElement && data.team) {
-                creditElement.textContent = data.team.credit_balance ? data.team.credit_balance.toLocaleString() : 'N/A';
-            }
-            
-            // Update Stripe customer info
-            const stripeCustomerElement = modal.querySelector('.stripe-customer');
-            if (stripeCustomerElement && data.stripe_details && data.stripe_details.customer) {
-                stripeCustomerElement.textContent = data.stripe_details.customer.id;
-            }
-            
-            // Update active subscriptions count
-            const activeSubsElement = modal.querySelector('.active-subscriptions');
-            if (activeSubsElement && data.stripe_details && data.stripe_details.subscriptions) {
-                activeSubsElement.textContent = data.stripe_details.subscriptions.length;
-            }
-            
-            // Update subscription details if available
-            if (data.stripe_details && data.stripe_details.subscriptions && data.stripe_details.subscriptions.length > 0) {
-                const subscription = data.stripe_details.subscriptions[0];
-                
-                // Update status
-                const statusElement = modal.querySelector('.subscription-status');
-                if (statusElement) {
-                    statusElement.textContent = subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1);
-                }
-                
-                // Update renewal date
-                const renewalElement = modal.querySelector('.subscription-renewal');
-                if (renewalElement && subscription.current_period_end) {
-                    const renewalDate = new Date(subscription.current_period_end * 1000);
-                    renewalElement.textContent = renewalDate.toLocaleDateString();
-                }
-                
-                // Store subscription ID for actions
-                modal.dataset.subscriptionId = subscription.id;
-            } else {
-                // No active Stripe subscriptions - show database info
-                const statusElement = modal.querySelector('.subscription-status');
-                if (statusElement) {
-                    statusElement.textContent = 'Database Plan (No Stripe Subscription)';
-                }
-                
-                const renewalElement = modal.querySelector('.subscription-renewal');
-                if (renewalElement) {
-                    renewalElement.textContent = 'Manual Management';
-                }
-            }
-            
-            // Update invoices section if available
-            if (data.stripe_details && data.stripe_details.invoices && data.stripe_details.invoices.length > 0) {
-                updateInvoicesSection(data.stripe_details.invoices);
-            } else {
-                // No invoices available
-                const modal = document.getElementById('subscription-management-modal');
-                const existingInvoicesSection = modal.querySelector('.invoices-section');
-                if (existingInvoicesSection) {
-                    existingInvoicesSection.remove();
-                }
-            }
-        }
-
-        // Update invoices section with real data
-        function updateInvoicesSection(invoices) {
-            const modal = document.getElementById('subscription-management-modal');
-            if (!modal) return;
-            
-            // Find or create invoices section
-            let invoicesSection = modal.querySelector('.invoices-section');
-            if (!invoicesSection) {
-                invoicesSection = document.createElement('div');
-                invoicesSection.className = 'invoices-section bg-gray-50 border border-gray-200 rounded-lg p-4 mt-4';
-                
-                const availableActions = modal.querySelector('.bg-green-50');
-                if (availableActions) {
-                    availableActions.parentNode.insertBefore(invoicesSection, availableActions);
-                }
-            }
-            
-            // Clear existing content
-            invoicesSection.innerHTML = `
-                <h4 class="font-semibold text-gray-800 mb-2">Recent Invoices</h4>
-                <div class="space-y-2">
-                    ${invoices.slice(0, 3).map(invoice => `
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <div>
-                                <span class="text-sm font-medium">${invoice.number || 'Invoice'}</span>
-                                <span class="text-xs text-gray-500 ml-2">${new Date(invoice.created * 1000).toLocaleDateString()}</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="text-sm font-bold">$${(invoice.amount_paid / 100).toFixed(2)}</span>
-                                <button onclick="downloadInvoiceById('${invoice.id}')" class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded hover:bg-blue-200">
-                                    Download
-                                </button>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        // Download specific invoice
-        async function downloadInvoiceById(invoiceId) {
-            try {
-                const response = await fetch('/api/billing/download-invoice', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ invoice_id: invoiceId })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success && result.invoice_url) {
-                    window.open(result.invoice_url, '_blank');
-                } else {
-                    alert('Error downloading invoice: ' + (result.error || 'Unknown error'));
-                }
-            } catch (error) {
-                console.error('Error downloading invoice:', error);
-                alert('Error downloading invoice. Please try again.');
-            }
-        }
-
-        // Upgrade plan function
-        function upgradePlan() {
-            // Close the current modal
-            closeSubscriptionManagementModal();
-            
-            // Navigate to the Plans & Credits section
-            showSection('plans');
+        // Placeholder functions for various actions
+        function openStripePortal() {
+            window.open('/api/billing/customer-portal', '_blank');
         }
 
         function exportUsageCSV() {
@@ -1600,57 +1309,6 @@
             document.getElementById('redeem-code-input').value = '';
         }
 
-        // Subscription Management Modal Functions
-        function showSubscriptionManagementModal() {
-            console.log('Showing subscription management modal');
-            document.getElementById('subscription-management-modal').classList.remove('hidden');
-        }
-
-        function closeSubscriptionManagementModal() {
-            document.getElementById('subscription-management-modal').classList.add('hidden');
-        }
-
-        function downloadInvoice() {
-            // Check if we have real invoice data loaded
-            const modal = document.getElementById('subscription-management-modal');
-            const invoicesSection = modal?.querySelector('.invoices-section');
-            
-            if (invoicesSection) {
-                // Use the first available invoice download button
-                const firstDownloadBtn = invoicesSection.querySelector('button[onclick*="downloadInvoiceById"]');
-                if (firstDownloadBtn) {
-                    firstDownloadBtn.click();
-                    return;
-                }
-            }
-            
-            // Fallback message
-            alert('No invoices available for download. Please contact support for your latest invoice.');
-        }
-
-        function contactSupport() {
-            // Open email client with pre-filled information
-            const subject = encodeURIComponent('Subscription Management Request');
-            const body = encodeURIComponent(`Hello,
-
-I need assistance with my subscription management.
-
-Account Email: devin@pfpsolutions.us
-Current Plan: Growth10 (Unlimited Credits)
-Request: [Please describe what you'd like to change]
-
-Thank you,
-${getUserName() || 'User'}`);
-            
-            window.open(`mailto:support@properwrite.com?subject=${subject}&body=${body}`);
-        }
-
-        function getUserName() {
-            // Get user name from the UI if available
-            const nameElement = document.querySelector('[data-user-name]');
-            return nameElement ? nameElement.textContent : null;
-        }
-
         async function redeemCreditCode() {
             const code = document.getElementById('redeem-code-input').value.trim();
             
@@ -1692,78 +1350,7 @@ ${getUserName() || 'User'}`);
         }
 
         async function changePlan(planKey) {
-            // Show payment portal for plan changes
-            await showPaymentPortal(planKey);
-        }
-        
-        async function showPaymentPortal(planKey) {
-            const modal = document.getElementById('payment-portal-modal');
-            if (!modal) {
-                console.error('Payment portal modal not found');
-                return;
-            }
-            
-            try {
-                // Get current plan details
-                const response = await fetch('/api/billing/subscription-details', {
-                    method: 'GET',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Populate the payment portal with plan change details
-                    populatePaymentPortal(data, planKey);
-                    modal.classList.remove('hidden');
-                } else {
-                    console.error('Error loading subscription details:', data.error);
-                    alert('Error loading subscription details. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error loading payment portal:', error);
-                alert('Error loading payment portal. Please try again.');
-            }
-        }
-        
-        function populatePaymentPortal(subscriptionData, newPlanKey) {
-            const planNames = {
-                'individual': 'Individual ($27/month)',
-                'pro': 'Pro ($79/month)', 
-                'team5': 'Team5 ($199/month)',
-                'growth10': 'Growth10 ($399/month)'
-            };
-            
-            const currentPlan = subscriptionData.team.plan;
-            const newPlan = planNames[newPlanKey] || newPlanKey;
-            
-            document.getElementById('current-plan-portal').textContent = planNames[currentPlan.toLowerCase()] || currentPlan;
-            document.getElementById('new-plan-portal').textContent = newPlan;
-            
-            // Store the plan key for later use
-            document.getElementById('payment-portal-modal').dataset.planKey = newPlanKey;
-        }
-        
-        function closePaymentPortal() {
-            const modal = document.getElementById('payment-portal-modal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
-        }
-        
-        async function confirmPlanChange() {
-            const modal = document.getElementById('payment-portal-modal');
-            const planKey = modal.dataset.planKey;
-            
-            if (!planKey) {
-                alert('Error: No plan selected');
-                return;
-            }
-            
-            if (!confirm(`Are you sure you want to change to the ${planKey} plan? This will take effect immediately.`)) {
+            if (!confirm(`Are you sure you want to change to the ${planKey} plan?`)) {
                 return;
             }
             
@@ -1781,14 +1368,11 @@ ${getUserName() || 'User'}`);
                 if (result.success) {
                     alert(`Successfully changed from ${result.old_plan} to ${result.new_plan} plan!`);
                     
-                    // Close payment portal
-                    closePaymentPortal();
-                    
                     // Update UI to reflect new plan
                     updatePlanUI(result.new_plan);
                     
                     // Refresh dashboard data
-                    await loadUserData();
+                    await loadDashboardData();
                 } else {
                     alert(`Error: ${result.error}`);
                 }
@@ -1966,49 +1550,28 @@ ${getUserName() || 'User'}`);
 
         async function loadUserData() {
             try {
-                // Load dashboard data with credentials
-                const response = await fetch('/api/billing/subscription-details', {
-                    method: 'GET',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-                
-                console.log('Subscription details response status:', response.status);
+                // Load dashboard data
+                const response = await fetch('/api/dashboard-data');
                 const data = await response.json();
-                console.log('Subscription details response data:', data);
                 
                 if (data.success) {
                     // Update user info in header
-                    if (data.user) {
-                        const userNameEl = document.getElementById('user-name');
-                        const userEmailEl = document.getElementById('user-email');
-                        const userInitialsEl = document.getElementById('user-initials');
-                        const currentPlanEl = document.getElementById('current-plan');
-                        const creditsRemainingEl = document.getElementById('credits-remaining');
-                        const teamSizeEl = document.getElementById('team-size');
-                        const renewalDateEl = document.getElementById('renewal-date');
-                        
-                        if (userNameEl) userNameEl.textContent = data.user.name || 'User';
-                        if (userEmailEl) userEmailEl.textContent = data.user.email || '';
-                        if (userInitialsEl) {
-                            // Generate initials from name
-                            const name = data.user.name || 'User';
-                            const nameParts = name.split(' ');
-                            const initials = nameParts.length >= 2 ? 
-                                nameParts[0][0] + nameParts[1][0] : 
-                                nameParts[0][0] + nameParts[0][1] || 'U';
-                            userInitialsEl.textContent = initials.toUpperCase();
-                        }
-                        if (currentPlanEl) currentPlanEl.textContent = data.team.plan || 'Unknown';
-                        if (creditsRemainingEl) creditsRemainingEl.textContent = (data.team.credit_balance || 0).toLocaleString();
-                        if (teamSizeEl) teamSizeEl.textContent = `${data.team.seats_used || 1} / ${data.team.seats_max || 1}`;
-                        
-                        // Update renewal date
-                        if (renewalDateEl) {
-                            renewalDateEl.textContent = data.team.renewal_date || 'N/A';
-                        }
+                    document.getElementById('user-name').textContent = data.user.name;
+                    document.getElementById('user-email').textContent = data.user.email;
+                    document.getElementById('user-initials').textContent = data.user.initials;
+                    
+                    // Update team stats
+                    document.getElementById('current-plan').textContent = data.team.plan;
+                    document.getElementById('credits-remaining').textContent = data.team.credits_remaining.toLocaleString();
+                    document.getElementById('team-size').textContent = `${data.team.total_members} / ${data.team.max_members}`;
+                    
+                    // Update renewal date
+                    if (data.team.next_billing_date) {
+                        const date = new Date(data.team.next_billing_date);
+                        document.getElementById('renewal-date').textContent = date.toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric' 
+                        });
                     }
                     
                     // Update credit usage stats in Plans section
@@ -2016,46 +1579,41 @@ ${getUserName() || 'User'}`);
                     if (plansSection) {
                         const creditsRemainingElements = plansSection.querySelectorAll('.text-3xl');
                         if (creditsRemainingElements[0]) {
-                            if (data.team.unlimited_credits) {
-                                creditsRemainingElements[0].textContent = 'Unlimited';
-                            } else {
-                                creditsRemainingElements[0].textContent = (data.team.credit_balance || 0).toLocaleString();
-                            }
+                            creditsRemainingElements[0].textContent = data.team.credits_remaining.toLocaleString();
                         }
                         if (creditsRemainingElements[1]) {
-                            creditsRemainingElements[1].textContent = (data.team.credits_used_this_month || 0).toLocaleString();
+                            creditsRemainingElements[1].textContent = data.team.credits_used_this_month.toLocaleString();
                         }
                     }
                     
                     // Update current plan info
                     const currentPlanName = document.getElementById('current-plan-name');
                     const currentPlanCredits = document.getElementById('current-plan-credits');
-                    const nextBillingDate = document.getElementById('next-billing-date');
-                    
                     if (currentPlanName) {
-                        currentPlanName.textContent = data.team.plan || 'Unknown';
+                        currentPlanName.textContent = data.team.plan || 'Pro';
                     }
                     if (currentPlanCredits) {
-                        if (data.team.unlimited_credits) {
-                            currentPlanCredits.textContent = 'Unlimited';
-                        } else {
-                            currentPlanCredits.textContent = data.team.credit_balance ? data.team.credit_balance.toLocaleString() : '0';
-                        }
-                    }
-                    if (nextBillingDate) {
-                        nextBillingDate.textContent = data.subscription.next_billing_date || 'Manual Management';
+                        currentPlanCredits.textContent = data.team.credits_remaining.toLocaleString();
                     }
                     
                     // Update team member count in team section
                     const teamSectionHeaders = document.querySelectorAll('h3');
                     teamSectionHeaders.forEach(header => {
                         if (header.textContent.includes('Team Members')) {
-                            header.textContent = `Team Members (${data.team.seats_used || 1}/${data.team.seats_max || 1})`;
+                            header.textContent = `Team Members (${data.team.total_members}/${data.team.max_members})`;
                         }
                     });
                     
-                    // Load team members separately
-                    loadTeamMembers();
+                    // Update team members table
+                    if (data.members && data.members.length > 0) {
+                        updateTeamMemberList(data.members);
+                    } else {
+                        // Show empty state if no members
+                        const memberTableBody = document.querySelector('#team-members-table tbody');
+                        if (memberTableBody) {
+                            memberTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500 py-8">No team members found</td></tr>';
+                        }
+                    }
                     
                     // Load pending invites
                     loadPendingInvites();
@@ -2063,43 +1621,21 @@ ${getUserName() || 'User'}`);
                     // Populate profile settings fields
                     const profileNameField = document.getElementById('profile-name');
                     const profileEmailField = document.getElementById('profile-email');
-                    if (profileNameField && data.user) {
+                    if (profileNameField) {
                         profileNameField.value = data.user.name || '';
                     }
-                    if (profileEmailField && data.user) {
+                    if (profileEmailField) {
                         profileEmailField.value = data.user.email || '';
                     }
                     
                 } else {
                     console.error('Error loading dashboard data:', data.error);
-                    // Show error message but try to populate what we can
+                    // Show error message
                     showErrorMessage('Failed to load dashboard data. Please try refreshing the page.');
-                    
-                    // Set fallback values to avoid showing "Loading..." indefinitely
-                    const currentPlanEl = document.getElementById('current-plan');
-                    const creditsRemainingEl = document.getElementById('credits-remaining');
-                    const teamSizeEl = document.getElementById('team-size');
-                    const renewalDateEl = document.getElementById('renewal-date');
-                    
-                    if (currentPlanEl) currentPlanEl.textContent = 'Error loading';
-                    if (creditsRemainingEl) creditsRemainingEl.textContent = 'Error loading';
-                    if (teamSizeEl) teamSizeEl.textContent = 'Error loading';
-                    if (renewalDateEl) renewalDateEl.textContent = 'Error loading';
                 }
             } catch (error) {
                 console.error('Error loading user data:', error);
                 showErrorMessage('Failed to load dashboard data. Please try refreshing the page.');
-                
-                // Set fallback values to avoid showing "Loading..." indefinitely
-                const currentPlanEl = document.getElementById('current-plan');
-                const creditsRemainingEl = document.getElementById('credits-remaining');
-                const teamSizeEl = document.getElementById('team-size');
-                const renewalDateEl = document.getElementById('renewal-date');
-                
-                if (currentPlanEl) currentPlanEl.textContent = 'Error loading';
-                if (creditsRemainingEl) creditsRemainingEl.textContent = 'Error loading';
-                if (teamSizeEl) teamSizeEl.textContent = 'Error loading';
-                if (renewalDateEl) renewalDateEl.textContent = 'Error loading';
             }
         }
 
@@ -2228,62 +1764,6 @@ ${getUserName() || 'User'}`);
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(email);
         }
-
-        async function loadTeamMembers() {
-            try {
-                const response = await fetch('/api/team/members', {
-                    method: 'GET',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success && data.members) {
-                        updateTeamMemberList(data.members);
-                    } else {
-                        // Show default member (current user)
-                        const defaultMember = {
-                            id: 'current-user',
-                            name: 'Devin (PFP Solutions)',
-                            email: 'devin@pfpsolutions.us',
-                            role: 'owner',
-                            is_active: true,
-                            last_active: new Date().toISOString()
-                        };
-                        updateTeamMemberList([defaultMember]);
-                    }
-                } else {
-                    console.error('Failed to load team members');
-                    // Show default member
-                    const defaultMember = {
-                        id: 'current-user',
-                        name: 'Devin (PFP Solutions)',
-                        email: 'devin@pfpsolutions.us',
-                        role: 'owner',
-                        is_active: true,
-                        last_active: new Date().toISOString()
-                    };
-                    updateTeamMemberList([defaultMember]);
-                }
-            } catch (error) {
-                console.error('Error loading team members:', error);
-                // Show default member
-                const defaultMember = {
-                    id: 'current-user',
-                    name: 'Devin (PFP Solutions)',
-                    email: 'devin@pfpsolutions.us',
-                    role: 'owner',
-                    is_active: true,
-                    last_active: new Date().toISOString()
-                };
-                updateTeamMemberList([defaultMember]);
-            }
-        }
-
-
 
         async function loadTeamData() {
             // This function is now handled by loadUserData()
@@ -2414,42 +1894,6 @@ ${getUserName() || 'User'}`);
             downloadAnchorNode.remove();
         }
 
-        // Status info helper function
-        function getStatusInfo(status) {
-            switch(status) {
-                case 'pending':
-                    return {
-                        displayText: 'Pending',
-                        badgeColor: 'bg-yellow-100 text-yellow-800',
-                        avatarColor: 'bg-gradient-to-r from-yellow-500 to-orange-600'
-                    };
-                case 'accepted':
-                    return {
-                        displayText: 'Accepted',
-                        badgeColor: 'bg-green-100 text-green-800',
-                        avatarColor: 'bg-gradient-to-r from-green-500 to-emerald-600'
-                    };
-                case 'cancelled':
-                    return {
-                        displayText: 'Cancelled',
-                        badgeColor: 'bg-red-100 text-red-800',
-                        avatarColor: 'bg-gradient-to-r from-red-500 to-pink-600'
-                    };
-                case 'expired':
-                    return {
-                        displayText: 'Expired',
-                        badgeColor: 'bg-gray-100 text-gray-800',
-                        avatarColor: 'bg-gradient-to-r from-gray-500 to-gray-600'
-                    };
-                default:
-                    return {
-                        displayText: 'Unknown',
-                        badgeColor: 'bg-gray-100 text-gray-800',
-                        avatarColor: 'bg-gradient-to-r from-gray-500 to-gray-600'
-                    };
-            }
-        }
-
         // Pending invites functionality
         async function loadPendingInvites() {
             try {
@@ -2458,7 +1902,7 @@ ${getUserName() || 'User'}`);
                 
                 if (data.success) {
                     updatePendingInvitesList(data.invites || []);
-                    updatePendingInvitesCount(data.invites || []);
+                    updatePendingInvitesCount(data.invites ? data.invites.length : 0);
                 } else {
                     console.error('Error loading pending invites:', data.error);
                     showPendingInvitesError();
@@ -2476,7 +1920,7 @@ ${getUserName() || 'User'}`);
             inviteTableBody.innerHTML = '';
             
             if (invites.length === 0) {
-                inviteTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500 py-8">No team invites</td></tr>';
+                inviteTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500 py-8">No pending invites</td></tr>';
                 return;
             }
             
@@ -2485,32 +1929,10 @@ ${getUserName() || 'User'}`);
                 const inviteDate = new Date(invite.created_at).toLocaleDateString();
                 const daysAgo = Math.floor((Date.now() - new Date(invite.created_at).getTime()) / (1000 * 60 * 60 * 24));
                 
-                // Get status-specific styling and display
-                const statusInfo = getStatusInfo(invite.status);
-                
-                // For accepted invites, show acceptance date instead of creation date
-                let dateDisplay = `${inviteDate} (${daysAgo} days ago)`;
-                if (invite.status === 'accepted' && invite.accepted_at) {
-                    const acceptedDate = new Date(invite.accepted_at).toLocaleDateString();
-                    const acceptedDaysAgo = Math.floor((Date.now() - new Date(invite.accepted_at).getTime()) / (1000 * 60 * 60 * 24));
-                    dateDisplay = `Accepted: ${acceptedDate} (${acceptedDaysAgo} days ago)`;
-                }
-                
-                // Actions based on status
-                let actions = '';
-                if (invite.status === 'pending') {
-                    actions = `
-                        <button onclick="resendInvite('${invite.id}')" class="text-blue-600 hover:text-blue-900 mr-3">Resend</button>
-                        <button onclick="cancelInvite('${invite.id}')" class="text-red-600 hover:text-red-900">Cancel</button>
-                    `;
-                } else {
-                    actions = '<span class="text-gray-400">No actions</span>';
-                }
-                
                 row.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
-                            <div class="w-8 h-8 rounded-full ${statusInfo.avatarColor} flex items-center justify-center text-white text-sm font-medium">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-500 to-orange-600 flex items-center justify-center text-white text-sm font-medium">
                                 ${invite.email.charAt(0).toUpperCase()}
                             </div>
                             <div class="ml-3">
@@ -2524,40 +1946,31 @@ ${getUserName() || 'User'}`);
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${dateDisplay}
+                        ${inviteDate} (${daysAgo} days ago)
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusInfo.badgeColor}">
-                            ${statusInfo.displayText}
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                            Pending
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        ${actions}
+                        <button onclick="resendInvite('${invite.id}')" class="text-blue-600 hover:text-blue-900 mr-3">Resend</button>
+                        <button onclick="cancelInvite('${invite.id}')" class="text-red-600 hover:text-red-900">Cancel</button>
                     </td>
                 `;
                 inviteTableBody.appendChild(row);
             });
         }
 
-        function updatePendingInvitesCount(allInvites) {
+        function updatePendingInvitesCount(count) {
             const countElement = document.getElementById('pending-invites-count');
             if (countElement) {
-                if (allInvites.length === 0) {
+                if (count === 0) {
                     countElement.innerHTML = '<i class="fas fa-check mr-1"></i>None';
                     countElement.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800';
                 } else {
-                    // Count different statuses
-                    const pendingCount = allInvites.filter(invite => invite.status === 'pending').length;
-                    const acceptedCount = allInvites.filter(invite => invite.status === 'accepted').length;
-                    const total = allInvites.length;
-                    
-                    if (pendingCount > 0) {
-                        countElement.innerHTML = `<i class="fas fa-clock mr-1"></i>${pendingCount} pending`;
-                        countElement.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800';
-                    } else {
-                        countElement.innerHTML = `<i class="fas fa-check mr-1"></i>${total} total`;
-                        countElement.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800';
-                    }
+                    countElement.innerHTML = `<i class="fas fa-clock mr-1"></i>${count}`;
+                    countElement.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800';
                 }
             }
         }
@@ -2622,80 +2035,5 @@ ${getUserName() || 'User'}`);
             }
         }
     </script>
-
-    <!-- Payment Portal Modal -->
-    <div id="payment-portal-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">Plan Change Payment Portal</h3>
-                    <button onclick="closePaymentPortal()" class="text-gray-400 hover:text-gray-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-                
-                <div class="mb-6">
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                        <h4 class="text-sm font-medium text-blue-900 mb-2">Plan Change Summary</h4>
-                        <div class="text-sm text-blue-800">
-                            <div class="flex justify-between mb-1">
-                                <span>Current Plan:</span>
-                                <span id="current-plan-portal">Loading...</span>
-                            </div>
-                            <div class="flex justify-between mb-1">
-                                <span>New Plan:</span>
-                                <span id="new-plan-portal">Loading...</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                        <h4 class="text-sm font-medium text-green-900 mb-2">Payment Tracking</h4>
-                        <div class="text-sm text-green-800">
-                            <div class="flex items-center mb-2">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <span>Plan changes are prorated automatically</span>
-                            </div>
-                            <div class="flex items-center mb-2">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <span>Payment receipt sent to your email</span>
-                            </div>
-                            <div class="flex items-center">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <span>Credits adjusted immediately</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                        <h4 class="text-sm font-medium text-amber-900 mb-2">Important Notes</h4>
-                        <ul class="text-sm text-amber-800 space-y-1">
-                            <li>• Plan changes take effect immediately</li>
-                            <li>• You can track all payment history in your subscription management</li>
-                            <li>• Contact support if you need assistance with billing</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="flex space-x-3">
-                    <button onclick="closePaymentPortal()" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
-                        Cancel
-                    </button>
-                    <button onclick="confirmPlanChange()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                        Confirm Plan Change
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </body>
 </html>

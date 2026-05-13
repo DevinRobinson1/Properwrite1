@@ -16,10 +16,6 @@ logger = logging.getLogger(__name__)
 
 affiliate_api = Blueprint('affiliate_api', __name__)
 
-# Import CSRF for exemption
-from flask_wtf.csrf import CSRFProtect
-csrf = CSRFProtect()
-
 def get_db_session():
     """Get database session from billing service"""
     from sqlalchemy import create_engine
@@ -43,25 +39,17 @@ def get_db_session():
     return Session()
 
 def require_admin(f):
-    """Admin authentication decorator - uses same auth as main admin API"""
+    """Admin authentication decorator"""
     @functools.wraps(f)
     def decorated_function(*args, **kwargs):
-        # Check if user is authenticated as admin
         admin_token = request.headers.get('X-Admin-Token')
-        if admin_token == 'admin123':  # Keep for backward compatibility
-            return f(*args, **kwargs)
-        
-        # Try session-based authentication (matches admin_routes_minimal.py)
-        from flask import session
-        if not session.get('is_admin'):
+        if admin_token != 'admin123':  # In production, use proper auth
             return jsonify({'error': 'Unauthorized'}), 401
-        
         return f(*args, **kwargs)
     return decorated_function
 
 # Affiliate Management Endpoints
 @affiliate_api.route('/api/admin/affiliates', methods=['GET'])
-@csrf.exempt
 @require_admin
 def get_affiliates():
     """Get all affiliates with filtering and pagination"""
@@ -149,9 +137,8 @@ def approve_affiliate(affiliate_id):
     try:
         service = AffiliateService(db)
         
-        # Get admin user ID from session
-        from flask import session
-        admin_id = session.get('admin_user_id', 'admin_user_id')
+        # In production, get admin user ID from session
+        admin_id = 'admin_user_id'
         
         affiliate = service.approve_affiliate(affiliate_id, admin_id)
         
@@ -180,7 +167,6 @@ def get_affiliate_metrics(affiliate_id):
 
 # Promo Code Management Endpoints
 @affiliate_api.route('/api/admin/promo-codes', methods=['GET'])
-@csrf.exempt
 @require_admin
 def get_promo_codes():
     """Get all promo codes with filtering"""
@@ -228,7 +214,6 @@ def get_promo_codes():
         db.close()
 
 @affiliate_api.route('/api/admin/promo-codes', methods=['POST'])
-@csrf.exempt
 @require_admin
 def create_promo_code():
     """Create a new promo code"""
@@ -237,9 +222,8 @@ def create_promo_code():
         service = AffiliateService(db)
         data = request.json
         
-        # Get admin user ID from session
-        from flask import session
-        data['created_by'] = session.get('admin_user_id', 'admin_user_id')
+        # In production, get admin user ID from session
+        data['created_by'] = 'admin_user_id'
         
         promo_code = service.create_promo_code(data)
         
@@ -253,66 +237,7 @@ def create_promo_code():
     finally:
         db.close()
 
-@affiliate_api.route('/api/admin/promo-codes/<code_id>', methods=['PUT'])
-@csrf.exempt
-@require_admin
-def update_promo_code(code_id):
-    """Update an existing promo code"""
-    db = get_db_session()
-    try:
-        from affiliate_models import PromoCode, PromoCodeType
-        
-        promo_code = db.query(PromoCode).filter_by(id=code_id).first()
-        if not promo_code:
-            return jsonify({'error': 'Promo code not found'}), 404
-        
-        data = request.json
-        
-        # Update fields if provided
-        if 'code' in data:
-            promo_code.code = data['code']
-        if 'type' in data:
-            promo_code.type = PromoCodeType(data['type'])
-        if 'discount_percentage' in data:
-            promo_code.discount_percentage = data['discount_percentage']
-        if 'credit_amount' in data:
-            promo_code.credit_amount = data['credit_amount']
-        if 'bonus_seats' in data:
-            promo_code.bonus_seats = data['bonus_seats']
-        if 'max_uses' in data:
-            promo_code.max_uses = data['max_uses']
-        if 'valid_until' in data:
-            from datetime import datetime
-            promo_code.valid_until = datetime.fromisoformat(data['valid_until']) if data['valid_until'] else None
-        if 'is_active' in data:
-            promo_code.is_active = data['is_active']
-        if 'first_month_only' in data:
-            promo_code.first_month_only = data['first_month_only']
-        if 'description' in data:
-            promo_code.description = data['description']
-        
-        db.commit()
-        
-        return jsonify({
-            'id': str(promo_code.id),
-            'code': promo_code.code,
-            'type': promo_code.type.value,
-            'discount_percentage': promo_code.discount_percentage,
-            'credit_amount': promo_code.credit_amount,
-            'bonus_seats': promo_code.bonus_seats,
-            'max_uses': promo_code.max_uses,
-            'valid_until': promo_code.valid_until.isoformat() if promo_code.valid_until else None,
-            'is_active': promo_code.is_active,
-            'first_month_only': promo_code.first_month_only,
-            'description': promo_code.description,
-            'updated': True
-        })
-        
-    finally:
-        db.close()
-
 @affiliate_api.route('/api/admin/promo-codes/<code_id>/deactivate', methods=['POST'])
-@csrf.exempt
 @require_admin
 def deactivate_promo_code(code_id):
     """Deactivate a promo code"""
@@ -334,7 +259,6 @@ def deactivate_promo_code(code_id):
 
 # Payout Management Endpoints
 @affiliate_api.route('/api/admin/payouts/pending', methods=['GET'])
-@csrf.exempt
 @require_admin
 def get_pending_payouts():
     """Get affiliates with pending payouts"""
@@ -374,9 +298,8 @@ def create_payout():
         service = AffiliateService(db)
         data = request.json
         
-        # Get admin user ID from session
-        from flask import session
-        initiated_by = session.get('admin_user_id', 'admin_user_id')
+        # In production, get admin user ID from session
+        initiated_by = 'admin_user_id'
         
         payout = service.create_payout(data['affiliate_id'], initiated_by)
         
@@ -392,170 +315,6 @@ def create_payout():
         return jsonify({'error': str(e)}), 400
     finally:
         db.close()
-
-# Public Promo Code Endpoints
-@affiliate_api.route('/api/apply-promo-code', methods=['POST'])
-@csrf.exempt
-def apply_promo_code():
-    """Apply a promo code and add credits to user account"""
-    try:
-        data = request.json
-        if not data or 'code' not in data:
-            return jsonify({'error': 'Promo code required'}), 400
-        
-        code = data.get('code', '').strip().upper()
-        if not code:
-            return jsonify({'error': 'Promo code required'}), 400
-        
-        # Get user info from session
-        from flask import session
-        user_id = session.get('user_id')
-        user_email = session.get('user_email')
-        
-        if not user_id:
-            return jsonify({'error': 'User must be logged in'}), 401
-        
-        # Get user and team info
-        from billing_models import User, Team
-        db = get_db_session()
-        
-        user = db.query(User).filter_by(id=user_id).first()
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-        
-        team = db.query(Team).filter_by(id=user.team_id).first()
-        if not team:
-            return jsonify({'error': 'Team not found'}), 404
-        
-        # Validate promo code using affiliate service
-        affiliate_service = AffiliateService(db)
-        is_valid, message, promo_code = affiliate_service.validate_promo_code(
-            code, user_id, team.tier or 'free'
-        )
-        
-        if not is_valid:
-            return jsonify({'error': message}), 400
-        
-        # Apply the promo code
-        credits_added = 0
-        
-        if promo_code.type == PromoCodeType.CREDIT_PACK:
-            credits_added = promo_code.credit_amount or 0
-            
-            # Add credits to team
-            team.credit_balance += credits_added
-            
-            # Log the credit addition
-            from billing_models import CreditLog
-            credit_log = CreditLog(
-                team_id=team.id,
-                delta=credits_added,
-                reason=f'promo-{code}'
-            )
-            db.add(credit_log)
-            
-            # Create redemption record
-            redemption = affiliate_service.redeem_promo_code(
-                code, user_id, team.id, {
-                    'amount': 0,  # No payment amount for direct credit application
-                    'stripe_payment_id': None
-                }
-            )
-            
-            db.commit()
-            
-            return jsonify({
-                'success': True,
-                'message': f'Successfully applied promo code {code}',
-                'credits_added': credits_added,
-                'new_balance': team.credit_balance,
-                'promo_type': 'credit_pack'
-            })
-            
-        else:
-            # For other types (percentage discount, team bonus), they apply at checkout
-            # Just mark as used for tracking
-            redemption = affiliate_service.redeem_promo_code(
-                code, user_id, team.id, {
-                    'amount': 0,
-                    'stripe_payment_id': None
-                }
-            )
-            
-            db.commit()
-            
-            return jsonify({
-                'success': True,
-                'message': f'Promo code {code} will be applied at checkout',
-                'credits_added': 0,
-                'new_balance': team.credit_balance,
-                'promo_type': promo_code.type.value
-            })
-            
-    except Exception as e:
-        logging.error(f"Error applying promo code: {str(e)}")
-        return jsonify({'error': 'Failed to apply promo code'}), 500
-    finally:
-        if 'db' in locals():
-            db.close()
-
-@affiliate_api.route('/api/validate-promo-code', methods=['POST'])
-@csrf.exempt
-def validate_promo_code_endpoint():
-    """Validate a promo code without applying it"""
-    try:
-        data = request.json
-        if not data or 'code' not in data:
-            return jsonify({'error': 'Promo code required'}), 400
-        
-        code = data.get('code', '').strip().upper()
-        if not code:
-            return jsonify({'error': 'Promo code required'}), 400
-        
-        # Get user info from session
-        from flask import session
-        user_id = session.get('user_id')
-        
-        if not user_id:
-            return jsonify({'error': 'User must be logged in'}), 401
-        
-        # Get user and team info
-        from billing_models import User, Team
-        db = get_db_session()
-        
-        user = db.query(User).filter_by(id=user_id).first()
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-        
-        team = db.query(Team).filter_by(id=user.team_id).first()
-        if not team:
-            return jsonify({'error': 'Team not found'}), 404
-        
-        # Validate promo code using affiliate service
-        affiliate_service = AffiliateService(db)
-        is_valid, message, promo_code = affiliate_service.validate_promo_code(
-            code, user_id, team.tier or 'free'
-        )
-        
-        if not is_valid:
-            return jsonify({'valid': False, 'message': message}), 200
-        
-        return jsonify({
-            'valid': True,
-            'message': 'Valid promo code',
-            'code': promo_code.code,
-            'type': promo_code.type.value,
-            'credit_amount': promo_code.credit_amount,
-            'discount_percentage': promo_code.discount_percentage,
-            'description': promo_code.campaign_name or f'{promo_code.code} promo code'
-        })
-        
-    except Exception as e:
-        logging.error(f"Error validating promo code: {str(e)}")
-        return jsonify({'error': 'Failed to validate promo code'}), 500
-    finally:
-        if 'db' in locals():
-            db.close()
 
 # Analytics Endpoints
 @affiliate_api.route('/api/admin/affiliates/top-performers', methods=['GET'])

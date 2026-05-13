@@ -137,12 +137,12 @@ def create_products_and_prices():
     
     # 4. Credit Packs (One-time purchases)
     credit_packs = [
-        {"name": "25 Credits", "credits": 25, "price": 1500, "lookup_key": "25-credits"},    # $15.00
-        {"name": "50 Credits", "credits": 50, "price": 2500, "lookup_key": "50-credits"},    # $25.00
-        {"name": "100 Credits", "credits": 100, "price": 4500, "lookup_key": "100-credits"},  # $45.00
-        {"name": "250 Credits", "credits": 250, "price": 9900, "lookup_key": "250-credits"},  # $99.00
-        {"name": "500 Credits", "credits": 500, "price": 17500, "lookup_key": "500-credits"}, # $175.00
-        {"name": "1000 Credits", "credits": 1000, "price": 29900, "lookup_key": "1000-credits"} # $299.00
+        {"name": "25 Credits", "credits": 25, "price": 1500},    # $15.00
+        {"name": "50 Credits", "credits": 50, "price": 2500},    # $25.00
+        {"name": "100 Credits", "credits": 100, "price": 4500},  # $45.00
+        {"name": "250 Credits", "credits": 250, "price": 9900},  # $99.00
+        {"name": "500 Credits", "credits": 500, "price": 17500}, # $175.00
+        {"name": "1000 Credits", "credits": 1000, "price": 29900} # $299.00
     ]
     
     for pack in credit_packs:
@@ -161,13 +161,12 @@ def create_products_and_prices():
                 product=credit_product.id,
                 unit_amount=pack["price"],
                 currency="usd",
-                lookup_key=pack["lookup_key"],
                 metadata={
                     "credits": str(pack["credits"]),
                     "type": "credit_pack"
                 }
             )
-            print(f"✓ Created {pack['name']} price: {credit_price.id} - ${pack['price']/100:.2f} (lookup_key: {pack['lookup_key']})")
+            print(f"✓ Created {pack['name']} price: {credit_price.id} - ${pack['price']/100:.2f}")
             
         except Exception as e:
             print(f"✗ Error creating {pack['name']}: {e}")

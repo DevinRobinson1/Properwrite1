@@ -268,7 +268,7 @@ class EmailService:
     def send_password_reset_email(self, user_email: str, reset_token: str) -> bool:
         """Send password reset email"""
         subject = "Reset Your Properwrite Password"
-        reset_url = f"https://properwrite.com/reset-password/{reset_token}?email={user_email}"
+        reset_url = f"https://properwrite.com/reset-password?token={reset_token}"
         
         html_content = f"""
         <html>
@@ -337,51 +337,6 @@ class EmailService:
                         View Dashboard
                     </a>
                 </div>
-            </div>
-        </body>
-        </html>
-        """
-        
-        return self.send_email(user_email, subject, html_content)
-    
-    def send_magic_link_email(self, user_email: str, magic_link: str) -> bool:
-        """Send magic link login email"""
-        subject = "Your Login Link - Properwrite"
-        
-        html_content = f"""
-        <html>
-        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: #667eea; padding: 40px; text-align: center;">
-                <h1 style="color: white; margin: 0;">Magic Link Login</h1>
-            </div>
-            
-            <div style="padding: 40px;">
-                <h2 style="color: #333;">Click to Sign In</h2>
-                
-                <p style="color: #666; line-height: 1.6;">
-                    You requested a login link for your Properwrite account. Click the button below to sign in instantly - no password needed!
-                </p>
-                
-                <div style="text-align: center; margin: 30px 0;">
-                    <a href="{magic_link}" 
-                       style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
-                        Sign In Now
-                    </a>
-                </div>
-                
-                <p style="color: #666; line-height: 1.6;">
-                    This link will expire in 15 minutes. If you didn't request this link, please ignore this email.
-                </p>
-                
-                <p style="color: #999; font-size: 12px; margin-top: 30px;">
-                    Or copy and paste this link into your browser:<br>
-                    {magic_link}
-                </p>
-                
-                <p style="color: #666;">
-                    Best regards,<br>
-                    The Properwrite Team
-                </p>
             </div>
         </body>
         </html>

@@ -1,19 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-WXR2WK4Q');</script>
-    <!-- End Google Tag Manager -->
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In - properwrite.com</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -29,10 +19,6 @@
     </style>
 </head>
 <body class="min-h-screen gradient-bg flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WXR2WK4Q"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
     <!-- Logo and Header -->
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
         <div class="flex justify-center">
@@ -85,12 +71,10 @@
                         </div>
                         <input id="password" name="password" type="password" autocomplete="current-password" required
                                placeholder="••••••••"
-                               class="appearance-none block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 sm:text-sm transition duration-150 ease-in-out">
-                        <button type="button" id="toggle-password-login" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
-                            <i class="fas fa-eye" id="password-eye-login"></i>
-                        </button>
+                               class="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 sm:text-sm transition duration-150 ease-in-out">
                     </div>
                 </div>
+
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
                         <input id="remember-me" name="remember-me" type="checkbox" 
@@ -161,23 +145,5 @@
             Your data is protected with industry-standard encryption
         </p>
     </div>
-
-    <!-- Password Toggle Script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const toggleButton = document.getElementById('toggle-password-login');
-            const passwordInput = document.getElementById('password');
-            const eyeIcon = document.getElementById('password-eye-login');
-            
-            if (toggleButton && passwordInput && eyeIcon) {
-                toggleButton.addEventListener('click', function() {
-                    const isPassword = passwordInput.type === 'password';
-                    passwordInput.type = isPassword ? 'text' : 'password';
-                    eyeIcon.classList.toggle('fa-eye');
-                    eyeIcon.classList.toggle('fa-eye-slash');
-                });
-            }
-        });
-    </script>
 </body>
 </html>

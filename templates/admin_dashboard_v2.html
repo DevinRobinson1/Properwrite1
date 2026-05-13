@@ -1,17 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-WXR2WK4Q');</script>
-    <!-- End Google Tag Manager -->
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Admin Dashboard - properwrite.com</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -23,10 +14,6 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WXR2WK4Q"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
     <!-- Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,9 +23,6 @@
                     <span class="ml-3 text-gray-500">Admin Dashboard</span>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <button onclick="showCreateAffiliateModal()" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
-                        <i class="fas fa-plus mr-1"></i>Create Affiliate Code
-                    </button>
                     <span class="text-sm text-gray-500">Admin</span>
                     <a href="/admin/logout" class="text-sm text-red-600 hover:text-red-800">Logout</a>
                 </div>
@@ -126,21 +110,14 @@
                     <button onclick="showTab('subscriptions')" class="tab-button py-4 px-1 border-b-2 font-medium text-sm">
                         Subscriptions
                     </button>
-                    <button onclick="window.location.href='/admin/jv-deals-enhanced'" class="tab-button py-4 px-1 border-b-2 font-medium text-sm bg-blue-50 hover:bg-blue-100 cursor-pointer">
+                    <button onclick="showTab('jv-deals')" class="tab-button py-4 px-1 border-b-2 font-medium text-sm">
                         JV Deals
-                        <span class="ml-2 bg-blue-500 text-white px-2 py-1 rounded-full text-xs">Enhanced</span>
                     </button>
                     <button onclick="showTab('activity')" class="tab-button py-4 px-1 border-b-2 font-medium text-sm">
                         Recent Activity
                     </button>
                     <button onclick="showTab('errors')" class="tab-button py-4 px-1 border-b-2 font-medium text-sm">
                         Error Logs
-                    </button>
-                    <button onclick="showTab('affiliates')" class="tab-button py-4 px-1 border-b-2 font-medium text-sm">
-                        Affiliates
-                    </button>
-                    <button onclick="showTab('promo-codes')" class="tab-button py-4 px-1 border-b-2 font-medium text-sm">
-                        Promo Codes
                     </button>
                 </nav>
             </div>
@@ -231,21 +208,6 @@
 
                 <!-- JV Deals Tab -->
                 <div id="jv-deals-tab" class="tab-content hidden">
-                    <div class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <i class="fas fa-rocket text-blue-600 text-lg mr-3"></i>
-                                <div>
-                                    <h3 class="text-sm font-medium text-blue-900">Enhanced JV Admin Panel</h3>
-                                    <p class="text-xs text-blue-700">Advanced features: sorting, filtering, user portfolios, and more</p>
-                                </div>
-                            </div>
-                            <a href="/admin/jv-deals-enhanced" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                <i class="fas fa-rocket mr-2"></i>
-                                Open Enhanced Panel
-                            </a>
-                        </div>
-                    </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full">
                             <thead>
@@ -303,72 +265,6 @@
                                 <!-- Loading skeleton -->
                                 <tr>
                                     <td colspan="6" class="text-center py-8">
-                                        <div class="skeleton h-4 w-32 rounded mx-auto"></div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Affiliates Tab -->
-                <div id="affiliates-tab" class="tab-content hidden">
-                    <div class="mb-4 flex justify-between items-center">
-                        <h3 class="text-lg font-semibold">Affiliate Partners</h3>
-                        <button onclick="showCreateAffiliateModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                            <i class="fas fa-plus mr-2"></i>Add New Affiliate
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full">
-                            <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Affiliate</th>
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Status</th>
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Tier</th>
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Commission Rate</th>
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Total Referrals</th>
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Revenue Generated</th>
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="affiliates-table">
-                                <!-- Loading skeleton -->
-                                <tr>
-                                    <td colspan="7" class="text-center py-8">
-                                        <div class="skeleton h-4 w-32 rounded mx-auto"></div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Promo Codes Tab -->
-                <div id="promo-codes-tab" class="tab-content hidden">
-                    <div class="mb-4 flex justify-between items-center">
-                        <h3 class="text-lg font-semibold">Promo Codes</h3>
-                        <button onclick="showCreatePromoCodeModal()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
-                            <i class="fas fa-plus mr-2"></i>Create Promo Code
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full">
-                            <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Code</th>
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Type</th>
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Discount</th>
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Uses</th>
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Status</th>
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Valid Until</th>
-                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="promo-codes-table">
-                                <!-- Loading skeleton -->
-                                <tr>
-                                    <td colspan="7" class="text-center py-8">
                                         <div class="skeleton h-4 w-32 rounded mx-auto"></div>
                                     </td>
                                 </tr>
@@ -479,12 +375,6 @@
                     break;
                 case 'errors':
                     loadErrors();
-                    break;
-                case 'affiliates':
-                    loadAffiliates();
-                    break;
-                case 'promo-codes':
-                    loadPromoCodes();
                     break;
             }
         }
@@ -699,350 +589,14 @@
             }, 300);
         });
 
-        // Affiliate functions
-        async function showCreateAffiliateModal() {
-            const modal = document.getElementById('create-affiliate-modal');
-            if (!modal) {
-                // Create modal if it doesn't exist
-                const modalHtml = `
-                    <div id="create-affiliate-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
-                        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-                            <h3 class="text-lg font-semibold mb-4">Create Affiliate Code</h3>
-                            <form id="create-affiliate-form">
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium mb-2">Code</label>
-                                    <input type="text" id="affiliate-code" class="w-full p-2 border rounded" placeholder="AUTO-GENERATED">
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium mb-2">Type</label>
-                                    <select id="affiliate-type" class="w-full p-2 border rounded">
-                                        <option value="percentage_discount">Percentage Discount</option>
-                                        <option value="credit_pack">Credit Pack</option>
-                                        <option value="team_bonus">Team Bonus</option>
-                                    </select>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium mb-2">Value</label>
-                                    <input type="number" id="affiliate-value" class="w-full p-2 border rounded" placeholder="10">
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium mb-2">Max Uses</label>
-                                    <input type="number" id="affiliate-max-uses" class="w-full p-2 border rounded" placeholder="100">
-                                </div>
-                                <div class="flex justify-end space-x-3">
-                                    <button type="button" onclick="closeAffiliateModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Create</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                `;
-                document.body.insertAdjacentHTML('beforeend', modalHtml);
-                
-                // Add form handler
-                document.getElementById('create-affiliate-form').addEventListener('submit', createAffiliateCode);
-            }
-            
-            modal.style.display = 'flex';
-        }
-        
-        function closeAffiliateModal() {
-            document.getElementById('create-affiliate-modal').style.display = 'none';
-        }
-        
-        async function createAffiliateCode(e) {
-            e.preventDefault();
-            
-            const code = document.getElementById('affiliate-code').value;
-            const type = document.getElementById('affiliate-type').value;
-            const value = document.getElementById('affiliate-value').value;
-            const maxUses = document.getElementById('affiliate-max-uses').value;
-            
-            const data = {
-                code: code || null, // Let backend generate if empty
-                type: type,
-                max_uses: parseInt(maxUses) || null,
-                affiliate_id: null, // Allow null for non-affiliate promo codes
-                created_by: 'admin_dashboard' // Identify the source
-            };
-            
-            // Set value based on type
-            if (type === 'percentage_discount') {
-                data.discount_percentage = parseInt(value);
-            } else if (type === 'credit_pack') {
-                data.credit_amount = parseInt(value);
-            } else if (type === 'team_bonus') {
-                data.bonus_seats = parseInt(value);
-            }
-            
-            try {
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                const response = await fetch('/api/admin/promo-codes', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Admin-Token': 'admin123',
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    alert(\`Affiliate code created successfully: \${result.code}\`);
-                    closeAffiliateModal();
-                    loadAffiliateStats();
-                } else {
-                    alert(\`Error: \${result.error}\`);
-                }
-            } catch (error) {
-                console.error('Error creating affiliate code:', error);
-                alert('Error creating affiliate code. Please try again.');
-            }
-        }
-        
-        async function loadAffiliateStats() {
-            try {
-                const response = await fetch('/api/admin/promo-codes?active_only=true', {
-                    headers: {'X-Admin-Token': 'admin123'}
-                });
-                const data = await response.json();
-                
-                if (response.ok) {
-                    const activeCount = data.promo_codes.length;
-                    const totalUses = data.promo_codes.reduce((sum, code) => sum + code.uses_count, 0);
-                    console.log(\`Active affiliate codes: \${activeCount}, Total uses: \${totalUses}\`);
-                }
-            } catch (error) {
-                console.error('Error loading affiliate stats:', error);
-            }
-        }
-
-        // Load affiliates data
-        async function loadAffiliates() {
-            try {
-                const response = await fetch('/api/admin/affiliates', {
-                    headers: {'X-Admin-Token': 'admin123'}
-                });
-                const data = await response.json();
-                
-                if (response.ok) {
-                    const tableHtml = data.affiliates.map(affiliate => {
-                        const statusClass = affiliate.status === 'active' ? 'bg-green-100 text-green-800' : 
-                                          affiliate.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                          'bg-red-100 text-red-800';
-                        const tierClass = affiliate.tier === 'elite' ? 'bg-purple-100 text-purple-800' : 
-                                        affiliate.tier === 'premium' ? 'bg-blue-100 text-blue-800' : 
-                                        'bg-gray-100 text-gray-800';
-                        
-                        return \`
-                            <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                <td class="py-3 px-4">
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-900">\${affiliate.name}</p>
-                                        <p class="text-xs text-gray-500">\${affiliate.email}</p>
-                                        <p class="text-xs text-gray-500">\${affiliate.company || 'No company'}</p>
-                                    </div>
-                                </td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full \${statusClass}">
-                                        \${affiliate.status}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full \${tierClass}">
-                                        \${affiliate.tier}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-4 text-sm text-gray-900">\${(affiliate.commission_rate * 100).toFixed(1)}%</td>
-                                <td class="py-3 px-4 text-sm text-gray-900">\${affiliate.metrics.referrals.total}</td>
-                                <td class="py-3 px-4 text-sm text-gray-900">$\${affiliate.metrics.referrals.total_revenue.toFixed(2)}</td>
-                                <td class="py-3 px-4">
-                                    <button class="text-blue-600 hover:text-blue-900 text-sm mr-2">Edit</button>
-                                    <button class="text-red-600 hover:text-red-900 text-sm">Delete</button>
-                                </td>
-                            </tr>
-                        \`;
-                    }).join('');
-                    
-                    document.getElementById('affiliates-table').innerHTML = tableHtml || '<tr><td colspan="7" class="text-center py-8 text-gray-500">No affiliates found</td></tr>';
-                }
-            } catch (error) {
-                console.error('Error loading affiliates:', error);
-                document.getElementById('affiliates-table').innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-500">Error loading affiliates</td></tr>';
-            }
-        }
-
-        // Load promo codes data
-        async function loadPromoCodes() {
-            try {
-                const response = await fetch('/api/admin/promo-codes', {
-                    headers: {'X-Admin-Token': 'admin123'}
-                });
-                const data = await response.json();
-                
-                if (response.ok) {
-                    const tableHtml = data.promo_codes.map(code => {
-                        const statusClass = code.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-                        const typeClass = code.type === 'percentage_discount' ? 'bg-blue-100 text-blue-800' : 
-                                        code.type === 'credit_pack' ? 'bg-purple-100 text-purple-800' : 
-                                        'bg-orange-100 text-orange-800';
-                        
-                        let discountText = '';
-                        if (code.discount_percentage) {
-                            discountText = \`\${code.discount_percentage}% off\`;
-                        } else if (code.credit_amount) {
-                            discountText = \`\${code.credit_amount} credits\`;
-                        } else if (code.bonus_seats) {
-                            discountText = \`\${code.bonus_seats} bonus seats\`;
-                        }
-                        
-                        return \`
-                            <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                <td class="py-3 px-4">
-                                    <span class="text-sm font-medium text-gray-900">\${code.code}</span>
-                                </td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full \${typeClass}">
-                                        \${code.type.replace('_', ' ')}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-4 text-sm text-gray-900">\${discountText}</td>
-                                <td class="py-3 px-4 text-sm text-gray-900">\${code.uses_count}/\${code.max_uses || '∞'}</td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full \${statusClass}">
-                                        \${code.is_active ? 'Active' : 'Inactive'}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-4 text-sm text-gray-500">\${code.valid_until ? new Date(code.valid_until).toLocaleDateString() : 'Never'}</td>
-                                <td class="py-3 px-4">
-                                    <button class="text-blue-600 hover:text-blue-900 text-sm mr-2">Edit</button>
-                                    <button class="text-red-600 hover:text-red-900 text-sm">Deactivate</button>
-                                </td>
-                            </tr>
-                        \`;
-                    }).join('');
-                    
-                    document.getElementById('promo-codes-table').innerHTML = tableHtml || '<tr><td colspan="7" class="text-center py-8 text-gray-500">No promo codes found</td></tr>';
-                }
-            } catch (error) {
-                console.error('Error loading promo codes:', error);
-                document.getElementById('promo-codes-table').innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-500">Error loading promo codes</td></tr>';
-            }
-        }
-
-        // Create promo code modal
-        function showCreatePromoCodeModal() {
-            const modal = document.getElementById('create-promo-code-modal');
-            if (!modal) {
-                // Create modal if it doesn't exist
-                const modalHtml = \`
-                    <div id="create-promo-code-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
-                        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-                            <h3 class="text-lg font-semibold mb-4">Create Promo Code</h3>
-                            <form id="create-promo-code-form">
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium mb-2">Code</label>
-                                    <input type="text" id="promo-code-input" class="w-full p-2 border rounded" placeholder="AUTO-GENERATED">
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium mb-2">Type</label>
-                                    <select id="promo-code-type" class="w-full p-2 border rounded">
-                                        <option value="percentage_discount">Percentage Discount</option>
-                                        <option value="credit_pack">Credit Pack</option>
-                                        <option value="team_bonus">Team Bonus</option>
-                                    </select>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium mb-2">Value</label>
-                                    <input type="number" id="promo-code-value" class="w-full p-2 border rounded" placeholder="10">
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium mb-2">Max Uses</label>
-                                    <input type="number" id="promo-code-max-uses" class="w-full p-2 border rounded" placeholder="100">
-                                </div>
-                                <div class="flex justify-end space-x-3">
-                                    <button type="button" onclick="closePromoCodeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
-                                    <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">Create</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                \`;
-                document.body.insertAdjacentHTML('beforeend', modalHtml);
-                
-                // Add form handler
-                document.getElementById('create-promo-code-form').addEventListener('submit', createPromoCode);
-            }
-            
-            document.getElementById('create-promo-code-modal').style.display = 'flex';
-        }
-
-        function closePromoCodeModal() {
-            document.getElementById('create-promo-code-modal').style.display = 'none';
-        }
-
-        async function createPromoCode(e) {
-            e.preventDefault();
-            
-            const code = document.getElementById('promo-code-input').value;
-            const type = document.getElementById('promo-code-type').value;
-            const value = document.getElementById('promo-code-value').value;
-            const maxUses = document.getElementById('promo-code-max-uses').value;
-            
-            const data = {
-                code: code || null,
-                type: type,
-                max_uses: parseInt(maxUses) || null,
-                affiliate_id: null,
-                created_by: 'admin_dashboard'
-            };
-            
-            // Set value based on type
-            if (type === 'percentage_discount') {
-                data.discount_percentage = parseInt(value);
-            } else if (type === 'credit_pack') {
-                data.credit_amount = parseInt(value);
-            } else if (type === 'team_bonus') {
-                data.bonus_seats = parseInt(value);
-            }
-            
-            try {
-                const response = await fetch('/api/admin/promo-codes', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Admin-Token': 'admin123'
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    alert(\`Promo code created successfully: \${result.code}\`);
-                    closePromoCodeModal();
-                    loadPromoCodes();
-                } else {
-                    alert(\`Error: \${result.error || 'Failed to create promo code'}\`);
-                }
-            } catch (error) {
-                console.error('Error creating promo code:', error);
-                alert('Error creating promo code. Please try again.');
-            }
-        }
-
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', () => {
             loadDashboardStats();
             loadUsers();
-            loadAffiliateStats();
             
             // Refresh stats every 30 seconds
             setInterval(() => {
                 loadDashboardStats();
-                loadAffiliateStats();
             }, 30000);
         });
     </script>

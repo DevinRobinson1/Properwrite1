@@ -4,14 +4,10 @@ Enhanced with external data pulling, cleaner UI, and comprehensive strategy comp
 """
 import os
 import logging
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
 import json
 import uuid
 from datetime import datetime, timedelta
-from flask import Flask, render_template, request, jsonify, session, redirect, g, url_for, flash, get_flashed_messages
+from flask import Flask, render_template, request, jsonify, session, redirect, g, url_for, flash
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -26,7 +22,7 @@ from wholesale_calculator import calculate_wholesale_offers
 from installment_calculator import calculate_installment_offers
 from subject_to_calculator import calculate_subject_to_offer
 from seller_finance_calculator import calculate_seller_finance_offer
-from jv_auto_underwrite import auto_underwrite_deal, auto_underwrite_deal_with_mao
+from jv_auto_underwrite import auto_underwrite_deal
 from billing_service import BillingService
 from auth_middleware import require_auth, require_seat, require_role, require_credits
 from billing_models import User
@@ -44,9 +40,6 @@ from email_service import email_service
 from affiliate_api import affiliate_api
 from construction_service import ConstructionService
 from renovation_estimator_backend import RenovationEstimatorService
-from services.unified_property_data_service import get_unified_property_service
-from werkzeug.security import check_password_hash
-from freemium_gate import gate_feature, check_free_use_status, get_feature_access_info, seed_free_credits
 
 # Load environment variables from .env file
 if os.path.exists('.env'):
@@ -75,8 +68,6 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 
 # Initialize CSRF protection
 csrf = CSRFProtect(app)
-
-# CSRF exemption for admin API routes will be handled in view functions
 
 # Initialize rate limiter
 limiter = Limiter(
@@ -125,29 +116,6 @@ def inject_csrf_token():
     """Make CSRF token available to all templates"""
     return dict(csrf_token=generate_csrf)
 
-# Freemium Gate API Endpoints
-@app.route('/api/freemium/status', methods=['GET'])
-@csrf.exempt
-def get_freemium_status():
-    """Get current freemium access status"""
-    try:
-        status = check_free_use_status()
-        return jsonify(status)
-    except Exception as e:
-        logging.error(f"Error getting freemium status: {e}")
-        return jsonify({'error': 'Failed to get status'}), 500
-
-@app.route('/api/freemium/feature-access/<feature_name>', methods=['GET'])
-@csrf.exempt
-def get_feature_access(feature_name):
-    """Get access information for a specific feature"""
-    try:
-        access_info = get_feature_access_info(feature_name)
-        return jsonify(access_info)
-    except Exception as e:
-        logging.error(f"Error getting feature access for {feature_name}: {e}")
-        return jsonify({'error': 'Failed to get access info'}), 500
-
 # Register affiliate API blueprint
 app.register_blueprint(affiliate_api)
 
@@ -161,12 +129,6 @@ def admin_affiliates():
 def admin_affiliate_login():
     """Admin affiliate login page"""
     return render_template('admin_affiliate_login.html')
-
-# JV Expectations Route
-@app.route('/jv-expectations')
-def jv_expectations():
-    """Joint Venture partnership expectations page"""
-    return render_template('jv_expectations.html')
 
 # Bitcoin Payment Routes
 @app.route('/bitcoin/subscription/<plan_key>')
@@ -291,46 +253,31 @@ def create_bitcoin_checkout():
 def api_signup():
     """API endpoint for user signup"""
     try:
-        logging.info("Signup request received")
-        
         # Handle both JSON and form data
         if request.content_type == 'application/json':
             data = request.get_json()
         else:
             data = request.form.to_dict()
             
-        logging.info(f"Signup data received: {data.keys()}")
-        
         name = data.get('name')
         email = data.get('email')
         password = data.get('password')
         
         if not name or not email or not password:
-            logging.error(f"Missing required fields: name={bool(name)}, email={bool(email)}, password={bool(password)}")
             return jsonify({"error": "Missing required fields"}), 400
-        
-        logging.info(f"Creating account for: {email}")
         
         # Check if user already exists
         with Session(engine) as db_session:
             existing_user = db_session.query(User).filter_by(email=email).first()
             if existing_user:
-                logging.warning(f"User already exists: {email}")
                 return jsonify({"error": "Email already registered"}), 400
         
-        # Get invite token from session if present
-        invite_token = session.get('team_invite_token')
-        
         # Create new user with billing service
-        logging.info(f"Creating user with billing service: {email}")
-        result = billing_service.create_user({
-            'name': name,
-            'email': email,
-            'password': password,
-            'invite_token': invite_token
-        })
-        
-        logging.info(f"Billing service result: {result}")
+        result = billing_service.create_user(
+            name=name,
+            email=email,
+            password=password
+        )
         
         if result.get('success'):
             # Set consolidated session with permanent flag
@@ -339,20 +286,13 @@ def api_signup():
             session['user_email'] = email
             session['email'] = email  # Keep for backward compatibility
             session['user_name'] = name
-            session['team_id'] = result.get('team_id')
-            session['team_role'] = result.get('role', 'owner')
+            session['team_id'] = result['team_id']
+            session['team_role'] = 'owner'  # Keep for backward compatibility
             session['new_user_welcome'] = True
-            
-            logging.info(f"Session created for user: {email}")
-            
-            # Clear invite token if used
-            if invite_token:
-                session.pop('team_invite_token', None)
             
             # Send welcome email
             try:
                 email_service.send_welcome_email(email, name)
-                logging.info(f"Welcome email sent to: {email}")
             except Exception as e:
                 logging.error(f"Failed to send welcome email: {e}")
             
@@ -361,19 +301,14 @@ def api_signup():
                 "message": "Account created successfully"
             })
         else:
-            logging.error(f"Failed to create user: {result.get('error')}")
             return jsonify({"error": result.get('error', 'Failed to create account')}), 400
             
     except Exception as e:
         logging.error(f"Signup error: {str(e)}")
-        import traceback
-        logging.error(f"Signup traceback: {traceback.format_exc()}")
         return jsonify({"error": "Internal server error"}), 500
 
 app.register_blueprint(admin_api_bp)
 app.register_blueprint(zapier_api_bp)
-
-# CSRF exemption for admin API routes will be handled in view functions
 
 @app.route('/')
 def index():
@@ -391,43 +326,6 @@ def index():
     
     return render_template('index_upgraded.html', 
                          google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY') or os.environ.get('GOOGLE_API_KEY'))
-
-@app.route('/rei-connect')
-def rei_connect_landing():
-    """REI Connect landing page with 50 credit offer"""
-    # Auto-apply the 50 credit promo code for REI Connect
-    session['rei_connect_promo'] = 'REICONNECT50'
-    session['rei_connect_credits'] = 50
-    session['promo_applied'] = True
-    
-    # Check if user is already logged in and auto-apply credits
-    if session.get('user_id'):
-        try:
-            billing_service = BillingService()
-            result = billing_service.add_credits(
-                user_email=session.get('email'),
-                credits=50,
-                payment_method='promo_code',
-                description='REI Connect 50 Credit Welcome Bonus'
-            )
-            if result.get('success'):
-                flash('Welcome! 50 free credits have been added to your account!', 'success')
-            else:
-                flash('Welcome to REI Connect! Sign up to claim your 50 free credits.', 'info')
-        except Exception as e:
-            logging.error(f"Error applying REI Connect credits: {e}")
-            flash('Welcome to REI Connect! Sign up to claim your 50 free credits.', 'info')
-    else:
-        flash('Welcome to REI Connect! Sign up now to claim your 50 free credits.', 'info')
-    
-    return render_template('rei_connect_landing.html',
-                         google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY') or os.environ.get('GOOGLE_API_KEY'))
-
-@app.route('/PFP-JV')
-@app.route('/pfp-jv')
-def pfp_jv_landing():
-    """PFP Joint Venture Partnership landing page"""
-    return render_template('pfp_jv.html')
 
 @app.route('/dashboard')
 def dashboard():
@@ -489,84 +387,61 @@ def signup():
     
     elif request.method == 'POST':
         # Handle registration
-        logging.info("POST signup request received")
-        
         email = request.form.get('email')
         password = request.form.get('password')
         name = request.form.get('name')
         credit_code = request.form.get('credit_code')
         
-        logging.info(f"Form data: email={email}, name={name}, credit_code={credit_code}")
-        
         if not email:
-            logging.error("Email is required")
             flash('Email is required', 'error')
             return render_template('auth/register.html')
         
-        try:
-            # Create user with billing service
-            billing_service = BillingService()
+        # Create user with billing service
+        billing_service = BillingService()
+        result = billing_service.create_user({
+            'email': email,
+            'name': name or email.split('@')[0],
+            'password': password,
+            'credit_code': credit_code
+        })
+        
+        if result.get('success'):
+            user_id = result.get('user_id')
             
-            # Get invite token from session if present
-            invite_token = session.get('team_invite_token')
+            # Set up consolidated session
+            session['user_id'] = user_id
+            session['user_email'] = email
+            session['email'] = email  # Keep for backward compatibility
             
-            logging.info(f"Creating user with billing service: {email}")
-            result = billing_service.create_user({
-                'email': email,
-                'name': name or email.split('@')[0],
-                'password': password,
-                'credit_code': credit_code,
-                'invite_token': invite_token
-            })
-            
-            logging.info(f"User creation result: {result}")
-            
-            if result.get('success'):
-                user_id = result.get('user_id')
-                team_name = result.get('team_name')
-                
-                # Set up consolidated session
-                session['user_id'] = user_id
-                session['user_email'] = email
-                session['email'] = email  # Keep for backward compatibility
-                session['team_id'] = result.get('team_id')
-                session['team_role'] = result.get('role')
-                
-                logging.info(f"Session created for user: {email}")
-                
-                # Send welcome email immediately after successful registration
-                try:
-                    user_name = name or email.split('@')[0]
-                    welcome_email_sent = email_service.send_welcome_email(email, user_name)
-                    if welcome_email_sent:
-                        logging.info(f"Welcome email sent successfully to {email}")
-                    else:
-                        logging.warning(f"Failed to send welcome email to {email}")
-                except Exception as e:
-                    logging.error(f"Error sending welcome email to {email}: {str(e)}")
-                
-                # Show appropriate welcome message
-                if invite_token:
-                    flash(f'Welcome! You\'ve successfully joined {team_name} and received analysis credits. Visit your dashboard to start analyzing properties.', 'success')
-                    session.pop('team_invite_token', None)
+            # Send welcome email immediately after successful registration
+            try:
+                user_name = name or email.split('@')[0]
+                welcome_email_sent = email_service.send_welcome_email(email, user_name)
+                if welcome_email_sent:
+                    logging.info(f"Welcome email sent successfully to {email}")
                 else:
-                    flash('Welcome to Properwrite! Your account has been created and you\'ve received analysis credits. Visit your dashboard to manage your account or start analyzing properties.', 'success')
-                
-                # Set a flag to show new user welcome message
-                session['new_user_welcome'] = True
-                
-                logging.info(f"Redirecting to dashboard for user: {email}")
-                return redirect(url_for('dashboard'))
+                    logging.warning(f"Failed to send welcome email to {email}")
+            except Exception as e:
+                logging.error(f"Error sending welcome email to {email}: {str(e)}")
+            
+            # If there's a team invite token, accept it
+            invite_token = session.get('team_invite_token')
+            if invite_token:
+                invite_result = billing_service.accept_team_invite(invite_token, user_id)
+                if invite_result.get('success'):
+                    flash(f'Welcome! You\'ve successfully joined {invite_result.get("team_name")} and received 4 analysis credits. Visit your dashboard to start analyzing properties.', 'success')
+                else:
+                    flash('Account created but failed to join team: ' + invite_result.get('error'), 'warning')
+                session.pop('team_invite_token', None)
             else:
-                logging.error(f"User creation failed: {result.get('error')}")
-                flash(result.get('error', 'Registration failed'), 'error')
-                return render_template('auth/register.html')
-                
-        except Exception as e:
-            logging.error(f"Exception during signup: {str(e)}")
-            import traceback
-            logging.error(f"Signup traceback: {traceback.format_exc()}")
-            flash('An error occurred during registration. Please try again.', 'error')
+                flash('Welcome to Properwrite! Your account has been created and you\'ve received 4 analysis credits. Visit your dashboard to manage your account or start analyzing properties.', 'success')
+            
+            # Set a flag to show new user welcome message
+            session['new_user_welcome'] = True
+            
+            return redirect(url_for('dashboard'))
+        else:
+            flash(result.get('error', 'Registration failed'), 'error')
             return render_template('auth/register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -660,187 +535,6 @@ def api_forgot_password():
             'success': False,
             'error': 'An error occurred. Please try again.'
         }), 500
-
-@app.route('/reset-password/<token>')
-def reset_password_page(token):
-    """Display password reset page with token"""
-    try:
-        # Extract email from URL parameters
-        email = request.args.get('email')
-        
-        if not email or not token:
-            flash('Invalid reset link. Please request a new password reset.', 'error')
-            return redirect(url_for('forgot_password'))
-        
-        # Verify reset token
-        token_key = f'reset_token_{email}'
-        stored_token = session.get(token_key)
-        
-        if not stored_token:
-            flash('Reset link has expired. Please request a new password reset.', 'error')
-            return redirect(url_for('forgot_password'))
-        
-        if stored_token['token'] != token:
-            flash('Invalid reset link. Please request a new password reset.', 'error')
-            return redirect(url_for('forgot_password'))
-        
-        if datetime.now() > stored_token['expires']:
-            flash('Reset link has expired. Please request a new password reset.', 'error')
-            return redirect(url_for('forgot_password'))
-        
-        return render_template('auth/reset_password.html', token=token, email=email)
-        
-    except Exception as e:
-        logging.error(f"Error in reset password page: {str(e)}")
-        flash('An error occurred. Please try again.', 'error')
-        return redirect(url_for('forgot_password'))
-
-@app.route('/api/reset-password', methods=['POST'])
-@limiter.limit("5 per minute")
-def api_reset_password():
-    """Handle password reset API request"""
-    try:
-        token = request.form.get('token')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
-        
-        if not all([token, email, password, confirm_password]):
-            return jsonify({'success': False, 'error': 'All fields are required'}), 400
-        
-        if password != confirm_password:
-            return jsonify({'success': False, 'error': 'Passwords do not match'}), 400
-        
-        if len(password) < 8:
-            return jsonify({'success': False, 'error': 'Password must be at least 8 characters long'}), 400
-        
-        # Verify reset token
-        token_key = f'reset_token_{email}'
-        stored_token = session.get(token_key)
-        
-        if not stored_token:
-            return jsonify({'success': False, 'error': 'Reset link has expired. Please request a new password reset.'}), 400
-        
-        if stored_token['token'] != token:
-            return jsonify({'success': False, 'error': 'Invalid reset link. Please request a new password reset.'}), 400
-        
-        if datetime.now() > stored_token['expires']:
-            return jsonify({'success': False, 'error': 'Reset link has expired. Please request a new password reset.'}), 400
-        
-        # Update password using billing service
-        billing_service = BillingService()
-        success = billing_service.update_user_password(email, password)
-        
-        if success:
-            # Clear the reset token
-            session.pop(token_key, None)
-            
-            return jsonify({
-                'success': True,
-                'message': 'Password updated successfully. You can now login with your new password.'
-            })
-        else:
-            return jsonify({
-                'success': False,
-                'error': 'Failed to update password. Please try again.'
-            }), 500
-            
-    except Exception as e:
-        logging.error(f"Error in reset password API: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': 'An error occurred. Please try again.'
-        }), 500
-
-@app.route('/magic-login', methods=['GET', 'POST'])
-def magic_login():
-    """Magic link login - send login link to email"""
-    if request.method == 'GET':
-        return render_template('auth/magic_login.html')
-    
-    elif request.method == 'POST':
-        email = request.form.get('email')
-        
-        if not email:
-            flash('Email is required', 'error')
-            return render_template('auth/magic_login.html')
-        
-        # Generate magic link token
-        import secrets
-        magic_token = secrets.token_urlsafe(32)
-        
-        # Store token in session (expires in 15 minutes)
-        session[f'magic_token_{email}'] = {
-            'token': magic_token,
-            'expires': datetime.now() + timedelta(minutes=15)
-        }
-        
-        # Send magic link email
-        try:
-            magic_link = url_for('verify_magic_link', token=magic_token, email=email, _external=True)
-            email_sent = email_service.send_magic_link_email(email, magic_link)
-            
-            if email_sent:
-                flash('Login link sent! Check your email and click the link to login.', 'success')
-            else:
-                flash('Login link created! Use the link sent to your email.', 'info')
-        except Exception as e:
-            logging.error(f"Error sending magic link email: {str(e)}")
-            flash('Magic link generated. Check your email.', 'info')
-        
-        return render_template('auth/magic_login.html')
-
-@app.route('/verify-magic-link')
-def verify_magic_link():
-    """Verify magic link and log user in"""
-    try:
-        email = request.args.get('email')
-        token = request.args.get('token')
-        
-        if not email or not token:
-            flash('Invalid login link', 'error')
-            return redirect(url_for('login_page'))
-        
-        # Verify token
-        token_key = f'magic_token_{email}'
-        stored_token = session.get(token_key)
-        
-        if not stored_token:
-            flash('Login link has expired. Please request a new one.', 'error')
-            return redirect(url_for('magic_login'))
-        
-        if stored_token['token'] != token:
-            flash('Invalid login link', 'error')
-            return redirect(url_for('magic_login'))
-        
-        if datetime.now() > stored_token['expires']:
-            flash('Login link has expired. Please request a new one.', 'error')
-            return redirect(url_for('magic_login'))
-        
-        # Get user from database
-        billing_service = BillingService()
-        with billing_service.db_session() as db:
-            user = db.query(User).filter(User.email == email).first()
-            
-            if not user or not user.is_active:
-                flash('Account not found or inactive', 'error')
-                return redirect(url_for('login_page'))
-            
-            # Log user in
-            session['user_id'] = str(user.id)
-            session['user_email'] = user.email
-            session['email'] = user.email
-            
-            # Clear the magic token
-            session.pop(token_key, None)
-            
-            flash('Login successful!', 'success')
-            return redirect(url_for('dashboard'))
-        
-    except Exception as e:
-        logging.error(f"Error verifying magic link: {str(e)}")
-        flash('An error occurred. Please try again.', 'error')
-        return redirect(url_for('login_page'))
 
 @app.route('/api/dashboard-data', methods=['GET'])
 def get_dashboard_data():
@@ -1022,44 +716,32 @@ def get_user_status():
 def api_logout():
     """API logout endpoint for compatibility"""
     try:
-        # Clear session completely
+        # Clear session
         session.clear()
-        
-        # Make session non-permanent to ensure it's cleared
-        session.permanent = False
         
         return jsonify({
             'success': True,
-            'message': 'Logged out successfully',
-            'redirect': '/'
+            'message': 'Logged out successfully'
         })
     except Exception as e:
         logging.error(f"Error logging out: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'Logout failed',
-            'redirect': '/'
-        }), 200  # Return 200 to prevent additional errors
+            'error': 'Error logging out'
+        }), 500
 
 @app.route('/logout', methods=['GET', 'POST'])
 @csrf.exempt
 def logout():
     """Standard logout route for compatibility"""
     try:
-        # Clear session completely
+        # Clear session
         session.clear()
-        
-        # Make session non-permanent to ensure it's cleared
-        session.permanent = False
-        
-        # Add success message
-        flash('You have been logged out successfully.', 'success')
         
         # Redirect to homepage
         return redirect('/')
     except Exception as e:
         logging.error(f"Error logging out: {str(e)}")
-        flash('Logout completed.', 'info')
         return redirect('/')
 
 @app.route('/api/login', methods=['POST'])
@@ -1121,7 +803,6 @@ def api_login():
         }), 500
 
 @app.route('/api/analyze-property', methods=['POST'])
-@gate_feature('propertyAnalysis')
 @limiter.limit("10 per minute, 100 per hour")
 @csrf.exempt
 def analyze_property():
@@ -1196,7 +877,7 @@ def analyze_property():
         # Initialize valuation_data to avoid unbound variable error
         valuation_data = {}
         
-        # Get comprehensive property valuation from multiple sources using unified service
+        # Get comprehensive property valuation from multiple sources
         try:
             # Clean up the formatted address to remove duplicates before sending to APIs
             from address_utils import to_zillow_search_string, normalize_address_for_apis
@@ -1206,38 +887,15 @@ def analyze_property():
             
             logging.info(f"🐛 Cleaned address for APIs: {clean_address}")
             
-            # Use unified property service for cache-aware data retrieval
-            unified_service = get_unified_property_service()
-            
-            # Get property data with intelligent caching
-            property_response = unified_service.get_property_data(
-                address=clean_address,
+            valuation_data = comprehensive_valuation_service.get_comprehensive_valuation(
+                place_id=canonical_address.get('place_id', ''),
+                address=clean_address,  # Use cleaned address without duplicates
                 city=canonical_address['city'],
                 state=canonical_address['state'],
                 zip_code=canonical_address['zip'],
-                place_id=canonical_address.get('place_id', ''),
                 latitude=latitude,
                 longitude=longitude
             )
-            
-            # Extract valuation data from unified response
-            valuation_data = property_response.get('valuations', {})
-            
-            # Format valuation data for backward compatibility
-            if not valuation_data:
-                valuation_data = {
-                    'valuations': {},
-                    'sources_tried': property_response.get('data_sources', []),
-                    'sources_used': property_response.get('data_sources', [])
-                }
-            else:
-                # Ensure valuation_data has expected structure
-                if isinstance(valuation_data, dict) and 'valuations' not in valuation_data:
-                    valuation_data = {
-                        'valuations': valuation_data,
-                        'sources_tried': property_response.get('data_sources', []),
-                        'sources_used': property_response.get('data_sources', [])
-                    }
             
             # Extract best property estimate from comprehensive valuation
             best_estimate = comprehensive_valuation_service.get_best_estimate(valuation_data)
@@ -1423,84 +1081,6 @@ def analyze_property():
         return jsonify({
             'success': False,
             'error': 'Failed to analyze property. Please check the address and try again.'
-        }), 500
-
-@app.route('/api/cache/stats', methods=['GET'])
-@csrf.exempt
-def get_cache_stats():
-    """Get cache statistics"""
-    try:
-        unified_service = get_unified_property_service()
-        stats = unified_service.get_cache_stats()
-        return jsonify({
-            'success': True,
-            'stats': stats
-        })
-    except Exception as e:
-        logging.error(f"Cache stats error: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'Failed to get cache statistics'
-        }), 500
-
-@app.route('/api/cache/clear', methods=['POST'])
-@csrf.exempt
-def clear_cache():
-    """Clear cache for specific address or all cache"""
-    try:
-        data = request.get_json()
-        address = data.get('address') if data else None
-        
-        unified_service = get_unified_property_service()
-        unified_service.clear_cache(address)
-        
-        return jsonify({
-            'success': True,
-            'message': f'Cache cleared for {address}' if address else 'All expired cache cleared'
-        })
-    except Exception as e:
-        logging.error(f"Cache clear error: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'Failed to clear cache'
-        }), 500
-
-@app.route('/api/cache/refresh', methods=['POST'])
-@csrf.exempt
-def refresh_cache():
-    """Force refresh cache for specific address"""
-    try:
-        data = request.get_json()
-        if not data or not data.get('address'):
-            return jsonify({
-                'success': False,
-                'error': 'Address is required'
-            }), 400
-        
-        address = data.get('address')
-        city = data.get('city', '')
-        state = data.get('state', '')
-        zip_code = data.get('zip_code', '')
-        
-        unified_service = get_unified_property_service()
-        property_data = unified_service.get_property_data(
-            address=address,
-            city=city,
-            state=state,
-            zip_code=zip_code,
-            force_refresh=True
-        )
-        
-        return jsonify({
-            'success': True,
-            'message': 'Cache refreshed successfully',
-            'data': property_data
-        })
-    except Exception as e:
-        logging.error(f"Cache refresh error: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'Failed to refresh cache'
         }), 500
 
 def _assess_investment_potential(property_data: dict) -> str:
@@ -1762,7 +1342,6 @@ def ai_strategy_insight():
         }), 500
 
 @app.route('/ai_deal_analysis', methods=['POST'])
-@gate_feature('aiAnalysis')
 def ai_deal_analysis():
     """
     AI-powered comparison of all four investment strategies
@@ -1799,7 +1378,6 @@ def ai_deal_analysis():
         }), 500
 
 @app.route('/acquisitions_analysis', methods=['POST'])
-@gate_feature('acquisitions')
 def acquisitions_analysis():
     """
     Comprehensive acquisitions analysis using the new Acquisitions Module
@@ -1828,7 +1406,6 @@ def acquisitions_analysis():
         }), 500
 
 @app.route('/optimal_acquisition_strategy', methods=['POST'])
-@gate_feature('acquisitions')
 def optimal_acquisition_strategy():
     """
     Get optimal acquisition strategy recommendation
@@ -2801,7 +2378,6 @@ def save_renovation_estimate():
         }), 500
 
 @app.route('/api/comps/analyze', methods=['POST'])
-@gate_feature('comps')
 @csrf.exempt
 def analyze_comps():
     """
@@ -2853,7 +2429,6 @@ def analyze_comps():
         
         # Create search parameters for enhanced service
         # Uses beds/baths/sqft from Subject Property header for matching
-        from enhanced_comps_service import SearchParams
         search_params = SearchParams(
             beds=int(beds),
             baths=float(baths),
@@ -2864,29 +2439,21 @@ def analyze_comps():
             zip_code=zip_code
         )
         
-        # SMART COMPS 2.0 SERVICE INTEGRATION
-        # Rule-Adaptive Comparable Search with progressive relaxation
-        from smart_comps_service import smart_comps_service
+        # ENHANCED COMPS SERVICE INTEGRATION
+        # This service uses RapidAPI-Zillow credentials with:
+        # - API Key injection: RAPIDAPI_KEY from environment variables
+        # - Endpoint: zillow-com1.p.rapidapi.com/propertyExtendedSearch
+        # - Parameters: status_type=RecentlySold, home_type=Houses
+        # - Rule filters: Time frame (≤90 days → 180 days → 365 days), Radius (0.25 → 0.5 → 1 mile)
+        result = enhanced_comps_service.search_comparable_sales(search_params)
         
-        # Search for comparable properties using Smart Comps 2.0
-        result = smart_comps_service.search_comparable_properties(
-            subject_address=address,
-            subject_beds=int(beds),
-            subject_baths=float(baths),
-            subject_sqft=int(sqft),
-            subject_lat=lat or 0.0,
-            subject_lng=lng or 0.0,
-            max_distance=max_distance,
-            days_filter=days_filter
-        )
-        
-        # If Smart Comps 2.0 service fails, fallback to unified service
+        # Fallback to simple service if enhanced fails
         if not result.get('success') or not result.get('comps'):
-            logging.warning("Smart Comps 2.0 service failed, falling back to unified service")
+            logging.warning("Enhanced comps service failed, falling back to simple service")
             
+            # Use simple service as fallback
             try:
-                unified_service = get_unified_property_service()
-                unified_result = unified_service.get_comparable_properties(
+                simple_result = comps_service.search_comparable_sales(
                     address=address,
                     beds=int(beds),
                     baths=float(baths),
@@ -2894,42 +2461,12 @@ def analyze_comps():
                     lat=lat or 0.0,
                     lng=lng or 0.0
                 )
-                if unified_result.get('success') and unified_result.get('comps'):
-                    result = unified_result
+                if simple_result.get('success') and simple_result.get('comps'):
+                    result = simple_result
                     result['fallback_used'] = True
-                    result['message'] = "Found comparable properties using cached data"
+                    result['message'] = "Using simplified analysis due to performance optimization"
             except Exception as e:
-                logging.error(f"Unified service fallback failed: {e}")
-                
-                # Final fallback to enhanced service
-                try:
-                    # Create search parameters with zip_code as positional argument
-                    from enhanced_comps_service import SearchParams
-                    enhanced_search_params = SearchParams(
-                        beds=int(beds),
-                        baths=float(baths),
-                        sqft=int(sqft),
-                        lat=lat or 0.0,
-                        lng=lng or 0.0,
-                        address=address,
-                        zip_code=zip_code or ""
-                    )
-                    enhanced_result = enhanced_comps_service.search_comparable_sales(enhanced_search_params)
-                    if enhanced_result.get('success') and enhanced_result.get('comps'):
-                        result = enhanced_result
-                        result['fallback_used'] = True
-                        result['message'] = "Found comparable properties using enhanced search"
-                except Exception as e:
-                    logging.error(f"Enhanced service fallback failed: {e}")
-                    
-                    # Return a helpful error message with context
-                    result = {
-                        'success': False,
-                        'comps': [],
-                        'message': "Comparable properties temporarily unavailable due to API rate limits. Please try again in a few minutes.",
-                        'error_type': 'rate_limit',
-                        'fallback_used': True
-                    }
+                logging.error(f"Simple service fallback failed: {e}")
         
         # Add analysis summary if successful
         if result.get('success') and result.get('comps'):
@@ -3192,206 +2729,71 @@ def jv_submit_page():
     return render_template('jv_submit.html', 
                          google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY') or os.environ.get('GOOGLE_API_KEY'))
 
-@app.route('/api/jv-deals', methods=['POST'])
-@limiter.limit("10 per minute")  # Increased limit for testing
-@csrf.exempt  # Exempt from CSRF for API endpoint
-def jv_deals_submit():
-    """
-    Submit JV deal with MAO analysis and approval logic
-    """
-    try:
-        # Handle FormData submission
-        data = {}
-        
-        # Extract form data
-        for key, value in request.form.items():
-            if key != 'csrf_token':
-                data[key] = value
-        
-        # Parse MAO analysis if provided
-        mao_analysis_json = request.form.get('mao_analysis')
-        mao_analysis = json.loads(mao_analysis_json) if mao_analysis_json else None
-        
-        # Map form fields to expected format
-        mapped_data = {
-            'partner_name': data.get('name'),
-            'partner_email': data.get('email'),
-            'partner_phone': data.get('phone'),
-            'partner_company': data.get('company', ''),
-            'partner_markets': data.get('markets', '').split(',') if data.get('markets') else [],
-            'property_address': data.get('address'),
-            'property_city': data.get('city'),
-            'property_state': data.get('state'),
-            'property_zip': data.get('zip'),
-            'deal_type': 'wholesale',  # Default for JV deals
-            'seller_asking_price': data.get('asking_price'),
-            'arv': data.get('arv'),
-            'rehab_needed': 'yes' if data.get('rehab_cost') else 'no',
-            'rehab_cost': data.get('rehab_cost', '0'),
-            'property_status': data.get('property_status'),
-            'closing_date': data.get('closing_date'),
-            'property_description': data.get('property_description', ''),
-            'photo_link': data.get('photo_link', ''),
-            'additional_notes': data.get('additional_notes', ''),
-            'mao_analysis': mao_analysis
-        }
-        
-        # Create or get partner record
-        from jv_database import jv_db
-        
-        partner_id = jv_db.create_or_get_partner(
-            name=mapped_data.get('partner_name'),
-            email=mapped_data.get('partner_email'),
-            phone=mapped_data.get('partner_phone'),
-            company=mapped_data.get('partner_company'),
-            markets=mapped_data.get('partner_markets', [])
-        )
-        
-        # Enhanced auto-underwrite with MAO analysis
-        underwrite_result = auto_underwrite_deal_with_mao(mapped_data, mao_analysis)
-        
-        # Prepare deal data for database storage
-        deal_data = {
-            'property_address': mapped_data.get('property_address'),
-            'street': mapped_data.get('street', ''),
-            'city': mapped_data.get('property_city'),
-            'state': mapped_data.get('property_state'),
-            'zip_code': mapped_data.get('property_zip'),
-            'asking_price': float(mapped_data.get('seller_asking_price', 0)),
-            'arv': float(mapped_data.get('arv', 0)),
-            'repair_estimate': float(mapped_data.get('rehab_cost', 0)),
-            'suggested_offer': underwrite_result.get('suggested_offer', 0),
-            'status': 'pending',
-            'auto_evaluation': underwrite_result.get('recommendation', 'needs_review'),
-            'evaluation_reasons': underwrite_result.get('reasons', []),
-            'admin_notes': '',
-            'submission_data': mapped_data,
-            'mao_analysis': mao_analysis
-        }
-        
-        # Submit deal to database
-        deal_id = jv_db.create_deal_submission(
-            partner_id=partner_id,
-            deal_data=deal_data,
-            auto_status=underwrite_result.get('recommendation', 'needs_review'),
-            reasons=underwrite_result.get('reasons', [])
-        )
-        
-        # Trigger Zapier webhook for new JV submission
-        from zapier_webhook_service import trigger_jv_submission
-        trigger_jv_submission({
-            'id': deal_id,
-            'address': deal_data['property_address'],
-            'user_id': partner_id,
-            'partner_name': mapped_data.get('partner_name'),
-            'partner_email': mapped_data.get('partner_email'),
-            'asking_price': deal_data['asking_price'],
-            'arv': deal_data['arv'],
-            'auto_evaluation': deal_data['auto_evaluation'],
-            'submitted_at': datetime.utcnow().isoformat()
-        })
-        
-        return jsonify({
-            'success': True,
-            'deal_id': deal_id,
-            'analysis': mao_analysis,
-            'underwrite_result': underwrite_result,
-            'message': 'Deal submitted successfully!'
-        })
-        
-    except Exception as e:
-        logging.error(f"Error submitting JV deal: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
 @app.route('/api/jv-submit', methods=['POST'])
-@limiter.limit("10 per minute")  # Increased limit for testing
-@csrf.exempt  # Exempt from CSRF for API endpoint
+@limiter.limit("5 per hour")  # Limit JV submissions to prevent spam
 def jv_submit_deal():
     """
     Submit and auto-underwrite JV deal with partner information
     """
     try:
-        # Handle both JSON and form data
-        if request.is_json:
-            data = request.get_json()
-        else:
-            data = request.form.to_dict()
-        
-        # Map form fields to expected partner fields
-        partner_name = data.get('name') or data.get('partner_name')
-        partner_email = data.get('email') or data.get('partner_email')
-        partner_phone = data.get('phone') or data.get('partner_phone')
-        partner_company = data.get('company') or data.get('partner_company', '')
-        partner_markets = data.get('markets') or data.get('partner_markets', [])
+        data = request.get_json()
         
         # Validate required partner fields
-        if not partner_name:
-            return jsonify({
-                'success': False,
-                'error': 'Partner name is required'
-            }), 400
-            
-        if not partner_email:
-            return jsonify({
-                'success': False,
-                'error': 'Partner email is required'
-            }), 400
-            
-        if not partner_phone:
-            return jsonify({
-                'success': False,
-                'error': 'Partner phone is required'
-            }), 400
+        partner_required_fields = ['partner_name', 'partner_email', 'partner_phone', 'partner_markets']
+        for field in partner_required_fields:
+            if not data.get(field):
+                return jsonify({
+                    'success': False,
+                    'error': f'Missing required partner field: {field}'
+                }), 400
         
         # Validate partner name (at least 2 words)
-        name_parts = (partner_name or '').strip().split()
+        name_parts = (data.get('partner_name') or '').strip().split()
         if len(name_parts) < 2:
             return jsonify({
                 'success': False,
                 'error': 'Full name must contain at least two words'
             }), 400
         
-        # Handle markets - for now, default to NC and SC since form doesn't include markets selection
-        if isinstance(partner_markets, str):
-            partner_markets = [partner_markets] if partner_markets else ['NC', 'SC']
-        elif not partner_markets:
-            partner_markets = ['NC', 'SC']  # Default markets for JV deals
-        
-        # Map and validate deal fields
-        property_address = data.get('address') or data.get('property_address')
-        asking_price = data.get('asking_price')
-        arv = data.get('arv')
-        
-        if not property_address:
+        # Validate markets selection
+        if not data.get('partner_markets') or len(data.get('partner_markets', [])) == 0:
             return jsonify({
                 'success': False,
-                'error': 'Property address is required'
+                'error': 'At least one market state must be selected'
             }), 400
-            
-        if not asking_price:
+        
+        # Validate required deal fields
+        deal_required_fields = ['property_address', 'deal_type', 'seller_asking_price', 'arv', 'rehab_needed', 'property_status', 'closing_date']
+        for field in deal_required_fields:
+            if not data.get(field):
+                return jsonify({
+                    'success': False,
+                    'error': f'Missing required deal field: {field}'
+                }), 400
+        
+        # Additional validation for wholesale deals
+        if data.get('deal_type') == 'wholesale' and not data.get('purchase_price'):
             return jsonify({
                 'success': False,
-                'error': 'Asking price is required'
+                'error': 'Purchase price is required for wholesale deals'
             }), 400
-            
-        if not arv:
+        
+        # Additional validation for rehab cost
+        if data.get('rehab_needed') == 'yes' and not data.get('rehab_cost'):
             return jsonify({
                 'success': False,
-                'error': 'ARV (After Repair Value) is required'
+                'error': 'Rehab cost is required when rehab is needed'
             }), 400
         
         # Create or get partner record
         from jv_database import jv_db
         
         partner_id = jv_db.create_or_get_partner(
-            name=partner_name,
-            email=partner_email,
-            phone=partner_phone,
-            company=partner_company,
-            markets=partner_markets
+            name=data.get('partner_name'),
+            email=data.get('partner_email'),
+            phone=data.get('partner_phone'),
+            company=data.get('partner_company'),
+            markets=data.get('partner_markets', [])
         )
         
         # Auto-underwrite the deal
@@ -3399,29 +2801,29 @@ def jv_submit_deal():
         
         # Prepare deal data for database storage
         deal_data = {
-            'property_address': property_address,
+            'property_address': data.get('property_address'),
             'street': data.get('street', ''),
             'city': data.get('city', ''),
             'state': data.get('state', ''),
             'zip': data.get('zip', ''),
-            'deal_type': data.get('deal_type', 'Cash'),
+            'deal_type': data.get('deal_type'),
             'purchase_price': data.get('purchase_price'),
-            'seller_asking_price': data.get('asking_price'),  # Form uses 'asking_price'
+            'seller_asking_price': data.get('seller_asking_price'),
             'arv': data.get('arv'),
             'rehab_needed': data.get('rehab_needed'),
             'rehab_cost': data.get('rehab_cost'),
             'property_description': data.get('property_description', ''),
             'photos_link': data.get('photos_link', ''),
-            'property_status': data.get('property_status', 'Vacant'),
-            'closing_date': data.get('closing_date', ''),
+            'property_status': data.get('property_status'),
+            'closing_date': data.get('closing_date'),
             'additional_notes': data.get('additional_notes', ''),
             'underwrite_result': underwrite_result,
             'partner_info': {
-                'name': partner_name,
-                'email': partner_email,
-                'phone': partner_phone,
-                'company': partner_company,
-                'markets': partner_markets
+                'name': data.get('partner_name'),
+                'email': data.get('partner_email'),
+                'phone': data.get('partner_phone'),
+                'company': data.get('partner_company'),
+                'markets': data.get('partner_markets', [])
             }
         }
         
@@ -3434,34 +2836,17 @@ def jv_submit_deal():
         )
         
         # Trigger Zapier webhook for new JV submission
-        from zapier_webhook_service import ZapierWebhookService
+        from zapier_webhook_service import trigger_jv_submission
         from datetime import datetime
-        
-        webhook_data = {
+        trigger_jv_submission({
             'id': deal_id,
-            'property_address': property_address,
-            'property_city': data.get('city'),
-            'property_state': data.get('state'),
-            'asking_price': asking_price,
-            'suggested_offer': data.get('purchase_price'),
-            'arv': arv,
-            'repair_estimate': data.get('rehab_cost'),
-            'partner_name': partner_name,
-            'partner_email': partner_email,
-            'partner_phone': partner_phone,
-            'partner_company': data.get('partner_company'),
-            'partner_markets': partner_markets,
-            'created_at': datetime.utcnow().isoformat(),
-            'auto_evaluation': underwrite_result.get('status'),
-            'evaluation_reasons': underwrite_result.get('reasons', [])
-        }
-        
-        try:
-            webhook_service = ZapierWebhookService()
-            webhook_service.trigger_new_jv_submission(webhook_data)
-        except Exception as webhook_error:
-            logging.error(f"Webhook error: {webhook_error}")
-            # Don't fail the main operation if webhook fails
+            'address': data.get('property_address'),
+            'user_id': partner_id,  # Using partner_id as user_id for now
+            'partner_name': data.get('partner_name'),
+            'partner_email': data.get('partner_email'),
+            'status': 'pending',
+            'created_at': datetime.utcnow().isoformat()
+        })
         
         return jsonify({
             'success': True,
@@ -3478,9 +2863,74 @@ def jv_submit_deal():
             'error': 'Internal server error'
         }), 500
 
-# Old JV admin route removed - replaced by dedicated JV admin system at /jv-admin/login
+@app.route('/jv-admin')
+def jv_admin_page():
+    """
+    Admin dashboard for JV deals and partners
+    """
+    try:
+        # Check admin authentication (simple token check)
+        admin_token = os.environ.get('ADMIN_TOKEN', 'admin123')  # Default for demo
+        provided_token = request.args.get('token')
+        
+        if provided_token != admin_token:
+            return render_template('jv_admin_login.html')
+        
+        from jv_database import jv_db
+        
+        # Get dashboard stats
+        stats = jv_db.get_dashboard_stats()
+        
+        # Get recent partners
+        partners = jv_db.get_all_partners(limit=20)
+        
+        return render_template('jv_admin.html', 
+                             stats=stats, 
+                             partners=partners, 
+                             admin_token=admin_token)
+        
+    except Exception as e:
+        logging.error(f"Error loading admin page: {e}")
+        return render_template('jv_admin.html', 
+                             stats={'total_partners': 0, 'deals_last_30_days': 0, 'auto_approved': 0, 'auto_denied': 0, 'approval_rate': 0}, 
+                             partners=[], 
+                             error=str(e))
 
-# Old JV admin partner route removed - replaced by dedicated JV admin system
+@app.route('/jv-admin/partner/<partner_id>')
+def jv_admin_partner_detail(partner_id):
+    """
+    Partner detail view
+    """
+    try:
+        # Check admin authentication
+        admin_token = os.environ.get('ADMIN_TOKEN', 'admin123')
+        provided_token = request.args.get('token')
+        
+        if provided_token != admin_token:
+            return redirect(f'/jv-admin?token={admin_token}')
+        
+        from jv_database import jv_db
+        
+        # Get partner details
+        partner = jv_db.get_partner_by_id(partner_id)
+        if not partner:
+            return "Partner not found", 404
+        
+        # Get partner deals
+        deals = jv_db.get_partner_deals(partner_id, limit=50)
+        
+        # Get partner stats
+        stats = jv_db.get_partner_stats(partner_id)
+        
+        return render_template('jv_admin_partner.html', 
+                             partner=partner, 
+                             deals=deals, 
+                             stats=stats,
+                             admin_token=admin_token)
+        
+    except Exception as e:
+        logging.error(f"Error loading partner detail: {e}")
+        return f"Error: {e}", 500
 
 @app.route('/jv-admin/deal/<deal_id>')
 def jv_admin_deal_detail(deal_id):
@@ -3650,205 +3100,6 @@ def get_billing_history():
         
     except Exception as e:
         logging.error(f"Error getting billing history: {e}")
-        return jsonify({'error': 'Internal server error'}), 500
-
-@app.route('/api/billing/subscription-details', methods=['GET'])
-def get_subscription_details():
-    """Get comprehensive subscription details"""
-    try:
-        # Check for user_id in session (same as user-status endpoint)
-        user_id = session.get('user_id')
-        logging.info(f"Subscription details - user_id from session: {user_id}")
-        if not user_id:
-            logging.warning("No user_id found in session for subscription details")
-            return jsonify({'success': False, 'error': 'Not authenticated'}), 401
-        
-        # Get user and team info (same as user-status endpoint)
-        with Session(engine) as db:
-            user = db.query(User).filter(User.id == user_id).first()
-            
-            if not user or not user.is_active:
-                return jsonify({'success': False, 'error': 'User not found or inactive'}), 404
-            
-            team_data = user.team
-            if not team_data:
-                return jsonify({'success': False, 'error': 'Team not found'}), 404
-        
-        # Return subscription details (similar to user-status endpoint)
-        plan_name = team_data.tier.upper() if team_data.tier else 'STARTER'
-        if plan_name == 'GROWTH10':
-            plan_name = 'Growth10'
-        elif plan_name == 'TEAM5':
-            plan_name = 'Team5'
-        elif plan_name == 'PRO':
-            plan_name = 'Pro'
-        
-        # Get current team member count
-        team_member_count = db.query(User).filter(User.team_id == team_data.id, User.is_active == True).count()
-        
-        # Calculate renewal date (placeholder - you can implement actual Stripe subscription date logic later)
-        from datetime import datetime, timedelta
-        renewal_date = datetime.now() + timedelta(days=30)
-        
-        return jsonify({
-            'success': True,
-            'user': {
-                'id': str(user.id),
-                'email': user.email,
-                'name': user.name or 'User'
-            },
-            'team': {
-                'id': str(team_data.id),
-                'name': team_data.name,
-                'plan': plan_name,
-                'tier': team_data.tier,
-                'credit_balance': team_data.credit_balance,
-                'unlimited_credits': team_data.tier == 'growth10',
-                'seats_used': team_member_count,
-                'seats_max': team_data.seats_max,
-                'renewal_date': renewal_date.strftime('%b %d')
-            },
-            'subscription': {
-                'status': 'active',
-                'plan_name': plan_name,
-                'billing_cycle': 'monthly',
-                'next_billing_date': renewal_date.strftime('%Y-%m-%d')
-            }
-        })
-        
-    except Exception as e:
-        logging.error(f"Error getting subscription details: {e}")
-        return jsonify({'success': False, 'error': 'Internal server error'}), 500
-
-@app.route('/api/team/members', methods=['GET'])
-def get_team_members():
-    """Get team members"""
-    try:
-        # Check for user_id in session
-        user_id = session.get('user_id')
-        if not user_id:
-            return jsonify({'success': False, 'error': 'Not authenticated'}), 401
-        
-        # Get user and team info
-        with Session(engine) as db:
-            user = db.query(User).filter(User.id == user_id).first()
-            
-            if not user or not user.is_active:
-                return jsonify({'success': False, 'error': 'User not found or inactive'}), 404
-            
-            team_data = user.team
-            if not team_data:
-                return jsonify({'success': False, 'error': 'Team not found'}), 404
-            
-            # Get all team members
-            team_members = db.query(User).filter(User.team_id == team_data.id, User.is_active == True).all()
-            
-            members_data = []
-            for member in team_members:
-                members_data.append({
-                    'id': str(member.id),
-                    'name': member.name or 'User',
-                    'email': member.email,
-                    'role': member.role or 'analyst',
-                    'is_active': member.is_active,
-                    'last_active': member.created_at.isoformat() if member.created_at else None
-                })
-            
-            return jsonify({
-                'success': True,
-                'members': members_data
-            })
-        
-    except Exception as e:
-        logging.error(f"Error getting team members: {e}")
-        return jsonify({'success': False, 'error': 'Internal server error'}), 500
-
-@app.route('/api/billing/update-payment-method', methods=['POST'])
-@require_auth
-def update_payment_method():
-    """Update default payment method"""
-    try:
-        data = request.get_json()
-        payment_method_id = data.get('payment_method_id')
-        
-        if not payment_method_id:
-            return jsonify({'error': 'Payment method ID required'}), 400
-        
-        team_id = g.current_user['team_id']
-        
-        # Update payment method
-        result = billing_service.update_payment_method(team_id, payment_method_id)
-        
-        return jsonify(result)
-        
-    except Exception as e:
-        logging.error(f"Error updating payment method: {e}")
-        return jsonify({'error': 'Internal server error'}), 500
-
-@app.route('/api/billing/cancel-subscription', methods=['POST'])
-@require_auth
-def cancel_subscription():
-    """Cancel subscription"""
-    try:
-        data = request.get_json()
-        subscription_id = data.get('subscription_id')
-        
-        if not subscription_id:
-            return jsonify({'error': 'Subscription ID required'}), 400
-        
-        team_id = g.current_user['team_id']
-        
-        # Cancel subscription
-        result = billing_service.cancel_subscription(team_id, subscription_id)
-        
-        return jsonify(result)
-        
-    except Exception as e:
-        logging.error(f"Error cancelling subscription: {e}")
-        return jsonify({'error': 'Internal server error'}), 500
-
-@app.route('/api/billing/change-plan', methods=['POST'])
-@require_auth
-def change_subscription_plan():
-    """Change subscription plan"""
-    try:
-        data = request.get_json()
-        new_plan_id = data.get('plan_id')
-        
-        if not new_plan_id:
-            return jsonify({'error': 'Plan ID required'}), 400
-        
-        team_id = g.current_user['team_id']
-        
-        # Change plan
-        result = billing_service.change_subscription_plan(team_id, new_plan_id)
-        
-        return jsonify(result)
-        
-    except Exception as e:
-        logging.error(f"Error changing subscription plan: {e}")
-        return jsonify({'error': 'Internal server error'}), 500
-
-@app.route('/api/billing/download-invoice', methods=['POST'])
-@require_auth
-def download_invoice():
-    """Get invoice download URL"""
-    try:
-        data = request.get_json()
-        invoice_id = data.get('invoice_id')
-        
-        if not invoice_id:
-            return jsonify({'error': 'Invoice ID required'}), 400
-        
-        team_id = g.current_user['team_id']
-        
-        # Get invoice download URL
-        result = billing_service.download_invoice(team_id, invoice_id)
-        
-        return jsonify(result)
-        
-    except Exception as e:
-        logging.error(f"Error downloading invoice: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
 @app.route('/api/team/stats')
@@ -4030,7 +3281,7 @@ def update_member_role(member_id):
 
 @app.route('/api/team/pending-invites', methods=['GET'])
 def get_pending_invites():
-    """Get all team invites (pending, accepted, cancelled)"""
+    """Get pending team invites"""
     try:
         user_id = session.get('user_id')
         if not user_id:
@@ -4043,26 +3294,21 @@ def get_pending_invites():
             if not user:
                 return jsonify({'success': False, 'error': 'User not found'}), 404
             
-            # Get all invites for this team (pending, accepted, cancelled)
+            # Get pending invites for this team
             invites = db.query(TeamInvite).filter(
-                TeamInvite.team_id == user.team_id
-            ).order_by(TeamInvite.created_at.desc()).all()
+                TeamInvite.team_id == user.team_id,
+                TeamInvite.status == 'pending'
+            ).all()
             
             invite_list = []
             for invite in invites:
-                invite_data = {
+                invite_list.append({
                     'id': str(invite.id),
                     'email': invite.email,
                     'role': invite.role,
                     'created_at': invite.created_at.isoformat(),
                     'status': invite.status
-                }
-                
-                # Add accepted_at timestamp if the invite was accepted
-                if invite.accepted_at:
-                    invite_data['accepted_at'] = invite.accepted_at.isoformat()
-                
-                invite_list.append(invite_data)
+                })
             
             return jsonify({
                 'success': True,
@@ -4453,8 +3699,7 @@ def affiliate_redirect(affiliate_code):
             'AFF002': 'AFF002', 
             'AFF003': 'AFF003',
             'WELCOME': 'WELCOME50',
-            'STARTER': 'STARTER100',
-            'CG40': 'CG40'
+            'STARTER': 'STARTER100'
         }
         
         promo_code = affiliate_promo_map.get(affiliate_code)
@@ -4486,1098 +3731,6 @@ def affiliate_redirect(affiliate_code):
 def affiliate_links():
     """Show affiliate links for easy copying"""
     return render_template('affiliate_links.html')
-
-# ===============================
-# JV Deals Admin Panel Routes
-# ===============================
-
-@app.route('/jv-admin/login', methods=['GET', 'POST'])
-@csrf.exempt
-def jv_admin_login():
-    """JV Admin Login - Separate from main admin"""
-    if request.method == 'POST':
-        password = request.form.get('password')
-        
-        # Get JV admin password hash from environment variable
-        jv_admin_password_hash = os.environ.get('JV_ADMIN_PASSWORD_HASH')
-        
-        if not jv_admin_password_hash:
-            # Fallback to main admin password if JV-specific not set
-            jv_admin_password_hash = os.environ.get('ADMIN_PASSWORD_HASH')
-            
-        if not jv_admin_password_hash:
-            return render_template('jv_admin_login.html', error='JV admin access is disabled. Please configure password.')
-        
-        # Check password against hash
-        if password and check_password_hash(jv_admin_password_hash, password):
-            session['is_jv_admin'] = True
-            session['jv_admin_user_id'] = 'jv_admin_1'
-            logging.info(f"JV admin login successful from IP: {request.remote_addr}")
-            return redirect('/jv-admin/dashboard')
-        
-        logging.warning(f"Failed JV admin login attempt from IP: {request.remote_addr}")
-        return render_template('jv_admin_login.html', error='Invalid password')
-    
-    return render_template('jv_admin_login.html')
-
-@app.route('/jv-admin/logout')
-def jv_admin_logout():
-    """JV Admin Logout"""
-    session.pop('is_jv_admin', None)
-    session.pop('jv_admin_user_id', None)
-    flash('You have been logged out of the JV admin panel.', 'info')
-    return redirect('/jv-admin/login')
-
-@app.route('/jv-admin/dashboard')
-def jv_admin_dashboard():
-    """JV Admin Dashboard - Direct access to enhanced JV panel"""
-    # Check if user has JV admin permissions
-    if not session.get('is_jv_admin'):
-        flash('Access denied. JV admin permissions required.', 'error')
-        return redirect('/jv-admin/login')
-    
-    return render_template('admin_jv_deals_enhanced.html')
-
-@app.route('/jv-admin/deal/<deal_id>/documents')
-def jv_admin_deal_documents(deal_id):
-    """JV Admin Deal Documents Management"""
-    # Check if user has JV admin permissions
-    if not session.get('is_jv_admin'):
-        flash('Access denied. JV admin permissions required.', 'error')
-        return redirect('/jv-admin/login')
-    
-    try:
-        from jv_database import JVDatabase
-        jv_db = JVDatabase()
-        
-        # Get deal details
-        deal = jv_db.get_deal_by_id(deal_id)
-        if not deal:
-            flash('Deal not found', 'error')
-            return redirect('/jv-admin/dashboard')
-        
-        return render_template('jv_deal_documents.html', deal=deal)
-        
-    except Exception as e:
-        logging.error(f"Error loading deal documents page: {e}")
-        flash('Error loading deal documents', 'error')
-        return redirect('/jv-admin/dashboard')
-
-# Update the existing enhanced JV deals route to use JV admin auth
-@app.route('/admin/jv-deals-enhanced')
-def admin_jv_deals_enhanced():
-    """Enhanced JV Deals Admin Panel - Redirect to dedicated JV admin"""
-    # Redirect to dedicated JV admin system
-    return redirect('/jv-admin/login')
-
-# ===============================
-# Team JV Queue Routes
-# ===============================
-
-@app.route('/team/jv-queue')
-@require_auth
-def team_jv_queue():
-    """Team-side JV queue viewer (read-only)"""
-    return render_template('team_jv_queue.html')
-
-@app.route('/api/team/jv-deals', methods=['GET'])
-@require_auth
-def get_team_jv_deals():
-    """Get JV deals for current team"""
-    try:
-        # Get user's team ID
-        user_id = session.get('user_id')
-        if not user_id:
-            return jsonify({'success': False, 'error': 'User not authenticated'}), 401
-        
-        # Get user's team information
-        billing_service = BillingService()
-        user_info = billing_service.get_user_info(user_id)
-        if not user_info:
-            return jsonify({'success': False, 'error': 'User not found'}), 404
-            
-        team_id = user_info.get('team_id')
-        if not team_id:
-            return jsonify({'success': False, 'error': 'User not part of any team'}), 400
-        
-        # Get team deals from database
-        from jv_database import JVDatabase
-        jv_db = JVDatabase()
-        
-        # Get team deals
-        deals = jv_db.get_team_jv_deals(team_id)
-        
-        # Get team members for filter
-        team_members = jv_db.get_team_members(team_id)
-        
-        # Calculate metrics
-        total_submitted = len(deals)
-        pending_count = len([d for d in deals if d.get('status') == 'pending'])
-        approved_count = len([d for d in deals if d.get('status') == 'approved'])
-        
-        return jsonify({
-            'success': True,
-            'deals': deals,
-            'team_members': team_members,
-            'metrics': {
-                'total_submitted': total_submitted,
-                'pending_count': pending_count,
-                'approved_count': approved_count
-            }
-        })
-        
-    except Exception as e:
-        logging.error(f"Error getting team JV deals: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/jv-submit')
-def jv_submit():
-    """Serve the JV submission page"""
-    try:
-        # Get Google Maps API key for the template (same as working form)
-        google_maps_api_key = os.environ.get('GOOGLE_MAPS_API_KEY', '')
-        return render_template('jv_submit.html', google_maps_api_key=google_maps_api_key)
-    except Exception as e:
-        logging.error(f"Error serving JV submit page: {e}")
-        flash('Error loading JV submission page', 'error')
-        return redirect(url_for('index'))
-
-@app.route('/api/jv-deals', methods=['POST'])
-def submit_jv_deal():
-    """Submit a new JV deal"""
-    try:
-        data = request.get_json()
-        
-        # Validate required fields
-        required_fields = ['email', 'phone', 'address', 'deal_type', 'asking_price', 'arv']
-        for field in required_fields:
-            if not data.get(field):
-                return jsonify({'error': f'Missing required field: {field}'}), 400
-        
-        # Validate email format
-        import re
-        email_regex = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
-        if not re.match(email_regex, data['email']):
-            return jsonify({'error': 'Invalid email format'}), 400
-        
-        # Validate phone format
-        phone_regex = r'^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$'
-        if not re.match(phone_regex, data['phone']):
-            return jsonify({'error': 'Invalid phone format'}), 400
-        
-        # Import JV database
-        from jv_database import JVDatabase
-        jv_db = JVDatabase()
-        
-        # Check if address is cached for optimization
-        cached_address = None
-        try:
-            from services.unified_property_data_service import get_unified_property_service
-            unified_service = get_unified_property_service()
-            cached_address = unified_service.get_cached_address_data(data['address'])
-        except Exception as e:
-            logging.warning(f"Could not check address cache: {e}")
-        
-        # Auto-underwrite the deal
-        try:
-            underwriting_result = auto_underwrite_deal({
-                'address': data['address'],
-                'asking_price': float(data['asking_price']),
-                'arv': float(data['arv']),
-                'rehab_cost': float(data.get('rehab_cost', 0)),
-                'deal_type': data['deal_type']
-            })
-        except Exception as e:
-            logging.warning(f"Auto-underwriting failed: {e}")
-            underwriting_result = {'status': 'needs_review', 'reason': 'Auto-underwriting unavailable'}
-        
-        # Create partner record
-        partner_data = {
-            'email': data['email'],
-            'phone': data['phone'],
-            'name': data.get('name', ''),
-            'company': data.get('company', ''),
-            'markets': data.get('markets', [])
-        }
-        
-        partner_id = jv_db.create_or_update_partner(partner_data)
-        
-        # Create JV deal record
-        deal_data = {
-            'partner_id': partner_id,
-            'address': data['address'],
-            'deal_type': data['deal_type'],
-            'asking_price': float(data['asking_price']),
-            'arv': float(data['arv']),
-            'rehab_cost': float(data.get('rehab_cost', 0)),
-            'photo_link': data.get('photo_link', ''),
-            'status': underwriting_result.get('status', 'pending'),
-            'auto_evaluation': underwriting_result.get('status', 'needs_review'),
-            'evaluation_reasons': underwriting_result.get('reasons', []),
-            'submission_data': data,
-            'cached_address': cached_address
-        }
-        
-        deal_id = jv_db.create_jv_deal(deal_data)
-        
-        # Send Zapier webhook notification
-        try:
-            from zapier_webhook_service import zapier_webhook_service
-            webhook_data = {
-                'deal_id': deal_id,
-                'partner_email': data['email'],
-                'partner_phone': data['phone'],
-                'address': data['address'],
-                'deal_type': data['deal_type'],
-                'asking_price': data['asking_price'],
-                'arv': data['arv'],
-                'rehab_cost': data.get('rehab_cost', 0),
-                'status': deal_data['status'],
-                'auto_evaluation': deal_data['auto_evaluation'],
-                'submitted_at': datetime.now().isoformat()
-            }
-            
-            zapier_webhook_service.trigger_new_jv_submission(webhook_data)
-            logging.info(f"Zapier webhook sent for deal {deal_id}")
-        except Exception as e:
-            logging.error(f"Failed to send Zapier webhook: {e}")
-        
-        # Return success response
-        return jsonify({
-            'success': True,
-            'deal_id': deal_id,
-            'status': deal_data['status'],
-            'message': 'Deal submitted successfully! We\'ll review it and get back to you soon.'
-        })
-        
-    except Exception as e:
-        logging.error(f"Error submitting JV deal: {e}")
-        return jsonify({'error': 'Failed to submit deal. Please try again.'}), 500
-
-# ===============================
-# JV Deal Progress Tracking Routes
-# ===============================
-
-@app.route('/api/jv-deals/<deal_id>/contract', methods=['PUT'])
-def update_deal_contract(deal_id):
-    """Update contract information for a deal (admin only)"""
-    try:
-        # Check admin authentication
-        if not session.get('is_jv_admin'):
-            return jsonify({'error': 'Admin access required'}), 401
-        
-        data = request.json
-        has_contract = data.get('has_contract', False)
-        contract_date = data.get('contract_date')
-        contract_notes = data.get('contract_notes', '')
-        needs_cancellation = data.get('needs_cancellation', False)
-        cancellation_reason = data.get('cancellation_reason', '')
-        
-        from jv_database import JVDatabase
-        jv_db = JVDatabase()
-        
-        success = jv_db.update_contract_info(
-            deal_id=deal_id,
-            has_contract=has_contract,
-            contract_date=contract_date,
-            contract_notes=contract_notes,
-            needs_cancellation=needs_cancellation,
-            cancellation_reason=cancellation_reason
-        )
-        
-        if success:
-            return jsonify({
-                'success': True,
-                'message': 'Contract information updated successfully'
-            })
-        else:
-            return jsonify({'error': 'Failed to update contract information'}), 500
-        
-    except Exception as e:
-        logging.error(f"Error updating contract info: {e}")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/jv-deals/<deal_id>/buyer', methods=['PUT'])
-def update_deal_buyer(deal_id):
-    """Update buyer information for a deal (admin only)"""
-    try:
-        # Check admin authentication
-        if not session.get('is_jv_admin'):
-            return jsonify({'error': 'Admin access required'}), 401
-        
-        data = request.json
-        has_buyer = data.get('has_buyer', False)
-        buyer_name = data.get('buyer_name', '')
-        down_payment = data.get('down_payment')
-        buyer_notes = data.get('buyer_notes', '')
-        
-        from jv_database import JVDatabase
-        jv_db = JVDatabase()
-        
-        success = jv_db.update_buyer_info(
-            deal_id=deal_id,
-            has_buyer=has_buyer,
-            buyer_name=buyer_name,
-            down_payment=float(down_payment) if down_payment else None,
-            buyer_notes=buyer_notes
-        )
-        
-        if success:
-            return jsonify({
-                'success': True,
-                'message': 'Buyer information updated successfully'
-            })
-        else:
-            return jsonify({'error': 'Failed to update buyer information'}), 500
-        
-    except Exception as e:
-        logging.error(f"Error updating buyer info: {e}")
-        return jsonify({'error': str(e)}), 500
-
-# ===============================
-# JV Document Management Routes
-# ===============================
-
-@app.route('/api/jv-deals/<deal_id>/documents', methods=['GET'])
-def get_deal_documents(deal_id):
-    """Get all documents for a deal"""
-    try:
-        # Check if user has admin or partner access
-        is_admin = session.get('is_jv_admin', False)
-        partner_email = request.args.get('partner_email')
-        
-        if not is_admin and not partner_email:
-            return jsonify({'error': 'Unauthorized'}), 401
-        
-        from jv_database import JVDatabase
-        jv_db = JVDatabase()
-        
-        # Get deal to verify it exists and get partner_id
-        deal = jv_db.get_deal_by_id(deal_id)
-        if not deal:
-            return jsonify({'error': 'Deal not found'}), 404
-        
-        partner_id = deal['partner_id']
-        
-        # Get documents
-        documents = jv_doc_service.get_deal_documents(
-            deal_id=deal_id,
-            partner_id=partner_id if not is_admin else None,
-            partner_view=not is_admin
-        )
-        
-        return jsonify({
-            'success': True,
-            'documents': documents
-        })
-        
-    except Exception as e:
-        logging.error(f"Error getting deal documents: {e}")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/jv-deals/<deal_id>/documents/upload', methods=['POST'])
-def upload_deal_document(deal_id):
-    """Upload a document for a deal (admin only)"""
-    try:
-        # Check admin authentication
-        if not session.get('is_jv_admin'):
-            return jsonify({'error': 'Admin access required'}), 401
-        
-        # Validate deal exists
-        from jv_database import JVDatabase
-        jv_db = JVDatabase()
-        deal = jv_db.get_deal_by_id(deal_id)
-        if not deal:
-            return jsonify({'error': 'Deal not found'}), 404
-        
-        # Get file from request
-        if 'file' not in request.files:
-            return jsonify({'error': 'No file provided'}), 400
-        
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({'error': 'No file selected'}), 400
-        
-        # Get form data
-        document_type = request.form.get('document_type', 'other')
-        description = request.form.get('description', '')
-        notes = request.form.get('notes', '')
-        requires_signature = request.form.get('requires_signature', 'false') == 'true'
-        share_with_partner = request.form.get('share_with_partner', 'false') == 'true'
-        
-        # Upload document
-        admin_email = session.get('jv_admin_email', 'admin@properwrite.com')
-        document_id = jv_doc_service.upload_document(
-            file=file,
-            deal_id=deal_id,
-            partner_id=deal['partner_id'],
-            document_type=document_type,
-            uploaded_by=admin_email,
-            description=description,
-            notes=notes,
-            requires_signature=requires_signature,
-            share_with_partner=share_with_partner
-        )
-        
-        return jsonify({
-            'success': True,
-            'document_id': document_id,
-            'message': 'Document uploaded successfully'
-        })
-        
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
-    except Exception as e:
-        logging.error(f"Error uploading document: {e}")
-        return jsonify({'error': 'Failed to upload document'}), 500
-
-@app.route('/api/jv-documents/<document_id>/share', methods=['POST'])
-def share_document(document_id):
-    """Share a document with partner (admin only)"""
-    try:
-        # Check admin authentication
-        if not session.get('is_jv_admin'):
-            return jsonify({'error': 'Admin access required'}), 401
-        
-        admin_email = session.get('jv_admin_email', 'admin@properwrite.com')
-        ip_address = request.remote_addr
-        user_agent = request.user_agent.string
-        
-        # Share document with audit logging
-        success = jv_doc_service.share_document_with_partner(
-            document_id, admin_email, ip_address, user_agent
-        )
-        
-        if success:
-            return jsonify({
-                'success': True,
-                'message': 'Document shared with partner'
-            })
-        else:
-            return jsonify({'error': 'Failed to share document'}), 500
-        
-    except Exception as e:
-        logging.error(f"Error sharing document: {e}")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/jv-documents/<document_id>/view', methods=['POST'])
-def mark_document_viewed(document_id):
-    """Mark document as viewed by partner"""
-    try:
-        partner_email = request.json.get('partner_email')
-        
-        if not partner_email:
-            return jsonify({'error': 'Partner email required'}), 400
-        
-        # Mark as viewed
-        ip_address = request.remote_addr
-        user_agent = request.user_agent.string
-        
-        success = jv_doc_service.mark_document_viewed(
-            document_id=document_id,
-            partner_email=partner_email,
-            ip_address=ip_address,
-            user_agent=user_agent
-        )
-        
-        if success:
-            return jsonify({
-                'success': True,
-                'message': 'Document marked as viewed'
-            })
-        else:
-            return jsonify({'error': 'Failed to mark document as viewed'}), 500
-        
-    except Exception as e:
-        logging.error(f"Error marking document viewed: {e}")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/jv-documents/<document_id>/sign', methods=['POST'])
-def sign_document(document_id):
-    """Mark document as signed by partner"""
-    try:
-        partner_email = request.json.get('partner_email')
-        
-        if not partner_email:
-            return jsonify({'error': 'Partner email required'}), 400
-        
-        # Mark as signed
-        ip_address = request.remote_addr
-        
-        success = jv_doc_service.mark_document_signed(
-            document_id=document_id,
-            partner_email=partner_email,
-            ip_address=ip_address
-        )
-        
-        if success:
-            return jsonify({
-                'success': True,
-                'message': 'Document marked as signed'
-            })
-        else:
-            return jsonify({'error': 'Failed to mark document as signed'}), 500
-        
-    except Exception as e:
-        logging.error(f"Error signing document: {e}")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/jv-documents/<document_id>', methods=['DELETE'])
-def delete_document(document_id):
-    """Delete a document (admin only)"""
-    try:
-        # Check admin authentication
-        if not session.get('is_jv_admin'):
-            return jsonify({'error': 'Admin access required'}), 401
-        
-        admin_email = session.get('jv_admin_email', 'admin@properwrite.com')
-        ip_address = request.remote_addr
-        user_agent = request.user_agent.string
-        
-        # Delete document with audit logging
-        success = jv_doc_service.delete_document(
-            document_id, admin_email, ip_address, user_agent
-        )
-        
-        if success:
-            return jsonify({
-                'success': True,
-                'message': 'Document deleted successfully'
-            })
-        else:
-            return jsonify({'error': 'Document not found or already deleted'}), 404
-        
-    except Exception as e:
-        logging.error(f"Error deleting document: {e}")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/jv-documents/<document_id>/notes', methods=['PUT'])
-def update_document_notes(document_id):
-    """Update notes for a document (admin only)"""
-    try:
-        # Check admin authentication
-        if not session.get('is_jv_admin'):
-            return jsonify({'error': 'Admin access required'}), 401
-        
-        notes = request.json.get('notes', '')
-        admin_email = session.get('jv_admin_email', 'admin@properwrite.com')
-        ip_address = request.remote_addr
-        user_agent = request.user_agent.string
-        
-        # Update notes with audit logging
-        success = jv_doc_service.update_document_notes(
-            document_id, notes, admin_email, ip_address, user_agent
-        )
-        
-        if success:
-            return jsonify({
-                'success': True,
-                'message': 'Notes updated successfully'
-            })
-        else:
-            return jsonify({'error': 'Failed to update notes'}), 500
-        
-    except Exception as e:
-        logging.error(f"Error updating document notes: {e}")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/jv-documents/<document_id>/access-log', methods=['GET'])
-def get_document_access_log(document_id):
-    """Get access log for a document (admin only)"""
-    try:
-        # Check admin authentication
-        if not session.get('is_jv_admin'):
-            return jsonify({'error': 'Admin access required'}), 401
-        
-        # Get access log
-        logs = jv_doc_service.get_document_access_log(document_id)
-        
-        return jsonify({
-            'success': True,
-            'logs': logs
-        })
-        
-    except Exception as e:
-        logging.error(f"Error getting document access log: {e}")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/jv-documents/<document_id>/download')
-def download_document(document_id):
-    """Download a document"""
-    try:
-        # Get document info
-        document = jv_doc_service.get_document_by_id(document_id)
-        
-        if not document:
-            return "Document not found", 404
-        
-        # Check permissions
-        is_admin = session.get('is_jv_admin', False)
-        partner_email = request.args.get('partner_email')
-        
-        if not is_admin:
-            # Partner access - must be shared
-            if not document['shared_with_partner']:
-                return "Access denied", 403
-        
-        # Log download with full audit trail
-        ip_address = request.remote_addr
-        user_agent = request.user_agent.string
-        
-        with jv_doc_service.get_connection() as conn:
-            if is_admin:
-                admin_email = session.get('jv_admin_email', 'admin@properwrite.com')
-                jv_doc_service._log_access(
-                    document_id, admin_email, 'admin', 'downloaded',
-                    conn, ip_address, user_agent
-                )
-            elif partner_email:
-                jv_doc_service._log_access(
-                    document_id, partner_email, 'partner', 'downloaded',
-                    conn, ip_address, user_agent
-                )
-            conn.commit()
-        
-        # Send file
-        from flask import send_file
-        return send_file(
-            document['file_path'],
-            as_attachment=True,
-            download_name=document['original_filename']
-        )
-        
-    except Exception as e:
-        logging.error(f"Error downloading document: {e}")
-        return "Error downloading document", 500
-
-# Freemium Access Gate API Endpoints
-@app.route('/api/freemium/clear-cookie', methods=['POST'])
-def clear_freemium_cookie():
-    """Clear the free use cookie for testing"""
-    response = make_response(jsonify({'success': True, 'message': 'Free use cookie cleared'}))
-    # Clear the cookie by setting it to empty with past expiration
-    response.set_cookie('free_use', '', expires=0, path='/', samesite='Lax')
-    # Also try alternative clearing method
-    response.set_cookie('free_use', '', max_age=0, path='/', samesite='Lax')
-    return response
-
-@app.route('/api/freemium/status', methods=['GET'])
-def api_freemium_status():
-    """Get freemium access status"""
-    try:
-        # Check if user is authenticated
-        user_id = session.get('user_id')
-        if user_id:
-            return jsonify({
-                'authenticated': True,
-                'free_use_available': False,
-                'free_use_used': False
-            })
-        
-        # Get free use status from cookies
-        free_use_status = check_free_use_status()
-        
-        return jsonify({
-            'authenticated': False,
-            'free_use_available': free_use_status.get('free_use_available', True),
-            'free_use_used': free_use_status.get('free_use_used', False)
-        })
-        
-    except Exception as e:
-        logging.error(f"Error getting freemium status: {e}")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/freemium/feature-access/<feature_name>', methods=['GET'])
-def api_feature_access(feature_name):
-    """Get access information for a specific feature"""
-    try:
-        # Check if user is authenticated
-        user_id = session.get('user_id')
-        if user_id:
-            return jsonify({
-                'accessible': True,
-                'reason': 'authenticated',
-                'message': 'Access granted for authenticated user'
-            })
-        
-        # Get feature access info
-        access_info = get_feature_access_info(feature_name)
-        
-        return jsonify(access_info)
-        
-    except Exception as e:
-        logging.error(f"Error getting feature access: {e}")
-        return jsonify({
-            'accessible': False,
-            'reason': 'error',
-            'message': 'Error checking feature access'
-        }), 500
-
-# ========================================
-# SUBJECT-TO LEAD SUBMISSION SYSTEM
-# ========================================
-from subto_database import subto_db
-from jv_document_service import jv_doc_service
-
-@app.route('/subto-register', methods=['GET', 'POST'])
-def subto_register():
-    """Subject-To submitter registration"""
-    if request.method == 'GET':
-        return render_template('subto_register.html')
-    
-    try:
-        # Get form data
-        email = request.form.get('email', '').strip()
-        password = request.form.get('password', '').strip()
-        name = request.form.get('name', '').strip()
-        company = request.form.get('company', '').strip()
-        phone = request.form.get('phone', '').strip()
-        city = request.form.get('city', '').strip()
-        state = request.form.get('state', '').strip().upper()
-        
-        # Validate required fields
-        if not all([email, password, name]):
-            flash('Email, password, and name are required', 'error')
-            return redirect(url_for('subto_register'))
-        
-        # Create submitter account
-        submitter_id = subto_db.create_submitter(email, password, name, company, phone, city, state)
-        
-        if not submitter_id:
-            flash('An account with this email already exists', 'error')
-            return redirect(url_for('subto_register'))
-        
-        # Auto-login after registration
-        session['subto_submitter_id'] = submitter_id
-        session['subto_submitter_name'] = name
-        session.permanent = True
-        
-        flash('Account created successfully!', 'success')
-        return redirect(url_for('subto_dashboard'))
-        
-    except Exception as e:
-        logging.error(f"Error in submitter registration: {e}")
-        flash('Registration failed. Please try again.', 'error')
-        return redirect(url_for('subto_register'))
-
-@app.route('/subto-login', methods=['GET', 'POST'])
-def subto_login():
-    """Subject-To submitter login"""
-    if request.method == 'GET':
-        return render_template('subto_login.html')
-    
-    try:
-        email = request.form.get('email', '').strip()
-        password = request.form.get('password', '').strip()
-        
-        if not all([email, password]):
-            flash('Email and password are required', 'error')
-            return redirect(url_for('subto_login'))
-        
-        # Authenticate submitter
-        submitter = subto_db.authenticate_submitter(email, password)
-        
-        if not submitter:
-            flash('Invalid email or password', 'error')
-            return redirect(url_for('subto_login'))
-        
-        # Set session
-        session['subto_submitter_id'] = submitter['id']
-        session['subto_submitter_name'] = submitter['name']
-        session.permanent = True
-        
-        flash(f'Welcome back, {submitter["name"]}!', 'success')
-        return redirect(url_for('subto_dashboard'))
-        
-    except Exception as e:
-        logging.error(f"Error in submitter login: {e}")
-        flash('Login failed. Please try again.', 'error')
-        return redirect(url_for('subto_login'))
-
-@app.route('/subto-logout')
-def subto_logout():
-    """Subject-To submitter logout"""
-    session.pop('subto_submitter_id', None)
-    session.pop('subto_submitter_name', None)
-    flash('You have been logged out', 'info')
-    return redirect(url_for('subto_login'))
-
-@app.route('/subto-submit', methods=['GET', 'POST'])
-def subto_submit():
-    """Subject-To lead submission form"""
-    # Check if submitter is logged in
-    submitter_id = session.get('subto_submitter_id')
-    if not submitter_id:
-        flash('Please log in to submit leads', 'error')
-        return redirect(url_for('subto_login'))
-    
-    if request.method == 'GET':
-        submitter_name = session.get('subto_submitter_name', 'Submitter')
-        return render_template('subto_submit.html', submitter_name=submitter_name)
-    
-    try:
-        # Get form data
-        lead_data = {
-            'seller_name': request.form.get('seller_name', '').strip(),
-            'property_address': request.form.get('property_address', '').strip(),
-            'seller_phone': request.form.get('seller_phone', '').strip(),
-            'loan_balance': request.form.get('loan_balance', '').strip() or None,
-            'interest_rate': request.form.get('interest_rate', '').strip() or None,
-            'monthly_payment': request.form.get('monthly_payment', '').strip() or None,
-            'arrears': request.form.get('arrears', '').strip() or 0,
-            'cash_to_seller': request.form.get('cash_to_seller', '').strip() or 0
-        }
-        
-        # Validate required fields
-        if not all([lead_data['seller_name'], lead_data['property_address'], lead_data['seller_phone']]):
-            flash('Seller name, property address, and phone number are required', 'error')
-            return redirect(url_for('subto_submit'))
-        
-        # Create lead
-        lead_id = subto_db.create_lead(submitter_id, lead_data)
-        
-        flash('Lead submitted successfully! You can track its status in your dashboard.', 'success')
-        return redirect(url_for('subto_dashboard'))
-        
-    except Exception as e:
-        logging.error(f"Error submitting lead: {e}")
-        flash('Failed to submit lead. Please try again.', 'error')
-        return redirect(url_for('subto_submit'))
-
-@app.route('/subto-dashboard')
-def subto_dashboard():
-    """Subject-To submitter dashboard - view all their leads"""
-    # Check if submitter is logged in
-    submitter_id = session.get('subto_submitter_id')
-    if not submitter_id:
-        flash('Please log in to view your dashboard', 'error')
-        return redirect(url_for('subto_login'))
-    
-    try:
-        # Get submitter info
-        submitter = subto_db.get_submitter_by_id(submitter_id)
-        if not submitter:
-            flash('Account not found', 'error')
-            return redirect(url_for('subto_login'))
-        
-        # Get all leads for this submitter
-        leads = subto_db.get_leads_by_submitter(submitter_id)
-        
-        return render_template('subto_dashboard.html', submitter=submitter, leads=leads)
-        
-    except Exception as e:
-        logging.error(f"Error loading dashboard: {e}")
-        flash('Failed to load dashboard. Please try again.', 'error')
-        return redirect(url_for('subto_login'))
-
-def require_subto_admin(f):
-    """Decorator to require Subject-To admin authentication"""
-    from functools import wraps
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get('subto_admin_authenticated'):
-            return redirect(url_for('subto_admin_login', next=request.url))
-        return f(*args, **kwargs)
-    return decorated_function
-
-@app.route('/subto-admin-login', methods=['GET', 'POST'])
-def subto_admin_login():
-    """Admin login for Subject-To lead management"""
-    if request.method == 'GET':
-        # Clear any flash messages that aren't from the login page itself
-        # This prevents lead submission success messages from showing up here
-        get_flashed_messages()
-        return render_template('subto_admin_login.html')
-    
-    try:
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '').strip()
-        
-        # Check credentials against environment variables
-        admin_username = os.environ.get('SUBTO_ADMIN_USERNAME', 'pfps_admin')
-        admin_password = os.environ.get('SUBTO_ADMIN_PASSWORD', 'PFPSAdmin2024!')
-        
-        if username == admin_username and password == admin_password:
-            session['subto_admin_authenticated'] = True
-            session.permanent = True
-            
-            # Redirect to next URL or admin panel
-            next_url = request.args.get('next')
-            if next_url:
-                return redirect(next_url)
-            return redirect(url_for('subto_admin'))
-        else:
-            flash('Invalid admin credentials', 'error')
-            return redirect(url_for('subto_admin_login'))
-            
-    except Exception as e:
-        logging.error(f"Error in admin login: {e}")
-        flash('Login failed. Please try again.', 'error')
-        return redirect(url_for('subto_admin_login'))
-
-@app.route('/subto-admin-logout')
-def subto_admin_logout():
-    """Admin logout for Subject-To system"""
-    session.pop('subto_admin_authenticated', None)
-    flash('You have been logged out', 'success')
-    return redirect(url_for('subto_admin_login'))
-
-@app.route('/subto-admin')
-@require_subto_admin
-def subto_admin():
-    """Subject-To admin panel - view and manage all leads"""
-    try:
-        # Get filter from query params
-        status_filter = request.args.get('status')
-        
-        # Get all leads
-        leads = subto_db.get_all_leads(status_filter)
-        
-        return render_template('subto_admin.html', leads=leads, current_filter=status_filter)
-        
-    except Exception as e:
-        logging.error(f"Error loading admin panel: {e}")
-        flash('Failed to load admin panel. Please try again.', 'error')
-        return redirect(url_for('subto_admin_login'))
-
-@app.route('/api/subto/update-status', methods=['POST'])
-@require_subto_admin
-@csrf.exempt
-def api_subto_update_status():
-    """API endpoint to update lead status"""
-    try:
-        data = request.get_json()
-        lead_id = data.get('lead_id')
-        status = data.get('status')
-        admin_notes = data.get('admin_notes', '')
-        
-        if not all([lead_id, status]):
-            return jsonify({'error': 'Lead ID and status are required'}), 400
-        
-        # Validate status
-        valid_statuses = ['pending', 'reviewing', 'approved', 'declined', 'closed']
-        if status not in valid_statuses:
-            return jsonify({'error': 'Invalid status'}), 400
-        
-        # Update status
-        success = subto_db.update_lead_status(lead_id, status, admin_notes)
-        
-        if success:
-            return jsonify({'success': True, 'message': 'Status updated successfully'})
-        else:
-            return jsonify({'error': 'Failed to update status'}), 500
-            
-    except Exception as e:
-        logging.error(f"Error updating lead status: {e}")
-        return jsonify({'error': 'Failed to update status'}), 500
-
-@app.route('/subto-quick-submit', methods=['GET', 'POST'])
-def subto_quick_submit():
-    """Quick Subject-To lead submission with company dropdown"""
-    if request.method == 'GET':
-        # Get all submitters for dropdown
-        submitters = subto_db.get_all_submitters()
-        # Add display names with masking
-        for submitter in submitters:
-            submitter['display_name'] = subto_db.get_display_name(submitter)
-        return render_template('subto_quick_submit.html', submitters=submitters)
-    
-    try:
-        # Get submitter ID from dropdown
-        submitter_id = request.form.get('submitter_id', '').strip()
-        
-        if not submitter_id:
-            flash('Please select a company', 'error')
-            return redirect(url_for('subto_quick_submit'))
-        
-        # Get form data
-        lead_data = {
-            'seller_name': request.form.get('seller_name', '').strip(),
-            'property_address': request.form.get('property_address', '').strip(),
-            'seller_phone': request.form.get('seller_phone', '').strip(),
-            'loan_balance': request.form.get('loan_balance', '').strip() or None,
-            'interest_rate': request.form.get('interest_rate', '').strip() or None,
-            'monthly_payment': request.form.get('monthly_payment', '').strip() or None,
-            'arrears': request.form.get('arrears', '').strip() or 0,
-            'cash_to_seller': request.form.get('cash_to_seller', '').strip() or 0
-        }
-        
-        # Validate required fields
-        if not all([lead_data['seller_name'], lead_data['property_address'], lead_data['seller_phone']]):
-            flash('Seller name, property address, and phone number are required', 'error')
-            return redirect(url_for('subto_quick_submit'))
-        
-        # Create lead
-        lead_id = subto_db.create_lead(submitter_id, lead_data)
-        
-        flash('Lead submitted successfully! Thank you for your submission.', 'success')
-        return redirect(url_for('subto_quick_submit'))
-        
-    except Exception as e:
-        logging.error(f"Error in quick submit: {e}")
-        flash('Failed to submit lead. Please try again.', 'error')
-        return redirect(url_for('subto_quick_submit'))
-
-@app.route('/api/subto/generate-script', methods=['POST'])
-@csrf.exempt
-def api_generate_subto_script():
-    """API endpoint to generate custom talking scripts using ChatGPT"""
-    try:
-        # Check if submitter is logged in
-        submitter_id = session.get('subto_submitter_id')
-        if not submitter_id:
-            return jsonify({'error': 'Please log in to use this feature'}), 401
-        
-        data = request.get_json()
-        situation = data.get('situation', '').strip()
-        seller_type = data.get('seller_type', '').strip()
-        
-        if not situation:
-            return jsonify({'error': 'Please describe the situation'}), 400
-        
-        # Import OpenAI
-        from openai import OpenAI
-        client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
-        
-        # Create the prompt for GPT
-        prompt = f"""You are a real estate expert helping partners create effective handoff scripts to transition seller leads to People First Property Solutions' Trust Equity Protection program.
-
-Situation: {situation}
-Seller Type: {seller_type or 'General'}
-
-Create a professional, empathetic talking script for transitioning this seller lead to People First Property Solutions (contact: Devin). The Trust Equity Protection program uses subject-to acquisition, which means purchasing the property while leaving the existing mortgage in place. This allows the seller to walk away with cash, avoid foreclosure, protect their credit, and eliminate the burden of the property.
-
-Provide a natural, conversational handoff script (2-3 paragraphs) that:
-1. Acknowledges the seller's specific situation with genuine empathy
-2. Transitions naturally by saying your cash offer may not work, but you have a trusted partner
-3. Introduces the Trust Equity Protection program and Devin from People First Property Solutions
-4. Explains the unique benefits: they can walk away, get cash in their pocket, keep the existing mortgage in place, avoid foreclosure impact, and stop worrying about the property
-5. Builds trust by positioning this as a specialized solution for low-equity situations
-6. Ends with a soft ask if they'd be open to learning more
-
-Keep it concise, warm, professional, and conversational. Write as a natural spoken script the partner can use when talking to the seller. Do not use bullet points or lists."""
-
-        # Call GPT-4
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "You are a real estate expert who creates empathetic, professional handoff scripts to help partners transition seller leads to People First Property Solutions' Trust Equity Protection program (subject-to acquisitions)."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7,
-            max_tokens=500
-        )
-        
-        script = response.choices[0].message.content.strip()
-        
-        return jsonify({
-            'success': True,
-            'script': script
-        })
-        
-    except Exception as e:
-        logging.error(f"Error generating script: {e}")
-        return jsonify({'error': 'Failed to generate script. Please try again.'}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)

@@ -1,7 +1,7 @@
 {
   "valuations": {
     "zillow": {
-      "zestimate": 390200,
+      "zestimate": 387200,
       "source": "Zillow Property Data",
       "confidence": "high",
       "zpid": 121306547,
@@ -14,19 +14,30 @@
       "square_feet": null,
       "year_built": 2014
     },
+    "rentcast": {
+      "estimate": 324000,
+      "source": "RentCast Property Data",
+      "confidence": "high",
+      "matched_address": null,
+      "bedrooms": null,
+      "bathrooms": null,
+      "square_feet": null,
+      "property_type": null,
+      "api_confidence": 0.95
+    },
     "rentometer": {
-      "rent_estimate": 2117,
-      "rent_median": 2149,
+      "rent_estimate": 2123,
+      "rent_median": 2165,
       "rent_range": {
         "min": 1700,
         "max": 2780
       },
       "source": "Rentometer",
       "confidence": "High",
-      "samples": 29,
+      "samples": 31,
       "radius_miles": 1.5,
-      "credits_remaining": 833,
-      "updated": "2025-07-28"
+      "credits_remaining": 964,
+      "updated": "2025-07-15"
     }
   },
   "sources_tried": [
@@ -37,6 +48,7 @@
   ],
   "sources_used": [
     "Zillow",
+    "RentCast",
     "Rentometer"
   ],
   "address_info": {
@@ -48,7 +60,7 @@
     "longitude": null
   },
   "cache_used": false,
-  "timestamp": "2025-07-28T16:29:21.132929",
-  "rent_estimate": 2117,
+  "timestamp": "2025-07-15T15:13:08.056375",
+  "rent_estimate": 2123,
   "rent_data_source": "Rentometer"
 }
