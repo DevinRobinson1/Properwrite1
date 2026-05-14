@@ -104,3 +104,52 @@ All critical security vulnerabilities have been addressed. The application now i
 - Proper webhook signature verification
 
 **The application is now secure for production deployment.**
+
+---
+
+## Addendum — 2026-05-13
+
+After a 7-month dormancy + a botched Replit zip export that stripped the
+Python sources, the repo was re-hydrated from GitHub and four additional
+security/correctness items were addressed:
+
+### 7. ADMIN_TOKEN fail-closed ✅
+- Four `/jv-admin*` routes defaulted `ADMIN_TOKEN` to `'admin123'` if the
+  env var was unset. A deploy that forgot the var would authenticate every
+  request as admin.
+- Now: missing env var → 503 + log line. Redirect on auth failure no longer
+  echoes the token in the URL bar.
+
+### 8. Coinbase webhook signature `None` handling ✅
+- `verify_webhook_signature(payload, signature)` would `TypeError` inside
+  `hmac.compare_digest(_, None)` when the `X-CC-Webhook-Signature` header
+  was absent.
+- Now: missing signature is treated as verification failure. Type hint is
+  `Optional[str]`.
+
+### 9. Property cache key normalization ✅
+- Cache keys were `f"valuation_{place_id}_{address}_{city}_{state}_{zip}"`.
+  Empty fields produced colliding `valuation_____.json` files; case and
+  state-name variants produced duplicate entries for the same property.
+- Now: `_make_cache_key` normalizes inputs and MD5-hashes them. Returns
+  `None` if inputs are too sparse, in which case the result is not cached
+  rather than written to a degenerate key.
+
+### 10. JV submission address validation ✅
+- `/api/jv-submit` accepted any truthy `property_address`. Typo
+  submissions like "14303 Evnein FFlgh lan" reached the auto-underwriter.
+- Now: requires populated street/city/state/zip and calls
+  `google_places_service.validate_address`. Falls through structurally on
+  Google API outage rather than returning 5xx.
+
+### Recovery + cleanup also done in this pass
+- Restored `.py` source from `github.com/DevinRobinson1/Properwrite1`.
+- Replaced corrupted `.git/` with the working clone.
+- Removed `main.py` dead Flask app setup; deleted dead `models.py`/
+  `admin_models.py`/`admin_routes.py` (duplicate `User` table definition;
+  `admin_routes` was broken at import).
+- Deleted `comprehensive_valuation_service_backup.py` (syntax error,
+  unused), `archived_files/`, and five orphan static/template files.
+- Added `.gitignore`.
+
+See `audit/audit-summary.md` for the consolidated current-state view.
