@@ -8,6 +8,7 @@ import logging
 import json
 import os
 import time
+import hashlib
 from datetime import datetime, timedelta
 from typing import Dict, Optional, List
 from address_utils import to_zillow_search_string
@@ -61,9 +62,11 @@ class ComprehensiveValuationService:
             'timestamp': datetime.now().isoformat()
         }
         
-        # Check cache first
-        cache_key = f"valuation_{place_id}_{address}_{city}_{state}_{zip_code}"
-        if self._is_cached_valid(cache_key):
+        # Check cache first — skip caching if the inputs are too degenerate
+        # to identify a single property (otherwise multiple distinct callers
+        # collide on the same `valuation_____.json` file).
+        cache_key = self._make_cache_key(place_id, address, city, state, zip_code)
+        if cache_key and self._is_cached_valid(cache_key):
             cached_data = self._get_cached_valuation(cache_key)
             if cached_data:
                 cached_data['cache_used'] = True
@@ -91,8 +94,9 @@ class ComprehensiveValuationService:
         # Get rent data from Rentometer after property details are available
         self._try_rentometer_rent_data_after_property_details(valuation_data, address, latitude, longitude)
         
-        # Cache the results
-        self._cache_valuation(cache_key, valuation_data)
+        # Cache the results (only if the key is well-formed)
+        if cache_key:
+            self._cache_valuation(cache_key, valuation_data)
         
         return valuation_data
     
@@ -696,6 +700,25 @@ class ComprehensiveValuationService:
         
         return intersection / union
     
+    def _make_cache_key(self, place_id: str, address: str, city: str, state: str, zip_code: str) -> Optional[str]:
+        """
+        Build a stable, normalized cache key. Returns None if inputs are too
+        sparse to uniquely identify a property — callers should then skip
+        the cache to avoid degenerate `valuation_____.json` collisions.
+        """
+        pid = (place_id or '').strip()
+        addr = (address or '').strip().lower()
+        c = (city or '').strip().lower()
+        s = (state or '').strip().upper()
+        z = (zip_code or '').strip()
+
+        # A place_id alone is enough; otherwise we need at least addr + (city or zip).
+        if not pid and not (addr and (c or z)):
+            return None
+
+        digest = hashlib.md5(f"{pid}|{addr}|{c}|{s}|{z}".encode('utf-8')).hexdigest()
+        return f"valuation_{digest}"
+
     def _is_cached_valid(self, cache_key: str) -> bool:
         """Check if cached data is still valid (within 24 hours)"""
         cache_file = f"property_cache/{cache_key}.json"
