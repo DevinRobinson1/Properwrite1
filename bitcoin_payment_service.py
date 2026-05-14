@@ -128,19 +128,19 @@ class BitcoinPaymentService:
         }
         return price_map.get(credits, 0.00)
 
-    def verify_webhook_signature(self, payload: str, signature: str) -> bool:
+    def verify_webhook_signature(self, payload: str, signature: Optional[str]) -> bool:
         """
         Verify Coinbase Commerce webhook signature
         """
-        if not self.webhook_secret:
+        if not self.webhook_secret or not signature:
             return False
-        
+
         computed_signature = hmac.new(
             self.webhook_secret.encode('utf-8'),
             payload.encode('utf-8'),
             hashlib.sha256
         ).hexdigest()
-        
+
         return hmac.compare_digest(computed_signature, signature)
 
     def process_webhook_event(self, event_data: Dict[str, Any]) -> Dict[str, Any]:

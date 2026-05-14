@@ -2870,9 +2870,12 @@ def jv_admin_page():
     """
     try:
         # Check admin authentication (simple token check)
-        admin_token = os.environ.get('ADMIN_TOKEN', 'admin123')  # Default for demo
+        admin_token = os.environ.get('ADMIN_TOKEN')
+        if not admin_token:
+            logging.error("ADMIN_TOKEN env var not set; /jv-admin disabled")
+            return ("Service unavailable: ADMIN_TOKEN not configured", 503)
         provided_token = request.args.get('token')
-        
+
         if provided_token != admin_token:
             return render_template('jv_admin_login.html')
         
@@ -2903,14 +2906,17 @@ def jv_admin_partner_detail(partner_id):
     """
     try:
         # Check admin authentication
-        admin_token = os.environ.get('ADMIN_TOKEN', 'admin123')
+        admin_token = os.environ.get('ADMIN_TOKEN')
+        if not admin_token:
+            logging.error("ADMIN_TOKEN env var not set; /jv-admin/partner disabled")
+            return ("Service unavailable: ADMIN_TOKEN not configured", 503)
         provided_token = request.args.get('token')
-        
+
         if provided_token != admin_token:
-            return redirect(f'/jv-admin?token={admin_token}')
-        
+            return redirect('/jv-admin')
+
         from jv_database import jv_db
-        
+
         # Get partner details
         partner = jv_db.get_partner_by_id(partner_id)
         if not partner:
@@ -2939,14 +2945,17 @@ def jv_admin_deal_detail(deal_id):
     """
     try:
         # Check admin authentication
-        admin_token = os.environ.get('ADMIN_TOKEN', 'admin123')
+        admin_token = os.environ.get('ADMIN_TOKEN')
+        if not admin_token:
+            logging.error("ADMIN_TOKEN env var not set; /jv-admin/deal disabled")
+            return ("Service unavailable: ADMIN_TOKEN not configured", 503)
         provided_token = request.args.get('token')
-        
+
         if provided_token != admin_token:
-            return redirect(f'/jv-admin?token={admin_token}')
-        
+            return redirect('/jv-admin')
+
         from jv_database import jv_db
-        
+
         # Get deal details
         deal = jv_db.get_deal_by_id(deal_id)
         if not deal:
@@ -2967,9 +2976,12 @@ def jv_admin_update_deal_status(deal_id):
     """
     try:
         # Check admin authentication
-        admin_token = os.environ.get('ADMIN_TOKEN', 'admin123')
+        admin_token = os.environ.get('ADMIN_TOKEN')
+        if not admin_token:
+            logging.error("ADMIN_TOKEN env var not set; /api/jv-admin/* disabled")
+            return jsonify({'success': False, 'error': 'ADMIN_TOKEN not configured'}), 503
         provided_token = request.json.get('admin_token') if request.json else None
-        
+
         if provided_token != admin_token:
             return jsonify({'success': False, 'error': 'Unauthorized'}), 401
         
