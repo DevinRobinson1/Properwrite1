@@ -2784,7 +2784,42 @@ def jv_submit_deal():
                 'success': False,
                 'error': 'Rehab cost is required when rehab is needed'
             }), 400
-        
+
+        # Hard-validate the property address. Previously any truthy string passed,
+        # which let typo submissions like "14303 Evnein FFlgh lan" through.
+        street = (data.get('street') or '').strip()
+        city = (data.get('city') or '').strip()
+        state = (data.get('state') or '').strip()
+        zip_code = (data.get('zip') or '').strip()
+
+        if not all([street, city, state, zip_code]):
+            return jsonify({
+                'success': False,
+                'error': 'Property address must be selected from the autocomplete '
+                         'suggestions so street, city, state, and ZIP are all set.'
+            }), 400
+
+        try:
+            address_check = google_places_service.validate_address(
+                street=street, city=city, state=state, zip_code=zip_code
+            )
+            if not address_check.get('isValid'):
+                return jsonify({
+                    'success': False,
+                    'error': f'Address could not be verified: {data.get("property_address")}'
+                }), 400
+            # Replace the free-text property_address with the canonical formatted one.
+            data['property_address'] = address_check.get('formattedAddress', data.get('property_address'))
+        except AddressValidationError as e:
+            return jsonify({
+                'success': False,
+                'error': f'Invalid property address: {e}'
+            }), 400
+        except GooglePlacesAPIError as e:
+            # Validation service down — log and fall back to the structural check
+            # above. Don't 500 the user; their address fields look complete.
+            logging.warning(f"JV submit: Google validation unavailable, accepting based on structure: {e}")
+
         # Create or get partner record
         from jv_database import jv_db
         
